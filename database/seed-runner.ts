@@ -102,9 +102,11 @@ export async function runSeed(prisma: PrismaClient) {
     const IMG_TSHIRT = 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800';
 
     // --- Products (for reviews) ---
+    // update: {} — do NOT overwrite images on existing products (production may have real images)
+    // create: images only for new products (local/fresh installs get placeholders)
     const product1 = await prisma.product.upsert({
         where: { slug: 'pro-camera-sony-a7' },
-        update: { images: [IMG_CAMERA] },
+        update: {},
         create: {
             name: 'Sony A7 IV Pro Camera',
             slug: 'pro-camera-sony-a7',
@@ -123,7 +125,7 @@ export async function runSeed(prisma: PrismaClient) {
 
     const product2 = await prisma.product.upsert({
         where: { slug: 'wireless-headphones' },
-        update: { images: [IMG_HEADPHONES] },
+        update: {},
         create: {
             name: 'Wireless Noise-Cancelling Headphones',
             slug: 'wireless-headphones',
@@ -141,7 +143,7 @@ export async function runSeed(prisma: PrismaClient) {
 
     const product3 = await prisma.product.upsert({
         where: { slug: 'cotton-tshirt-classic' },
-        update: { images: [IMG_TSHIRT] },
+        update: {},
         create: {
             name: 'Classic Cotton T-Shirt',
             slug: 'cotton-tshirt-classic',
