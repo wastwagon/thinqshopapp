@@ -8,12 +8,15 @@ See **[docs/COOLIFY_DEPLOY.md](./docs/COOLIFY_DEPLOY.md)** for full instructions
 
 ### Quick start
 
+**Coolify (Option A):** Use `docker-compose.yaml` at repo root. Coolify detects it by default. Set env vars in Coolify → Environment. See [docs/COOLIFY_DEPLOY.md](./docs/COOLIFY_DEPLOY.md).
+
+**Local / VPS (plain Docker Compose):**
 ```bash
 # With included PostgreSQL
 cp .env.example .env   # Edit with your values
 docker compose -f docker-compose.full.yml up -d
 
-# Or with external database (Coolify)
+# Or with external database only (backend + web)
 docker compose -f docker-compose.coolify.yml up -d
 ```
 

@@ -1,69 +1,103 @@
-# Deploy ThinQShop to VPS with Coolify
+# Deploy ThinQShop with Coolify (Docker Compose)
 
-This guide covers deploying ThinQShop to your own VPS using [Coolify](https://coolify.io).
+Deploy the full stack (PostgreSQL + backend + web) in one go using Coolify's Docker Compose support.
 
 ## Prerequisites
 
 - VPS with Coolify installed
 - Domain(s) for your app (e.g. `thinqshopping.app`, `api.thinqshopping.app`)
-- PostgreSQL database (Coolify can create one, or use external)
+- GitHub repo: `wastwagon/thinqshopapp` (or your fork)
 
-## Option A: Coolify Docker Compose
+---
 
-1. **Create a new resource** in Coolify → **Docker Compose**
-2. **Connect your Git repo** (e.g. `wastwagon/thinqshopapp`)
-3. **Compose file path:** `docker-compose.coolify.yml`
-4. **Set environment variables** in Coolify:
+## Step-by-step: Option A — Docker Compose
 
-   | Variable | Description |
-   |----------|-------------|
-   | `DATABASE_URL` | PostgreSQL connection string (from Coolify DB or external) |
-   | `JWT_SECRET` | Random secret for JWT (e.g. `openssl rand -hex 32`) |
-   | `PAYSTACK_SECRET_KEY` | Paystack secret key (sk_live_... or sk_test_...) |
-   | `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Paystack public key (pk_live_... or pk_test_...) |
-   | `NEXT_PUBLIC_API_URL` | Backend URL (e.g. `https://api.thinqshopping.app`) |
-   | `FRONTEND_URL` | Frontend URL for CORS (e.g. `https://thinqshopping.app`) |
+### 1. Create new application
 
-5. **Deploy** – Coolify will build and run both backend and web.
+1. In Coolify → **Projects** → your project → **Add Resource** → **Docker Compose**
+2. **Repository URL:** `https://github.com/wastwagon/thinqshopapp`
+3. **Branch:** `main`
+4. **Build Pack:** `Docker Compose`
+5. **Docker Compose Location:** `/docker-compose.yaml` (default)
+6. **Base Directory:** `/`
+7. Click **Continue**
 
-## Option B: Full stack with included PostgreSQL
+### 2. Set environment variables
 
-If you want PostgreSQL managed by Docker:
+In the application's **Environment** / **Variables** section, add:
 
-1. Use **Compose file path:** `docker-compose.full.yml`
-2. Add `POSTGRES_PASSWORD` to env vars
-3. Set `DATABASE_URL` is built from the db service (already in compose)
-4. For first deploy, you may need to run migrations – the backend runs them on startup
+| Variable | Required | Example / Notes |
+|----------|----------|-----------------|
+| `POSTGRES_PASSWORD` | Yes | Strong password for the database (e.g. `openssl rand -base64 24`) |
+| `JWT_SECRET` | Yes | Random secret (e.g. `openssl rand -hex 32`) |
+| `PAYSTACK_SECRET_KEY` | Yes | `sk_live_...` or `sk_test_...` |
+| `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Yes | `pk_live_...` or `pk_test_...` |
+| `FRONTEND_URL` | Yes | `https://thinqshopping.app` (your frontend domain, for CORS) |
+| `NEXT_PUBLIC_API_URL` | Yes | `https://api.thinqshopping.app` (your backend API URL) |
 
-## Option C: Separate services in Coolify
+### 3. Configure domains (optional)
 
-Create two services:
+In Coolify, assign domains to the services:
 
-1. **Backend** – Dockerfile: `backend/Dockerfile`, context: repo root
-2. **Web** – Dockerfile: `web/Dockerfile`, context: repo root
+- **web** (port 3000) → `thinqshopping.app`
+- **backend** (port 7000) → `api.thinqshopping.app`
 
-Add a PostgreSQL database in Coolify and link `DATABASE_URL` to the backend.
+Coolify will set up the reverse proxy and SSL.
 
-## Ports
+### 4. Deploy
 
-- **Backend:** 7000 (internal)
-- **Web:** 3000 (internal)
+1. Click **Deploy** (or enable auto-deploy on push)
+2. Coolify will clone the repo, build the images, and start all three services
+3. First deploy may take 5–10 minutes (builds backend and web)
 
-Configure Coolify to expose these via your domain (reverse proxy).
+### 5. Run migrations and seed (first time)
 
-## First-time setup
+The backend runs `prisma migrate deploy` on startup, so migrations are applied automatically.
 
-After first deploy, seed the database if needed:
+**To seed the database** (creates admin user, categories, shipping zones, etc.):
+
+**Option A — Coolify shell:** Open a shell/terminal for the `backend` container, then:
 
 ```bash
-# From your machine, or Coolify shell
-docker compose exec backend npx prisma db seed --schema=./database/schema.prisma
+npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed.ts
 ```
 
-Or use your existing seed script with `DATABASE_URL` set.
+**Option B — Admin UI** (after first seed): Log in as `admin@thinqshopping.app` / `password` → **Admin** → **Settings** → Database section → **Migrate + seed** (for future runs)
+
+### 6. Default admin login
+
+After seeding: `admin@thinqshopping.app` / `password` — **change this immediately** in production.
+
+---
+
+## Ports (internal)
+
+| Service | Port |
+|---------|------|
+| db | 5432 (internal only) |
+| backend | 7000 |
+| web | 3000 |
+
+Coolify exposes these via its reverse proxy based on your domain configuration.
+
+---
 
 ## Troubleshooting
 
-- **Build fails:** Ensure `package-lock.json` is committed and in sync
-- **Backend can't connect to DB:** Check `DATABASE_URL` and that the database is reachable from the backend container
-- **CORS errors:** Set `FRONTEND_URL` to your actual frontend domain(s)
+| Issue | Fix |
+|-------|-----|
+| Build fails | Ensure `package-lock.json` is committed and in sync |
+| Backend can't connect to DB | Check `POSTGRES_PASSWORD` is set; db service must be healthy before backend starts |
+| CORS errors | Set `FRONTEND_URL` to your exact frontend domain (no trailing slash) |
+| 502 Bad Gateway | Wait for backend health check to pass; check backend logs |
+| Migrations not applied | Backend runs them on startup; check backend logs for Prisma errors |
+
+---
+
+## Alternative: External database
+
+If you prefer Coolify's managed PostgreSQL instead of the compose db service:
+
+1. Create a PostgreSQL database in Coolify (Servers → Database)
+2. Use **Compose file:** `/docker-compose.coolify.yml` (backend + web only)
+3. Set `DATABASE_URL` to the connection string from Coolify's database

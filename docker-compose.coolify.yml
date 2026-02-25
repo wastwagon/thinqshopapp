@@ -1,8 +1,9 @@
-# ThinQShop - Coolify / VPS deployment
-# Use this with Coolify or docker-compose on your VPS
+# ThinQShop - External DB only (backend + web)
+# Use with Coolify's managed PostgreSQL or your own DB.
 #
-# Required env vars (set in Coolify or .env):
-#   DATABASE_URL, JWT_SECRET, PAYSTACK_SECRET_KEY, NEXT_PUBLIC_API_URL, NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+# Set these in Coolify → Environment (or .env for local):
+#   DATABASE_URL, JWT_SECRET, PAYSTACK_SECRET_KEY, NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+#   NEXT_PUBLIC_API_URL, FRONTEND_URL
 
 services:
   backend:
@@ -17,8 +18,6 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY}
       FRONTEND_URL: ${FRONTEND_URL:-https://thinqshopping.app}
-    env_file:
-      - .env
     healthcheck:
       test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:7000/health',r=>process.exit(r.statusCode===200?0:1))\" || exit 1"]
       interval: 30s
@@ -37,8 +36,6 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-    env_file:
-      - .env
     depends_on:
       backend:
         condition: service_healthy
