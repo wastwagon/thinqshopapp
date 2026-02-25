@@ -1,5 +1,8 @@
 # ThinQShop Web - Coolify/VPS ready
-FROM node:20-alpine AS builder
+# Use Debian (slim) so sharp binaries match runner (Alpine/musl breaks sharp in standalone)
+FROM node:20-slim AS builder
+
+RUN apt-get update -y && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -21,8 +24,10 @@ ENV NEXT_IGNORE_INCORRECT_LOCKFILE=1
 
 RUN npm run build -w web
 
-# Production stage
-FROM node:20-alpine AS runner
+# Production stage - use Debian (slim) for sharp compatibility (Alpine/musl often fails)
+FROM node:20-slim AS runner
+
+RUN apt-get update -y && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
