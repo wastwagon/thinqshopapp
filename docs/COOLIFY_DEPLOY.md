@@ -32,7 +32,7 @@ In the application's **Environment** / **Variables** section, add:
 | `JWT_SECRET` | Yes | Random secret (e.g. `openssl rand -hex 32`) |
 | `PAYSTACK_SECRET_KEY` | Yes | `sk_live_...` or `sk_test_...` |
 | `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Yes | `pk_live_...` or `pk_test_...` |
-| `FRONTEND_URL` | Yes | `https://thinqshopping.app` (your frontend domain, for CORS) |
+| `FRONTEND_URL` | Yes | `https://thinqshopping.app` (no trailing slash; for CORS) |
 | `NEXT_PUBLIC_API_URL` | Yes | `https://api.thinqshopping.app` (your backend API URL) |
 
 ### 3. Configure domains (optional)
@@ -89,7 +89,7 @@ Coolify exposes these via its reverse proxy based on your domain configuration.
 | Build fails | Ensure `package-lock.json` is committed and in sync |
 | Backend can't connect to DB | Check `POSTGRES_PASSWORD` is set; db service must be healthy before backend starts |
 | CORS errors | Set `FRONTEND_URL` to your exact frontend domain (no trailing slash) |
-| 502 Bad Gateway | Wait for backend health check to pass; check backend logs |
+| 502 Bad Gateway | Check backend logs in Coolify → Terminal (backend container). Backend may need 30–60s for migrations on first start |
 | Migrations not applied | Backend runs them on startup; check backend logs for Prisma errors |
 
 ---

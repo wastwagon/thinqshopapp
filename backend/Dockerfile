@@ -1,5 +1,8 @@
 # ThinQShop Backend - Coolify/VPS ready
-FROM node:20-alpine AS builder
+# Use Debian (slim) for both stages so Prisma generates correct binaries for OpenSSL 3.x
+FROM node:20-slim AS builder
+
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -12,7 +15,7 @@ COPY packages/ ./packages/
 # Install all deps (needed for workspace resolution)
 RUN npm ci
 
-# Generate Prisma client
+# Generate Prisma client (Debian/OpenSSL 3.x)
 ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
 RUN npx prisma generate --schema=database/schema.prisma
 
