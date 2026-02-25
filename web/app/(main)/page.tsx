@@ -6,8 +6,12 @@ import { motion } from 'framer-motion';
 import { Zap, ArrowRight, ChevronRight, Flame } from 'lucide-react';
 import products from '@/lib/data/scraped_products.json';
 import api from '@/lib/axios';
+import { getMediaUrl } from '@/lib/media';
 import ProductCard from '@/components/ui/ProductCard';
 import ShopLayout from '@/components/layout/ShopLayout';
+import HomeHero from '@/components/home/HomeHero';
+import TrustStrip from '@/components/home/TrustStrip';
+import TestimonialsBlock from '@/components/home/TestimonialsBlock';
 
 type Product = {
     category: string | { name: string; slug: string };
@@ -43,11 +47,44 @@ function normalizeProduct(p: any, index: number): Product {
 
 const STATIC_CATEGORIES = ['Photography', 'Computers', 'Pro Video'];
 
+const HERO_SLIDE_COUNT = 5;
+
+function getProductFirstImage(p: Product): string | null {
+    const arr = (p.gallery_images ?? p.images) as string[] | undefined;
+    if (Array.isArray(arr) && arr.length > 0 && arr[0]) return arr[0];
+    if (p.image && typeof p.image === 'string') return p.image;
+    return null;
+}
+
+function buildHeroSlidesFromProducts(productList: Product[], count: number): HeroSlide[] {
+    const withImages = productList.filter((p) => getProductFirstImage(p));
+    if (withImages.length === 0) return [];
+    const shuffled = [...withImages].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count).map((p, i) => {
+        const firstImage = getProductFirstImage(p);
+        return {
+            id: p.id ?? i + 1,
+            title: p.name,
+            subtitle: typeof p.price === 'string' ? p.price : p.price != null ? String(p.price) : null,
+            cta_text: 'View',
+            cta_url: `/products/${p.slug ?? (typeof p.name === 'string' ? p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : '')}`,
+            image_path: firstImage ? getMediaUrl(firstImage) : null,
+        };
+    });
+}
+
+type HeroSlide = { id: number; title: string; subtitle?: string | null; cta_text?: string | null; cta_url?: string | null; image_path?: string | null };
+type TrustBadge = { id: number; icon: string; label: string; optional_link?: string | null };
+type Testimonial = { id: number; quote: string; author_name: string; author_role?: string | null };
+
 export default function Home() {
     const [mounted, setMounted] = useState(false);
     const [productsList, setProductsList] = useState<Product[]>([]);
     const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
     const [source, setSource] = useState<'api' | 'static'>('static');
+    const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
+    const [trustBadges, setTrustBadges] = useState<TrustBadge[]>([]);
+    const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
     useEffect(() => {
         setMounted(true);
@@ -57,16 +94,25 @@ export default function Home() {
         if (!mounted) return;
         const load = async () => {
             try {
-                const [productsRes, categoriesRes] = await Promise.all([
+                const [productsRes, categoriesRes, heroRes, trustRes, testimonialRes] = await Promise.all([
                     api.get('/products', { params: { limit: 100 } }),
                     api.get('/products/categories'),
+                    api.get('/content/hero-slides').catch(() => ({ data: [] })),
+                    api.get('/content/trust-badges').catch(() => ({ data: [] })),
+                    api.get('/content/testimonials').catch(() => ({ data: [] })),
                 ]);
-                const apiProducts = productsRes.data?.data ?? [];
+                const apiProducts = productsRes.data?.data ?? productsRes.data ?? [];
                 const apiCategories = categoriesRes.data ?? [];
-                if (apiProducts.length > 0) {
-                    setProductsList(apiProducts.map((p: any, i: number) => normalizeProduct(p, i)));
+                const contentHeroSlides = Array.isArray(heroRes.data) ? heroRes.data : [];
+                setTrustBadges(Array.isArray(trustRes.data) ? trustRes.data : []);
+                setTestimonials(Array.isArray(testimonialRes.data) ? testimonialRes.data : []);
+                if (apiProducts.length > 0 && Array.isArray(apiProducts)) {
+                    const list = apiProducts.map((p: any, i: number) => normalizeProduct(p, i));
+                    setProductsList(list);
                     setCategories(apiCategories.map((c: any) => ({ name: c.name, slug: c.slug })));
                     setSource('api');
+                    const productSlides = buildHeroSlidesFromProducts(list, HERO_SLIDE_COUNT);
+                    setHeroSlides(productSlides.length > 0 ? productSlides : contentHeroSlides);
                     return;
                 }
             } catch (_) {
@@ -76,6 +122,8 @@ export default function Home() {
             setProductsList(staticProducts);
             setCategories(STATIC_CATEGORIES.map(name => ({ name, slug: name.toLowerCase().replace(/\s+/g, '-') })));
             setSource('static');
+            const productSlides = buildHeroSlidesFromProducts(staticProducts, HERO_SLIDE_COUNT);
+            setHeroSlides(productSlides.length > 0 ? productSlides : []);
         };
         load();
     }, [mounted]);
@@ -88,54 +136,22 @@ export default function Home() {
     const fallbackFlash = flashSales.length ? flashSales : productsWithIds.slice(0, 6);
     const allProducts = productsWithIds;
 
-    if (!mounted || productsWithIds.length === 0) {
-        if (!mounted) return null;
-        return (
-            <ShopLayout>
-                <div className="min-h-[60vh] flex items-center justify-center">
-                    <div className="animate-pulse text-sm text-gray-500">Loading products...</div>
-                </div>
-            </ShopLayout>
-        );
-    }
+    if (!mounted) return null;
 
     return (
         <ShopLayout>
             <div className="min-h-screen bg-[#fafafa]">
-                {/* Premium Hero Banner */}
-                <section className="relative overflow-hidden border-b border-gray-100">
-                    <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,#3b82f640,transparent)]" />
-                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
-                    <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
-                    <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32">
-                        <div className="max-w-2xl">
-                            <p className="text-[10px] sm:text-xs font-bold text-blue-400 uppercase tracking-[0.3em] mb-4">ThinQShop</p>
-                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6 leading-[1.1]">
-                                Discover premium tech
-                            </h1>
-                            <p className="text-base sm:text-lg text-gray-300 mb-10 max-w-lg">
-                                Cameras, computers, and pro gear — curated for creators and professionals.
-                            </p>
-                            <div className="flex flex-wrap gap-4">
-                                <Link
-                                    href="/shop"
-                                    className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white text-sm font-bold rounded-2xl hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/25 group"
-                                >
-                                    Shop all
-                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
-                                </Link>
-                                <Link
-                                    href="/shop/photography"
-                                    className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 text-white text-sm font-semibold rounded-2xl border border-white/20 hover:bg-white/20 transition-all backdrop-blur-sm"
-                                >
-                                    Browse cameras
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                {/* Hero (API or fallback) — mobile-first */}
+                <HomeHero slides={heroSlides} />
+                {/* Trust strip (API) */}
+                <TrustStrip badges={trustBadges} />
 
+                {productsWithIds.length === 0 ? (
+                    <div className="min-h-[40vh] flex items-center justify-center px-4">
+                        <div className="animate-pulse text-sm text-gray-500">Loading products…</div>
+                    </div>
+                ) : (
+                    <>
                 {/* Flash Sales */}
                 <section className="py-8 sm:py-12">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -236,7 +252,7 @@ export default function Home() {
                         <div className="flex justify-center">
                             <Link
                                 href="/shop"
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-colors"
+                                className="inline-flex items-center gap-2 min-h-[44px] px-6 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-colors touch-manipulation"
                             >
                                 Shop all products
                                 <ArrowRight className="w-4 h-4" />
@@ -244,6 +260,9 @@ export default function Home() {
                         </div>
                     </div>
                 </section>
+
+                {/* Testimonials (API) — mobile-first */}
+                <TestimonialsBlock testimonials={testimonials} />
 
                 {/* All Products - compact grid */}
                 <section className="py-8 sm:py-12 bg-white border-t border-gray-100">
@@ -266,6 +285,8 @@ export default function Home() {
                         </div>
                     </div>
                 </section>
+                    </>
+                )}
             </div>
         </ShopLayout>
     );

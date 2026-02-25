@@ -28,7 +28,9 @@ import {
     Eye,
     LifeBuoy,
     FolderTree,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Layout,
+    Type,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -55,6 +57,9 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
 
     const adminLinks = [
         { name: 'Overview', href: '/admin', icon: ShieldCheck },
+        { name: 'Content', href: '/admin/content', icon: Layout },
+        { name: 'Storefront', href: '/admin/storefront', icon: Type },
+        { name: 'Reviews', href: '/admin/reviews', icon: Eye },
         { name: 'Products', href: '/admin/products', icon: Package },
         { name: 'Categories', href: '/admin/categories', icon: FolderTree },
         { name: 'Media', href: '/admin/media', icon: ImageIcon },

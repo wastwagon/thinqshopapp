@@ -68,6 +68,10 @@ async function main() {
             is_active: true,
         },
     });
+
+    // World-class content (hero, trust badges, testimonials, policies, sections, settings)
+    const { seedWorldClassContent } = await import('./seed-world-class-content');
+    await seedWorldClassContent(prisma);
 }
 
 main()

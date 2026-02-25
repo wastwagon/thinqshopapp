@@ -10,11 +10,15 @@
   "scripts": {
     "dev:backend": "npm run start:dev -w backend",
     "dev:web": "npm run dev -w web",
+    "dev:start": "bash scripts/dev-start.sh",
+    "dev:ports-free": "bash -c 'for p in 7000 7001; do pid=$(lsof -ti :$p 2>/dev/null); [ -n \"$pid\" ] && kill -9 $pid; done; echo Ports 7000 and 7001 freed'",
     "dev:mobile": "npm run start -w mobile",
     "build:web:docker": "docker build -f web/Dockerfile -t thinqshop-web .",
     "build:backend:docker": "docker build -f backend/Dockerfile -t thinqshop-backend .",
     "clean": "rm -rf backend/dist web/.next",
     "test:local": "npm run build -w backend && npm run test -w backend && npm run build -w web",
+    "db:seed": "npx prisma generate --schema=database/schema.prisma && npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' database/seed.ts",
+    "db:seed:content": "npx prisma generate --schema=database/schema.prisma && npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' database/seed-world-class-content.ts",
     "email:process": "node node_modules/ts-node/dist/bin.js --compiler-options '{\"module\":\"CommonJS\"}' backend/scripts/process-email-queue.ts"
   },
   "overrides": {

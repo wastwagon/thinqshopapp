@@ -151,6 +151,8 @@ model Product {
   is_active           Boolean          @default(true)
   meta_title          String?          @db.VarChar(255)
   meta_description    String?
+  rating_aggregate    Decimal?         @db.Decimal(3, 2)
+  review_count        Int              @default(0)
   created_at          DateTime         @default(now())
   updated_at          DateTime         @updatedAt
 
@@ -297,6 +299,7 @@ model ProductReview {
   rating        Int      // 1-5
   review_text   String?
   review_images Json?    // Array
+  display_name  String?  @db.VarChar(100)  // e.g. "Kofi M." for PDP without exposing email
   is_approved   Boolean  @default(false)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
@@ -305,6 +308,7 @@ model ProductReview {
   user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   order         Order?   @relation(fields: [order_id], references: [id], onDelete: SetNull)
 
+  @@index([product_id, is_approved])
   @@map("product_reviews")
 }
 
@@ -790,6 +794,71 @@ model Media {
   created_at DateTime @default(now())
 
   @@map("media")
+}
+
+// --- WORLD-CLASS CONTENT (homepage, trust, testimonials, policies) ---
+
+model HeroSlide {
+  id         Int      @id @default(autoincrement())
+  title      String   @db.VarChar(255)
+  subtitle   String?  @db.VarChar(500)
+  cta_text   String?  @db.VarChar(100)
+  cta_url    String?  @db.VarChar(500)
+  image_path String?  @db.VarChar(500)
+  sort_order Int      @default(0)
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("hero_slides")
+}
+
+model TrustBadge {
+  id            Int      @id @default(autoincrement())
+  icon          String   @db.VarChar(50)
+  label         String   @db.VarChar(255)
+  optional_link String?  @db.VarChar(500)
+  sort_order    Int      @default(0)
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@map("trust_badges")
+}
+
+model Testimonial {
+  id           Int      @id @default(autoincrement())
+  quote        String   @db.Text
+  author_name  String   @db.VarChar(255)
+  author_role  String?  @db.VarChar(255)
+  avatar_path  String?  @db.VarChar(500)
+  sort_order   Int      @default(0)
+  is_active    Boolean  @default(true)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  @@map("testimonials")
+}
+
+model SitePolicy {
+  id         Int      @id @default(autoincrement())
+  type       String   @unique @db.VarChar(30)   // 'delivery' | 'returns'
+  short_text String?  @db.VarChar(500)
+  full_text  String?  @db.Text
+  updated_at DateTime @updatedAt
+
+  @@map("site_policies")
+}
+
+model HomepageSection {
+  id          Int      @id @default(autoincrement())
+  section_key String   @unique @db.VarChar(50)
+  sort_order  Int      @default(0)
+  is_enabled  Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("homepage_sections")
 }
 
 // --- NOTIFICATION TABLES ---

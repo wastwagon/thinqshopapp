@@ -28,9 +28,14 @@ export default function CheckoutClient() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [walletBalance, setWalletBalance] = useState<number | null>(null);
     const [paystackOrder, setPaystackOrder] = useState<{ orderId: number; reference: string; amount_pesewas: number } | null>(null);
+    const [publicSettings, setPublicSettings] = useState<Record<string, string>>({});
 
     useEffect(() => {
         if (cart.length > 0) trackBeginCheckout(cartTotal, cart.length);
+    }, []);
+
+    useEffect(() => {
+        api.get('/content/settings/public').then((res) => setPublicSettings(res.data || {})).catch(() => {});
     }, []);
 
     useEffect(() => {
@@ -198,13 +203,21 @@ export default function CheckoutClient() {
                             </div>
 
                             {step === 2 && (
-                                <button
-                                    onClick={handlePlaceOrder}
-                                    disabled={isProcessing}
-                                    className="w-full bg-blue-600 text-white rounded-[2rem] h-20 font-extrabold text-sm uppercase tracking-[0.2em] hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-4 shadow-2xl shadow-blue-200"
-                                >
-                                    {isProcessing ? 'Synchronizing Node...' : `Authorize ₵${cartTotal.toFixed(2)}`}
-                                </button>
+                                <>
+                                    <button
+                                        onClick={handlePlaceOrder}
+                                        disabled={isProcessing}
+                                        className="w-full min-h-[48px] sm:h-14 bg-blue-600 text-white rounded-2xl font-extrabold text-sm uppercase tracking-wider hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-4 shadow-2xl shadow-blue-200 touch-manipulation"
+                                    >
+                                        {isProcessing ? 'Processing…' : `Pay ₵${cartTotal.toFixed(2)}`}
+                                    </button>
+                                    <p className="mt-3 text-center text-xs text-gray-500">
+                                        Secure payment with Paystack
+                                        {publicSettings.free_shipping_threshold_ghs && Number(publicSettings.free_shipping_threshold_ghs) > 0 && (
+                                            <> · Free delivery on orders over ₵{publicSettings.free_shipping_threshold_ghs}</>
+                                        )}
+                                    </p>
+                                </>
                             )}
                         </section>
                     </div>

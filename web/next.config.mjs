@@ -2,6 +2,10 @@
 const nextConfig = {
     output: 'standalone',
     staticPageGenerationTimeout: 120,
+    async rewrites() {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000';
+        return [{ source: '/api/:path*', destination: `${apiUrl}/:path*` }];
+    },
     async headers() {
         return [
             {

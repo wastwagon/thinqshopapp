@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Star, Heart, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, Star, Heart, Plus, Minus, Truck, RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import ShopLayout from '@/components/layout/ShopLayout';
@@ -16,6 +16,9 @@ import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { trackViewItem } from '@/lib/analytics';
 
+type ReviewRow = { id: number; rating: number; review_text: string | null; review_images?: string[]; display_name: string; created_at: string };
+type PolicyRow = { type: string; short_text: string | null; full_text: string | null };
+
 export default function ProductDetailsPage({ params }: { params: { slug: string } }) {
     const { slug } = params;
     const { addToCart } = useCart();
@@ -24,6 +27,8 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
+    const [reviews, setReviews] = useState<{ data: ReviewRow[]; meta: { total: number; totalPages: number } }>({ data: [], meta: { total: 0, totalPages: 0 } });
+    const [policies, setPolicies] = useState<PolicyRow[]>([]);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -45,6 +50,19 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
 
         if (slug) fetchProduct();
     }, [slug]);
+
+    useEffect(() => {
+        if (!slug) return;
+        api.get(`/products/${slug}/reviews`, { params: { page: 1, limit: 5 } })
+            .then((res) => setReviews({ data: res.data?.data ?? [], meta: res.data?.meta ?? { total: 0, totalPages: 0 } }))
+            .catch(() => {});
+    }, [slug]);
+
+    useEffect(() => {
+        api.get('/content/policies')
+            .then((res) => setPolicies(Array.isArray(res.data) ? res.data : []))
+            .catch(() => {});
+    }, []);
 
     useEffect(() => {
         if (product) {
@@ -127,6 +145,13 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                     {/* Product Info */}
                     <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
                         <div className="mb-8">
+                            {product.stock_quantity != null && (
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${product.stock_quantity > (product.low_stock_threshold ?? 10) ? 'bg-green-50 text-green-700 border border-green-100' : product.stock_quantity > 0 ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                                        {product.stock_quantity === 0 ? 'Out of stock' : product.stock_quantity <= (product.low_stock_threshold ?? 10) ? `Only ${product.stock_quantity} left` : 'In stock'}
+                                    </span>
+                                </div>
+                            )}
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[11px] font-bold tracking-wider text-blue-600 uppercase mb-4">
                                 Ships from abroad · 7–14 day delivery
                             </div>
@@ -138,22 +163,27 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             {qualifiesWholesale && (
                                 <span className="px-2 py-1 rounded-lg bg-green-100 text-green-700 text-xs font-bold">Wholesale {discountPct}% off</span>
                             )}
-                            {!qualifiesWholesale && basePrice > 0 && (
-                                <p className="text-base font-bold text-gray-300 line-through">₵{(basePrice * 1.2).toFixed(2)}</p>
+                            {product.compare_price != null && Number(product.compare_price) > unitPrice && (
+                                <p className="text-base font-bold text-gray-400 line-through">₵{Number(product.compare_price).toFixed(2)}</p>
                             )}
                         </div>
 
                         <div className="space-y-6 mb-10">
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center">
-                                    {[0, 1, 2, 3, 4].map((rating) => (
-                                        <Star
-                                            key={rating}
-                                            className={`h-4 w-4 fill-current ${rating < 4 ? 'text-yellow-400' : 'text-gray-200'}`}
-                                        />
-                                    ))}
+                                    {[0, 1, 2, 3, 4].map((rating) => {
+                                        const r = product.rating_aggregate != null ? Number(product.rating_aggregate) : 4;
+                                        return (
+                                            <Star
+                                                key={rating}
+                                                className={`h-4 w-4 fill-current ${rating < Math.round(r) ? 'text-yellow-400' : 'text-gray-200'}`}
+                                            />
+                                        );
+                                    })}
                                 </div>
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">4.8 / 117 Reviews</span>
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                    {product.rating_aggregate != null ? Number(product.rating_aggregate).toFixed(1) : '4.8'} / {product.review_count ?? reviews.meta.total ?? 0} Reviews
+                                </span>
                             </div>
 
                             <div className="text-lg text-gray-600 leading-relaxed font-medium space-y-6" dangerouslySetInnerHTML={{ __html: product.description || '' }} />
@@ -204,18 +234,70 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-gray-50 p-6 rounded-[2rem] border border-gray-100">
-                                <p className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-2">Delivery</p>
-                                <p className="text-xs font-bold text-gray-900">7–14 days (international)</p>
-                            </div>
-                            <div className="bg-gray-50 p-6 rounded-[2rem] border border-gray-100">
-                                <p className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-2">Warranty</p>
-                                <p className="text-xs font-bold text-gray-900">12 Month International</p>
-                            </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {policies.filter((p) => p.type === 'delivery').map((p) => (
+                                <div key={p.type} className="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100">
+                                    <p className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-2 flex items-center gap-1.5">
+                                        <Truck className="h-3.5 w-3.5" /> Delivery
+                                    </p>
+                                    <p className="text-xs sm:text-sm font-medium text-gray-900">{p.short_text || '7–14 days (international)'}</p>
+                                    {p.full_text && (
+                                        <Link href="/privacy" className="text-xs font-semibold text-blue-600 mt-2 inline-block touch-manipulation">Full delivery info</Link>
+                                    )}
+                                </div>
+                            ))}
+                            {policies.filter((p) => p.type === 'returns').map((p) => (
+                                <div key={p.type} className="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100">
+                                    <p className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-2 flex items-center gap-1.5">
+                                        <RotateCcw className="h-3.5 w-3.5" /> Returns
+                                    </p>
+                                    <p className="text-xs sm:text-sm font-medium text-gray-900">{p.short_text || '14-day returns on unused items'}</p>
+                                    {p.full_text && (
+                                        <Link href="/terms" className="text-xs font-semibold text-blue-600 mt-2 inline-block touch-manipulation">Returns policy</Link>
+                                    )}
+                                </div>
+                            ))}
+                            {policies.length === 0 && (
+                                <>
+                                    <div className="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100">
+                                        <p className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-2">Delivery</p>
+                                        <p className="text-xs font-bold text-gray-900">7–14 days (international)</p>
+                                    </div>
+                                    <div className="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100">
+                                        <p className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-2">Returns</p>
+                                        <p className="text-xs font-bold text-gray-900">14-day returns on unused items</p>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
+
+                {/* Reviews block — mobile-first */}
+                {(reviews.data.length > 0 || (product.review_count != null && product.review_count > 0)) && (
+                    <section className="mt-12 sm:mt-16 pt-8 sm:pt-12 border-t border-gray-100" aria-label="Customer reviews">
+                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Customer reviews</h2>
+                        <div className="space-y-4">
+                            {reviews.data.map((r) => (
+                                <div key={r.id} className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="flex items-center gap-0.5">
+                                            {[1, 2, 3, 4, 5].map((i) => (
+                                                <Star key={i} className={`h-4 w-4 ${i <= r.rating ? 'text-yellow-400 fill-current' : 'text-gray-200'}`} />
+                                            ))}
+                                        </span>
+                                        <span className="text-xs font-semibold text-gray-700">{r.display_name}</span>
+                                        <span className="text-xs text-gray-400">{new Date(r.created_at).toLocaleDateString()}</span>
+                                    </div>
+                                    {r.review_text && <p className="text-sm text-gray-700 leading-relaxed">{r.review_text}</p>}
+                                </div>
+                            ))}
+                        </div>
+                        {reviews.meta.total > reviews.data.length && (
+                            <p className="text-sm text-gray-500 mt-3">Showing {reviews.data.length} of {reviews.meta.total} reviews.</p>
+                        )}
+                    </section>
+                )}
 
                 {/* Related Products Section */}
                 {product && (

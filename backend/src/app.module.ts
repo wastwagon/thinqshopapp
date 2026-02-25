@@ -17,6 +17,7 @@ import { ConfigModule } from '@nestjs/config';
 import { NotificationModule } from './notification/notification.module';
 import { MediaModule } from './media/media.module';
 import { EmailTemplateModule } from './email-template/email-template.module';
+import { ContentModule } from './content/content.module';
 
 @Module({
     imports: [
@@ -38,6 +39,7 @@ import { EmailTemplateModule } from './email-template/email-template.module';
         ProcurementModule,
         NotificationModule,
         EmailTemplateModule,
+        ContentModule,
     ],
     controllers: [AppController],
     providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

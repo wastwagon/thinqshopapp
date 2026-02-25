@@ -2,7 +2,9 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Re
 import { ProductService } from './product.service';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
+import { CreateReviewDto, UpdateReviewAdminDto } from './dto/review.dto';
 import { AuthGuard } from '../auth/auth.guard';
+import { Public } from '../auth/public.decorator';
 
 @Controller('products')
 export class ProductController {
@@ -72,6 +74,37 @@ export class ProductController {
             throw new ForbiddenException('Admin access required');
         }
         return this.productService.create(createProductDto);
+    }
+
+    @Get('admin/reviews')
+    @UseGuards(AuthGuard)
+    async getReviewsAdmin(@Request() req: any, @Query() query: { page?: number; limit?: number; product_id?: number; is_approved?: string }) {
+        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
+            throw new ForbiddenException('Admin access required');
+        }
+        return this.productService.getReviewsAdmin(query);
+    }
+
+    @Patch('admin/reviews/:id')
+    @UseGuards(AuthGuard)
+    async updateReviewAdmin(@Request() req: any, @Param('id', ParseIntPipe) id: number, @Body() dto: UpdateReviewAdminDto) {
+        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
+            throw new ForbiddenException('Admin access required');
+        }
+        return this.productService.updateReviewAdmin(id, dto);
+    }
+
+    @Get(':slug/reviews')
+    @Public()
+    @Header('Cache-Control', 'public, max-age=60')
+    getReviews(@Param('slug') slug: string, @Query() query: { page?: number; limit?: number }) {
+        return this.productService.getReviewsByProductSlug(slug, query.page, query.limit);
+    }
+
+    @Post(':id/reviews')
+    @UseGuards(AuthGuard)
+    createReview(@Request() req: any, @Param('id', ParseIntPipe) id: number, @Body() dto: CreateReviewDto) {
+        return this.productService.createReview(id, req.user.id, dto);
     }
 
     @Get(':slug')
