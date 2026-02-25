@@ -87,6 +87,7 @@ Coolify exposes these via its reverse proxy based on your domain configuration.
 | Issue | Fix |
 |-------|-----|
 | Build fails | Ensure `package-lock.json` is committed and in sync |
+| **Deployment failed (exit 255)** | Often transient (SSH/connection). **Try Deploy again.** If it persists, check Coolify → Server → Advanced for deployment timeout; ensure server has enough RAM (2GB+ for parallel builds) |
 | Backend can't connect to DB | Check `POSTGRES_PASSWORD` is set; db service must be healthy before backend starts |
 | CORS errors | Set `FRONTEND_URL` to your exact frontend domain (no trailing slash) |
 | 502 Bad Gateway | Check backend logs in Coolify → Terminal (backend container). Backend may need 30–60s for migrations on first start |
