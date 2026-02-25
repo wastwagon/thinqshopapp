@@ -2,7 +2,7 @@
 # https://render.com/docs/blueprint-spec
 # Connect this repo in Render Dashboard and use "New > Blueprint" to create all services.
 #
-# api-build/ is a tracked dir (see api-build/.gitkeep) so Render includes it in the deploy artifact.
+# Backend build output goes to backend/api-build (inside backend/) so Render includes it.
 # If deploy fails, ensure Build/Start in Render Dashboard match the values below.
 
 databases:
@@ -18,8 +18,8 @@ services:
     runtime: node
     region: oregon
     plan: free
-    buildCommand: npm install --include=dev && npx prisma generate --schema=database/schema.prisma && npm run build -w backend && rm -rf api-build/* && cp -r backend/dist/* api-build/
-    startCommand: npx prisma migrate deploy --schema=database/schema.prisma && node api-build/main.js
+    buildCommand: npm install --include=dev && npx prisma generate --schema=database/schema.prisma && npm run build -w backend && rm -rf backend/api-build && cp -r backend/dist backend/api-build
+    startCommand: npx prisma migrate deploy --schema=database/schema.prisma && node backend/api-build/main.js
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
@@ -47,7 +47,7 @@ services:
     plan: free
     rootDir: web
     buildCommand: npm install --include=dev && npm run build
-    startCommand: npm start
+    startCommand: node .next/standalone/server.js
     envVars:
       - key: NODE_VERSION
         value: "20"
