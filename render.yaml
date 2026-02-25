@@ -2,7 +2,7 @@
 # https://render.com/docs/blueprint-spec
 # Connect this repo in Render Dashboard and use "New > Blueprint" to create all services.
 #
-# Backend build output goes to backend/api-build (inside backend/) so Render includes it.
+# Build outputs go to non-gitignored dirs (backend/api-build, web/web-build) so Render includes them.
 # If deploy fails, ensure Build/Start in Render Dashboard match the values below.
 
 databases:
@@ -46,8 +46,8 @@ services:
     region: oregon
     plan: free
     rootDir: web
-    buildCommand: npm install --include=dev && npm run build
-    startCommand: node .next/standalone/server.js
+    buildCommand: npm install --include=dev && npm run build && rm -rf web-build/* && cp -r .next/standalone/* web-build/ && cp -r .next/static web-build/.next/ && cp -r public web-build/ 2>/dev/null || true
+    startCommand: cd web-build && node server.js
     envVars:
       - key: NODE_VERSION
         value: "20"
