@@ -1,10 +1,10 @@
 # ThinQShop
 
-Premium e-commerce and money transfer platform built with NestJS, Next.js, Expo, PostgreSQL, and Redis.
+Premium e-commerce and money transfer platform built with NestJS, Next.js, Expo, and PostgreSQL.
 
 ## Stack
 
-- **Backend:** NestJS, Prisma, PostgreSQL, Redis
+- **Backend:** NestJS, Prisma, PostgreSQL
 - **Web:** Next.js 14, React 18, Tailwind
 - **Mobile:** Expo / React Native
 - **Deploy:** Docker, Coolify
@@ -15,7 +15,7 @@ Premium e-commerce and money transfer platform built with NestJS, Next.js, Expo,
 
 - Node.js 20+
 - Docker (for production builds)
-- PostgreSQL & Redis (or use Docker Compose)
+- PostgreSQL (or use Docker Compose)
 
 ### Development
 
@@ -43,11 +43,11 @@ npm run dev:mobile
 # Optional: free ports 7000 and 7001 if something is already using them
 npm run dev:ports-free
 
-# Start backend (7000) and web (7001) in one go (requires PostgreSQL + Redis)
+# Start backend (7000) and web (7001) in one go (requires PostgreSQL)
 npm run dev:start
 ```
 
-If you use Docker for the database, start it first: `docker compose up -d db redis`. Then run `npm run dev:start`.  
+If you use Docker for the database, start it first: `docker compose up -d db`. Then run `npm run dev:start`.  
 **Two-terminal option:** Terminal 1: `PORT=7000 npm run dev:backend` → Terminal 2: `npm run dev:web` → open http://localhost:7001.
 
 ### Environment
@@ -55,7 +55,6 @@ If you use Docker for the database, start it first: `docker compose up -d db red
 Copy `.env.example` to `.env` and set:
 
 - `DATABASE_URL` – PostgreSQL connection string
-- `REDIS_URL` – Redis connection string
 - `JWT_SECRET`
 - `PAYSTACK_SECRET_KEY` (backend) and `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` (web)
 - `NEXT_PUBLIC_API_URL` – backend URL (e.g. `https://api.yourdomain.com` in production)
@@ -90,7 +89,7 @@ Deploy with Docker Compose or Coolify. See [DEPLOY.md](./DEPLOY.md) and [docs/CO
 ├── web/              # Next.js app
 ├── mobile/           # Expo app
 ├── database/         # Prisma schema
-├── docker-compose.yml         # Local dev (with db, redis)
+├── docker-compose.yml         # Local dev (with db)
 ├── docker-compose.coolify.yml # Coolify / VPS (external DB)
 ├── docker-compose.full.yml    # Full stack with PostgreSQL
 ```

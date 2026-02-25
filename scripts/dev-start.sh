@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Free ports 7000/7001, start backend on 7000 and web on 7001.
-# Prerequisite: PostgreSQL (and Redis) running. If using Docker: docker compose up -d db redis
+# Prerequisite: PostgreSQL running. If using Docker: docker compose up -d db
 set -e
 cd "$(dirname "$0")/.."
 
@@ -14,7 +14,7 @@ if command -v nc >/dev/null 2>&1; then
       break
     fi
     if [ "$i" -eq 30 ]; then
-      echo "    Warning: port $DB_PORT not open. Start Postgres (e.g. docker compose up -d db redis) and ensure .env DATABASE_URL uses localhost:$DB_PORT"
+      echo "    Warning: port $DB_PORT not open. Start Postgres (e.g. docker compose up -d db) and ensure .env DATABASE_URL uses localhost:$DB_PORT"
     fi
     sleep 1
   done
@@ -44,7 +44,7 @@ for i in $(seq 1 20); do
     break
   fi
   if ! kill -0 $BACKEND_PID 2>/dev/null; then
-    echo "    Backend process exited (e.g. DB not running). Start PostgreSQL/Redis (e.g. Docker: docker compose up -d db redis), then run:"
+    echo "    Backend process exited (e.g. DB not running). Start PostgreSQL (e.g. Docker: docker compose up -d db), then run:"
     echo "      Terminal 1: PORT=7000 npm run dev:backend"
     echo "      Terminal 2: npm run dev:web"
     exit 1

@@ -34,10 +34,10 @@ This document describes how the **admin backend**, **database**, and **user dash
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  Database (PostgreSQL) + Redis                                   │
+│  Database (PostgreSQL)                                            │
 │  • Prisma schema: database/schema.prisma                          │
 │  • Migrations: database/migrations/                              │
-│  • Docker: db (5440), redis (6390)                               │
+│  • Docker: db (5440)                                              │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

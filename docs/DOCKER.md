@@ -1,6 +1,6 @@
 # Docker — Run all services
 
-Start the full stack (PostgreSQL, Redis, backend, web) with Docker Compose.
+Start the full stack (PostgreSQL, backend, web) with Docker Compose.
 
 ## Prerequisites
 
@@ -25,7 +25,6 @@ First run will build the backend and web images (can take several minutes). Late
 | Service  | Host port | Description        |
 |----------|-----------|--------------------|
 | **db**   | 5440      | PostgreSQL         |
-| **redis** | 6390    | Redis              |
 | **backend** | 7001   | NestJS API         |
 | **web**  | 3000      | Next.js (shop/app) |
 
@@ -51,5 +50,5 @@ docker compose up -d --build
 
 ## Env and secrets
 
-- Backend gets `DATABASE_URL`, `REDIS_URL`, `PAYSTACK_SECRET_KEY`, `JWT_SECRET` from `docker-compose` and `.env`.
+- Backend gets `DATABASE_URL`, `PAYSTACK_SECRET_KEY`, `JWT_SECRET` from `docker-compose` and `.env`.
 - Web build gets `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` as build args; at runtime the server uses `BACKEND_URL=http://backend:7000` to proxy `/api` to the backend.

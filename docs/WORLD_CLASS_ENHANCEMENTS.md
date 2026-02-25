@@ -40,7 +40,6 @@ Your stack (NestJS, Next.js, Prisma, Paystack) is solid. The main gaps are **sec
 
 | Area | Current | Recommendation | Effort |
 |------|---------|----------------|--------|
-| **Redis** | Env present; not used in backend | Use Redis for: session or token blocklist; rate-limit state; cache for hot reads (e.g. product list, category tree) with short TTL | Medium |
 | **DB indexes** | Only primary/unique | Add `@@index` in Prisma for: `Order(user_id, created_at)`, `Order(status)`, `Product(category_id, is_active)`, `Payment(order_id)`; analyze slow queries | Low |
 | **Images** | Next/Image with some `unoptimized` | Prefer Next Image with proper `sizes`; consider Cloudinary for uploads and CDN for media | Medium |
 | **API response shape** | Consistent pagination in places | Standardize list responses: `{ data, meta: { total, page, limit, totalPages } }` everywhere; add `Cache-Control` for public GETs where safe | Low |
@@ -98,7 +97,6 @@ Your stack (NestJS, Next.js, Prisma, Paystack) is solid. The main gaps are **sec
 - Email worker/sender for `email_queue` and test order confirmation.
 
 **Phase 3 — Performance & resilience (2–3 weeks)**  
-- Redis: cache hot reads and/or rate-limit state.  
 - Prisma indexes for orders, products, payments.  
 - Standardize list API responses and Cache-Control where appropriate.
 
