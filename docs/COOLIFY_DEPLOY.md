@@ -54,19 +54,26 @@ Coolify will set up the reverse proxy and SSL.
 
 The backend runs `prisma migrate deploy` on startup, so migrations are applied automatically.
 
-**To seed the database** (creates admin user, categories, shipping zones, etc.):
+**To seed the database** (creates admin user, test user, products, reviews, warehouses, etc.):
 
-**Option A — Coolify shell:** Open a shell/terminal for the `backend` container, then:
+**Option A — Auto-seed on startup:** In Coolify → Environment, add `SEED_ON_STARTUP=true`. Redeploy. After first successful login, set it back to `false` (or remove it).
+
+**Option B — Coolify shell:** Open a shell/terminal for the `backend` container, then:
 
 ```bash
 npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed.ts
 ```
 
-**Option B — Admin UI** (after first seed): Log in as `admin@thinqshopping.app` / `password` → **Admin** → **Settings** → Database section → **Migrate + seed** (for future runs)
+**Option C — Admin UI** (after first seed): Log in as `admin@thinqshopping.app` / `password` → **Admin** → **Settings** → Database section → **Migrate + seed** (for future runs)
 
-### 6. Default admin login
+### 6. Default credentials (after seed)
 
-After seeding: `admin@thinqshopping.app` / `password` — **change this immediately** in production.
+| Account | Email | Password |
+|---------|-------|----------|
+| Admin | `admin@thinqshopping.app` | `password` |
+| Test user | `user@thinqshopping.app` | `password` |
+
+**Change the admin password immediately** in production.
 
 ---
 

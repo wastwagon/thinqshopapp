@@ -22,7 +22,7 @@ services:
       dockerfile: backend/Dockerfile
     restart: always
     ports:
-      - "7001:7000"
+      - "7000:7000"
     environment:
       NODE_ENV: production
       PORT: 7000
@@ -40,11 +40,11 @@ services:
       context: .
       dockerfile: web/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:7001
+        NEXT_PUBLIC_API_URL: http://localhost:7000
         NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: ${NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY:-}
     restart: always
     ports:
-      - "3000:3000"
+      - "7001:3000"
     environment:
       NODE_ENV: production
       PORT: 3000

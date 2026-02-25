@@ -21,5 +21,11 @@ for i in 1 2 3 4 5; do
   fi
 done
 
+# Optional: seed on startup (set SEED_ON_STARTUP=true for fresh deploys)
+if [ "$SEED_ON_STARTUP" = "true" ]; then
+  echo "Running database seed..."
+  npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed.ts || echo "Seed failed or skipped."
+fi
+
 echo "Starting application..."
 exec node dist/backend/src/main.js

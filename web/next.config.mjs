@@ -2,10 +2,8 @@
 const nextConfig = {
     output: 'standalone',
     staticPageGenerationTimeout: 120,
-    async rewrites() {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000';
-        return [{ source: '/api/:path*', destination: `${apiUrl}/:path*` }];
-    },
+    // Removed rewrites: they used NEXT_PUBLIC_API_URL (localhost) at build time, failing in Docker.
+    // API route app/api/[...path]/route.ts proxies using BACKEND_URL at runtime (http://backend:7000 in Docker).
     async headers() {
         return [
             {

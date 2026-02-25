@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:7000';
+// Prefer BACKEND_URL for server-side proxy (Docker: http://backend:7000); NEXT_PUBLIC_API_URL is for client
+const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000';
 
 type RouteParams = { path: string[] };
 type ParamsArg = RouteParams | Promise<RouteParams>;

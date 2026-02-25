@@ -21,20 +21,24 @@ export async function seedWorldClassContent(prisma: PrismaClient) {
         console.log('Seeded hero_slides');
     }
 
-    // --- Trust badges (seed only if empty) ---
+    // --- Trust badges (seed only if empty, or update labels for shorter text) ---
     const trustCount = await prisma.trustBadge.count();
     if (trustCount === 0) {
         await prisma.trustBadge.createMany({
             data: [
                 { icon: 'shield', label: 'Secure checkout', optional_link: null, sort_order: 0, is_active: true, updated_at: now },
-                { icon: 'truck', label: 'International shipping · 7–14 days', optional_link: '/privacy', sort_order: 1, is_active: true, updated_at: now },
+                { icon: 'truck', label: 'Global shipping 7–14 days', optional_link: '/privacy', sort_order: 1, is_active: true, updated_at: now },
                 { icon: 'rotate-ccw', label: 'Easy returns', optional_link: '/terms', sort_order: 2, is_active: true, updated_at: now },
                 { icon: 'star', label: 'Rated 4.8 by customers', optional_link: null, sort_order: 3, is_active: true, updated_at: now },
                 { icon: 'lock', label: 'Paystack protected', optional_link: 'https://paystack.com', sort_order: 4, is_active: true, updated_at: now },
-                { icon: 'check-circle', label: 'Warranty on select items', optional_link: '/shop', sort_order: 5, is_active: true, updated_at: now },
+                { icon: 'check-circle', label: 'Warranty available', optional_link: '/shop', sort_order: 5, is_active: true, updated_at: now },
             ],
         });
         console.log('Seeded trust_badges');
+    } else {
+        // Update labels for card-fit (shorter text)
+        await prisma.trustBadge.updateMany({ where: { icon: 'truck' }, data: { label: 'Global shipping 7–14 days', updated_at: now } });
+        await prisma.trustBadge.updateMany({ where: { icon: 'check-circle' }, data: { label: 'Warranty available', updated_at: now } });
     }
 
     // --- Testimonials (seed only if empty) ---

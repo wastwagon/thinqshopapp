@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,7 +10,7 @@ import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import ShopLayout from '@/components/layout/ShopLayout';
-import { ShieldCheck, Lock, Mail, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const loginSchema = z.object({
@@ -20,6 +21,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+    const [showPassword, setShowPassword] = useState(false);
     const searchParams = useSearchParams();
     const from = searchParams.get('from') || undefined; // e.g. /dashboard from ?from=%2Fdashboard
     const { login } = useAuth();
@@ -40,10 +42,12 @@ export default function LoginPage() {
 
     return (
         <ShopLayout>
-            <div className="min-h-[90vh] flex items-center justify-center px-4 py-20 relative bg-[#fdfdfd] overflow-hidden">
-                {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
-                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2" />
+            <div className="min-h-[90vh] flex items-center justify-center px-4 py-20 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+                {/* Premium background: subtle mesh gradient + grid */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(59,130,246,0.15),transparent)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_80%_50%,rgba(99,102,241,0.08),transparent)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_20%_80%,rgba(59,130,246,0.06),transparent)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
 
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -51,7 +55,7 @@ export default function LoginPage() {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="max-w-md w-full relative z-10"
                 >
-                    <div className="bg-white rounded-[2.5rem] p-10 md:p-14 border border-gray-100 shadow-xl shadow-gray-100/50 relative overflow-hidden">
+                    <div className="bg-white/95 backdrop-blur-xl rounded-[2.5rem] p-10 md:p-14 border border-white/20 shadow-2xl shadow-black/20 relative overflow-hidden">
                         <div className="mb-12 text-center">
                             <h1 className="text-2xl font-semibold text-gray-900 tracking-tight mb-3">Sign in</h1>
                             <p className="text-gray-500 text-sm">
@@ -84,11 +88,20 @@ export default function LoginPage() {
                                     <div className="relative">
                                         <input
                                             {...register('password')}
-                                            type="password"
+                                            type={showPassword ? 'text' : 'password'}
                                             placeholder="••••••••••••"
-                                            className="block w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
+                                            className="block w-full px-5 py-3.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
                                         />
-                                        <Lock className="absolute right-6 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-200" />
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                            >
+                                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            </button>
+                                        </div>
                                     </div>
                                     {errors.password && <p className="text-red-500 text-xs mt-2 ml-1">{errors.password.message}</p>}
                                 </div>
@@ -113,9 +126,9 @@ export default function LoginPage() {
                         </form>
                     </div>
 
-                    <div className="mt-8 flex items-center justify-center gap-2 text-gray-400">
+                    <div className="mt-8 flex items-center justify-center gap-2 text-white/60">
                         <ShieldCheck className="h-4 w-4" />
-                        <span className="text-xs text-gray-500">Secure connection</span>
+                        <span className="text-xs">Secure connection</span>
                     </div>
                 </motion.div>
             </div>

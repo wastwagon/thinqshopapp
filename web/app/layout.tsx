@@ -29,9 +29,9 @@ export const metadata: Metadata = {
         description: "Shop premium imaging systems and electronics delivered to Ghana with verified global warranty.",
     },
     icons: {
-        icon: "/favicon.gif",
-        shortcut: "/favicon.gif",
-        apple: "/favicon.gif",
+        icon: "/favicon.png",
+        shortcut: "/favicon.png",
+        apple: "/favicon.png",
     },
 };
 

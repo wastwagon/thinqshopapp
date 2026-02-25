@@ -15,7 +15,7 @@ export default function manifest(): MetadataRoute.Manifest {
         orientation: 'portrait-primary',
         icons: [
             { src: '/thinqshop-logo.webp', sizes: 'any', type: 'image/webp', purpose: 'any' },
-            { src: '/favicon.gif', sizes: 'any', type: 'image/gif', purpose: 'any' },
+            { src: '/favicon.png', sizes: 'any', type: 'image/png', purpose: 'any' },
         ],
     };
 }

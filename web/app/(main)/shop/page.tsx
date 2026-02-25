@@ -30,7 +30,7 @@ function ShopContent() {
                     api.get('/products/categories'),
                 ]);
                 const apiProducts = productsRes.data?.data ?? [];
-                const apiCategories = productsRes.data ?? [];
+                const apiCategories = categoriesRes.data ?? [];
                 if (apiProducts.length > 0) {
                     setProducts(apiProducts.map((p: any, i: number) => normalizeProduct(p, i)));
                     setCategories(Array.isArray(apiCategories) ? apiCategories : []);
