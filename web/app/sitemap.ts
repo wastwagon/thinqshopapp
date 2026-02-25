@@ -3,6 +3,8 @@ import { MetadataRoute } from 'next';
 const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app';
 const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000';
 
+const FETCH_TIMEOUT_MS = 5000;
+
 async function fetchProductSlugs(): Promise<string[]> {
     try {
         const slugs: string[] = [];
@@ -10,7 +12,13 @@ async function fetchProductSlugs(): Promise<string[]> {
         const limit = 100;
         let hasMore = true;
         while (hasMore) {
-            const res = await fetch(`${apiBase}/products?page=${page}&limit=${limit}`, { next: { revalidate: 3600 } });
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+            const res = await fetch(`${apiBase}/products?page=${page}&limit=${limit}`, {
+                next: { revalidate: 3600 },
+                signal: controller.signal,
+            });
+            clearTimeout(timeoutId);
             if (!res.ok) break;
             const json = await res.json();
             const data = json?.data ?? [];
