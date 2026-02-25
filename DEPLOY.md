@@ -61,7 +61,7 @@ The repo root contains `render.yaml`, which defines Postgres, Redis, backend, an
 4. For each service that has `sync: false` env vars, open the service → **Environment** and set:
    - **Backend:** `PAYSTACK_SECRET_KEY` (and optionally `REDIS_URL` from the Redis instance’s internal URL).
    - **Web:** `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY`, and after backend is live, `NEXT_PUBLIC_API_URL` = backend URL.
-5. Deploy; migrations run automatically via the backend’s **Pre-Deploy Command**.
+5. Deploy; migrations run at backend startup (in the start command; free tier does not support Pre-Deploy Command).
 
 ### Optional: build verification (Docker, local)
 
@@ -75,6 +75,6 @@ npm run build:web:docker
 
 ## 3. After deploy
 
-1. **Migrations** – Run automatically by the backend’s Pre-Deploy Command (`prisma migrate deploy`).
+1. **Migrations** – Run at backend startup (`prisma migrate deploy` in the start command).
 2. **Verify** – Open the web URL; log in or browse the shop.
 3. **Seed** – If the database is empty, add products via the admin panel for full catalog.
