@@ -22,4 +22,4 @@ for i in 1 2 3 4 5; do
 done
 
 echo "Starting application..."
-exec node dist/src/main.js
+exec node dist/backend/src/main.js
