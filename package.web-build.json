@@ -1,0 +1,8 @@
+{
+  "name": "thinqshop-web-build",
+  "private": true,
+  "workspaces": ["web"],
+  "scripts": {
+    "build": "npm run build -w web"
+  }
+}

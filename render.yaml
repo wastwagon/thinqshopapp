@@ -1,0 +1,64 @@
+# Render Blueprint — ThinQShop
+# https://render.com/docs/blueprint-spec
+# Connect this repo in Render Dashboard and use "New > Blueprint" to create all services.
+
+databases:
+  - name: thinqshop-db
+    databaseName: thinqshop_db
+    plan: free
+    region: oregon
+
+services:
+  # Redis (optional; set REDIS_URL in backend if you use it)
+  - type: keyvalue
+    name: thinqshop-redis
+    plan: free
+    region: oregon
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
+
+  # NestJS API (backend)
+  - type: web
+    name: thinqshop-backend
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npx prisma generate --schema=database/schema.prisma && npm run build -w backend
+    preDeployCommand: npx prisma migrate deploy --schema=database/schema.prisma
+    startCommand: node backend/dist/main.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 7000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: thinqshop-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: REDIS_URL
+        sync: false
+
+  # Next.js frontend (web)
+  - type: web
+    name: thinqshop-web
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: web
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+        sync: false

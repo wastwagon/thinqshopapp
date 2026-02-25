@@ -1,0 +1,8 @@
+{
+  "name": "thinqshop-backend-build",
+  "private": true,
+  "workspaces": ["backend"],
+  "scripts": {
+    "build": "npm run build -w backend"
+  }
+}

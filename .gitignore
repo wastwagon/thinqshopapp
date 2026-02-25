@@ -1,0 +1,28 @@
+# Dependencies and build
+node_modules/
+dist/
+.next/
+build/
+out/
+.expo/
+
+# Environment and secrets (never commit)
+.env
+.env.local
+.env.*.local
+backend/.env
+web/.env
+*.pem
+
+# Logs and OS
+*.log
+.DS_Store
+
+# Uploads and runtime
+uploads/
+
+# IDE and misc
+.idea/
+.vscode/
+*.swp
+*.swo

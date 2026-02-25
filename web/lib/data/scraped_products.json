@@ -1,0 +1,272 @@
+[
+    {
+        "category": "Photography",
+        "name": "Sony a7 V Mirrorless Camera",
+        "price": "$2,898.00",
+        "description": "A hybrid mirrorless camera featuring a 33MP partially-stacked sensor, BIONZ XR2 processor, and advanced AI-based subject recognition. Built for content creators, it balances high-speed action photography with professional-grade video capabilities.",
+        "specs": [
+            "33MP Partially-Stacked Exmor RS Sensor",
+            "BIONZ XR2 Processor with Dedicated AI Unit",
+            "759-Point PDAF with Real-time Tracking",
+            "AI Subject Recognition & Auto Framing",
+            "Dual SD/CFexpress Type A Slots"
+        ],
+        "gallery_images": [
+            "https://www.bhphotovideo.com/images/fb/sony_a7_v_mirrorless_camera_1935439.jpg",
+            "https://www.bhphotovideo.com/cdn-cgi/image/fit=scale-down,width=500,quality=95/https://www.bhphotovideo.com/images/images500x500/sony_a7_v_mirrorless_camera_1764667996_1935439.jpg",
+            "https://static.bhphoto.com/images/images500x500/1708511158_1812335.jpg"
+        ]
+    },
+    {
+        "category": "Photography",
+        "name": "Sony a7 III Mirrorless Camera with 28-70mm f/3.5-5.6 Lens",
+        "price": "$1,698.00",
+        "description": "A well-rounded mirrorless camera suitable for both photo and video applications. It features a full-frame sensor design with refined image quality, speed, and low-light performance.",
+        "specs": [
+            "24.2MP Full-Frame Exmor R BSI CMOS Sensor",
+            "BIONZ X Image Processor & Front-End LSI",
+            "693-Point Hybrid AF System",
+            "UHD 4K24p Video with S-Log3 Gammas",
+            "5-Axis SteadyShot INSIDE Stabilization"
+        ],
+        "gallery_images": [
+            "https://www.bhphotovideo.com/images/fb/sony_ilce_7m3k_b_alpha_a7_iii_mirrorless_1394219.jpg",
+            "https://www.bhphotovideo.com/cdn-cgi/image/fit=scale-down,width=500,quality=95/https://www.bhphotovideo.com/images/images500x500/sony_ilce_7m3k_b_alpha_a7_iii_mirrorless_1519677934_1394219.jpg",
+            "https://static.bhphoto.com/images/images500x500/1757501273_1920345.jpg"
+        ]
+    },
+    {
+        "category": "Photography",
+        "name": "Sony Cyber-shot DSC-RX100 VII Digital Camera",
+        "price": "$1,698.00",
+        "description": "A pocket-sized powerhouse that brings flagship-level speed and performance. It features a broad zoom range and exceptionally fast autofocus, making it ideal for travel and high-action vlogging.",
+        "specs": [
+            "20.1MP 1\" Exmor RS BSI CMOS Sensor",
+            "ZEISS Vario-Sonnar T* f/2.8-4.5 Lens (24-200mm equiv.)",
+            "0.02-sec. Real-time AF with 357 phase-detection points",
+            "Up to 20 fps Blackout-Free Shooting",
+            "4K HDR (HLG) Video Recording & Microphone Input"
+        ],
+        "gallery_images": [
+            "https://www.bhphotovideo.com/images/fb/sony_dscrx100m7_b_cyber_shot_dsc_rx100_vii_digital_1496248.jpg",
+            "https://www.bhphotovideo.com/cdn-cgi/image/fit=scale-down,width=500,quality=95/https://www.bhphotovideo.com/images/images500x500/sony_dscrx100m7_b_cyber_shot_dsc_rx100_vii_digital_1563275195_1494689.jpg",
+            "https://static.bhphoto.com/images/images500x500/1563301278_1494691.jpg"
+        ]
+    },
+    {
+        "category": "Photography",
+        "name": "FUJIFILM instax mini Evo Cinema Hybrid Instant Camera",
+        "price": "$199.95",
+        "description": "A hybrid instant camera that blends modern digital convenience with classic analog film appeal. It allows you to select and print high-quality photos directly from the camera or your smartphone.",
+        "specs": [
+            "Hybrid Digital/Instant Film System",
+            "10 Lens Effects and 10 Film Effects for 100 combinations",
+            "Bluetooth Connectivity for Smartphone Printing",
+            "Fixed 28mm f/2 Lens (35mm equivalent)",
+            "Built-In Selfie Mirror and Manual Print Lever"
+        ],
+        "gallery_images": [
+            "https://www.bhphotovideo.com/images/fb/fujifilm_instax_mini_evo_cinema_1942857.jpg",
+            "https://www.bhphotovideo.com/cdn-cgi/image/fit=scale-down,width=500,quality=95/https://www.bhphotovideo.com/images/images500x500/fujifilm_instax_mini_evo_cinema_1736467389_1942857.jpg",
+            "https://static.bhphoto.com/images/images500x500/1768337141_1942857.jpg"
+        ]
+    },
+    {
+        "category": "Photography",
+        "name": "Canon PowerShot ELPH 360 HS A Digital Camera (Black)",
+        "price": "$379.00",
+        "description": "A slim, stylish point-and-shoot camera with a high-resolution sensor and powerful zoom.",
+        "specs": [
+            "20.2MP 1/2.3\" CMOS Image Sensor",
+            "DIGIC 4+ Image Processor",
+            "12x Optical Zoom Lens; 25-300mm (35mm Equivalent)",
+            "Full HD 1080p Video Recording at 30 fps",
+            "Built-In Wi-Fi with NFC"
+        ],
+        "gallery_images": [
+            "https://www.bhphotovideo.com/cdn-cgi/image/fit=scale-down,width=500,quality=95/https://www.bhphotovideo.com/images/images500x500/canon_7280c001_powershot_elph_360_hs_1757407699_1919557.jpg",
+            "https://www.bhphotovideo.com/images/fb/canon_7280c001_powershot_elph_360_hs_1919557.jpg",
+            "https://static.bhphoto.com/images/images500x500/1658757032_1692705.jpg"
+        ]
+    },
+    {
+        "category": "Photography",
+        "name": "Sony a6400 Mirrorless Camera with 18-135mm f/3.5-5.6 Lens",
+        "price": "$1,248.00",
+        "description": "Stable, fast, versatile, and compact, the Sony a6400 is an APS-C-format mirrorless camera that adopts many features normally reserved for their full-frame lineup.",
+        "specs": [
+            "24.2MP APS-C Exmor CMOS Sensor",
+            "Real-Time Eye AF & Real-Time Tracking",
+            "Internal UHD 4K Video, S-Log3, and HLG",
+            "3.0\" 921.6k-Dot 180° Tilting Touchscreen",
+            "Built-In Wi-Fi with NFC"
+        ],
+        "gallery_images": [
+            "https://www.bhphotovideo.com/cdn-cgi/image/fit=scale-down,width=500,quality=95/https://www.bhphotovideo.com/images/images500x500/sony_ilce_6400m_b_alpha_a6400_mirrorless_digital_1548254228_1453771.jpg",
+            "https://www.bhphotovideo.com/images/fb/sony_ilce_6400m_b_alpha_a6400_mirrorless_digital_1453771.jpg",
+            "https://static.bhphoto.com/images/images500x500/1658758849_1692696.jpg"
+        ]
+    },
+    {
+        "category": "Photography",
+        "name": "Sony ZV-1 Digital Camera (Black)",
+        "price": "$798.00",
+        "description": "Designed specifically for vloggers and content creators, the ZV-1 is a pocket-sized camera with a flip-out screen and advanced autofocus features.",
+        "specs": [
+            "20.1MP 1\" Exmor RS BSI CMOS Sensor",
+            "ZEISS 24-70mm-Equiv. f/1.8-2.8 Lens",
+            "UHD 4K30p Video w/ HLG & S-Log3/2 Gammas",
+            "3.0\" Side Flip-Out Touchscreen LCD",
+            "Real-Time Eye AF & Tracking"
+        ],
+        "gallery_images": [
+            "https://www.bhphotovideo.com/cdn-cgi/image/fit=scale-down,width=500,quality=95/https://www.bhphotovideo.com/images/images500x500/sony_dczv1_b_zv_1_digital_camera_1590489343_1565880.jpg",
+            "https://www.bhphotovideo.com/images/fb/sony_dczv1_b_zv_1_digital_camera_1565880.jpg",
+            "https://static.bhphoto.com/images/images500x500/1579004482_1540293.jpg"
+        ]
+    },
+    {
+        "category": "Photography",
+        "name": "Canon EOS R5 Mark II Mirrorless Camera",
+        "price": "$4,299.00",
+        "description": "The high-resolution powerhouse that combines speed, video performance, and professional-grade handling.",
+        "specs": [
+            "45MP Full-Frame Stacked BSI CMOS Sensor",
+            "Dual Pixel Intelligent AF, Eye Control AF",
+            "8K 60p Raw, 4K 120p Video, Internal 10-Bit",
+            "Up to 30 fps Shooting, Pre-Continuous Mode",
+            "Built-In Wi-Fi & Bluetooth"
+        ],
+        "gallery_images": [
+            "https://www.bhphotovideo.com/cdn-cgi/image/fit=scale-down,width=500,quality=95/https://www.bhphotovideo.com/images/images500x500/canon_eos_r5_mark_ii_1764054587_1908101.jpg",
+            "https://www.bhphotovideo.com/images/fb/canon_eos_r5_mark_ii_1908101.jpg",
+            "https://static.bhphoto.com/images/images500x500/1566949680_1502500.jpg"
+        ]
+    },
+    {
+        "category": "Computers",
+        "name": "Lenovo 15.6\" IdeaPad Slim 3 Notebook (Arctic Gray)",
+        "price": "$279.00",
+        "description": "Powerful enough to help you get things done, yet small enough to fit in your bag, the Arctic Gray Lenovo 15.6\" IdeaPad Slim 3 Notebook is an ideal travel companion.",
+        "specs": [
+            "Operating System: Windows 11 Home",
+            "Processor: AMD Ryzen 5 7520U 4-Core",
+            "Memory: 8 GB LPDDR5 RAM",
+            "Display: 15.6\" 1920 x 1080 FHD",
+            "Storage: 256 GB NVMe SSD"
+        ],
+        "gallery_images": [
+            "https://static.bhphoto.com/images/images500x500/lenovo_82xq00ebus_15_6_ideapad_slim_3_1751979319_1904850.jpg",
+            "https://static.bhphoto.com/images/images500x500/1715096530_1904850.jpg",
+            "https://static.bhphoto.com/images/images500x500/1715096530_1904850_1.jpg"
+        ]
+    },
+    {
+        "category": "Computers",
+        "name": "Acer 14\" Chromebook Vero 514",
+        "price": "$294.95",
+        "description": "Make your mark with the Acer Chromebook Vero 514, which features a recycled-plastic design and reliable performance for your everyday tasks.",
+        "specs": [
+            "Operating System: Chrome OS",
+            "Processor: Intel Core i3-1215U (12th Gen)",
+            "Memory: 8 GB LPDDR4x RAM",
+            "Display: 14\" 1920 x 1080 FHD IPS",
+            "Storage: 128 GB NVMe Storage"
+        ],
+        "gallery_images": [
+            "https://static.bhphoto.com/images/images500x500/acer_cbv514_1h_38vs_14_chromebook_vero_514_1754923318_1908487.jpg",
+            "https://static.bhphoto.com/images/images500x500/1754923318_1908487_1.jpg",
+            "https://static.bhphoto.com/images/images500x500/1754923318_1908487_2.jpg"
+        ]
+    },
+    {
+        "category": "Computers",
+        "name": "Lenovo 14\" 2-in-1 Chromebook Plus",
+        "price": "$829.00",
+        "description": "Flexible performance for your creative and professional needs.",
+        "specs": [
+            "Processor: Intel Core Ultra 5 120U",
+            "Memory: 8GB LPDDR5x RAM",
+            "Storage: 256GB SSD",
+            "Display: 14\" 1920 x 1200 Touchscreen",
+            "Features: 2-in-1 Convertible Design"
+        ],
+        "gallery_images": [
+            "https://static.bhphoto.com/images/images500x500/lenovo_83ll000hus_14_chrome_plus_multi_touch_1886929.jpg",
+            "https://static.bhphoto.com/images/images500x500/1715096530_1886929.jpg",
+            "https://static.bhphoto.com/images/images500x500/1715096530_1886929_1.jpg"
+        ]
+    },
+    {
+        "category": "Computers",
+        "name": "Acer 14\" Chromebook 314",
+        "price": "$279.99",
+        "description": "Reliable and efficient computing for everyday tasks.",
+        "specs": [
+            "Processor: 0.8 GHz Intel N100 Quad-Core",
+            "Memory: 4GB LPDDR5 RAM",
+            "Storage: 128GB eMMC Storage",
+            "Display: 14\" 1920 x 1080 ComfyView Display",
+            "Graphics: Integrated Intel UHD Graphics"
+        ],
+        "gallery_images": [
+            "https://static.bhphoto.com/images/images500x500/acer_cb314_4h_c29d_14_chromebook_314_n100_1727715875_1852928.jpg",
+            "https://static.bhphoto.com/images/images500x500/1727715875_1852928.jpg",
+            "https://static.bhphoto.com/images/images500x500/1727715875_1852928_1.jpg"
+        ]
+    },
+    {
+        "category": "Computers",
+        "name": "ASUS 14\" Multi-Touch Chromebook CM14 Flip",
+        "price": "$379.99",
+        "description": "Versatile 2-in-1 design with a responsive touchscreen for enhanced productivity.",
+        "specs": [
+            "Processor: 2.0 GHz MediaTek Kompanio 520 8-Core",
+            "Memory: 8GB LPDDR4X RAM",
+            "Storage: 64GB eMMC Storage",
+            "Display: 14\" Full HD 1920 x 1080 Touchscreen",
+            "Graphics: ARM Mali-G52 MC2 Graphics"
+        ],
+        "gallery_images": [
+            "https://static.bhphoto.com/images/images500x500/asus_cm1402fm2a_ds84ft_s_14_multi_touch_chromebook_cm14_1910389.jpg",
+            "https://static.bhphoto.com/images/images500x500/1707166138_1910389.jpg",
+            "https://static.bhphoto.com/images/images500x500/1707166138_1910389_1.jpg"
+        ]
+    },
+    {
+        "category": "Computers",
+        "name": "HP 14\" Fortis G11 Chromebook",
+        "price": "$378.95",
+        "description": "Rugged and durable Chromebook built for demanding environments.",
+        "specs": [
+            "Processor: 0.8 GHz Intel N100 4-Core",
+            "Memory: 8GB LPDDR5x RAM",
+            "Storage: 64GB eMMC SSD",
+            "Display: 14\" 1366 x 768 Anti-Glare Display",
+            "Network: Wi-Fi 6E Support"
+        ],
+        "gallery_images": [
+            "https://static.bhphoto.com/images/images500x500/hp_9r391ut_aba_14_fortis_14_g11_1715871261_1805085.jpg",
+            "https://static.bhphoto.com/images/images500x500/1715871261_1805085.jpg",
+            "https://static.bhphoto.com/images/images500x500/1715871261_1805085_1.jpg"
+        ]
+    },
+    {
+        "category": "Computers",
+        "name": "Lenovo 14\" 2-in-1 Chromebook Plus (83LL000GUS)",
+        "price": "$979.00",
+        "description": "Premium 2-in-1 performance with a high-resolution touchscreen.",
+        "specs": [
+            "Processor: Intel Core 7 250U 10-Core",
+            "Memory: 16GB LPDDR5 RAM",
+            "Storage: 512GB M.2 SSD",
+            "Display: 14\" 1920 x 1200 IPS Touchscreen",
+            "Graphics: Integrated Intel Graphics"
+        ],
+        "gallery_images": [
+            "https://static.bhphoto.com/images/images500x500/lenovo_83ll000gus_14_chrome_plus_multi_touch_1717616198_1833503.jpg",
+            "https://static.bhphoto.com/images/images500x500/1717616198_1833503.jpg",
+            "https://static.bhphoto.com/images/images500x500/1717616198_1833503_1.jpg"
+        ]
+    }
+]

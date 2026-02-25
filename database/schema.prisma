@@ -1,0 +1,838 @@
+// This is a conversion of the MySQL schema to Prisma/PostgreSQL
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- CORE TABLES ---
+
+model User {
+  id                Int       @id @default(autoincrement())
+  user_identifier   String?   @unique @db.VarChar(50)
+  email             String    @unique @db.VarChar(255)
+  phone             String?   @unique @db.VarChar(20)
+  password          String    @db.VarChar(255)
+  ghana_card        String?   @db.VarChar(50)
+  voter_id          String?   @db.VarChar(50)
+  is_verified       Boolean   @default(false)
+  is_active         Boolean   @default(true)
+  role              String    @default("user") // 'user', 'admin', 'superadmin'
+  email_verified_at DateTime?
+  phone_verified_at DateTime?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  profile           UserProfile?
+  wallet            UserWallet?
+  addresses         Address[]
+  orders            Order[]
+  cart_items        CartItem[]
+  reviews           ProductReview[]
+  wishlist          Wishlist[]
+  money_transfers   MoneyTransfer[]
+  shipments         Shipment[]
+  procurement_reqs  ProcurementRequest[]
+  procurement_orders ProcurementOrder[]
+  payments          Payment[]
+  coupon_usages     CouponUsage[]
+  notifications     Notification[]
+  saved_recipients  SavedRecipient[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id            Int       @id @default(autoincrement())
+  user_id       Int       @unique
+  first_name    String?   @db.VarChar(100)
+  last_name     String?   @db.VarChar(100)
+  profile_image String?   @db.VarChar(255)
+  date_of_birth DateTime? @db.Date
+  gender        Gender?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+model UserWallet {
+  id          Int      @id @default(autoincrement())
+  user_id     Int      @unique
+  balance_ghs Decimal  @default(0.00) @db.Decimal(10, 2)
+  updated_at  DateTime @updatedAt
+
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_wallets")
+}
+
+model Address {
+  id             Int         @id @default(autoincrement())
+  user_id        Int
+  address_type   AddressType @default(home)
+  full_name      String      @db.VarChar(255)
+  phone          String      @db.VarChar(20)
+  street         String      @db.VarChar(255)
+  city           String      @db.VarChar(100)
+  region         String      @db.VarChar(100)
+  landmark       String?     @db.VarChar(255)
+  gps_coords     String?     @db.VarChar(100)
+  is_default     Boolean     @default(false)
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+
+  user           User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  orders         Order[]
+  pickup_shipments Shipment[] @relation("PickupAddress")
+  delivery_shipments Shipment[] @relation("DeliveryAddress")
+  proc_orders    ProcurementOrder[]
+
+  @@map("addresses")
+}
+
+enum AddressType {
+  home
+  work
+  other
+}
+
+// --- E-COMMERCE TABLES ---
+
+model Category {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(255)
+  slug        String     @unique @db.VarChar(255)
+  parent_id   Int?
+  description String?
+  image       String?    @db.VarChar(255)
+  sort_order  Int        @default(0)
+  is_active   Boolean    @default(true)
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+
+  parent      Category?  @relation("CategoryParent", fields: [parent_id], references: [id], onDelete: SetNull)
+  children    Category[] @relation("CategoryParent")
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id                     Int              @id @default(autoincrement())
+  name                   String           @db.VarChar(255)
+  slug                   String           @unique @db.VarChar(255)
+  sku                    String?          @db.VarChar(100)
+  description            String?
+  short_description      String?
+  price                  Decimal          @db.Decimal(10, 2)
+  compare_price          Decimal?         @db.Decimal(10, 2)
+  stock_quantity         Int              @default(0)
+  low_stock_threshold    Int              @default(10)
+  wholesale_min_quantity Int?
+  wholesale_discount_pct Decimal?         @db.Decimal(5, 2)
+  category_id            Int
+  images              Json?            // Array of image paths
+  specifications      Json?            // Object
+  is_featured         Boolean          @default(false)
+  is_active           Boolean          @default(true)
+  meta_title          String?          @db.VarChar(255)
+  meta_description    String?
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @updatedAt
+
+  category            Category         @relation(fields: [category_id], references: [id])
+  variants            ProductVariant[]
+  cart_items          CartItem[]
+  order_items         OrderItem[]
+  reviews             ProductReview[]
+  wishlist            Wishlist[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id             Int      @id @default(autoincrement())
+  product_id     Int
+  variant_type   String   @db.VarChar(50) // size, color, etc.
+  variant_value  String   @db.VarChar(100)
+  sku            String?  @db.VarChar(100)
+  price_adjust   Decimal  @default(0.00) @db.Decimal(10, 2)
+  stock_quantity Int      @default(0)
+  image          String?  @db.VarChar(255)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  product        Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  cart_items     CartItem[]
+  order_items    OrderItem[]
+
+  @@map("product_variants")
+}
+
+model CartItem {
+  id         Int      @id @default(autoincrement())
+  user_id    Int?
+  session_id String?  @db.VarChar(255)
+  product_id Int
+  variant_id Int?
+  quantity   Int      @default(1)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  variant    ProductVariant? @relation(fields: [variant_id], references: [id], onDelete: Cascade)
+
+  @@map("cart")
+}
+
+model Order {
+  id                 Int           @id @default(autoincrement())
+  user_id            Int
+  order_number       String        @unique @db.VarChar(50)
+  subtotal           Decimal       @db.Decimal(10, 2)
+  tax                Decimal       @default(0.00) @db.Decimal(10, 2)
+  shipping_fee       Decimal       @default(0.00) @db.Decimal(10, 2)
+  discount           Decimal       @default(0.00) @db.Decimal(10, 2)
+  total              Decimal       @db.Decimal(10, 2)
+  status             OrderStatus   @default(pending)
+  payment_method     PaymentMethod
+  payment_status     PaymentStatus @default(pending)
+  paystack_reference String?       @db.VarChar(255)
+  shipping_address_id Int
+  notes              String?
+  created_at         DateTime      @default(now())
+  updated_at         DateTime      @updatedAt
+
+  user               User          @relation(fields: [user_id], references: [id])
+  shipping_address   Address       @relation(fields: [shipping_address_id], references: [id])
+  items              OrderItem[]
+  tracking           OrderTracking[]
+  reviews            ProductReview[]
+  coupon_usages      CouponUsage[]
+
+  @@map("orders")
+}
+
+enum OrderStatus {
+  pending
+  processing
+  packed
+  shipped
+  out_for_delivery
+  delivered
+  cancelled
+}
+
+enum PaymentMethod {
+  card
+  mobile_money
+  bank_transfer
+  wallet
+  cod
+}
+
+enum PaymentStatus {
+  pending
+  success
+  failed
+  refunded
+}
+
+model OrderItem {
+  id              Int      @id @default(autoincrement())
+  order_id        Int
+  product_id      Int
+  variant_id      Int?
+  product_name    String   @db.VarChar(255)
+  variant_details String?  @db.VarChar(255)
+  quantity        Int
+  price           Decimal  @db.Decimal(10, 2)
+  total           Decimal  @db.Decimal(10, 2)
+  created_at      DateTime @default(now())
+
+  order           Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product         Product  @relation(fields: [product_id], references: [id])
+  variant         ProductVariant? @relation(fields: [variant_id], references: [id])
+
+  @@map("order_items")
+}
+
+model OrderTracking {
+  id         Int      @id @default(autoincrement())
+  order_id   Int
+  status     String   @db.VarChar(50)
+  notes      String?
+  location   String?  @db.VarChar(255)
+  admin_id   Int?
+  created_at DateTime @default(now())
+
+  order      Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@map("order_tracking")
+}
+
+model ProductReview {
+  id            Int      @id @default(autoincrement())
+  product_id    Int
+  user_id       Int
+  order_id      Int?
+  rating        Int      // 1-5
+  review_text   String?
+  review_images Json?    // Array
+  is_approved   Boolean  @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  product       Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  order         Order?   @relation(fields: [order_id], references: [id], onDelete: SetNull)
+
+  @@map("product_reviews")
+}
+
+model Wishlist {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  product_id Int
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, product_id])
+  @@map("wishlist")
+}
+
+// --- MONEY TRANSFER TABLES ---
+
+model TransferType {
+  id          Int      @id @default(autoincrement())
+  type_name   String   @db.VarChar(100)
+  code        String   @unique @db.VarChar(50)
+  description String?
+
+  @@map("transfer_types")
+}
+
+model MoneyTransfer {
+  id                 Int                @id @default(autoincrement())
+  user_id            Int
+  transfer_type      TransferDirection
+  token              String             @unique @db.VarChar(50)
+  amount_ghs         Decimal            @db.Decimal(10, 2)
+  amount_cny         Decimal            @db.Decimal(10, 2)
+  exchange_rate      Decimal            @db.Decimal(10, 4)
+  transfer_fee       Decimal            @default(0.00) @db.Decimal(10, 2)
+  total_amount       Decimal            @db.Decimal(10, 2)
+  status             TransferStatus     @default(payment_received)
+  sender_name        String             @db.VarChar(255)
+  sender_phone       String             @db.VarChar(20)
+  sender_email       String?            @db.VarChar(255)
+  recipient_name     String             @db.VarChar(255)
+  recipient_phone    String             @db.VarChar(20)
+  recipient_type     RecipientType
+  recipient_details  Json               // Recipient info
+  payment_method     PaymentMethod
+  payment_status     PaymentStatus      @default(pending)
+  paystack_reference String?            @db.VarChar(255)
+  proof_of_transfer  String?            @db.VarChar(255)
+  qr_codes           Json?              // Array of { image, amount_ghs }
+  qr_fulfillments    Json?              // Per-QR: [{ qr_index, status, confirmation_image?, admin_notes?, fulfilled_at? }]
+  admin_reply_images Json?              // Array of admin response image URLs (legacy / overall)
+  admin_notes        String?
+  purpose            String?
+  expires_at         DateTime?
+  created_at         DateTime           @default(now())
+  updated_at         DateTime           @updatedAt
+
+  user               User               @relation(fields: [user_id], references: [id])
+  tracking           TransferTracking[]
+
+  @@map("money_transfers")
+}
+
+enum TransferDirection {
+  send_to_china
+  receive_from_china
+}
+
+enum TransferStatus {
+  payment_received
+  processing
+  sent_to_partner
+  completed
+  failed
+  cancelled
+}
+
+enum RecipientType {
+  bank_account
+  alipay
+  wechat_pay
+  mobile_money
+}
+
+model TransferTracking {
+  id          Int      @id @default(autoincrement())
+  transfer_id Int
+  status      String   @db.VarChar(50)
+  notes       String?
+  admin_id    Int?
+  created_at  DateTime @default(now())
+
+  transfer    MoneyTransfer @relation(fields: [transfer_id], references: [id], onDelete: Cascade)
+
+  @@map("transfer_tracking")
+}
+
+model SavedRecipient {
+  id                Int           @id @default(autoincrement())
+  user_id           Int
+  recipient_name    String        @db.VarChar(255)
+  recipient_type    RecipientType
+  recipient_details Json
+  phone             String        @db.VarChar(20)
+  is_verified       Boolean       @default(false)
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+
+  user              User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("saved_recipients")
+}
+
+model ExchangeRate {
+  id              Int      @id @default(autoincrement())
+  rate_ghs_to_cny Decimal  @db.Decimal(10, 4)
+  valid_from      DateTime @default(now())
+  valid_to        DateTime?
+  admin_id        Int?
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+
+  @@map("exchange_rates")
+}
+
+// --- LOGISTICS TABLES ---
+
+model Warehouse {
+  id               Int      @id @default(autoincrement())
+  name             String   @db.VarChar(100)
+  code             String   @unique @db.VarChar(50)
+  address          String   @db.Text
+  city             String?  @db.VarChar(100)
+  country          String   @default("China")
+  phone            String?  @db.VarChar(20)
+  recipient_name   String?  @db.VarChar(255)
+  is_active        Boolean  @default(true)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  shipments_origin      Shipment[] @relation("OriginWarehouse")
+  shipments_destination Shipment[] @relation("DestinationWarehouse")
+
+  @@map("warehouses")
+}
+
+// Ecommerce/shop: local delivery zones (base + per-kg). Not used by logistics freight.
+model ShippingZone {
+  id               Int      @id @default(autoincrement())
+  zone_name        String   @db.VarChar(100)
+  zone_description String?
+  base_price       Decimal  @db.Decimal(10, 2)
+  per_kg_price     Decimal  @db.Decimal(10, 2)
+  regions          Json?    // Array of regions
+  is_active        Boolean  @default(true)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@map("shipping_zones")
+}
+
+// Logistics only: freight rates for Ship for Me (China → Ghana). Not used for ecommerce/shop checkout.
+model ShippingMethodRate {
+  id         Int      @id @default(autoincrement())
+  rate_id    String   @unique @db.VarChar(50)   // e.g. air_express, sea_standard
+  method     String   @db.VarChar(20)           // air_freight | sea_freight
+  name       String   @db.VarChar(120)         // e.g. "Express (3-5 days)"
+  price      Decimal  @db.Decimal(10, 2)       // e.g. 17.00
+  type       String   @db.VarChar(10)          // KG | UNIT | CBM
+  duration   String?  @db.VarChar(50)          // e.g. "3-5 days", "45-60 days"
+  is_active  Boolean  @default(true)
+  sort_order Int      @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("shipping_method_rates")
+}
+
+model Shipment {
+  id                 Int            @id @default(autoincrement())
+  user_id            Int
+  tracking_number    String         @unique @db.VarChar(50)
+  pickup_address_id  Int?
+  delivery_address_id Int
+  weight             Decimal        @db.Decimal(5, 2)
+  dimensions         String?        @db.VarChar(100)
+  service_type       ServiceType    @default(standard)
+  status             ShipmentStatus @default(booked)
+  payment_method     PaymentMethod
+  payment_status     PaymentStatus  @default(pending)
+  base_price         Decimal        @db.Decimal(10, 2)
+  weight_price       Decimal        @db.Decimal(10, 2)
+  service_price      Decimal        @default(0.00) @db.Decimal(10, 2)
+  cod_amount         Decimal        @default(0.00) @db.Decimal(10, 2)
+  total_price        Decimal        @db.Decimal(10, 2)
+  paystack_reference String?        @db.VarChar(255)
+  pickup_date        DateTime?      @db.Date
+  pickup_time_slot   String?        @db.VarChar(50)
+  estimated_delivery DateTime?      @db.Date
+  delivery_proof     String?        @db.VarChar(255)
+  
+  // Freight Forwarding Fields
+  origin_warehouse_id      Int?
+  destination_warehouse_id Int?
+  carrier_tracking_number  String?      @db.VarChar(100)
+  shipping_method          String?      @db.VarChar(50) // air_freight, sea_freight
+  shipping_rate_id         String?      @db.VarChar(50) // e.g. air_express, sea_standard
+  is_cod                   Boolean      @default(false)
+  items_declaration        Json?        // Array of declared items
+  
+  notes              String?
+  created_at         DateTime       @default(now())
+  updated_at         DateTime       @updatedAt
+
+  user               User           @relation(fields: [user_id], references: [id])
+  pickup_address     Address?       @relation("PickupAddress", fields: [pickup_address_id], references: [id])
+  delivery_address   Address        @relation("DeliveryAddress", fields: [delivery_address_id], references: [id])
+  origin_warehouse   Warehouse?     @relation("OriginWarehouse", fields: [origin_warehouse_id], references: [id])
+  destination_warehouse Warehouse?   @relation("DestinationWarehouse", fields: [destination_warehouse_id], references: [id])
+  tracking           ShipmentTracking[]
+
+  @@map("shipments")
+}
+
+enum ServiceType {
+  same_day
+  next_day
+  standard
+}
+
+enum ShipmentStatus {
+  booked
+  pickup_scheduled
+  picked_up
+  in_transit
+  out_for_delivery
+  delivered
+  cancelled
+}
+
+model ShipmentTracking {
+  id          Int      @id @default(autoincrement())
+  shipment_id Int
+  status      String   @db.VarChar(50)
+  location    String?  @db.VarChar(255)
+  notes       String?
+  admin_id    Int?
+  created_at  DateTime @default(now())
+
+  shipment    Shipment @relation(fields: [shipment_id], references: [id], onDelete: Cascade)
+
+  @@map("shipment_tracking")
+}
+
+// --- PROCUREMENT TABLES ---
+
+model ProcurementRequest {
+  id               Int                @id @default(autoincrement())
+  user_id          Int
+  request_number   String             @unique @db.VarChar(50)
+  description      String
+  specifications   String?
+  quantity         Int?               @default(1)
+  budget_range     String?            @db.VarChar(100)
+  reference_images Json?              // Array
+  status           ProcurementStatus  @default(submitted)
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+
+  user             User               @relation(fields: [user_id], references: [id])
+  quotes           ProcurementQuote[]
+  orders           ProcurementOrder[]
+
+  @@map("procurement_requests")
+}
+
+enum ProcurementStatus {
+  submitted
+  quote_provided
+  accepted
+  payment_received
+  processing
+  delivered
+  cancelled
+}
+
+model ProcurementQuote {
+  id            Int      @id @default(autoincrement())
+  request_id    Int
+  admin_id      Int?
+  quote_amount  Decimal  @db.Decimal(10, 2)
+  quote_details String?
+  status        QuoteStatus @default(pending)
+  valid_until   DateTime?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  request       ProcurementRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+  orders        ProcurementOrder[]
+
+  @@map("procurement_quotes")
+}
+
+enum QuoteStatus {
+  pending
+  accepted
+  rejected
+  expired
+}
+
+model ProcurementOrder {
+  id                 Int                 @id @default(autoincrement())
+  request_id         Int
+  quote_id           Int?
+  user_id            Int
+  order_number       String              @unique @db.VarChar(50)
+  amount             Decimal             @db.Decimal(10, 2)
+  payment_method     PaymentMethod
+  payment_status     PaymentStatus       @default(pending)
+  paystack_reference String?             @db.VarChar(255)
+  status             ProcProcOrderStatus @default(payment_received)
+  delivery_address_id Int?
+  notes              String?
+  created_at         DateTime            @default(now())
+  updated_at         DateTime            @updatedAt
+
+  request            ProcurementRequest  @relation(fields: [request_id], references: [id])
+  quote              ProcurementQuote?   @relation(fields: [quote_id], references: [id])
+  user               User                @relation(fields: [user_id], references: [id])
+  delivery_address   Address?            @relation(fields: [delivery_address_id], references: [id])
+  tracking           ProcurementTracking[]
+
+  @@map("procurement_orders")
+}
+
+enum ProcProcOrderStatus {
+  payment_received
+  sourcing
+  items_received
+  ready_for_delivery
+  delivered
+  cancelled
+}
+
+model ProcurementTracking {
+  id         Int      @id @default(autoincrement())
+  order_id   Int
+  status     String   @db.VarChar(50)
+  notes      String?
+  admin_id   Int?
+  created_at DateTime @default(now())
+
+  order      ProcurementOrder @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@map("procurement_tracking")
+}
+
+// --- PAYMENT TABLES ---
+
+model Payment {
+  id                 Int           @id @default(autoincrement())
+  user_id            Int?
+  transaction_ref    String        @unique @db.VarChar(255)
+  amount             Decimal       @db.Decimal(10, 2)
+  payment_method     PaymentMethod
+  service_type       ServiceTypeFinance
+  service_id         Int           // ID of order/transfer/shipment/etc
+  status             PaymentStatus @default(pending)
+  paystack_reference String?       @unique @db.VarChar(255)
+  paystack_response  Json?         // Response
+  created_at         DateTime      @default(now())
+  updated_at         DateTime      @updatedAt
+
+  user               User?         @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@map("payments")
+}
+
+enum ServiceTypeFinance {
+  ecommerce
+  money_transfer
+  logistics
+  procurement
+  wallet_topup
+}
+
+model Coupon {
+  id             Int          @id @default(autoincrement())
+  code           String       @unique @db.VarChar(50)
+  discount_type  DiscountType
+  discount_value Decimal      @db.Decimal(10, 2)
+  min_purchase   Decimal      @default(0.00) @db.Decimal(10, 2)
+  max_discount   Decimal?     @db.Decimal(10, 2)
+  valid_from     DateTime
+  valid_to       DateTime
+  usage_limit    Int?
+  used_count     Int          @default(0)
+  is_active      Boolean      @default(true)
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @updatedAt
+
+  usages         CouponUsage[]
+
+  @@map("coupons")
+}
+
+enum DiscountType {
+  percentage
+  fixed
+}
+
+model CouponUsage {
+  id              Int      @id @default(autoincrement())
+  coupon_id       Int
+  user_id         Int
+  order_id        Int?
+  discount_amount Decimal  @db.Decimal(10, 2)
+  used_at         DateTime @default(now())
+
+  coupon          Coupon   @relation(fields: [coupon_id], references: [id])
+  user            User     @relation(fields: [user_id], references: [id])
+  order           Order?   @relation(fields: [order_id], references: [id], onDelete: SetNull)
+
+  @@map("coupon_usage")
+}
+
+// --- ADMIN TABLES ---
+
+model AdminUser {
+  id          Int      @id @default(autoincrement())
+  username    String   @unique @db.VarChar(100)
+  email       String   @unique @db.VarChar(255)
+  password    String   @db.VarChar(255)
+  full_name   String?  @db.VarChar(255)
+  role        AdminRole @default(admin)
+  permissions Json?    // Array
+  is_active   Boolean  @default(true)
+  last_login  DateTime?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
+enum AdminRole {
+  super_admin
+  admin
+  moderator
+}
+
+model AdminLog {
+  id         Int      @id @default(autoincrement())
+  admin_id   Int?
+  action     String   @db.VarChar(100)
+  table_name String?  @db.VarChar(100)
+  record_id  Int?
+  details    Json?    // Object
+  ip_address String?  @db.VarChar(45)
+  created_at DateTime @default(now())
+
+  @@map("admin_logs")
+}
+
+model Setting {
+  id            Int      @id @default(autoincrement())
+  setting_key   String   @unique @db.VarChar(100)
+  setting_value String?
+  description   String?
+  updated_at    DateTime @updatedAt
+
+  @@map("settings")
+}
+
+// Admin media library (WordPress-style): all uploads stored and reusable
+model Media {
+  id         Int      @id @default(autoincrement())
+  filename   String   @db.VarChar(255)
+  path       String   @db.VarChar(500)   // relative path used in URLs, e.g. media/files/xxx.jpg
+  mime_type  String?  @db.VarChar(100)
+  size_bytes Int?
+  alt        String?  @db.VarChar(255)
+  created_at DateTime @default(now())
+
+  @@map("media")
+}
+
+// --- NOTIFICATION TABLES ---
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  type       String   @db.VarChar(50)
+  title      String   @db.VarChar(255)
+  message    String
+  link       String?  @db.VarChar(255)
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model EmailQueue {
+  id         Int         @id @default(autoincrement())
+  recipient  String      @db.VarChar(255)
+  subject    String      @db.VarChar(255)
+  body       String
+  status     EmailStatus @default(pending)
+  sent_at    DateTime?
+  created_at DateTime    @default(now())
+
+  @@map("email_queue")
+}
+
+enum EmailStatus {
+  pending
+  sent
+  failed
+}
+
+model EmailTemplate {
+  id          Int      @id @default(autoincrement())
+  trigger_key  String   @unique @db.VarChar(80)
+  name        String   @db.VarChar(255)
+  subject     String   @db.VarChar(500)
+  body        String
+  is_enabled  Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("email_templates")
+}
