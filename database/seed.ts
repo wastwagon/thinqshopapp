@@ -5,10 +5,10 @@ const prisma = new PrismaClient();
 async function main() {
     // Seed Users
     const user1 = await prisma.user.upsert({
-        where: { email: 'admin@thinqshop.com' },
+        where: { email: 'admin@thinqshopping.app' },
         update: {},
         create: {
-            email: 'admin@thinqshop.com',
+            email: 'admin@thinqshopping.app',
             password: '$2b$10$EpRnTzVlqHNP0AM25jEpyeCNiF.LN.W.lG.mC32.r0J.d8I.b2.C', // "password" hash by default (bcrypt)
             phone: '+233540000000',
             is_verified: true,

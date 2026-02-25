@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 async function main() {
     console.log('Seeding Admin User...');
 
-    const email = 'admin@thinqshop.com';
+    const email = 'admin@thinqshopping.app';
     const password = await bcrypt.hash('admin123', 10);
 
     const admin = await prisma.user.upsert({
