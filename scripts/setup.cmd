@@ -4,16 +4,15 @@ cd /d "%~dp0\.."
 echo ==^> ThinQShop setup
 echo.
 
+if not exist .env (
+  echo ==^> No .env found. Copying .env.example to .env...
+  copy .env.example .env
+  echo    Edit .env and set DATABASE_URL, JWT_SECRET, and Paystack keys.
+  echo.
+)
+
 echo ==^> Installing dependencies (root)...
 call npm install
-echo.
-
-echo ==^> Installing backend dependencies...
-call npm install -w backend 2>nul || (cd backend && call npm install)
-echo.
-
-echo ==^> Installing web dependencies...
-call npm install -w web 2>nul || (cd web && call npm install)
 echo.
 
 echo ==^> Prisma generate...
@@ -22,11 +21,12 @@ echo.
 
 echo ==^> Prisma migrate deploy...
 call npx prisma migrate deploy --schema=database/schema.prisma
+if errorlevel 1 echo Warning: Migrate failed. Is PostgreSQL running? Run "npx prisma migrate deploy --schema=database/schema.prisma" after starting the DB.
 echo.
 
 echo ==^> Setup complete.
 echo     Backend:  npm run dev:backend
 echo     Web:      npm run dev:web
-echo     Set PAYSTACK_SECRET_KEY and NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY in .env and backend\.env
+echo     Test:     npm run test:local
 echo.
 pause

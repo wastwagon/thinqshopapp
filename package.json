@@ -13,7 +13,9 @@
     "dev:mobile": "npm run start -w mobile",
     "build:web:docker": "docker build -f web/Dockerfile -t thinqshop-web .",
     "build:backend:docker": "docker build -f backend/Dockerfile -t thinqshop-backend .",
-    "clean": "rm -rf backend/dist web/.next"
+    "clean": "rm -rf backend/dist web/.next",
+    "test:local": "npm run build -w backend && npm run test -w backend && npm run build -w web",
+    "email:process": "node node_modules/ts-node/dist/bin.js --compiler-options '{\"module\":\"CommonJS\"}' backend/scripts/process-email-queue.ts"
   },
   "overrides": {
     "react": "18.3.1",

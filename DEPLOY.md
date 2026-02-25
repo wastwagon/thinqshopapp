@@ -37,8 +37,9 @@ The repo root contains `render.yaml`, which defines Postgres, Redis, backend, an
 
    | Variable | Service | Required | Notes |
    |----------|---------|----------|-------|
-   | `DATABASE_URL` | backend | Yes | Set automatically from Postgres (blueprint) |
-   | `JWT_SECRET` | backend | Yes | Set automatically (blueprint) |
+| `DATABASE_URL` | backend | Yes | Set automatically from Postgres (blueprint) |
+| `JWT_SECRET` | backend | Yes | **Required.** Set in dashboard (or blueprint generates it). Backend will not start without it. |
+| `FRONTEND_URL` | backend | Recommended | Comma-separated frontend origins for CORS (e.g. `https://thinqshop-web.onrender.com`). Omit to allow all. |
    | `PAYSTACK_SECRET_KEY` | backend | Yes | Set manually in dashboard |
    | `REDIS_URL` | backend | No | Optional; set if you use Redis (from Key Value instance) |
    | `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | web | Yes | Set manually in dashboard |

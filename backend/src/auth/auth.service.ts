@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -28,8 +29,8 @@ export class AuthService {
         };
     }
 
-    async register(data: any) {
-        const { first_name, last_name, password, phone, ...rest } = data;
+    async register(data: RegisterDto) {
+        const { first_name, last_name, password, phone, email } = data;
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Generate TQ-ID: TQ-[FIRST_NAME]-[4-DIGITS]
@@ -38,8 +39,7 @@ export class AuthService {
 
         const user = await this.prisma.user.create({
             data: {
-                ...rest,
-                email: data.email,
+                email,
                 phone: phone && String(phone).trim() ? String(phone).trim() : null,
                 password: hashedPassword,
                 user_identifier: tqId,
@@ -51,7 +51,7 @@ export class AuthService {
                 },
                 wallet: {
                     create: {
-                        balance: 0
+                        balance_ghs: 0
                     }
                 }
             },

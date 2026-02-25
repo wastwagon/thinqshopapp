@@ -17,6 +17,7 @@ services:
     plan: free
     buildCommand: npm install --include=dev && npx prisma generate --schema=database/schema.prisma && npm run build -w backend
     startCommand: npx prisma migrate deploy --schema=database/schema.prisma && node backend/dist/main.js
+    healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
         value: "20"
@@ -31,6 +32,8 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: FRONTEND_URL
         sync: false
 
   # Next.js frontend (web)

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Request, ParseIntPipe, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Request, ParseIntPipe, ForbiddenException, Header } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
@@ -9,11 +9,13 @@ export class ProductController {
     constructor(private readonly productService: ProductService) { }
 
     @Get()
+    @Header('Cache-Control', 'public, max-age=60')
     findAll(@Query() query: { category?: string; search?: string; page?: number; limit?: number }) {
         return this.productService.findAll(query);
     }
 
     @Get('categories')
+    @Header('Cache-Control', 'public, max-age=60')
     getCategories() {
         return this.productService.getCategories();
     }

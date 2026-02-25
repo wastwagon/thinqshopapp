@@ -2,6 +2,9 @@ import { Controller, Post, Body, Delete, UnauthorizedException, HttpCode, HttpSt
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -9,8 +12,8 @@ export class AuthController {
 
     @Post('login')
     @HttpCode(HttpStatus.OK)
-    async login(@Body() body: any) {
-        const user = await this.authService.validateUser(body.email, body.password);
+    async login(@Body() dto: LoginDto) {
+        const user = await this.authService.validateUser(dto.email, dto.password);
         if (!user) {
             throw new UnauthorizedException('Invalid credentials');
         }
@@ -18,15 +21,15 @@ export class AuthController {
     }
 
     @Post('register')
-    async register(@Body() body: any) {
-        return this.authService.register(body);
+    async register(@Body() dto: RegisterDto) {
+        return this.authService.register(dto);
     }
 
     @Post('forgot-password')
     @HttpCode(HttpStatus.OK)
-    async forgotPassword(@Body() body: { email?: string }) {
+    async forgotPassword(@Body() dto: ForgotPasswordDto) {
         // Always return success to prevent email enumeration
-        await this.authService.forgotPassword(body.email || '');
+        await this.authService.forgotPassword(dto.email || '');
         return { message: 'If an account exists, reset instructions have been sent.' };
     }
 

@@ -5,4 +5,8 @@ export class AppService {
     getHello(): string {
         return 'ThinQShop API is running!';
     }
+
+    getHealth(): { status: string; timestamp: string } {
+        return { status: 'ok', timestamp: new Date().toISOString() };
+    }
 }
