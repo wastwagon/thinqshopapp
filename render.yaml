@@ -15,8 +15,9 @@ services:
     runtime: node
     region: oregon
     plan: free
-    buildCommand: npm install --include=dev && npx prisma generate --schema=database/schema.prisma && npm run build -w backend
-    startCommand: npx prisma migrate deploy --schema=database/schema.prisma && node backend/dist/main.js
+    rootDir: backend
+    buildCommand: (cd .. && npm install --include=dev && npx prisma generate --schema=database/schema.prisma) && npm run build
+    startCommand: (cd .. && npx prisma migrate deploy --schema=database/schema.prisma) && node dist/main.js
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
