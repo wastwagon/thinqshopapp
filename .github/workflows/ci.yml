@@ -31,9 +31,12 @@ jobs:
 
       - name: Test backend
         run: npm run test -w backend
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/test
 
       - name: Build web
         run: npm run build -w web
         env:
+          CI: "true"
           NEXT_PUBLIC_API_URL: http://localhost:7000
           NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: pk_test_placeholder

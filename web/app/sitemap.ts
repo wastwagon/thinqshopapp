@@ -4,8 +4,10 @@ const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app';
 const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000';
 
 const FETCH_TIMEOUT_MS = 5000;
+const isCI = process.env.CI === 'true';
 
 async function fetchProductSlugs(): Promise<string[]> {
+    if (isCI) return [];
     try {
         const slugs: string[] = [];
         let page = 1;

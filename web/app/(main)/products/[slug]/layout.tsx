@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app';
 const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000';
+const isCI = process.env.CI === 'true';
 
 async function getProduct(slug: string) {
+    if (isCI) return null;
     try {
         const res = await fetch(`${apiBase}/products/${slug}`, { next: { revalidate: 60 } });
         if (!res.ok) return null;
