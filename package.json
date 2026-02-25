@@ -17,7 +17,7 @@
     "build:web:docker": "docker build -f web/Dockerfile -t thinqshop-web .",
     "build:backend:docker": "docker build -f backend/Dockerfile -t thinqshop-backend .",
     "clean": "rm -rf backend/dist web/.next",
-    "test:local": "npm run build -w backend && npm run test -w backend && npm run build -w web",
+    "test:local": "npx prisma generate --schema=database/schema.prisma && npm run build -w backend && npm run test -w backend && npm run build -w web",
     "db:seed": "npx prisma generate --schema=database/schema.prisma && npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' database/seed.ts",
     "db:seed:content": "npx prisma generate --schema=database/schema.prisma && npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' database/seed-world-class-content.ts",
     "email:process": "node node_modules/ts-node/dist/bin.js --compiler-options '{\"module\":\"CommonJS\"}' backend/scripts/process-email-queue.ts"
