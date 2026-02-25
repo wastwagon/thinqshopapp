@@ -9,15 +9,6 @@ databases:
     region: oregon
 
 services:
-  # Redis (optional; set REDIS_URL in backend if you use it)
-  - type: keyvalue
-    name: thinqshop-redis
-    plan: free
-    region: oregon
-    ipAllowList:
-      - source: 0.0.0.0/0
-        description: everywhere
-
   # NestJS API (backend)
   - type: web
     name: thinqshop-backend
@@ -39,8 +30,6 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: PAYSTACK_SECRET_KEY
-        sync: false
-      - key: REDIS_URL
         sync: false
 
   # Next.js frontend (web)
