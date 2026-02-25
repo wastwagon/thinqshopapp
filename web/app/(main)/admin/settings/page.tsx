@@ -12,7 +12,10 @@ import {
     Database,
     RefreshCw,
     Percent,
-    Shield
+    Shield,
+    Play,
+    DatabaseIcon,
+    Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -26,6 +29,7 @@ export default function AdminSettings() {
     });
     const [rateLoading, setRateLoading] = useState(true);
     const [savingRate, setSavingRate] = useState(false);
+    const [dbAction, setDbAction] = useState<'idle' | 'migrate' | 'seed' | 'migrate-seed'>('idle');
 
     useEffect(() => {
         (async () => {
@@ -59,6 +63,20 @@ export default function AdminSettings() {
 
     const handleSave = async () => {
         await handleSaveRate();
+    };
+
+    const runDbAction = async (action: 'migrate' | 'seed' | 'migrate-seed') => {
+        setDbAction(action);
+        try {
+            const endpoint = action === 'migrate' ? '/admin/database/migrate' : action === 'seed' ? '/admin/database/seed' : '/admin/database/migrate-seed';
+            const { data } = await api.post(endpoint);
+            toast.success(data.message || `${action} complete`);
+        } catch (e: any) {
+            const msg = e.response?.data?.message || e.response?.data?.error || e.message || 'Action failed';
+            toast.error(msg);
+        } finally {
+            setDbAction('idle');
+        }
     };
 
     const toggles = [
@@ -183,9 +201,43 @@ export default function AdminSettings() {
                                     ))}
                                 </div>
                             </div>
-                            <button type="button" className="w-full h-9 border border-red-200 text-red-600 rounded-lg text-xs font-semibold hover:bg-red-50 transition-colors">
-                                Clear cache
-                            </button>
+                            {/* Database migration & seeding */}
+                        <div className="space-y-2">
+                            <p className="text-[10px] font-semibold text-gray-500 mb-2">Database</p>
+                            <div className="flex flex-col gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => runDbAction('migrate')}
+                                    disabled={dbAction !== 'idle'}
+                                    className="w-full h-9 border border-blue-200 text-blue-600 rounded-lg text-xs font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {dbAction === 'migrate' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <DatabaseIcon className="h-3.5 w-3.5" />}
+                                    Run migrations
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => runDbAction('seed')}
+                                    disabled={dbAction !== 'idle'}
+                                    className="w-full h-9 border border-emerald-200 text-emerald-600 rounded-lg text-xs font-semibold hover:bg-emerald-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {dbAction === 'seed' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+                                    Run seed
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => runDbAction('migrate-seed')}
+                                    disabled={dbAction !== 'idle'}
+                                    className="w-full h-9 border border-violet-200 text-violet-600 rounded-lg text-xs font-semibold hover:bg-violet-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {dbAction === 'migrate-seed' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                                    Migrate + seed
+                                </button>
+                            </div>
+                            <p className="text-[9px] text-gray-400">Apply migrations and/or seed data. Admin only.</p>
+                        </div>
+                        <button type="button" className="w-full h-9 border border-red-200 text-red-600 rounded-lg text-xs font-semibold hover:bg-red-50 transition-colors">
+                            Clear cache
+                        </button>
                         </div>
                     </section>
 

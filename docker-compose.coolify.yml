@@ -1,0 +1,44 @@
+# ThinQShop - Coolify / VPS deployment
+# Use this with Coolify or docker-compose on your VPS
+#
+# Required env vars (set in Coolify or .env):
+#   DATABASE_URL, JWT_SECRET, PAYSTACK_SECRET_KEY, NEXT_PUBLIC_API_URL, NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 7000
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY}
+      FRONTEND_URL: ${FRONTEND_URL:-https://thinqshopping.app}
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:7000/health',r=>process.exit(r.statusCode===200?0:1))\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.thinqshopping.app}
+        NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: ${NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    env_file:
+      - .env
+    depends_on:
+      backend:
+        condition: service_healthy

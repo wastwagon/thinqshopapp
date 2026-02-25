@@ -78,6 +78,6 @@ After `npm run test:local` passes:
 
 1. Commit your changes.
 2. Push to GitHub (e.g. `main`).
-3. Deploy on Render (auto-deploy on push or manual deploy).
+3. Deploy (e.g. with Docker Compose or Coolify).
 4. Set `FRONTEND_URL` on the backend service to your web URL.
-5. Run migrations on production (Render runs them in the start command).
+5. Run migrations on production (backend runs them in the start command).

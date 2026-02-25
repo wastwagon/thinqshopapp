@@ -7,7 +7,7 @@ Premium e-commerce and money transfer platform built with NestJS, Next.js, Expo,
 - **Backend:** NestJS, Prisma, PostgreSQL, Redis
 - **Web:** Next.js 14, React 18, Tailwind
 - **Mobile:** Expo / React Native
-- **Deploy:** Docker, Render
+- **Deploy:** Docker, Coolify
 
 ## Quick Start
 
@@ -15,7 +15,7 @@ Premium e-commerce and money transfer platform built with NestJS, Next.js, Expo,
 
 - Node.js 20+
 - Docker (for production builds)
-- PostgreSQL & Redis (or use Render blueprint)
+- PostgreSQL & Redis (or use Docker Compose)
 
 ### Development
 
@@ -58,14 +58,9 @@ Copy `.env.example` to `.env` and set:
 - `REDIS_URL` – Redis connection string
 - `JWT_SECRET`
 - `PAYSTACK_SECRET_KEY` (backend) and `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` (web)
-- `NEXT_PUBLIC_API_URL` – backend URL (e.g. `https://thinqshop-backend.onrender.com` in production)
+- `NEXT_PUBLIC_API_URL` – backend URL (e.g. `https://api.yourdomain.com` in production)
 
 ## Production Builds (Docker)
-
-Production images use isolated workspaces to avoid dependency conflicts:
-
-- **Web:** `package.web-build.json` (web only) → single React instance, static + dynamic pages
-- **Backend:** `package.backend-build.json` (backend only) → slimmer image
 
 ```bash
 # Build images
@@ -86,7 +81,7 @@ npm run build:backend:docker
 
 ## Deploy
 
-Use `render.yaml` to deploy to Render (Postgres, Redis, backend, web). See [DEPLOY.md](./DEPLOY.md) for the full checklist and required env vars.
+Deploy with Docker Compose or Coolify. See [DEPLOY.md](./DEPLOY.md) and [docs/COOLIFY_DEPLOY.md](./docs/COOLIFY_DEPLOY.md).
 
 ## Structure
 
@@ -95,7 +90,7 @@ Use `render.yaml` to deploy to Render (Postgres, Redis, backend, web). See [DEPL
 ├── web/              # Next.js app
 ├── mobile/           # Expo app
 ├── database/         # Prisma schema
-├── package.web-build.json    # Web-only build config (Docker)
-├── package.backend-build.json # Backend-only build config (Docker)
-└── render.yaml       # Render blueprint
+├── docker-compose.yml         # Local dev (with db, redis)
+├── docker-compose.coolify.yml # Coolify / VPS (external DB)
+├── docker-compose.full.yml    # Full stack with PostgreSQL
 ```

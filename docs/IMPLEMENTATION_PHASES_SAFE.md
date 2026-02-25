@@ -16,14 +16,14 @@ Implemented in this phase:
 | **Rate limiting** | ✅ | `@nestjs/throttler`: global 10 req/15s + 100 req/60s. `ThrottlerGuard` applied globally; `@SkipThrottle()` on `AppController` (/, /health). |
 | **CORS** | ✅ | If `FRONTEND_URL` or `CORS_ORIGIN` is set (comma-separated), CORS restricted to those origins with credentials. Otherwise allow-all for local dev. |
 | **Helmet** | ✅ | `helmet()` in backend (CSP disabled for now to avoid breaking inline scripts). |
-| **Health endpoint** | ✅ | `GET /health` returns `{ status: 'ok', timestamp }`. Used by Render; `healthCheckPath: /health` in `render.yaml`. |
+| **Health endpoint** | ✅ | `GET /health` returns `{ status: 'ok', timestamp }`. Used for health checks. |
 | **Next.js security headers** | ✅ | `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` in `next.config.mjs`. |
-| **Env docs** | ✅ | `.env.example` documents `JWT_SECRET` (required) and `FRONTEND_URL`. Render blueprint has `FRONTEND_URL` sync: false. |
+| **Env docs** | ✅ | `.env.example` documents `JWT_SECRET` (required) and `FRONTEND_URL`. |
 
 **How to run after Phase 1**
 
 - Backend: set `JWT_SECRET` (and optionally `FRONTEND_URL` for CORS). Then start as usual.
-- Render: set `FRONTEND_URL` to your web URL (e.g. `https://thinqshop-web.onrender.com`) so CORS allows the frontend.
+- Set `FRONTEND_URL` to your web URL so CORS allows the frontend.
 
 ---
 
@@ -60,11 +60,11 @@ Implemented in this phase:
 ## Rollback / safety
 
 - **Phase 1**: To revert CORS to allow-all, remove the `frontendUrl` block in `main.ts` and leave only `app.enableCors()`. To revert rate limiting, remove `ThrottlerModule` and `APP_GUARD` from `AppModule` and `@SkipThrottle()` from `AppController`. ValidationPipe and DTOs can stay; they only make invalid payloads fail with 400.
-- **Env**: Keep `JWT_SECRET` set everywhere (local and Render). Add `FRONTEND_URL` on Render to your web URL so CORS works in production.
+- **Env**: Keep `JWT_SECRET` set everywhere. Add `FRONTEND_URL` to your web URL so CORS works in production.
 
 ---
 
 ## Next steps
 
-1. Deploy Phase 1: commit, push, redeploy backend on Render. Set `FRONTEND_URL` to your web app URL in the backend service.
+1. Deploy Phase 1: commit, push, redeploy backend. Set `FRONTEND_URL` to your web app URL in the backend service.
 2. When ready, proceed to Phase 2 (logging, Sentry, email sender) in a separate branch or incrementally.

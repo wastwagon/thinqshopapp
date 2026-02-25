@@ -6,7 +6,7 @@ This document recommends enhancements to make ThinQShop a best-in-class, product
 
 ## Executive summary
 
-Your stack (NestJS, Next.js, Prisma, Paystack, Render) is solid. The main gaps are **security hardening**, **validation & error handling**, **observability**, **email delivery**, **testing & CI**, and **performance/caching**. Addressing these in order will materially improve trust, uptime, and maintainability.
+Your stack (NestJS, Next.js, Prisma, Paystack) is solid. The main gaps are **security hardening**, **validation & error handling**, **observability**, **email delivery**, **testing & CI**, and **performance/caching**. Addressing these in order will materially improve trust, uptime, and maintainability.
 
 ---
 
@@ -28,11 +28,11 @@ Your stack (NestJS, Next.js, Prisma, Paystack, Render) is solid. The main gaps a
 
 | Area | Current | Recommendation | Effort |
 |------|---------|----------------|--------|
-| **Health endpoint** | None | Add `GET /health` (and optionally `GET /ready`) returning 200 + DB connectivity check; use in Render health check path | Low |
+| **Health endpoint** | None | Add `GET /health` (and optionally `GET /ready`) returning 200 + DB connectivity check; use for health checks | Low |
 | **Structured logging** | `console.log` only | Introduce Pino or Nest Logger with request ID, log level, and JSON output; log errors with stack | Medium |
 | **Error tracking** | None | Integrate Sentry (or similar) in backend and Next.js; capture unhandled exceptions and failed API calls | Medium |
 | **Email delivery** | Templates + queue only; no sender | Add a worker or cron that reads `email_queue` and sends via SendGrid/SES/SMTP; retries and dead-letter | Medium |
-| **Backups** | Platform (Render) only | Document backup/restore; consider periodic export or point-in-time recovery; test restore once | Low |
+| **Backups** | Platform only | Document backup/restore; consider periodic export or point-in-time recovery; test restore once | Low |
 
 ---
 
@@ -42,7 +42,7 @@ Your stack (NestJS, Next.js, Prisma, Paystack, Render) is solid. The main gaps a
 |------|---------|----------------|--------|
 | **Redis** | Env present; not used in backend | Use Redis for: session or token blocklist; rate-limit state; cache for hot reads (e.g. product list, category tree) with short TTL | Medium |
 | **DB indexes** | Only primary/unique | Add `@@index` in Prisma for: `Order(user_id, created_at)`, `Order(status)`, `Product(category_id, is_active)`, `Payment(order_id)`; analyze slow queries | Low |
-| **Images** | Next/Image with some `unoptimized` | Prefer Next Image with proper `sizes`; consider Render/Cloudinary for uploads and CDN for media | Medium |
+| **Images** | Next/Image with some `unoptimized` | Prefer Next Image with proper `sizes`; consider Cloudinary for uploads and CDN for media | Medium |
 | **API response shape** | Consistent pagination in places | Standardize list responses: `{ data, meta: { total, page, limit, totalPages } }` everywhere; add `Cache-Control` for public GETs where safe | Low |
 
 ---
@@ -90,7 +90,7 @@ Your stack (NestJS, Next.js, Prisma, Paystack, Render) is solid. The main gaps a
 - CORS restricted to frontend origin(s).  
 - Security headers (Helmet + Next.js headers).  
 - Remove JWT fallback; require `JWT_SECRET`.  
-- Health endpoint and use it in Render.
+- Health endpoint and use it for health checks.
 
 **Phase 2 — Observability & email (1–2 weeks)**  
 - Structured logging (request ID, levels).  
@@ -116,7 +116,7 @@ Your stack (NestJS, Next.js, Prisma, Paystack, Render) is solid. The main gaps a
 ## 8. Quick wins (do first)
 
 1. Add `ValidationPipe` globally and DTOs for auth.  
-2. Add `GET /health` and point Render health check at it.  
+2. Add `GET /health` and point health checks at it.  
 3. Restrict CORS and add Helmet.  
 4. Add ThrottlerModule for `/auth/*`.  
 5. Require `JWT_SECRET` at startup (no default).  

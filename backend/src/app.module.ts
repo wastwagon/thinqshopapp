@@ -18,6 +18,7 @@ import { NotificationModule } from './notification/notification.module';
 import { MediaModule } from './media/media.module';
 import { EmailTemplateModule } from './email-template/email-template.module';
 import { ContentModule } from './content/content.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
     imports: [
@@ -40,6 +41,7 @@ import { ContentModule } from './content/content.module';
         NotificationModule,
         EmailTemplateModule,
         ContentModule,
+        DatabaseModule,
     ],
     controllers: [AppController],
     providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

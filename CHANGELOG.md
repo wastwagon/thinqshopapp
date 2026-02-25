@@ -4,8 +4,6 @@
 
 ### Added
 
-- Isolated web build (`package.web-build.json`) for production Docker
-- Isolated backend build (`package.backend-build.json`) for production Docker
 - `npm run build:web:docker` and `npm run build:backend:docker`
 - `npm run clean` to remove stale build output
 

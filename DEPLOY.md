@@ -1,81 +1,55 @@
-# Deploy: GitHub + Render Blueprint
+# Deploy ThinQShop
 
-## 1. Prepare for GitHub
+## Docker / Coolify (recommended)
 
-Your project is ready to push. **Never commit** `.env`, `backend/.env`, or `web/.env` (they are in `.gitignore`).
+Deploy to your VPS with Coolify or plain Docker Compose.
 
-### Push with GitHub Desktop
+See **[docs/COOLIFY_DEPLOY.md](./docs/COOLIFY_DEPLOY.md)** for full instructions.
 
-1. **Add the repo** (if not already):
-   - File → Add Local Repository → choose `thinqshop-world-class`
-   - Or: File → Clone Repository → URL `https://github.com/wastwagon/thinqshopapp.git` → choose a folder and clone, then copy your project files into it (excluding `node_modules`, `.env`, etc.)
-
-2. **If the folder is not yet a Git repo:**
-   - In terminal: `cd /path/to/thinqshop-world-class` then `git init`
-   - In GitHub Desktop: File → Add Local Repository → select this folder
-
-3. **Set the remote** (if you created the repo on GitHub first):
-   - Repository → Repository Settings → Primary remote repository: `https://github.com/wastwagon/thinqshopapp.git`
-   - Or in terminal: `git remote add origin https://github.com/wastwagon/thinqshopapp.git`
-
-4. **Commit and push:**
-   - Stage all files (ensure no `.env` or `node_modules` are staged)
-   - Commit message e.g. "Initial commit: ThinQShop monorepo + Render blueprint"
-   - Push to `main` (or your default branch)
-
-Repo: **https://github.com/wastwagon/thinqshopapp**
-
----
-
-## 2. Render Blueprint (render.yaml)
-
-The repo root contains `render.yaml`, which defines Postgres, Redis, backend, and web services.
-
-### Before first deploy
-
-1. **Environment variables** (set in Render dashboard for each service; blueprint marks some as `sync: false`):
-
-   | Variable | Service | Required | Notes |
-   |----------|---------|----------|-------|
-| `DATABASE_URL` | backend | Yes | Set automatically from Postgres (blueprint) |
-| `JWT_SECRET` | backend | Yes | **Required.** Set in dashboard (or blueprint generates it). Backend will not start without it. |
-| `FRONTEND_URL` | backend | Recommended | Comma-separated frontend origins for CORS (e.g. `https://thinqshop-web.onrender.com`). Omit to allow all. |
-   | `PAYSTACK_SECRET_KEY` | backend | Yes | Set manually in dashboard |
-   | `REDIS_URL` | backend | No | Optional; set if you use Redis (from Key Value instance) |
-   | `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | web | Yes | Set manually in dashboard |
-   | `NEXT_PUBLIC_API_URL` | web | Yes | Set to backend URL after first deploy (e.g. `https://thinqshop-backend.onrender.com`) |
-
-2. **Service URLs**
-   - Backend: `https://thinqshop-backend.onrender.com` (or the name you give in the blueprint)
-   - Web: `https://thinqshop-web.onrender.com`
-   - After the first deploy, set the **web** service env var `NEXT_PUBLIC_API_URL` to your backend URL.
-
-### Deploy steps
-
-1. Go to [Render Dashboard](https://dashboard.render.com/) → **New** → **Blueprint**.
-2. Connect the repo **wastwagon/thinqshopapp** (GitHub).
-3. Render will read `render.yaml` and create:
-   - Postgres database (`thinqshop-db`)
-   - Redis-compatible Key Value instance (`thinqshop-redis`)
-   - Backend web service (`thinqshop-backend`)
-   - Web frontend service (`thinqshop-web`)
-4. For each service that has `sync: false` env vars, open the service → **Environment** and set:
-   - **Backend:** `PAYSTACK_SECRET_KEY` (and optionally `REDIS_URL` from the Redis instance’s internal URL).
-   - **Web:** `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY`, and after backend is live, `NEXT_PUBLIC_API_URL` = backend URL.
-5. Deploy; migrations run at backend startup (in the start command; free tier does not support Pre-Deploy Command).
-
-### Optional: build verification (Docker, local)
+### Quick start
 
 ```bash
-npm run clean
+# With included PostgreSQL
+cp .env.example .env   # Edit with your values
+docker compose -f docker-compose.full.yml up -d
+
+# Or with external database (Coolify)
+docker compose -f docker-compose.coolify.yml up -d
+```
+
+### Required environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `JWT_SECRET` | Secret for JWT (e.g. `openssl rand -hex 32`) |
+| `PAYSTACK_SECRET_KEY` | Paystack secret key |
+| `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Paystack public key |
+| `NEXT_PUBLIC_API_URL` | Backend URL (e.g. `https://api.yourdomain.com`) |
+| `FRONTEND_URL` | Frontend URL for CORS |
+
+### Database migration and seeding
+
+**CLI (local or production):**
+```bash
+# Set DATABASE_URL, then:
+npm run db:migrate-seed    # migrate + seed
+npm run db:migrate        # migrate only
+npm run db:seed           # seed only
+```
+
+Or use the shell script directly:
+```bash
+DATABASE_URL="postgresql://..." ./scripts/db-migrate-and-seed.sh           # migrate + seed
+DATABASE_URL="postgresql://..." ./scripts/db-migrate-and-seed.sh migrate    # migrate only
+DATABASE_URL="postgresql://..." ./scripts/db-migrate-and-seed.sh seed       # seed only
+```
+
+**Admin UI:** In Admin → Settings, use the Database section to run migrations and/or seed from the browser (admin/superadmin only).
+
+### Build verification (local)
+
+```bash
 npm run build:backend:docker
 npm run build:web:docker
 ```
-
----
-
-## 3. After deploy
-
-1. **Migrations** – Run at backend startup (`prisma migrate deploy` in the start command).
-2. **Verify** – Open the web URL; log in or browse the shop.
-3. **Seed** – If the database is empty, add products via the admin panel for full catalog.
