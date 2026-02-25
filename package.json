@@ -13,6 +13,7 @@
     "dev:start": "bash scripts/dev-start.sh",
     "dev:ports-free": "bash -c 'for p in 7000 7001; do pid=$(lsof -ti :$p 2>/dev/null); [ -n \"$pid\" ] && kill -9 $pid; done; echo Ports 7000 and 7001 freed'",
     "dev:mobile": "npm run start -w mobile",
+    "build:backend": "npm run build -w backend && cp -r backend/dist dist",
     "build:web:docker": "docker build -f web/Dockerfile -t thinqshop-web .",
     "build:backend:docker": "docker build -f backend/Dockerfile -t thinqshop-backend .",
     "clean": "rm -rf backend/dist web/.next",
