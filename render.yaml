@@ -2,8 +2,9 @@
 # https://render.com/docs/blueprint-spec
 # Connect this repo in Render Dashboard and use "New > Blueprint" to create all services.
 #
-# If deploy fails with "Cannot find module ... backend/dist/main.js", the service is using
-# dashboard Build/Start overrides. Set Build Command and Start Command to match below.
+# If deploy fails with "Cannot find module ... dist/main.js" or "backend/dist/main.js",
+# the service is using dashboard Build/Start overrides. In Render Dashboard > thinqshop-backend
+# > Settings, set Build Command and Start Command to match the values below (api-build, not dist).
 
 databases:
   - name: thinqshop-db
