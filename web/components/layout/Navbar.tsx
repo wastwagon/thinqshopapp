@@ -9,8 +9,6 @@ import {
     User,
     Heart,
     ShoppingCart,
-    Menu,
-    X,
     Instagram,
     Twitter,
     Facebook,
@@ -59,9 +57,6 @@ export default function Navbar() {
     const { cart, toggleCart } = useCart();
     const [searchOpen, setSearchOpen] = useState(false);
     const [shopMegaOpen, setShopMegaOpen] = useState(false);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const menuRef = useRef<HTMLDivElement>(null);
-    const menuButtonRef = useRef<HTMLButtonElement>(null);
     const megaRef = useRef<HTMLDivElement>(null);
     const megaTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -85,26 +80,6 @@ export default function Navbar() {
 
     const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
 
-    const closeMenu = useCallback(() => setMobileMenuOpen(false), []);
-
-    useEffect(() => {
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') closeMenu();
-        };
-        document.addEventListener('keydown', handleEscape);
-        return () => document.removeEventListener('keydown', handleEscape);
-    }, [closeMenu]);
-
-    useEffect(() => {
-        if (mobileMenuOpen) {
-            document.body.style.overflow = 'hidden';
-            menuRef.current?.querySelector<HTMLAnchorElement>('a')?.focus();
-        } else {
-            document.body.style.overflow = '';
-        }
-        return () => { document.body.style.overflow = ''; };
-    }, [mobileMenuOpen]);
-
     return (
         <nav
             className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-xl border-b border-gray-100 flex flex-col"
@@ -124,21 +99,6 @@ export default function Navbar() {
 
                 {/* Right-aligned: menu button, nav, social, actions */}
                 <div className="ml-auto flex items-center gap-4 sm:gap-8">
-                {/* Mobile menu button - visible below lg; no focus ring on mobile/tablet */}
-                <div className="flex items-center gap-2 lg:hidden">
-                    <button
-                        ref={menuButtonRef}
-                        type="button"
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="touch-target w-12 h-12 -ml-2 rounded-2xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none transition-colors"
-                        aria-expanded={mobileMenuOpen}
-                        aria-controls="mobile-main-menu"
-                        aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-                    >
-                        {mobileMenuOpen ? <X className="h-6 w-6" aria-hidden /> : <Menu className="h-6 w-6" aria-hidden />}
-                    </button>
-                </div>
-
                 {/* Main nav links - desktop only */}
                 <div className="hidden lg:flex items-center gap-6 text-xs font-bold text-gray-500 uppercase tracking-wider" role="menubar">
                     {mainNavItems.map((item) =>
@@ -293,113 +253,6 @@ export default function Navbar() {
             </div>
 
             <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
-
-            {/* Mobile menu: solid overlay + horizontal category scroll */}
-            {/* Backdrop - dims page when menu is open */}
-            <div
-                className={`lg:hidden fixed inset-0 top-14 sm:top-16 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
-                    mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-                onClick={closeMenu}
-                aria-hidden={!mobileMenuOpen}
-            />
-            {/* Menu panel - solid white, slides in from right */}
-            <div
-                id="mobile-main-menu"
-                ref={menuRef}
-                className={`lg:hidden fixed inset-y-0 right-0 top-14 sm:top-16 z-50 w-[min(100%,380px)] bg-white shadow-2xl transform transition-transform duration-300 ease-out overflow-y-auto ${
-                    mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-                }`}
-                aria-hidden={!mobileMenuOpen}
-            >
-                <div className="px-5 py-6">
-                    <button
-                        type="button"
-                        onClick={() => { setSearchOpen(true); closeMenu(); }}
-                        className="w-full mb-4 flex items-center gap-3 px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors focus:outline-none"
-                    >
-                        <Search className="h-5 w-5 shrink-0" />
-                        <span className="text-left text-sm font-medium">Search products...</span>
-                    </button>
-                    <div className="mb-6">
-                        <CurrencySwitcher />
-                    </div>
-                    <div className="flex gap-2 mb-6">
-                        <a href="#" className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-100 text-gray-500 hover:bg-blue-50 hover:text-blue-600" aria-label="Instagram"><Instagram className="h-5 w-5" /></a>
-                        <a href="#" className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-100 text-gray-500 hover:bg-blue-50 hover:text-blue-600" aria-label="Twitter"><Twitter className="h-5 w-5" /></a>
-                        <a href="#" className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-100 text-gray-500 hover:bg-blue-50 hover:text-blue-600" aria-label="Facebook"><Facebook className="h-5 w-5" /></a>
-                    </div>
-
-                    {/* Shop categories - hidden on mobile and tablets */}
-                    <div className="hidden">
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-3 px-1">Shop by category</p>
-                        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 no-scrollbar snap-x snap-mandatory">
-                            <Link
-                                href="/shop"
-                                onClick={closeMenu}
-                                className="shrink-0 snap-start flex flex-col items-center gap-1.5 w-20 py-3 px-2 rounded-xl bg-slate-50 border border-gray-100 hover:bg-slate-100 hover:border-gray-200 transition-colors focus:outline-none"
-                            >
-                                <span className="flex items-center justify-center w-10 h-10 rounded-lg bg-white border border-gray-200">
-                                    <Package className="h-5 w-5 text-gray-600" />
-                                </span>
-                                <span className="text-[11px] font-semibold text-gray-700 text-center leading-tight">All</span>
-                            </Link>
-                            {STATIC_CATEGORIES.map((cat) => {
-                                const Icon = CATEGORY_ICONS[cat.icon] ?? Package;
-                                const slug = cat.slug ?? cat.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
-                                const isActive = pathname === `/shop/${slug}`;
-                                return (
-                                    <Link
-                                        key={cat.slug}
-                                        href={`/shop/${slug}`}
-                                        onClick={closeMenu}
-                                        className={`shrink-0 snap-start flex flex-col items-center gap-1.5 w-20 py-3 px-2 rounded-xl border transition-colors focus:outline-none ${
-                                            isActive
-                                                ? 'bg-slate-900 border-slate-800 text-white'
-                                                : 'bg-slate-50 border-gray-100 hover:bg-slate-100 hover:border-gray-200'
-                                        }`}
-                                    >
-                                        <span className={`flex items-center justify-center w-10 h-10 rounded-lg ${
-                                            isActive ? 'bg-white/20' : 'bg-white border border-gray-200'
-                                        }`}>
-                                            <Icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-gray-600'}`} />
-                                        </span>
-                                        <span className={`text-[11px] font-semibold text-center leading-tight ${isActive ? 'text-white' : 'text-gray-700'}`}>{cat.name}</span>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Main nav links */}
-                    <ul className="space-y-0.5" role="menu">
-                        <li role="none">
-                            <Link
-                                href="/shop"
-                                role="menuitem"
-                                onClick={closeMenu}
-                                className="block py-3.5 px-4 rounded-xl text-[13px] font-bold uppercase tracking-wider text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none"
-                            >
-                                Shop
-                            </Link>
-                        </li>
-                        {mainNavItems.filter((i) => !i.mega).map((item) => (
-                            <li key={item.href} role="none">
-                                <Link
-                                    href={item.href}
-                                    role="menuitem"
-                                    onClick={closeMenu}
-                                    className={`block py-3.5 px-4 rounded-xl text-[13px] font-bold uppercase tracking-wider transition-colors hover:bg-gray-50 focus:outline-none ${
-                                        item.highlight ? 'text-blue-600' : 'text-gray-700'
-                                    }`}
-                                >
-                                    {item.label}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
         </nav>
     );
 }

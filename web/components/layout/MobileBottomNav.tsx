@@ -10,11 +10,10 @@ import {
     ShoppingBag,
     User,
     Send,
-    Zap
 } from 'lucide-react';
 
 const navItems = [
-    { name: 'Home', href: '/', icon: Zap },
+    { name: 'Home', href: '/', icon: Home },
     { name: 'Logistics', href: '/track', icon: Truck },
     { name: 'Supply', href: '/dashboard/procurement', icon: ShoppingBag },
     { name: 'Transfers', href: '/dashboard/transfers', icon: Send },
@@ -25,12 +24,12 @@ export default function MobileBottomNav() {
     const pathname = usePathname();
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[100] md:hidden px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,24px))] pt-2">
+        <div className="fixed bottom-0 left-0 right-0 z-[100] md:hidden px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,20px))] pt-1.5">
             <motion.div
                 initial={{ y: 100 }}
                 animate={{ y: 0 }}
-                transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-                className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] border border-gray-100 flex items-center justify-around px-2 py-3 shadow-2xl shadow-gray-200 relative overflow-hidden"
+                transition={{ type: 'spring', damping: 22, stiffness: 120 }}
+                className="bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-slate-700/50 flex items-center justify-between px-1 py-2 shadow-xl shadow-black/20"
             >
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
@@ -40,14 +39,14 @@ export default function MobileBottomNav() {
                         <Link
                             key={item.name}
                             href={item.href}
-                            className="relative flex flex-col items-center justify-center gap-1 group touch-target py-2 px-4 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                            className="relative flex flex-col items-center justify-center gap-0.5 min-w-0 flex-1 py-1.5 px-1 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
                             aria-label={item.name}
                             aria-current={isActive ? 'page' : undefined}
                         >
-                            <div className={`p-2 rounded-xl transition-all duration-300 ${isActive ? 'bg-blue-600 text-white scale-110 shadow-lg shadow-blue-200' : 'text-gray-400 group-hover:text-gray-600'}`}>
-                                <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} aria-hidden />
+                            <div className={`p-1.5 rounded-lg transition-all duration-200 ${isActive ? 'bg-blue-500 text-white' : 'text-slate-400'}`}>
+                                <Icon className="h-4 w-4" strokeWidth={isActive ? 2.5 : 2} aria-hidden />
                             </div>
-                            <span className={`text-[9px] font-bold uppercase tracking-tight transition-all duration-300 ${isActive ? 'text-blue-600' : 'text-gray-400 opacity-60'}`}>
+                            <span className={`text-[8px] font-semibold uppercase tracking-wider truncate w-full text-center ${isActive ? 'text-blue-400' : 'text-slate-500'}`}>
                                 {item.name}
                             </span>
                         </Link>
