@@ -55,10 +55,11 @@ async function proxy(request: NextRequest, pathSegments: string[]) {
         }
 
         const res = await fetch(targetUrl, init);
-        const data = await res.text();
         const contentType = res.headers.get('content-type') || 'application/json';
+        const isBinary = contentType.startsWith('image/') || contentType === 'application/octet-stream' || contentType.includes('font/');
+        const body = isBinary ? await res.arrayBuffer() : await res.text();
 
-        return new NextResponse(data, {
+        return new NextResponse(body, {
             status: res.status,
             headers: { 'Content-Type': contentType },
         });

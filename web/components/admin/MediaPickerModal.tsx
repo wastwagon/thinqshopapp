@@ -96,6 +96,10 @@ export default function MediaPickerModal({
                                             src={getMediaUrl(path)}
                                             alt={m.filename}
                                             className="w-full h-full object-contain"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%239ca3af" stroke-width="1.5"%3E%3Crect x="3" y="3" width="18" height="18" rx="2"/%3E%3Ccircle cx="8.5" cy="8.5" r="1.5"/%3E%3Cpath d="M21 15l-5-5L5 21"/%3E%3C/svg%3E';
+                                                (e.target as HTMLImageElement).onerror = null;
+                                            }}
                                         />
                                     </button>
                                 );

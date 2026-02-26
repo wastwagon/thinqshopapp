@@ -23,6 +23,8 @@ services:
     restart: always
     ports:
       - "7000:7000"
+    volumes:
+      - backend_uploads:/app/uploads
     environment:
       NODE_ENV: production
       PORT: 7000
@@ -57,3 +59,4 @@ services:
 
 volumes:
   postgres_data:
+  backend_uploads:

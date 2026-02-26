@@ -458,7 +458,15 @@ export default function AdminProducts() {
                                 <div className="flex items-start gap-2">
                                     <div className="w-20 h-20 rounded-lg border border-gray-100 bg-gray-50 overflow-hidden shrink-0">
                                         {formData.featuredImage ? (
-                                            <img src={productImageUrl(formData.featuredImage)} alt="" className="w-full h-full object-contain" />
+                                            <img
+                                                src={productImageUrl(formData.featuredImage)}
+                                                alt=""
+                                                className="w-full h-full object-contain"
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).src = '/placeholder.svg';
+                                                    (e.target as HTMLImageElement).onerror = null;
+                                                }}
+                                            />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-gray-300">
                                                 <ImageIcon className="h-6 w-6" />
@@ -483,7 +491,15 @@ export default function AdminProducts() {
                                     <div className="flex flex-wrap gap-1.5">
                                         {formData.gallery.map((path, i) => (
                                             <div key={i} className="relative w-14 h-14 rounded-lg border border-gray-100 bg-gray-50 overflow-hidden group">
-                                                <img src={productImageUrl(path)} alt="" className="w-full h-full object-contain" />
+                                                <img
+                                                    src={productImageUrl(path)}
+                                                    alt=""
+                                                    className="w-full h-full object-contain"
+                                                    onError={(e) => {
+                                                        (e.target as HTMLImageElement).src = '/placeholder.svg';
+                                                        (e.target as HTMLImageElement).onerror = null;
+                                                    }}
+                                                />
                                                 <button type="button" onClick={() => removeGalleryImage(i)} className="absolute top-0.5 right-0.5 w-5 h-5 rounded bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Remove">
                                                     <X className="h-2.5 w-2.5" />
                                                 </button>

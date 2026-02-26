@@ -11,6 +11,8 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     restart: unless-stopped
+    volumes:
+      - backend_uploads:/app/uploads
     environment:
       NODE_ENV: production
       PORT: 7000
@@ -39,3 +41,6 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+
+volumes:
+  backend_uploads:
