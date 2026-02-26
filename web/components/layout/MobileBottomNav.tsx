@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
 import {
     Home,
     Truck,
@@ -24,13 +23,8 @@ export default function MobileBottomNav() {
     const pathname = usePathname();
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[100] md:hidden px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,20px))] pt-1.5">
-            <motion.div
-                initial={{ y: 100 }}
-                animate={{ y: 0 }}
-                transition={{ type: 'spring', damping: 22, stiffness: 120 }}
-                className="bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-slate-700/50 flex items-center justify-between px-1 py-2 shadow-xl shadow-black/20"
-            >
+        <div className="fixed bottom-0 left-0 right-0 z-[100] md:hidden bg-slate-900 border-t border-slate-700/80 shadow-[0_-4px_12px_rgba(0,0,0,0.15)]">
+            <div className="flex items-center justify-between px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
                     const Icon = item.icon;
@@ -52,7 +46,7 @@ export default function MobileBottomNav() {
                         </Link>
                     );
                 })}
-            </motion.div>
+            </div>
         </div>
     );
 }
