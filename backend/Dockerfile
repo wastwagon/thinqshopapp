@@ -10,6 +10,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY backend/ ./backend/
 COPY database/ ./database/
+COPY web/lib/data/scraped_products.json ./database/scraped_products.json
 COPY packages/ ./packages/
 
 # Install all deps (needed for workspace resolution)

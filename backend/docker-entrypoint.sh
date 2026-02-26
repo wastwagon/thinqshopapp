@@ -29,6 +29,12 @@ if [ "$SEED_ON_STARTUP" = "true" ]; then
   else
     echo "Seed failed (check logs above). Continuing startup..."
   fi
+  echo "Seeding products from scraped_products.json..."
+  if npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed-products.ts; then
+    echo "Product seed complete."
+  else
+    echo "Product seed failed or skipped. Continuing startup..."
+  fi
 fi
 
 echo "Starting application..."

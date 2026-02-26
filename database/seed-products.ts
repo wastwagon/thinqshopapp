@@ -5,7 +5,11 @@ import * as path from 'path';
 const prisma = new PrismaClient();
 
 async function main() {
-    const productsPath = '/Users/OceanCyber/Downloads/thinqshop-world-class/web/lib/data/scraped_products.json';
+    const productsPath = path.join(process.cwd(), 'database', 'scraped_products.json');
+    if (!fs.existsSync(productsPath)) {
+        console.log('scraped_products.json not found, skipping product seed.');
+        return;
+    }
     const productsData = JSON.parse(fs.readFileSync(productsPath, 'utf8'));
 
     console.log(`Found ${productsData.length} products in JSON.`);
