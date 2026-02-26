@@ -253,7 +253,7 @@ export default function ProcurementPage() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
+                            <div className="space-y-3">
                                 <label className="text-xs font-medium text-gray-600 mb-1.5 block">
                                     {requestType === 'sourcing' ? 'Product images' : 'Design files'}{' '}
                                     <span className="text-gray-400">(JPG, PNG, WebP)</span>
@@ -275,26 +275,45 @@ export default function ProcurementPage() {
                                     <Upload className="h-4 w-4" />
                                     {uploading ? 'Uploading…' : 'Upload images'}
                                 </button>
-                                {uploadedImages.length > 0 && (
-                                    <div className="mt-2 flex flex-wrap gap-2">
-                                        {uploadedImages.map((url, i) => (
-                                            <div key={i} className="relative group">
-                                                <img
-                                                    src={getMediaUrl(url)}
-                                                    alt=""
-                                                    className="w-16 h-16 rounded-lg object-cover border border-gray-100"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeImage(i)}
-                                                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                                >
-                                                    <Trash2 className="h-2.5 w-2.5" />
-                                                </button>
+                                <div className="min-h-[120px] rounded-lg border-2 border-dashed border-gray-100 bg-gray-50/50 p-3">
+                                    <p className="text-[10px] font-semibold text-gray-500 mb-2">
+                                        {uploadedImages.length > 0
+                                            ? `Uploaded images (${uploadedImages.length})`
+                                            : 'Image preview — uploads will appear here'}
+                                    </p>
+                                    {uploadedImages.length > 0 ? (
+                                        <div className="flex flex-wrap gap-3">
+                                            {uploadedImages.map((url, i) => (
+                                                <div key={i} className="relative group">
+                                                    <img
+                                                        src={getMediaUrl(url)}
+                                                        alt={`Upload ${i + 1}`}
+                                                        className="w-20 h-20 rounded-lg object-cover border-2 border-white shadow-sm"
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="%239ca3af" stroke-width="1.5"%3E%3Crect x="3" y="3" width="18" height="18" rx="2"/%3E%3Ccircle cx="8.5" cy="8.5" r="1.5"/%3E%3Cpath d="M21 15l-5-5L5 21"/%3E%3C/svg%3E';
+                                                        }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeImage(i)}
+                                                        className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
+                                                        title="Remove image"
+                                                    >
+                                                        <Trash2 className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center justify-center py-6 text-gray-400">
+                                            <div className="text-center">
+                                                <Upload className="h-8 w-8 mx-auto mb-1 opacity-50" />
+                                                <p className="text-[10px]">No images yet</p>
+                                                <p className="text-[9px]">Click above to upload</p>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <div>

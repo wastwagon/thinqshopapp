@@ -12,5 +12,6 @@ import { EmailTemplateModule } from '../email-template/email-template.module';
     imports: [PrismaModule, AuthModule, CartModule, AddressModule, FinanceModule, EmailTemplateModule],
     controllers: [OrderController],
     providers: [OrderService],
+    exports: [OrderService],
 })
 export class OrderModule { }

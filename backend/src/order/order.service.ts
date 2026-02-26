@@ -212,6 +212,29 @@ export class OrderService {
         return order;
     }
 
+    /** Public lookup by order_number for track page. Returns minimal safe data (no user email, no full address). */
+    async findOneByOrderNumber(orderNumber: string) {
+        const order = await this.prisma.order.findUnique({
+            where: { order_number: orderNumber },
+            include: {
+                items: { select: { product_name: true, quantity: true, price: true, total: true } },
+                shipping_address: { select: { city: true, region: true } },
+            },
+        });
+        if (!order) return null;
+        return {
+            id: order.id,
+            order_number: order.order_number,
+            status: order.status,
+            total: order.total,
+            payment_method: order.payment_method,
+            created_at: order.created_at,
+            items: order.items,
+            items_count: order.items.length,
+            shipping_region: order.shipping_address ? `${order.shipping_address.city || ''} ${order.shipping_address.region || ''}`.trim() : null,
+        };
+    }
+
     async findAllForAdmin(query: { page?: number; limit?: number; status?: string }) {
         const { page = 1, limit = 50, status } = query;
         const skip = (page - 1) * limit;

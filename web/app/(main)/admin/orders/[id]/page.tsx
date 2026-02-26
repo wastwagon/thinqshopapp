@@ -36,7 +36,7 @@ interface Order {
     payment_status?: string;
     created_at: string;
     items: OrderItem[];
-    user?: { email: string; profile?: { first_name?: string; last_name?: string; phone?: string } };
+    user?: { email: string; phone?: string | null; profile?: { first_name?: string; last_name?: string } };
     shipping_address?: {
         full_name?: string;
         phone?: string;
@@ -212,9 +212,9 @@ export default function AdminOrderDetailPage() {
                                         <Mail className="h-3.5 w-3.5" /> {order.user.email}
                                     </a>
                                 )}
-                                {order.user?.profile?.phone && (
-                                    <a href={`tel:${order.user.profile.phone}`} className="flex items-center gap-2 text-xs text-blue-600 hover:underline">
-                                        <Phone className="h-3.5 w-3.5" /> {order.user.profile.phone}
+                                {order.user?.phone && (
+                                    <a href={`tel:${order.user.phone}`} className="flex items-center gap-2 text-xs text-blue-600 hover:underline">
+                                        <Phone className="h-3.5 w-3.5" /> {order.user.phone}
                                     </a>
                                 )}
                             </div>

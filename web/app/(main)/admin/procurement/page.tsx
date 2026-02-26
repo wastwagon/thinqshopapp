@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import Link from 'next/link';
 import {
     ShoppingBag,
     Search,
@@ -13,7 +14,8 @@ import {
     User,
     Plus,
     ChevronRight,
-    FileText
+    FileText,
+    Eye
 } from 'lucide-react';
 
 interface ProcurementRequest {
@@ -25,6 +27,7 @@ interface ProcurementRequest {
     budget_range?: string;
     status: string;
     created_at: string;
+    reference_images?: string[] | null;
     user: {
         email: string;
         profile?: { first_name?: string; last_name?: string };
@@ -185,6 +188,17 @@ export default function AdminProcurementPage() {
                                             <span>Qty: {req.quantity}</span>
                                             <span>{new Date(req.created_at).toLocaleDateString()}</span>
                                             <span className="font-medium text-gray-600">{req.request_number}</span>
+                                            {Array.isArray(req.reference_images) && req.reference_images.length > 0 && (
+                                                <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
+                                                    {req.reference_images.length} image{req.reference_images.length !== 1 ? 's' : ''}
+                                                </span>
+                                            )}
+                                            <Link
+                                                href={`/admin/procurement/${req.id}`}
+                                                className="text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium"
+                                            >
+                                                <Eye className="h-3.5 w-3.5" /> View details & images
+                                            </Link>
                                         </div>
                                         {req.specifications && (
                                             <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">

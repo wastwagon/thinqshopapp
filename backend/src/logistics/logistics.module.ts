@@ -9,5 +9,6 @@ import { FinanceModule } from '../finance/finance.module';
     imports: [PrismaModule, AuthModule, FinanceModule],
     providers: [LogisticsService],
     controllers: [LogisticsController],
+    exports: [LogisticsService],
 })
 export class LogisticsModule { }

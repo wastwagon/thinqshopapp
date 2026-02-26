@@ -1,9 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UserService {
     constructor(private prisma: PrismaService) { }
+
+    /** Admin: get single user with full details (no password). */
+    async findOneForAdmin(id: number) {
+        const user = await this.prisma.user.findUnique({
+            where: { id },
+            include: {
+                profile: true,
+                wallet: { select: { balance_ghs: true } },
+                _count: { select: { orders: true, addresses: true } },
+            },
+        });
+        if (!user) throw new NotFoundException('User not found');
+        const { password, ...rest } = user;
+        return rest;
+    }
 
     async findOne(id: number) {
         const user = await this.prisma.user.findUnique({

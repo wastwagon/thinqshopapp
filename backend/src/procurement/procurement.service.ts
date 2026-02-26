@@ -36,6 +36,27 @@ export class ProcurementService {
         });
     }
 
+    /** Public lookup by order_number (POR-xxx) for track page. Returns minimal safe data. */
+    async findOrderByOrderNumber(orderNumber: string) {
+        const order = await this.prisma.procurementOrder.findUnique({
+            where: { order_number: orderNumber },
+            include: {
+                request: { select: { request_number: true } },
+                tracking: { orderBy: { created_at: 'asc' } },
+            },
+        });
+        if (!order) return null;
+        return {
+            id: order.id,
+            order_number: order.order_number,
+            request_number: order.request?.request_number,
+            status: order.status,
+            amount: order.amount,
+            created_at: order.created_at,
+            tracking: order.tracking,
+        };
+    }
+
     async findUserRequestById(userId: number, requestId: number) {
         const req = await this.prisma.procurementRequest.findFirst({
             where: { id: requestId, user_id: userId },
@@ -63,6 +84,32 @@ export class ProcurementService {
             },
             orderBy: { created_at: 'desc' }
         });
+    }
+
+    /** Admin: get single request with full details including reference_images. */
+    async getRequestForAdmin(id: number) {
+        const req = await this.prisma.procurementRequest.findUnique({
+            where: { id },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        email: true,
+                        phone: true,
+                        profile: {
+                            select: {
+                                first_name: true,
+                                last_name: true
+                            }
+                        }
+                    }
+                },
+                quotes: { orderBy: { created_at: 'desc' } },
+                orders: { include: { tracking: { orderBy: { created_at: 'asc' } } } }
+            }
+        });
+        if (!req) throw new NotFoundException('Request not found');
+        return req;
     }
 
     async updateRequestStatus(id: number, status: ProcurementStatus) {

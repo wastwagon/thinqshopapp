@@ -19,6 +19,7 @@ import { MediaModule } from './media/media.module';
 import { EmailTemplateModule } from './email-template/email-template.module';
 import { ContentModule } from './content/content.module';
 import { DatabaseModule } from './database/database.module';
+import { TrackModule } from './track/track.module';
 
 @Module({
     imports: [
@@ -42,6 +43,7 @@ import { DatabaseModule } from './database/database.module';
         EmailTemplateModule,
         ContentModule,
         DatabaseModule,
+        TrackModule,
     ],
     controllers: [AppController],
     providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

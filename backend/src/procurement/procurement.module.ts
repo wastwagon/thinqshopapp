@@ -10,5 +10,6 @@ import { MediaModule } from '../media/media.module';
     imports: [PrismaModule, AuthModule, FinanceModule, MediaModule],
     providers: [ProcurementService],
     controllers: [ProcurementController],
+    exports: [ProcurementService],
 })
 export class ProcurementModule { }

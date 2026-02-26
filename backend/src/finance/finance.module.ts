@@ -13,6 +13,6 @@ import { TransferController } from './transfer.controller';
     imports: [PrismaModule, AuthModule],
     providers: [PaymentService, WalletService, TransferService],
     controllers: [PaymentController, WalletController, TransferController],
-    exports: [WalletService, PaymentService],
+    exports: [WalletService, PaymentService, TransferService],
 })
 export class FinanceModule { }

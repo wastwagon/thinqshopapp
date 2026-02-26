@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, UseGuards, Request, Query, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Patch, Body, Param, UseGuards, Request, Query, ForbiddenException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '../auth/auth.guard';
 
@@ -13,6 +13,15 @@ export class UserController {
             throw new ForbiddenException('Admin access required');
         }
         return this.userService.findAllForAdmin(query);
+    }
+
+    @Get('admin/:id')
+    @UseGuards(AuthGuard)
+    async findOneAdmin(@Request() req: any, @Param('id') id: string) {
+        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
+            throw new ForbiddenException('Admin access required');
+        }
+        return this.userService.findOneForAdmin(Number(id));
     }
 
     @Get('profile')

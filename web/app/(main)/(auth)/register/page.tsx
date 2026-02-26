@@ -105,11 +105,11 @@ export default function RegisterPage() {
                                     {errors.email && <p className="text-red-500 text-xs mt-2 ml-1">{errors.email.message}</p>}
                                 </div>
                                 <div>
-                                    <label className="text-sm font-medium text-gray-700 ml-1 mb-2 block">Phone number <span className="text-gray-400 font-normal">(optional)</span></label>
+                                    <label className="text-sm font-medium text-gray-700 ml-1 mb-2 block">WhatsApp / Phone number <span className="text-gray-400 font-normal">(optional)</span></label>
                                     <input
                                         {...register('phone')}
                                         type="tel"
-                                        placeholder="+233XXXXXXXXX or 0XXXXXXXXX"
+                                        placeholder="+233XXXXXXXXX or 0XXXXXXXXX (for WhatsApp contact)"
                                         className="block w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
                                     />
                                     {errors.phone && <p className="text-red-500 text-xs mt-2 ml-1">{errors.phone.message}</p>}

@@ -164,7 +164,7 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Phone</label>
+                                    <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">WhatsApp / Phone</label>
                                     <input
                                         type="text"
                                         value={formData.phone}

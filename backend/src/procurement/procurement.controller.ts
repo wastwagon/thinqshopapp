@@ -84,6 +84,14 @@ export class ProcurementController {
         return this.procurementService.getAllRequests();
     }
 
+    @Get('admin/:id')
+    async getRequestForAdmin(@Request() req, @Param('id') id: string) {
+        if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+            throw new ForbiddenException('Admin access required');
+        }
+        return this.procurementService.getRequestForAdmin(Number(id));
+    }
+
     @Patch('admin/:id/status')
     async updateRequestStatus(@Request() req, @Param('id') id: string, @Body() body: { status: any }) {
         if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {

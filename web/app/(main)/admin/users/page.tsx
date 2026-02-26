@@ -1,10 +1,20 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Users, Shield, Search, Mail, Calendar, Activity } from 'lucide-react';
+import { Users, Shield, Search, Mail, Calendar, Activity, Eye, Phone } from 'lucide-react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+
+/** Convert Ghana phone to WhatsApp wa.me URL. */
+function toWhatsAppUrl(phone: string | null | undefined): string | null {
+    if (!phone || !phone.trim()) return null;
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 9) return null;
+    const num = digits.startsWith('233') ? digits : digits.startsWith('0') ? '233' + digits.slice(1) : '233' + digits;
+    return `https://wa.me/${num}`;
+}
 
 const displayName = (u: any) => {
     const p = u?.profile;
@@ -51,7 +61,7 @@ export default function AdminUsers() {
         (u) =>
             displayName(u).toLowerCase().includes(searchTerm.toLowerCase()) ||
             (u.email ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (u.phone ?? '').includes(searchTerm)
+            (u.phone ?? '').toString().includes(searchTerm)
     );
 
     const stats = [
@@ -120,6 +130,7 @@ export default function AdminUsers() {
                     const isActive = user.is_active !== false;
                     const verified = user.is_verified === true;
                     const created = user.created_at ? new Date(user.created_at).toLocaleDateString() : '—';
+                    const waUrl = toWhatsAppUrl(user.phone);
                     return (
                         <div key={user.id} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all group">
                             <div className="flex justify-between items-start mb-3">
@@ -138,9 +149,21 @@ export default function AdminUsers() {
                                 </div>
                             </div>
                             <h3 className="text-sm font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors truncate">{name || 'No name'}</h3>
-                            <p className="text-xs text-gray-500 flex items-center gap-1.5 truncate mb-2">
+                            <p className="text-xs text-gray-500 flex items-center gap-1.5 truncate mb-1">
                                 <Mail className="h-3 w-3 shrink-0" /> {user.email}
                             </p>
+                            {user.phone && (
+                                <p className="text-xs text-gray-500 flex items-center gap-1.5 truncate mb-2">
+                                    <Phone className="h-3 w-3 shrink-0" />
+                                    {waUrl ? (
+                                        <a href={waUrl} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline truncate">
+                                            {user.phone}
+                                        </a>
+                                    ) : (
+                                        <span>{user.phone}</span>
+                                    )}
+                                </p>
+                            )}
                             <div className="flex items-center justify-between pt-2 border-t border-gray-50">
                                 <span className="text-[9px] text-gray-400 flex items-center gap-1">
                                     <Calendar className="h-3 w-3 shrink-0" /> {created}
@@ -149,6 +172,12 @@ export default function AdminUsers() {
                                     {isActive ? 'Active' : 'Inactive'}
                                 </span>
                             </div>
+                            <Link
+                                href={`/admin/users/${user.id}`}
+                                className="mt-2 pt-2 border-t border-gray-50 flex items-center justify-center gap-1.5 text-blue-600 hover:text-blue-800 text-xs font-semibold w-full"
+                            >
+                                <Eye className="h-3.5 w-3.5" /> View details
+                            </Link>
                         </div>
                     );
                 })}
