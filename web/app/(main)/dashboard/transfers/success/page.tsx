@@ -80,7 +80,8 @@ export default function TransferSuccessPage() {
                         { label: 'Status', value: statusLabel },
                         { label: 'Date', value: new Date(transfer.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) },
                     ]}
-                    primaryAction={{ label: 'View transfer details', href: `/dashboard/transfers/${transfer.id}/confirmation`, icon: FileDown }}
+                    primaryAction={{ label: 'View details', href: `/dashboard/transfers/${transfer.id}/confirmation`, icon: FileDown }}
+                    primaryVariant="outlined"
                     secondaryAction={{ label: 'New transfer', href: '/dashboard/transfers', icon: Send }}
                     accentColor="blue"
                 />

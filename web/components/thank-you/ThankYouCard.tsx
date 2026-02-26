@@ -15,6 +15,7 @@ interface ThankYouCardProps {
     details: ThankYouDetail[];
     primaryAction?: { label: string; href: string; icon?: LucideIcon };
     secondaryAction?: { label: string; href: string; icon?: LucideIcon };
+    primaryVariant?: 'filled' | 'outlined';
     accentColor?: 'blue' | 'emerald' | 'violet' | 'amber';
 }
 
@@ -31,6 +32,7 @@ export default function ThankYouCard({
     details,
     primaryAction,
     secondaryAction,
+    primaryVariant = 'filled',
     accentColor = 'blue',
 }: ThankYouCardProps) {
     const style = accentStyles[accentColor];
@@ -81,7 +83,11 @@ export default function ThankYouCard({
                         {primaryAction && (
                             <Link
                                 href={primaryAction.href}
-                                className="flex-1 flex items-center justify-center gap-2 min-h-[44px] sm:h-11 py-3 sm:py-2.5 rounded-xl bg-gray-900 text-white font-semibold text-xs sm:text-sm hover:bg-gray-800 active:scale-[0.98] transition-all shadow-lg shadow-gray-900/10"
+                                className={`flex-1 flex items-center justify-center gap-2 min-h-[44px] sm:h-11 py-3 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm active:scale-[0.98] transition-all ${
+                                    primaryVariant === 'outlined'
+                                        ? 'border-2 border-gray-200 text-gray-700 hover:bg-gray-50'
+                                        : 'bg-gray-900 text-white hover:bg-gray-800 shadow-lg shadow-gray-900/10'
+                                }`}
                             >
                                 {primaryAction.icon && <primaryAction.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />}
                                 <span className="truncate">{primaryAction.label}</span>
