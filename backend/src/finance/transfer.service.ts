@@ -54,21 +54,22 @@ export class TransferService {
     async createTransfer(userId: number, dto: any) {
         const { amount_ghs, transfer_direction, recipient_type, recipient_details, purpose, payment_method, qr_codes: rawQrCodes } = dto;
 
-        // Normalize and validate QR codes (array of { image, amount_ghs, recipient_name? })
-        let qr_codes: Array<{ image: string; amount_ghs: number; recipient_name?: string }> = [];
+        // Normalize and validate QR codes (array of { image, amount_cny, recipient_name? })
+        const rate = await this.getExchangeRate();
+        const amount_cny = Number(amount_ghs) * rate;
+        let qr_codes: Array<{ image: string; amount_cny: number; recipient_name?: string }> = [];
         if (Array.isArray(rawQrCodes) && rawQrCodes.length > 0) {
             qr_codes = rawQrCodes
-                .filter((q: any) => q && (q.image || q.image_base64) && typeof q.amount_ghs === 'number')
+                .filter((q: any) => q && (q.image || q.image_base64) && typeof (q.amount_cny ?? q.amount_ghs) === 'number')
                 .map((q: any) => ({
                     image: q.image || q.image_base64,
-                    amount_ghs: Number(q.amount_ghs),
+                    amount_cny: Number(q.amount_cny ?? q.amount_ghs),
                     recipient_name: typeof q.recipient_name === 'string' ? q.recipient_name.trim() : undefined
                 }));
-            const sumQr = qr_codes.reduce((s, q) => s + q.amount_ghs, 0);
-            const mainAmount = Number(amount_ghs);
-            if (Math.abs(sumQr - mainAmount) > 0.01) {
+            const sumQr = qr_codes.reduce((s, q) => s + q.amount_cny, 0);
+            if (Math.abs(sumQr - amount_cny) > 0.01) {
                 throw new BadRequestException(
-                    `QR code amounts (₵${sumQr.toFixed(2)}) must equal transfer amount (₵${mainAmount.toFixed(2)}). Please match the totals.`
+                    `QR code amounts (¥${sumQr.toFixed(2)}) must equal converted amount (¥${amount_cny.toFixed(2)}). Recipients receive CNY.`
                 );
             }
         }
@@ -83,8 +84,6 @@ export class TransferService {
 
         const senderName = user.profile ? `${user.profile.first_name} ${user.profile.last_name}` : 'Unknown User';
 
-        const rate = await this.getExchangeRate();
-        const amount_cny = amount_ghs * rate;
         const transfer_fee = 0; // Or calculate based on amount
         const total_amount = Number(amount_ghs) + transfer_fee;
 

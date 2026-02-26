@@ -21,7 +21,7 @@ function downloadImage(url: string, filename: string) {
         .catch(() => toast.error('Download failed'));
 }
 
-type QrEntry = { image: string; amount_ghs?: number; recipient_name?: string };
+type QrEntry = { image: string; amount_ghs?: number; amount_cny?: number; recipient_name?: string };
 type QrFulfillment = { qr_index: number; status: string; confirmation_image?: string; admin_notes?: string; fulfilled_at?: string };
 
 interface Transfer {
@@ -227,7 +227,7 @@ export default function TransferConfirmationPage() {
                                                             </>
                                                         )}
                                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Amount</p>
-                                                        <p className="text-lg font-bold text-gray-900">₵{entry.amount_ghs != null ? Number(entry.amount_ghs).toFixed(2) : '—'}</p>
+                                                        <p className="text-lg font-bold text-gray-900">¥{(entry.amount_cny ?? entry.amount_ghs) != null ? Number(entry.amount_cny ?? entry.amount_ghs).toFixed(2) : '—'}</p>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         {fulfilled ? (

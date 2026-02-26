@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Send, Search, History, ChevronRight, Calendar, ArrowRight, QrCode, Upload, ImagePlus, Download, CheckCircle, Loader2, FileText, Clock, Package } from 'lucide-react';
 
-type QrCodeEntry = { image: string; amount_ghs?: number; recipient_name?: string };
+type QrCodeEntry = { image: string; amount_ghs?: number; amount_cny?: number; recipient_name?: string };
 type QrFulfillment = { qr_index: number; status: string; confirmation_image?: string; admin_notes?: string; fulfilled_at?: string };
 
 interface Transfer {
@@ -425,7 +425,7 @@ export default function AdminTransfersPage() {
                                                     <div className="min-w-0">
                                                         {entry.recipient_name && <p className="text-xs font-semibold text-gray-900 mb-0.5">{entry.recipient_name}</p>}
                                                         <p className="text-[10px] text-gray-500">Amount</p>
-                                                        <p className="text-lg font-bold text-gray-900">₵{entry.amount_ghs != null ? Number(entry.amount_ghs).toFixed(2) : '—'}</p>
+                                                        <p className="text-lg font-bold text-gray-900">¥{(entry.amount_cny ?? entry.amount_ghs) != null ? Number(entry.amount_cny ?? entry.amount_ghs).toFixed(2) : '—'}</p>
                                                         {fulfillment?.status === 'fulfilled' && (
                                                             <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded">
                                                                 <CheckCircle className="h-2.5 w-2.5" /> Fulfilled

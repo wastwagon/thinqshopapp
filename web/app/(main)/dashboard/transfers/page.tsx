@@ -24,7 +24,7 @@ interface Transfer {
     status: string;
     created_at: string;
     admin_reply_images?: string[];
-    qr_codes?: Array<{ image: string; amount_ghs?: number }>;
+    qr_codes?: Array<{ image: string; amount_ghs?: number; amount_cny?: number }>;
     qr_fulfillments?: Array<{ qr_index: number; status: string; confirmation_image?: string; admin_notes?: string; fulfilled_at?: string }>;
 }
 
@@ -151,15 +151,16 @@ export default function TransferPage() {
                 return;
             }
             const sumQr = filledQr.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-            if (Math.abs(sumQr - mainAmount) > 0.01) {
-                toast.error(`Total of QR amounts (₵${sumQr.toFixed(2)}) must equal transfer amount (₵${mainAmount.toFixed(2)}). Match the totals.`);
+            const targetAmount = amountCny;
+            if (Math.abs(sumQr - targetAmount) > 0.01) {
+                toast.error(`Total of QR amounts (¥${sumQr.toFixed(2)}) must equal converted amount (¥${targetAmount.toFixed(2)}). Recipients receive CNY.`);
                 return;
             }
         }
 
         const qr_codes =
             recipientType !== 'bank_account' && filledQr.length > 0
-                ? filledQr.map((e) => ({ image: e.dataUrl, amount_ghs: Number(e.amount), recipient_name: e.recipientName.trim() }))
+                ? filledQr.map((e) => ({ image: e.dataUrl, amount_cny: Number(e.amount), recipient_name: e.recipientName.trim() }))
                 : [];
 
         const firstQrRecipient = filledQr[0]?.recipientName?.trim() || '';
@@ -369,7 +370,7 @@ export default function TransferPage() {
                                         <div className="md:col-span-2 space-y-3">
                                             <div>
                                                 <label className="text-[10px] font-medium text-gray-500  ml-1 mb-1 block">QR codes & amounts</label>
-                                                <p className="text-[10px] text-gray-500 mb-2 ml-1">Add at least one QR: upload image, recipient name and amount (GHS). Total must equal transfer amount.</p>
+                                                <p className="text-[10px] text-gray-500 mb-2 ml-1">Add at least one QR: upload image, recipient name and amount (CNY). Total must equal converted amount above.</p>
                                                 <div className="space-y-3">
                                                     {qrEntries.map((entry) => (
                                                         <div key={entry.id} className="flex flex-wrap items-start gap-2 p-2.5 bg-gray-50 rounded-lg border border-gray-100">
@@ -405,7 +406,7 @@ export default function TransferPage() {
                                                                     min="0"
                                                                     value={entry.amount}
                                                                     onChange={(e) => setQrEntryAmount(entry.id, e.target.value)}
-                                                                    placeholder="Amount (GHS)"
+                                                                    placeholder="Amount (CNY)"
                                                                     className="block w-full px-3 py-2 bg-white border border-gray-100 rounded-lg text-sm font-medium text-gray-900 focus:bg-white outline-none"
                                                                 />
                                                             </div>
