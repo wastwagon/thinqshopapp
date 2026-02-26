@@ -231,8 +231,8 @@ export default function TransferPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                {/* Transfer Form */}
-                <div className="lg:col-span-8 space-y-4">
+                {/* Transfer Form - order-2 on mobile so Recent transfers shows first */}
+                <div className="lg:col-span-8 space-y-4 order-2 lg:order-1">
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 lg:p-5">
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* Direction Selection */}
@@ -448,8 +448,8 @@ export default function TransferPage() {
                     </div>
                 </div>
 
-                {/* History Sidebar */}
-                <div className="lg:col-span-4 space-y-4">
+                {/* History Sidebar - order-1 on mobile so visible first */}
+                <div className="lg:col-span-4 space-y-4 order-1 lg:order-2">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="px-4 py-3 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                             <h3 className="text-xs font-semibold  text-gray-500">Recent transfers</h3>

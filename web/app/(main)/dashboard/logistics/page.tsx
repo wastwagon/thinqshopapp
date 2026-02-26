@@ -220,8 +220,8 @@ export default function LogisticsPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Booking Wizard */}
-                <div className="lg:col-span-2">
+                {/* Booking Wizard - order-2 on mobile so widgets show first */}
+                <div className="lg:col-span-2 order-2 lg:order-1">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="px-6 py-5 border-b border-gray-100">
                             <h2 className="text-lg font-bold text-gray-900 tracking-tight">Create New Shipment</h2>
@@ -461,8 +461,8 @@ export default function LogisticsPage() {
                     </div>
                 </div>
 
-                {/* Tracking History */}
-                <div className="space-y-4 md:space-y-8">
+                {/* Tracking History & Save on shipping - order-1 on mobile so visible first */}
+                <div className="space-y-4 md:space-y-8 order-1 lg:order-2">
                     <div className="bg-white rounded-2xl md:rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
                         <div className="px-4 py-4 md:px-8 md:py-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                             <h3 className="text-xs font-bold tracking-[0.2em]  text-gray-400 flex items-center">

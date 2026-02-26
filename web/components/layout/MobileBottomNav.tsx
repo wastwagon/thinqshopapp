@@ -13,7 +13,7 @@ import {
 
 const navItems = [
     { name: 'Home', href: '/', icon: Home },
-    { name: 'Logistics', href: '/track', icon: Truck },
+    { name: 'Logistics', href: '/dashboard/logistics', icon: Truck },
     { name: 'Supply', href: '/dashboard/procurement', icon: ShoppingBag },
     { name: 'Transfers', href: '/dashboard/transfers', icon: Send },
     { name: 'Account', href: '/dashboard', icon: User },
