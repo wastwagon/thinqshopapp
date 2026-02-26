@@ -78,11 +78,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         api.get('/users/profile').then(({ data }) => setUser(data)).catch(console.error);
         // Safe redirect: only /dashboard or /admin (and subpaths)
         const safe = redirectPath && /^\/(dashboard|admin)(\/|$)/.test(redirectPath) ? redirectPath : null;
-        if (userRole === 'admin' || userRole === 'superadmin') {
-            router.push(safe && safe.startsWith('/admin') ? safe : '/admin');
-        } else {
-            router.push(safe && safe.startsWith('/dashboard') ? safe : '/dashboard');
-        }
+        const target = userRole === 'admin' || userRole === 'superadmin'
+            ? (safe && safe.startsWith('/admin') ? safe : '/admin')
+            : (safe && safe.startsWith('/dashboard') ? safe : '/dashboard');
+        // Use window.location for full reload so middleware sees the new cookie (router.push can fail)
+        window.location.href = target;
     };
 
     const logout = () => {
