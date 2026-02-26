@@ -12,14 +12,19 @@ import ShopLayout from '@/components/layout/ShopLayout';
 import { ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const ghanaPhoneRegex = /^(\+233|0)[0-9]{9}$/;
+/** Accept international numbers: +country + digits, 10-15 digits total. */
+const phoneOptional = (v: string | undefined) => {
+    if (!v || v.trim() === '') return true;
+    const digits = v.replace(/\D/g, '');
+    return digits.length >= 10 && digits.length <= 15;
+};
 const registerSchema = z.object({
     first_name: z.string().min(2, "First name is required"),
     last_name: z.string().min(2, "Last name is required"),
     email: z.string().email("Please enter a valid email address"),
     password: z.string().min(8, "Password must be at least 8 characters long"),
     confirmPassword: z.string().min(8, "Please confirm your password"),
-    phone: z.string().optional().refine((v) => !v || v.trim() === '' || ghanaPhoneRegex.test(v.replace(/\s/g, '')), "Please enter a valid Ghana phone number (e.g. +233XXXXXXXXX or 0XXXXXXXXX)"),
+    phone: z.string().optional().refine(phoneOptional, "Please enter a valid phone number (e.g. +233XXXXXXXXX, +86138..., +1234567890)"),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
@@ -109,7 +114,7 @@ export default function RegisterPage() {
                                     <input
                                         {...register('phone')}
                                         type="tel"
-                                        placeholder="+233XXXXXXXXX or 0XXXXXXXXX (for WhatsApp contact)"
+                                        placeholder="+233... or +86... (international, optional)"
                                         className="block w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
                                     />
                                     {errors.phone && <p className="text-red-500 text-xs mt-2 ml-1">{errors.phone.message}</p>}

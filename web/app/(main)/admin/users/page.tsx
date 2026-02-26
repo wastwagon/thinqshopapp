@@ -7,12 +7,12 @@ import { Users, Shield, Search, Mail, Calendar, Activity, Eye, Phone } from 'luc
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 
-/** Convert Ghana phone to WhatsApp wa.me URL. */
+/** Convert phone to WhatsApp wa.me URL. Handles Ghana (0/233) and international (+country). */
 function toWhatsAppUrl(phone: string | null | undefined): string | null {
     if (!phone || !phone.trim()) return null;
     const digits = phone.replace(/\D/g, '');
     if (digits.length < 9) return null;
-    const num = digits.startsWith('233') ? digits : digits.startsWith('0') ? '233' + digits.slice(1) : '233' + digits;
+    const num = digits.startsWith('0') ? '233' + digits.slice(1) : digits;
     return `https://wa.me/${num}`;
 }
 
