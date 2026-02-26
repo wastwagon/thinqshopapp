@@ -43,10 +43,10 @@ export default function MobileBottomNav() {
                             aria-label={item.name}
                             aria-current={isActive ? 'page' : undefined}
                         >
-                            <div className={`p-1.5 rounded-lg transition-all duration-200 ${isActive ? 'bg-blue-500 text-white' : 'text-slate-400'}`}>
+                            <div className={`p-1.5 rounded-lg transition-all duration-200 ${isActive ? 'bg-blue-500 text-white' : 'text-white'}`}>
                                 <Icon className="h-4 w-4" strokeWidth={isActive ? 2.5 : 2} aria-hidden />
                             </div>
-                            <span className={`text-[8px] font-semibold uppercase tracking-wider truncate w-full text-center ${isActive ? 'text-blue-400' : 'text-slate-500'}`}>
+                            <span className={`text-[8px] font-semibold uppercase tracking-wider truncate w-full text-center ${isActive ? 'text-blue-300' : 'text-white'}`}>
                                 {item.name}
                             </span>
                         </Link>
