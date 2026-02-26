@@ -199,6 +199,19 @@ export class OrderService {
         return order;
     }
 
+    async findOneForAdmin(id: number) {
+        const order = await this.prisma.order.findUnique({
+            where: { id },
+            include: {
+                items: { include: { product: true } },
+                user: { include: { profile: true } },
+                shipping_address: true,
+            },
+        });
+        if (!order) throw new NotFoundException('Order not found');
+        return order;
+    }
+
     async findAllForAdmin(query: { page?: number; limit?: number; status?: string }) {
         const { page = 1, limit = 50, status } = query;
         const skip = (page - 1) * limit;

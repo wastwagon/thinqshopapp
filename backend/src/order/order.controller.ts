@@ -16,6 +16,15 @@ export class OrderController {
         return this.orderService.findAllForAdmin(query);
     }
 
+    @Get('admin/:id')
+    @UseGuards(AuthGuard)
+    async findOneAdmin(@Request() req: any, @Param('id', ParseIntPipe) id: number) {
+        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
+            throw new ForbiddenException('Admin access required');
+        }
+        return this.orderService.findOneForAdmin(id);
+    }
+
     @Patch('admin/:id/status')
     @UseGuards(AuthGuard)
     async updateStatusAdmin(@Request() req: any, @Param('id', ParseIntPipe) id: number, @Body() body: { status: string }) {

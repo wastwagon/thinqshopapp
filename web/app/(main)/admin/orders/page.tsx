@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Package, Search, ChevronRight, FileText, Clock, Truck, CheckCircle, XCircle } from 'lucide-react';
+import Link from 'next/link';
+import { Package, Search, ChevronRight, FileText, Clock, Truck, CheckCircle, XCircle, Eye } from 'lucide-react';
 
 const ORDER_STATUSES = ['pending', 'processing', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'];
 
@@ -169,25 +170,40 @@ export default function AdminOrdersPage() {
                             ) : (
                                 filteredOrders.map((o) => (
                                     <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="px-3 py-2.5"><span className="text-xs font-semibold text-gray-900">{o.order_number}</span></td>
+                                        <td className="px-3 py-2.5">
+                                            <Link
+                                                href={`/admin/orders/${o.id}`}
+                                                className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+                                            >
+                                                {o.order_number}
+                                            </Link>
+                                        </td>
                                         <td className="px-3 py-2.5"><span className="text-xs text-gray-700 truncate block max-w-[120px]">{userName(o)}</span></td>
                                         <td className="px-3 py-2.5"><span className="text-xs text-gray-600">{o.items?.length ?? 0} items</span></td>
                                         <td className="px-3 py-2.5"><span className="text-xs font-semibold text-gray-900">₵{Number(o.total).toFixed(2)}</span></td>
                                         <td className="px-3 py-2.5"><StatusBadge status={o.status} /></td>
                                         <td className="px-3 py-2.5 text-[10px] text-gray-500">{o.created_at ? new Date(o.created_at).toLocaleDateString() : '—'}</td>
                                         <td className="px-3 py-2.5 text-right">
-                                            <div className="relative inline-block">
-                                                <select
-                                                    value={o.status}
-                                                    onChange={(e) => handleStatusUpdate(o.id, e.target.value)}
-                                                    disabled={updatingId === o.id}
-                                                    className="text-[10px] font-semibold border border-gray-100 rounded-lg pl-2 pr-6 py-1.5 bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer"
+                                            <div className="flex items-center gap-2 justify-end">
+                                                <Link
+                                                    href={`/admin/orders/${o.id}`}
+                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold text-blue-600 hover:bg-blue-50 border border-blue-100"
                                                 >
-                                                    {ORDER_STATUSES.map((s) => (
-                                                        <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
-                                                    ))}
-                                                </select>
-                                                <ChevronRight className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none rotate-90" aria-hidden />
+                                                    <Eye className="h-3 w-3" /> View
+                                                </Link>
+                                                <div className="relative inline-block">
+                                                    <select
+                                                        value={o.status}
+                                                        onChange={(e) => handleStatusUpdate(o.id, e.target.value)}
+                                                        disabled={updatingId === o.id}
+                                                        className="text-[10px] font-semibold border border-gray-100 rounded-lg pl-2 pr-6 py-1.5 bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer"
+                                                    >
+                                                        {ORDER_STATUSES.map((s) => (
+                                                            <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
+                                                        ))}
+                                                    </select>
+                                                    <ChevronRight className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none rotate-90" aria-hidden />
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
