@@ -101,17 +101,19 @@ export class ProductService {
         return product;
     }
 
-    async getReviewsByProductSlug(slug: string, page = 1, limit = 10) {
+    async getReviewsByProductSlug(slug: string, page: number | string = 1, limit: number | string = 10) {
         const product = await this.prisma.product.findUnique({ where: { slug }, select: { id: true } });
         if (!product) throw new NotFoundException(`Product with slug ${slug} not found`);
-        const skip = (page - 1) * limit;
+        const p = Number(page) || 1;
+        const l = Number(limit) || 10;
+        const skip = (p - 1) * l;
         const [reviews, total] = await Promise.all([
             this.prisma.productReview.findMany({
                 where: { product_id: product.id, is_approved: true },
                 include: { user: { select: { profile: { select: { first_name: true, last_name: true } } } } },
                 orderBy: { created_at: 'desc' },
                 skip,
-                take: limit,
+                take: l,
             }),
             this.prisma.productReview.count({ where: { product_id: product.id, is_approved: true } }),
         ]);
@@ -123,7 +125,7 @@ export class ProductService {
             display_name: r.display_name || (r.user?.profile ? [r.user.profile.first_name, r.user.profile.last_name].filter(Boolean).join(' ').trim() || 'Customer' : 'Customer'),
             created_at: r.created_at,
         }));
-        return { data: list, meta: { total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / limit) } };
+        return { data: list, meta: { total, page: p, limit: l, totalPages: Math.ceil(total / l) } };
     }
 
     async createReview(productId: number, userId: number, dto: CreateReviewDto) {

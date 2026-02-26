@@ -1,10 +1,9 @@
-import { Controller, Get, Post, Body, UseGuards, Request, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards, Request, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { PaymentService } from './payment.service';
 import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('finance/wallet')
-@UseGuards(AuthGuard)
 export class WalletController {
     constructor(
         private walletService: WalletService,
@@ -12,6 +11,7 @@ export class WalletController {
     ) { }
 
     @Get()
+    @UseGuards(AuthGuard)
     async getWallet(@Request() req) {
         let wallet = await this.walletService.getBalance(req.user.sub);
         if (!wallet) {
@@ -21,11 +21,13 @@ export class WalletController {
     }
 
     @Get('transactions')
+    @UseGuards(AuthGuard)
     async getTransactions(@Request() req) {
         return this.walletService.getTransactions(req.user.sub);
     }
 
     @Post('topup')
+    @UseGuards(AuthGuard)
     async topUp(@Request() req, @Body() body: { amount: number }) {
         const amount = Number(body.amount);
         if (!Number.isFinite(amount) || amount <= 0) {
@@ -48,6 +50,7 @@ export class WalletController {
     }
 
     @Post('confirm-topup')
+    @UseGuards(AuthGuard)
     async confirmTopup(@Request() req, @Body() body: { reference: string }) {
         const reference = body?.reference?.trim();
         if (!reference) throw new BadRequestException('reference is required');
@@ -68,5 +71,29 @@ export class WalletController {
         await this.walletService.topUp(req.user.sub, amount);
         const wallet = await this.walletService.getBalance(req.user.sub);
         return { balance_ghs: Number(wallet?.balance_ghs ?? 0), credited: amount };
+    }
+
+    @Get('admin/list')
+    @UseGuards(AuthGuard)
+    async listAdmin(@Request() req: any, @Query() query: { page?: number; limit?: number; search?: string }) {
+        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
+            throw new ForbiddenException('Admin access required');
+        }
+        return this.walletService.listAllForAdmin(query);
+    }
+
+    @Post('admin/adjust')
+    @UseGuards(AuthGuard)
+    async adminAdjust(@Request() req: any, @Body() body: { user_id: number; amount: number }) {
+        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
+            throw new ForbiddenException('Admin access required');
+        }
+        const userId = Number(body.user_id);
+        const amount = Number(body.amount);
+        if (!userId || !Number.isFinite(userId)) {
+            throw new BadRequestException('user_id is required');
+        }
+        const wallet = await this.walletService.adminAdjust(userId, amount);
+        return { balance_ghs: Number(wallet.balance_ghs) };
     }
 }

@@ -69,7 +69,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
         { name: 'Transfers', href: '/admin/transfers', icon: Send },
         { name: 'Procurement', href: '/admin/procurement', icon: ShoppingBag },
         { name: 'Users', href: '/admin/users', icon: User },
-        { name: 'Wallet', href: '/admin/wallet', icon: Wallet },
+        { name: 'Wallet management', href: '/admin/wallet', icon: Wallet },
         { name: 'Email templates', href: '/admin/email-templates', icon: Edit3 },
         { name: 'Settings', href: '/admin/settings', icon: Settings },
     ];

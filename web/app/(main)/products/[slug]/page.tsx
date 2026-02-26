@@ -304,11 +304,11 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                     <div className="mt-24 border-t border-gray-100 pt-16">
                         <div className="flex items-center justify-between mb-8">
                             <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Related Assets</h2>
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{product.category}</span>
+                            {catName && <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{catName}</span>}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                             {localProducts
-                                .filter(p => p.category === product.category && p.name !== product.name)
+                                .filter((p: any) => (typeof p.category === 'string' ? p.category : p.category?.name) === catName && p.name !== product.name)
                                 .slice(0, 4)
                                 .map((relatedProduct, idx) => (
                                     <ProductCard key={idx} product={relatedProduct as any} />
