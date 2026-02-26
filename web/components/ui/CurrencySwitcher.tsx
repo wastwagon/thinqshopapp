@@ -5,10 +5,10 @@ import { ChevronDown } from 'lucide-react';
 import { useCurrency } from '@/context/CurrencyContext';
 import type { DisplayCurrency } from '@/context/CurrencyContext';
 
-const CURRENCIES: { code: DisplayCurrency; symbol: string; label: string }[] = [
-    { code: 'GHS', symbol: '₵', label: 'GHS' },
-    { code: 'USD', symbol: '$', label: 'USD' },
-    { code: 'CNY', symbol: '¥', label: 'CNY' },
+const CURRENCIES: { code: DisplayCurrency; symbol: string; label: string; flag: string }[] = [
+    { code: 'GHS', symbol: '₵', label: 'GHS', flag: '🇬🇭' },
+    { code: 'USD', symbol: '$', label: 'USD', flag: '🇺🇸' },
+    { code: 'CNY', symbol: '¥', label: 'CNY', flag: '🇨🇳' },
 ];
 
 export default function CurrencySwitcher() {
@@ -36,7 +36,8 @@ export default function CurrencySwitcher() {
                 aria-haspopup="listbox"
                 aria-label={`Currency: ${current.label}. Click to change`}
             >
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1.5">
+                    <span className="text-base leading-none" aria-hidden>{current.flag}</span>
                     <span className="text-base font-bold text-blue-600">{current.symbol}</span>
                     <span className="text-xs font-bold uppercase tracking-wider">{current.label}</span>
                 </span>
@@ -65,6 +66,7 @@ export default function CurrencySwitcher() {
                                         : 'bg-white text-gray-700 hover:bg-gray-50'
                                 }`}
                             >
+                                <span className="text-xl leading-none" aria-hidden>{c.flag}</span>
                                 <span className="text-lg font-bold text-blue-600">{c.symbol}</span>
                                 <span className="text-sm font-semibold">{c.label}</span>
                                 {currency === c.code && (
