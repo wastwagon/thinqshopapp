@@ -6,6 +6,7 @@ import { Truck, Package, Search, History as HistoryIcon, Info, CheckCircle, Plus
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 interface Zone {
     id: number;
@@ -38,6 +39,7 @@ interface FreightRate {
 
 export default function LogisticsPage() {
     const { user } = useAuth();
+    const router = useRouter();
     const [zones, setZones] = useState<Zone[]>([]);
     const [history, setHistory] = useState<any[]>([]);
 
@@ -186,12 +188,11 @@ export default function LogisticsPage() {
                 notes: notes
             };
 
-            await api.post('/logistics/book', payload);
-            toast.success("Shipment Booked Successfully!");
+            const { data } = await api.post('/logistics/book', payload);
             // Reset fields
             setCarrierTracking('');
             setDeclaredItems([{ description: '', value: '', quantity: 1 }]);
-
+            router.push(`/dashboard/logistics/success?id=${data.id}`);
             // Refresh history
             const res = await api.get('/logistics/history');
             setHistory(res.data);

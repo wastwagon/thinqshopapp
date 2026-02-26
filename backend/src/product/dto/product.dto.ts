@@ -20,6 +20,10 @@ export class CreateProductDto {
     @IsNumber()
     stock_quantity?: number;
 
+    @IsOptional()
+    @IsNumber()
+    compare_price?: number;
+
     @IsNumber()
     category_id: number;
 

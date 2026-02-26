@@ -7,6 +7,7 @@ import { ShoppingBag, Plus, Link as LinkIcon, CheckCircle, History as HistoryIco
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useRouter } from 'next/navigation';
 
 interface Request {
     id: number;
@@ -21,6 +22,7 @@ interface Request {
 }
 
 export default function ProcurementPage() {
+    const router = useRouter();
     const [requests, setRequests] = useState<Request[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
@@ -114,9 +116,7 @@ export default function ProcurementPage() {
                 reference_images: uploadedImages.length > 0 ? uploadedImages : undefined,
             };
 
-            await api.post('/procurement/request', payload);
-
-            toast.success('Request submitted!');
+            const { data } = await api.post('/procurement/request', payload);
             setIsCreating(false);
             setDescription('');
             setQuantity(1);
@@ -125,6 +125,7 @@ export default function ProcurementPage() {
             setReferenceLink('');
             setUrgency('standard');
             setUploadedImages([]);
+            router.push(`/dashboard/procurement/success?id=${data.id}`);
             fetchRequests();
         } catch (error) {
             toast.error('Failed to submit request');

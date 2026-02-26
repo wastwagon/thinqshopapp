@@ -8,6 +8,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 const PaystackTrigger = dynamic(
     () => import('@/components/transfers/PaystackTrigger').then((m) => m.default),
@@ -29,6 +30,7 @@ interface Transfer {
 
 export default function TransferPage() {
     const { user } = useAuth();
+    const router = useRouter();
     const [rate, setRate] = useState<number>(0);
     const [transferDirection, setTransferDirection] = useState('send_to_china');
     const [purpose, setPurpose] = useState('Personal');
@@ -101,12 +103,12 @@ export default function TransferPage() {
             await api.post(`/finance/transfers/${paystackConfig.transferId}/confirm-payment`, {
                 paystack_reference: ref.reference
             });
-            toast.success("Payment confirmed! Transfer initiated.");
             setPaystackConfig(null);
             setAmountGhs('');
             setRecipientName('');
             setRecipientId('');
             setQrEntries([{ id: crypto.randomUUID(), dataUrl: '', amount: '', recipientName: '' }]);
+            router.push(`/dashboard/transfers/success?id=${paystackConfig.transferId}`);
             fetchData();
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Payment confirmation failed.");
@@ -182,11 +184,11 @@ export default function TransferPage() {
             const { data } = await api.post('/finance/transfers', payload);
 
             if (paymentMethod === 'wallet') {
-                toast.success("Transfer initiated successfully!");
                 setAmountGhs('');
                 setRecipientName('');
                 setQrEntries([{ id: crypto.randomUUID(), dataUrl: '', amount: '', recipientName: '' }]);
                 setRecipientId('');
+                router.push(`/dashboard/transfers/success?id=${data.id}`);
                 fetchData();
             } else if (data.paystack_reference) {
                 setPaystackConfig({
@@ -508,7 +510,7 @@ export default function TransferPage() {
                             </ul>
                         )}
                         <div className="p-4 border-t border-gray-50 flex justify-center">
-                            <Link href="/dashboard/orders" className="text-xs font-semibold text-blue-600 hover:text-gray-900 transition-colors">
+                            <Link href="/dashboard/transfers" className="text-xs font-semibold text-blue-600 hover:text-gray-900 transition-colors">
                                 View all →
                             </Link>
                         </div>

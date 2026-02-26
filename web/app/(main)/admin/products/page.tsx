@@ -35,7 +35,9 @@ export default function AdminProducts() {
         name: '',
         category_id: '',
         price: '',
+        compare_price: '',
         stock_quantity: '',
+        is_featured: false,
         featuredImage: '',
         gallery: [] as string[],
         wholesale_min_quantity: '',
@@ -82,7 +84,9 @@ export default function AdminProducts() {
                 name: product.name ?? '',
                 category_id: String(catId),
                 price: String(Number(product.price ?? 0)),
+                compare_price: product.compare_price != null ? String(Number(product.compare_price)) : '',
                 stock_quantity: String(Number(product.stock_quantity ?? product.stock ?? 10)),
+                is_featured: !!product.is_featured,
                 featuredImage: imgs[0] ?? '',
                 gallery: imgs.slice(1),
                 wholesale_min_quantity: String(product.wholesale_min_quantity ?? ''),
@@ -94,7 +98,9 @@ export default function AdminProducts() {
                 name: '',
                 category_id: '',
                 price: '',
+                compare_price: '',
                 stock_quantity: '',
+                is_featured: false,
                 featuredImage: '',
                 gallery: [],
                 wholesale_min_quantity: '',
@@ -172,8 +178,10 @@ export default function AdminProducts() {
                 category_id: categoryId,
                 price: parseFloat(formData.price),
                 stock_quantity: parseInt(formData.stock_quantity || '0', 10) || 0,
+                is_featured: formData.is_featured,
                 images
             };
+            if (formData.compare_price) payload.compare_price = parseFloat(formData.compare_price);
             if (formData.wholesale_min_quantity) payload.wholesale_min_quantity = parseInt(formData.wholesale_min_quantity, 10);
             if (formData.wholesale_discount_pct) payload.wholesale_discount_pct = parseFloat(formData.wholesale_discount_pct);
             if (editingProduct) {
@@ -386,6 +394,19 @@ export default function AdminProducts() {
                                     />
                                 </div>
                                 <div>
+                                    <label className="block text-[10px] font-semibold text-gray-500 mb-1">Compare price (GHS)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={formData.compare_price}
+                                        onChange={(e) => setFormData({ ...formData, compare_price: e.target.value })}
+                                        placeholder="Original price for sale display"
+                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    />
+                                    <p className="text-[9px] text-gray-400 mt-0.5">Shows in Flash Sales when set</p>
+                                </div>
+                                <div>
                                     <label className="block text-[10px] font-semibold text-gray-500 mb-1">Stock</label>
                                     <input
                                         type="number"
@@ -395,6 +416,16 @@ export default function AdminProducts() {
                                         className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                     />
                                 </div>
+                            </div>
+                            <div className="flex items-center gap-3 py-1">
+                                <input
+                                    type="checkbox"
+                                    id="is_featured"
+                                    checked={formData.is_featured}
+                                    onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                                    className="w-4 h-4 rounded border-gray-200 text-blue-600 focus:ring-blue-500"
+                                />
+                                <label htmlFor="is_featured" className="text-sm font-medium text-gray-700">Show in Featured section on homepage</label>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
