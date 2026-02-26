@@ -230,7 +230,7 @@ export default function LogisticsPage() {
                                     <div className="min-w-0 font-mono text-xs text-gray-800 whitespace-pre-wrap break-words">
                                         <p>ThinQ:18320709024</p>
                                         <p>广州市越秀区三元里大道499-523号四楼08号商铺({user?.first_name || 'Customer'})</p>
-                                        <p className="mt-2 text-gray-600">Shipping Mark: {user?.user_identifier || 'TQ-ID'} {user?.first_name || 'Customer'} + {user?.phone || 'Phone'}</p>
+                                        <p className="mt-2 text-gray-600">Shipping Mark: ({user?.user_identifier || 'TQ-ID'}) +{user?.phone || 'Phone'}</p>
                                     </div>
                                     <button
                                         type="button"
@@ -241,7 +241,7 @@ export default function LogisticsPage() {
                                             const copyText = `ThinQ:18320709024
 广州市越秀区三元里大道499-523号四楼08号商铺(${firstName})
 
-Shipping Mark: ${customerId} ${firstName} + ${phone}`;
+Shipping Mark: (${customerId}) +${phone}`;
                                             navigator.clipboard.writeText(copyText);
                                             toast.success("Address copied");
                                         }}
