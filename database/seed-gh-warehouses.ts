@@ -3,6 +3,26 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
+    const chinaWarehouses = [
+        {
+            name: 'ThinQ China Hub',
+            code: 'CN-GZ-001',
+            address: 'Building A, Logistics Park, Guangzhou, Guangdong, China',
+            city: 'Guangzhou',
+            country: 'China',
+            phone: '+86 20 0000 0000',
+            recipient_name: 'ThinQ China Team',
+            is_active: true,
+        },
+    ];
+    for (const w of chinaWarehouses) {
+        await prisma.warehouse.upsert({
+            where: { code: w.code },
+            update: w,
+            create: w,
+        });
+    }
+
     const ghanaWarehouses = [
         {
             name: 'Lapaz Hub',

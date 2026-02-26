@@ -222,14 +222,14 @@ export default function LogisticsPage() {
                             <p className="text-xs text-gray-500 mt-1">Ship from our China warehouse to Ghana. All fields on one page.</p>
                         </div>
 
-                        <div className="p-6 space-y-6 max-h-[calc(100vh-14rem)] overflow-y-auto">
+                        <div className="p-6 space-y-6 md:max-h-[calc(100vh-14rem)] md:overflow-y-auto">
                             {/* Single China forwarding address (no duplication) */}
                             <section>
                                 <h3 className="text-[10px] font-bold tracking-[0.2em]  text-gray-400 mb-3">Our Warehouse Address</h3>
                                 <p className="text-[10px] font-medium text-gray-500  mb-3">Forwarding Warehouse (China)</p>
                                 {(() => {
                                     const w = chinaWarehouses.length > 0 ? chinaWarehouses[0] : null;
-                                    if (!w) return <p className="text-xs text-gray-400">Loading warehouse…</p>;
+                                    if (!w) return <p className="text-xs text-amber-600">No China warehouse configured. Run database seed or add one in Admin.</p>;
                                     return (
                                         <div className="rounded-xl border-2 border-gray-100 bg-gray-50/50 p-4 flex justify-between items-start gap-4">
                                             <div className="min-w-0">

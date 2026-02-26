@@ -221,7 +221,19 @@ export async function runSeed(prisma: PrismaClient) {
         skipDuplicates: true,
     });
 
-    // --- Ghana warehouses (Ship for Me) ---
+    // --- China warehouse (forwarding / Ship for Me origin) ---
+    const chinaWarehouses = [
+        { name: 'ThinQ China Hub', code: 'CN-GZ-001', address: 'Building A, Logistics Park, Guangzhou, Guangdong, China', city: 'Guangzhou', country: 'China', phone: '+86 20 0000 0000', recipient_name: 'ThinQ China Team', is_active: true },
+    ];
+    for (const w of chinaWarehouses) {
+        await prisma.warehouse.upsert({
+            where: { code: w.code },
+            update: w,
+            create: w,
+        });
+    }
+
+    // --- Ghana warehouses (Ship for Me destination) ---
     const ghanaWarehouses = [
         { name: 'Lapaz Hub', code: 'GH-LAPAZ-001', address: 'Lapaz Main Road, Opposite Las Palmas, Accra', city: 'Accra', country: 'Ghana', phone: '+233 24 000 0000', recipient_name: 'ThinQ Lapaz Team', is_active: true },
         { name: 'Kumasi Hub', code: 'GH-KUMASI-001', address: 'Adum Central, Kumasi', city: 'Kumasi', country: 'Ghana', phone: '+233 24 111 1111', recipient_name: 'ThinQ Kumasi Team', is_active: true },
