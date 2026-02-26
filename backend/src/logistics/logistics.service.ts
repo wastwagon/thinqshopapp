@@ -147,9 +147,8 @@ export class LogisticsService {
                 await this.walletService.topUp(userId, -priceDetails.total);
             }
         } else {
-            // Freight Forwarding: Just an Alert / Booking
-            // Required: delivery_address, tracking, etc.
-            if (!delivery_address_id || !dto.carrier_tracking_number) {
+            // Freight Forwarding: Local pickup at destination warehouse (no delivery address needed)
+            if (!dto.carrier_tracking_number) {
                 throw new BadRequestException('Missing required freight details.');
             }
             // Price is TBD upon arrival
@@ -163,7 +162,7 @@ export class LogisticsService {
                 user_id: userId,
                 tracking_number,
                 pickup_address_id: dto.origin_warehouse_id ? null : pickup_address_id,
-                delivery_address_id,
+                delivery_address_id: isFreightForwarding ? null : delivery_address_id,
                 weight: weight || 0,
                 dimensions: dimensions || '',
                 service_type: isFreightForwarding ? dto.shipping_method : service_type,

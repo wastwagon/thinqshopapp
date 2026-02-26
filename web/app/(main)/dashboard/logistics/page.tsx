@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
-import { Truck, Package, MapPin, Search, History as HistoryIcon, Info, CheckCircle, Plus, Copy, Camera } from 'lucide-react';
+import { Truck, Package, Search, History as HistoryIcon, Info, CheckCircle, Plus, Copy, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
-import AddressBook from '@/components/ui/AddressBook';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
 
@@ -44,7 +43,6 @@ export default function LogisticsPage() {
 
     // Booking Form State
     const [selectedPickupId, setSelectedPickupId] = useState<number | null>(null);
-    const [selectedDeliveryId, setSelectedDeliveryId] = useState<number | null>(null);
     const [weight, setWeight] = useState<number>(1);
     const [dimensions, setDimensions] = useState({ length: '', width: '', height: '' });
     const [contentsDescription, setContentsDescription] = useState('');
@@ -163,10 +161,6 @@ export default function LogisticsPage() {
             toast.error("Destination warehouse (Lapaz) is not available.");
             return;
         }
-        if (!selectedDeliveryId) {
-            toast.error("Please select a delivery address in Ghana");
-            return;
-        }
         if (!selectedRateId) {
             toast.error("Please select a shipping rate");
             return;
@@ -182,7 +176,6 @@ export default function LogisticsPage() {
                 type: 'freight_forwarding',
                 origin_warehouse_id: selectedWarehouseId,
                 destination_warehouse_id: destinationId,
-                delivery_address_id: selectedDeliveryId,
                 carrier_tracking_number: carrierTracking.trim(),
                 shipping_method: serviceType,
                 shipping_rate_id: selectedRateId || undefined,
@@ -268,15 +261,7 @@ export default function LogisticsPage() {
                                 })()}
                             </section>
 
-                            {/* Delivery address (Ghana) */}
-                            <section>
-                                <h3 className="text-[10px] font-bold tracking-[0.2em]  text-gray-400 mb-3 flex items-center gap-2">
-                                    <MapPin className="h-3.5 w-3.5" /> Delivery Address (Ghana)
-                                </h3>
-                                <AddressBook onSelect={(addr) => setSelectedDeliveryId(addr.id)} selectedId={selectedDeliveryId || undefined} />
-                            </section>
-
-                            {/* Destination: only Local Pick Up at Lapaz Warehouse (no Kumasi) */}
+                            {/* Destination: Local Pick Up at Lapaz Warehouse */}
                             <section>
                                 <h3 className="text-[10px] font-bold tracking-[0.2em]  text-gray-400 mb-3">Destination (Ghana)</h3>
                                 {lapazWarehouse ? (

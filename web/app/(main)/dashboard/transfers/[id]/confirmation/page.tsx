@@ -5,8 +5,21 @@ import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Link from 'next/link';
-import { ArrowLeft, FileDown, Printer, CheckCircle, Clock, Send } from 'lucide-react';
+import { ArrowLeft, Download, Printer, CheckCircle, Clock, Send, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+function downloadImage(url: string, filename: string) {
+    fetch(url, { mode: 'cors' })
+        .then((res) => res.blob())
+        .then((blob) => {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        })
+        .catch(() => toast.error('Download failed'));
+}
 
 type QrEntry = { image: string; amount_ghs?: number; recipient_name?: string };
 type QrFulfillment = { qr_index: number; status: string; confirmation_image?: string; admin_notes?: string; fulfilled_at?: string };
@@ -86,45 +99,51 @@ export default function TransferConfirmationPage() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-3xl mx-auto pb-12">
-                {/* Actions - hidden when printing */}
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-8 print:hidden">
-                    <Link
-                        href="/dashboard/transfers"
-                        className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900"
-                    >
-                        <ArrowLeft className="h-4 w-4" /> Back to transfers
-                    </Link>
-                    <div className="flex items-center gap-3">
+            <div className="max-w-3xl mx-auto pb-6">
+                {/* Breadcrumb and actions - hidden when printing */}
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-4 print:hidden">
+                    <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm">
+                        <Link href="/dashboard" className="text-gray-500 hover:text-gray-900">Dashboard</Link>
+                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                        <Link href="/dashboard/transfers" className="text-gray-500 hover:text-gray-900">Transfers</Link>
+                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                        <span className="font-medium text-gray-900">Payment Confirmation</span>
+                    </nav>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href="/dashboard/transfers"
+                            className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
+                        >
+                            <ArrowLeft className="h-4 w-4" /> Back
+                        </Link>
                         <button
                             type="button"
                             onClick={handlePrint}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-blue-600 transition-colors"
                         >
                             <Printer className="h-4 w-4" /> Print / Save as PDF
                         </button>
-                        <span className="text-xs text-gray-500">Send this page to your suppliers as payment confirmation.</span>
                     </div>
                 </div>
 
                 {/* Printable content */}
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden print:shadow-none print:border print:rounded-lg">
-                    <div className="p-8 md:p-10 border-b border-gray-100 bg-gradient-to-b from-gray-50 to-white">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
-                                <Send className="h-6 w-6 text-white" />
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden print:shadow-none print:border print:rounded-lg">
+                    <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                                <Send className="h-5 w-5 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold text-gray-900">Payment Confirmation</h1>
-                                <p className="text-sm text-gray-500">Reference: {transfer.token}</p>
+                                <h1 className="text-xl font-bold text-gray-900">Payment Confirmation</h1>
+                                <p className="text-xs text-gray-500">Reference: {transfer.token}</p>
                             </div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="text-xs text-gray-500 mt-1">
                             Generated on {new Date().toLocaleDateString(undefined, { dateStyle: 'long' })}. Use this document to confirm payment to your suppliers.
                         </p>
                     </div>
 
-                    <div className="p-8 md:p-10 space-y-8">
+                    <div className="p-6 space-y-6">
                         <section>
                             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Transfer details</h2>
                             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -160,11 +179,19 @@ export default function TransferConfirmationPage() {
 
                         {transfer.admin_reply_images && transfer.admin_reply_images.length > 0 && (
                             <section>
-                                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Proof of transfer</h2>
-                                <div className="flex flex-wrap gap-3">
+                                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Proof of transfer</h2>
+                                <div className="flex flex-wrap gap-2">
                                     {transfer.admin_reply_images.map((img, i) => (
-                                        <div key={i} className="w-28 h-28 rounded-xl border border-gray-200 overflow-hidden bg-gray-50">
+                                        <div key={i} className="group relative w-24 h-24 rounded-lg border border-gray-200 overflow-hidden bg-gray-50">
                                             <img src={img} alt={`Proof ${i + 1}`} className="w-full h-full object-cover" />
+                                            <button
+                                                type="button"
+                                                onClick={() => downloadImage(img, `proof-${i + 1}.png`)}
+                                                className="absolute bottom-1 right-1 p-1.5 rounded-md bg-gray-900/80 text-white opacity-0 group-hover:opacity-100 transition-opacity print:hidden"
+                                                title="Download"
+                                            >
+                                                <Download className="h-3.5 w-3.5" />
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
@@ -173,16 +200,24 @@ export default function TransferConfirmationPage() {
 
                         {qrEntries.length > 0 && (
                             <section>
-                                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Per-recipient confirmation</h2>
-                                <div className="space-y-6">
+                                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Per-recipient confirmation</h2>
+                                <div className="space-y-4">
                                     {qrEntries.map((entry, i) => {
                                         const fulfillment = getFulfillment(transfer, i);
                                         const fulfilled = fulfillment?.status === 'fulfilled';
                                         return (
-                                            <div key={i} className="rounded-xl border border-gray-200 bg-gray-50/50 overflow-hidden">
+                                            <div key={i} className="rounded-lg border border-gray-200 bg-gray-50/50 overflow-hidden">
                                                 <div className="p-4 flex flex-wrap items-center gap-4 border-b border-gray-100 bg-white">
-                                                    <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
+                                                    <div className="group relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
                                                         <img src={entry.image} alt={`QR ${i + 1}`} className="w-full h-full object-contain" />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => downloadImage(entry.image, `qr-${entry.recipient_name || i + 1}.png`)}
+                                                            className="absolute bottom-0.5 right-0.5 p-1 rounded bg-gray-900/80 text-white opacity-0 group-hover:opacity-100 transition-opacity print:hidden"
+                                                            title="Download"
+                                                        >
+                                                            <Download className="h-3 w-3" />
+                                                        </button>
                                                     </div>
                                                     <div>
                                                         {entry.recipient_name && (
@@ -209,8 +244,16 @@ export default function TransferConfirmationPage() {
                                                 {fulfilled && (fulfillment!.confirmation_image || fulfillment!.admin_notes) && (
                                                     <div className="p-4 flex flex-wrap gap-4">
                                                         {fulfillment!.confirmation_image && (
-                                                            <div className="w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
+                                                            <div className="group relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
                                                                 <img src={fulfillment!.confirmation_image} alt="Confirmation" className="w-full h-full object-cover" />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => downloadImage(fulfillment!.confirmation_image!, `confirmation-${entry.recipient_name || i + 1}.png`)}
+                                                                    className="absolute bottom-1 right-1 p-1.5 rounded-md bg-gray-900/80 text-white opacity-0 group-hover:opacity-100 transition-opacity print:hidden"
+                                                                    title="Download"
+                                                                >
+                                                                    <Download className="h-3.5 w-3.5" />
+                                                                </button>
                                                             </div>
                                                         )}
                                                         {fulfillment!.admin_notes && (

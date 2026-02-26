@@ -493,7 +493,7 @@ model Shipment {
   user_id            Int
   tracking_number    String         @unique @db.VarChar(50)
   pickup_address_id  Int?
-  delivery_address_id Int
+  delivery_address_id Int?
   weight             Decimal        @db.Decimal(5, 2)
   dimensions         String?        @db.VarChar(100)
   service_type       ServiceType    @default(standard)
@@ -526,7 +526,7 @@ model Shipment {
 
   user               User           @relation(fields: [user_id], references: [id])
   pickup_address     Address?       @relation("PickupAddress", fields: [pickup_address_id], references: [id])
-  delivery_address   Address        @relation("DeliveryAddress", fields: [delivery_address_id], references: [id])
+  delivery_address   Address?       @relation("DeliveryAddress", fields: [delivery_address_id], references: [id])
   origin_warehouse   Warehouse?     @relation("OriginWarehouse", fields: [origin_warehouse_id], references: [id])
   destination_warehouse Warehouse?   @relation("DestinationWarehouse", fields: [destination_warehouse_id], references: [id])
   tracking           ShipmentTracking[]
@@ -570,11 +570,13 @@ model ProcurementRequest {
   id               Int                @id @default(autoincrement())
   user_id          Int
   request_number   String             @unique @db.VarChar(50)
+  request_type     String?            @db.VarChar(20) // sourcing | print
   description      String
   specifications   String?
   quantity         Int?               @default(1)
   budget_range     String?            @db.VarChar(100)
-  reference_images Json?              // Array
+  reference_link   String?            @db.VarChar(500)
+  reference_images Json?              // Array of uploaded image URLs
   status           ProcurementStatus  @default(submitted)
   created_at       DateTime           @default(now())
   updated_at       DateTime           @updatedAt

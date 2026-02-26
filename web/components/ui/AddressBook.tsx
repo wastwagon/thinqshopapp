@@ -101,15 +101,15 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
     return (
         <div className="mt-8">
             <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xs font-bold tracking-widest uppercase text-gray-400 flex items-center">
-                    <MapPin className="mr-3 h-4 w-4 text-blue-600" /> Saved Destinations
+                    <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+                    <MapPin className="mr-3 h-4 w-4 text-blue-600" /> Saved Addresses
                 </h3>
                 {!isAdding && (
                     <button
                         onClick={() => { setIsAdding(true); reset(); setEditingId(null); }}
-                        className="flex items-center text-xs font-bold text-blue-600 hover:text-blue-700 uppercase tracking-widest"
+                        className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700"
                     >
-                        <Plus className="mr-1.5 h-4 w-4" /> Add Destination
+                        <Plus className="mr-1.5 h-4 w-4" /> Add Address
                     </button>
                 )}
             </div>
@@ -156,8 +156,8 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={() => setIsAdding(false)} className="px-6 py-3 rounded-xl text-xs font-bold text-gray-500 uppercase tracking-widest hover:bg-gray-100 transition-all">Cancel</button>
-                        <button type="submit" disabled={isSubmitting} className="px-8 py-3 bg-gray-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-gray-200">
-                            {isSubmitting ? 'Synchronizing...' : 'Save Destination'}
+                        <button type="submit" disabled={isSubmitting} className="px-8 py-3 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition-all shadow-lg shadow-gray-200">
+                            {isSubmitting ? 'Saving...' : 'Save Address'}
                         </button>
                     </div>
                 </form>
@@ -189,7 +189,7 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
                                         : 'bg-gray-100 text-gray-600 hover:bg-gray-900 hover:text-white'
                                         }`}
                                 >
-                                    {selectedId === address.id ? 'Target Selected' : 'Deploy Here'}
+                                    {selectedId === address.id ? 'Selected' : 'Use this address'}
                                 </button>
                             ) : (
                                 <>

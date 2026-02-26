@@ -1,11 +1,55 @@
-import { Controller, Post, Get, Patch, Body, Param, UseGuards, Request, ForbiddenException } from '@nestjs/common';
+import {
+    Controller,
+    Post,
+    Get,
+    Patch,
+    Body,
+    Param,
+    UseGuards,
+    Request,
+    ForbiddenException,
+    BadRequestException,
+    UseInterceptors,
+    UploadedFile,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { ProcurementService } from './procurement.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { MediaService } from '../media/media.service';
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
 
 @Controller('procurement')
 @UseGuards(AuthGuard)
 export class ProcurementController {
-    constructor(private procurementService: ProcurementService) { }
+    constructor(
+        private procurementService: ProcurementService,
+        private mediaService: MediaService,
+    ) {}
+
+    @Post('upload-image')
+    @UseInterceptors(
+        FileInterceptor('file', {
+            storage: memoryStorage(),
+            limits: { fileSize: MAX_FILE_SIZE },
+            fileFilter: (_req, file, cb) => {
+                if (!file.mimetype || ALLOWED_MIMES.includes(file.mimetype)) {
+                    cb(null, true);
+                } else {
+                    cb(new Error('Invalid file type. Allowed: JPEG, PNG, GIF, WebP, SVG'), false);
+                }
+            },
+        }),
+    )
+    async uploadImage(@Request() req: any, @UploadedFile() file: Express.Multer.File) {
+        if (!file) {
+            throw new BadRequestException('No file uploaded');
+        }
+        const result = await this.mediaService.createFromFile(file);
+        return { url: result.url, path: result.path };
+    }
 
     @Post('request')
     async createRequest(@Request() req, @Body() body: any) {

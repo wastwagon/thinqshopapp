@@ -10,6 +10,7 @@ import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import { CreditCard, Truck, CheckCircle } from 'lucide-react';
 import ShopLayout from '@/components/layout/ShopLayout';
+import PageHeader from '@/components/ui/PageHeader';
 import { trackBeginCheckout, trackPurchase } from '@/lib/analytics';
 
 const CheckoutPaystackTrigger = dynamic(
@@ -24,7 +25,7 @@ export default function CheckoutClient() {
 
     const [step, setStep] = useState(1);
     const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
-    const [paymentMethod, setPaymentMethod] = useState('card');
+    const [paymentMethod, setPaymentMethod] = useState('wallet');
     const [isProcessing, setIsProcessing] = useState(false);
     const [walletBalance, setWalletBalance] = useState<number | null>(null);
     const [paystackOrder, setPaystackOrder] = useState<{ orderId: number; reference: string; amount_pesewas: number } | null>(null);
@@ -61,11 +62,11 @@ export default function CheckoutClient() {
         try {
             const { data } = await api.post('/orders', {
                 total: cartTotal,
-                payment_method: paymentMethod,
+                payment_method: paymentMethod === 'paystack' ? 'card' : paymentMethod,
                 shipping_address_id: selectedAddressId,
             });
 
-            if (paymentMethod === 'card' || paymentMethod === 'mobile_money') {
+            if (paymentMethod === 'paystack') {
                 if (data.paystack_reference && data.amount_pesewas != null) {
                     setPaystackOrder({
                         orderId: data.id,
@@ -85,7 +86,7 @@ export default function CheckoutClient() {
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Failed to place order");
         } finally {
-            if (paymentMethod !== 'card' && paymentMethod !== 'mobile_money') setIsProcessing(false);
+            if (paymentMethod !== 'paystack') setIsProcessing(false);
         }
     };
 
@@ -123,41 +124,37 @@ export default function CheckoutClient() {
                     onClose={handlePaystackClose}
                 />
             )}
-            <div className="max-w-7xl mx-auto px-6 py-12 lg:py-20">
-                <header className="mb-12">
-                    <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">Secure Checkout</h1>
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-100 rounded-full">
-                            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
-                            <p className="text-[10px] text-blue-600 font-bold uppercase tracking-widest leading-none">Verified Merchant Flow</p>
-                        </div>
-                    </div>
-                </header>
+            <div className="max-w-7xl mx-auto px-6 py-6 lg:py-8">
+                <PageHeader
+                    title="Secure Checkout"
+                    subtitle="Complete your purchase"
+                    breadcrumbs={[{ label: 'Cart', href: '/cart' }, { label: 'Checkout' }]}
+                />
 
-                <div className="lg:grid lg:grid-cols-12 lg:gap-16 items-start">
+                <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
                     {/* Left Column: Flow */}
-                    <div className="lg:col-span-7 space-y-10">
+                    <div className="lg:col-span-7 space-y-6">
                         {/* Step 1: Shipping Address */}
-                        <section className={`bg-white rounded-[2.5rem] p-8 lg:p-10 border transition-all duration-500 ${step === 1 ? 'border-blue-200 shadow-2xl shadow-blue-100/20 ring-4 ring-blue-50/50' : 'border-gray-100 opacity-60'}`}>
-                            <div className="flex justify-between items-center mb-10">
-                                <h2 className="text-xs font-bold tracking-[0.2em] uppercase text-gray-400 flex items-center">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center mr-4 ${step === 1 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                                        <Truck className="h-4 w-4" />
+                        <section className={`bg-white rounded-2xl p-6 border transition-all duration-300 ${step === 1 ? 'border-blue-200 shadow-lg shadow-blue-100/20 ring-2 ring-blue-50' : 'border-gray-100 opacity-60'}`}>
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-sm font-semibold text-gray-700 flex items-center">
+                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center mr-3 ${step === 1 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                        <Truck className="h-3.5 w-3.5" />
                                     </div>
-                                    01. Shipping Destination
+                                    Shipping Address
                                 </h2>
                                 {step > 1 && (
-                                    <button onClick={() => setStep(1)} className="text-[10px] font-bold text-blue-600 uppercase tracking-widest hover:underline">Edit</button>
+                                    <button onClick={() => setStep(1)} className="text-xs font-medium text-blue-600 hover:underline">Edit</button>
                                 )}
                             </div>
 
                             <AddressBook onSelect={handleAddressSelect} selectedId={selectedAddressId || undefined} />
 
                             {selectedAddressId && step === 1 && (
-                                <div className="mt-12 flex justify-end">
+                                <div className="mt-6 flex justify-end">
                                     <button
                                         onClick={() => setStep(2)}
-                                        className="bg-gray-900 text-white px-10 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-gray-200 flex items-center gap-3"
+                                        className="bg-gray-900 text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-600 transition-all shadow-lg flex items-center gap-2"
                                     >
                                         Proceed to Payment
                                         <CheckCircle className="h-4 w-4" />
@@ -167,23 +164,21 @@ export default function CheckoutClient() {
                         </section>
 
                         {/* Step 2: Payment Method */}
-                        <section className={`bg-white rounded-[2.5rem] p-8 lg:p-10 border transition-all duration-500 ${step === 2 ? 'border-blue-200 shadow-2xl shadow-blue-100/20 ring-4 ring-blue-50/50' : 'border-gray-100'} ${step < 2 ? 'opacity-40 pointer-events-none grayscale' : ''}`}>
-                            <h2 className="text-xs font-bold tracking-[0.2em] uppercase text-gray-400 flex items-center mb-10">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center mr-4 ${step === 2 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                                    <CreditCard className="h-4 w-4" />
+                        <section className={`bg-white rounded-2xl p-6 border transition-all duration-300 ${step === 2 ? 'border-blue-200 shadow-lg shadow-blue-100/20 ring-2 ring-blue-50' : 'border-gray-100'} ${step < 2 ? 'opacity-40 pointer-events-none grayscale' : ''}`}>
+                            <h2 className="text-sm font-semibold text-gray-700 flex items-center mb-6">
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center mr-3 ${step === 2 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                    <CreditCard className="h-3.5 w-3.5" />
                                 </div>
-                                02. Transaction Method
+                                Payment Method
                             </h2>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                                 {[
-                                    { id: 'card', label: 'Credit / Debit Card', icon: '💳' },
-                                    { id: 'mobile_money', label: 'Mobile Money', icon: '📱' },
-                                    { id: 'wallet', label: walletBalance !== null ? `ThinQ Wallet (₵${walletBalance.toFixed(2)})` : 'ThinQ Wallet', icon: '💰' },
-                                    { id: 'cod', label: 'Cash on Transit', icon: '🚚' }
+                                    { id: 'wallet', label: walletBalance !== null ? `Wallet Balance (₵${walletBalance.toFixed(2)})` : 'Wallet Balance', icon: '💰' },
+                                    { id: 'paystack', label: 'Secure payment on Paystack', icon: '🔒' }
                                 ].map((method) => (
-                                    <label key={method.id} className={`flex items-center justify-between p-6 rounded-2xl border-2 transition-all cursor-pointer group ${paymentMethod === method.id ? 'bg-blue-50 border-blue-600 shadow-lg shadow-blue-100/50' : 'bg-gray-50 border-gray-100 hover:border-gray-200'}`}>
-                                        <div className="flex items-center gap-4">
+                                    <label key={method.id} className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer group ${paymentMethod === method.id ? 'bg-blue-50 border-blue-600 shadow-md shadow-blue-100/20' : 'bg-gray-50 border-gray-100 hover:border-gray-200'}`}>
+                                        <div className="flex items-center gap-3">
                                             <input
                                                 id={method.id}
                                                 name="payment_method"
@@ -192,8 +187,8 @@ export default function CheckoutClient() {
                                                 onChange={() => setPaymentMethod(method.id)}
                                                 className="hidden"
                                             />
-                                            <span className="text-xl">{method.icon}</span>
-                                            <span className={`text-xs font-bold uppercase tracking-wider ${paymentMethod === method.id ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-900'}`}>{method.label}</span>
+                                            <span className="text-lg">{method.icon}</span>
+                                            <span className={`text-sm font-medium ${paymentMethod === method.id ? 'text-blue-600' : 'text-gray-600 group-hover:text-gray-900'}`}>{method.label}</span>
                                         </div>
                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${paymentMethod === method.id ? 'border-blue-600 bg-blue-600' : 'border-gray-300'}`}>
                                             {paymentMethod === method.id && <CheckCircle className="h-3 w-3 text-white" />}
@@ -207,15 +202,14 @@ export default function CheckoutClient() {
                                     <button
                                         onClick={handlePlaceOrder}
                                         disabled={isProcessing}
-                                        className="w-full min-h-[48px] sm:h-14 bg-blue-600 text-white rounded-2xl font-extrabold text-sm uppercase tracking-wider hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-4 shadow-2xl shadow-blue-200 touch-manipulation"
+                                        className="w-full min-h-[44px] bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-4 shadow-lg touch-manipulation"
                                     >
                                         {isProcessing ? 'Processing…' : `Pay ₵${cartTotal.toFixed(2)}`}
                                     </button>
-                                    <p className="mt-3 text-center text-xs text-gray-500">
-                                        Secure payment with Paystack
-                                        {publicSettings.free_shipping_threshold_ghs && Number(publicSettings.free_shipping_threshold_ghs) > 0 && (
-                                            <> · Free delivery on orders over ₵{publicSettings.free_shipping_threshold_ghs}</>
-                                        )}
+                                    <p className="mt-2 text-center text-xs text-gray-500">
+                                        {publicSettings.free_shipping_threshold_ghs && Number(publicSettings.free_shipping_threshold_ghs) > 0 ? (
+                                            <>Free delivery on orders over ₵{publicSettings.free_shipping_threshold_ghs}</>
+                                        ) : null}
                                     </p>
                                 </>
                             )}
@@ -223,27 +217,27 @@ export default function CheckoutClient() {
                     </div>
 
                     {/* Right Column: Order Summary */}
-                    <div className="mt-16 lg:mt-0 lg:col-span-5">
-                        <div className="sticky top-32">
-                            <h3 className="text-xs font-bold tracking-[0.2em] uppercase text-gray-400 mb-8 ml-4">Order Composition</h3>
-                            <div className="bg-white rounded-[2.5rem] p-8 lg:p-10 border border-gray-100 shadow-xl shadow-gray-200/50">
-                                <ul role="list" className="divide-y divide-gray-50 mb-10">
+                    <div className="mt-8 lg:mt-0 lg:col-span-5">
+                        <div className="sticky top-24">
+                            <h3 className="text-sm font-semibold text-gray-700 mb-4">Order Summary</h3>
+                            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-lg">
+                                <ul role="list" className="divide-y divide-gray-50 mb-6">
                                     {cart.map((item) => {
                                         const mainImage = item.product.gallery_images?.[0] || (Array.isArray(item.product.images) ? item.product.images[0] : item.product.images) || '/placeholder.svg';
                                         return (
-                                            <li key={item.id} className="flex py-6 gap-6 group">
-                                                <div className="h-24 w-24 rounded-2xl bg-gray-50 flex-shrink-0 relative overflow-hidden border border-gray-100 group-hover:scale-105 transition-transform duration-500">
+                                            <li key={item.id} className="flex py-4 gap-4 group">
+                                                <div className="h-20 w-20 rounded-xl bg-gray-50 flex-shrink-0 relative overflow-hidden border border-gray-100 group-hover:scale-105 transition-transform">
                                                     <img
                                                         src={mainImage}
                                                         alt={item.product.name}
-                                                        className="w-full h-full object-contain p-4"
+                                                        className="w-full h-full object-contain p-2"
                                                     />
                                                 </div>
                                                 <div className="flex-1 flex flex-col justify-center">
-                                                    <h4 className="text-sm font-bold text-gray-900 mb-1 line-clamp-2">{item.product.name}</h4>
-                                                    <div className="flex items-center justify-between mt-2">
-                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Qty {item.quantity}</p>
-                                                        <p className="text-sm font-extrabold text-gray-900 tracking-tight">₵{Number(item.product.price).toFixed(2)}</p>
+                                                    <h4 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">{item.product.name}</h4>
+                                                    <div className="flex items-center justify-between mt-1">
+                                                        <p className="text-xs text-gray-500">Qty {item.quantity}</p>
+                                                        <p className="text-sm font-bold text-gray-900">₵{Number(item.product.price).toFixed(2)}</p>
                                                     </div>
                                                 </div>
                                             </li>
@@ -251,28 +245,24 @@ export default function CheckoutClient() {
                                     })}
                                 </ul>
 
-                                <div className="space-y-4 border-t border-gray-50 pt-10">
+                                <div className="space-y-3 border-t border-gray-100 pt-6">
                                     <div className="flex items-center justify-between">
-                                        <dt className="text-xs font-bold text-gray-400 uppercase tracking-widest">Merchandise Vol.</dt>
-                                        <dd className="text-sm font-extrabold text-gray-900">₵{cartTotal.toFixed(2)}</dd>
+                                        <dt className="text-sm text-gray-600">Subtotal</dt>
+                                        <dd className="text-sm font-semibold text-gray-900">₵{cartTotal.toFixed(2)}</dd>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <dt className="text-xs font-bold text-gray-400 uppercase tracking-widest">Procurement Fee</dt>
-                                        <dd className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-widest">Calculated Next</dd>
+                                        <dt className="text-sm text-gray-600">Shipping</dt>
+                                        <dd className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">Calculated next</dd>
                                     </div>
-                                    <div className="flex items-center justify-between border-t border-gray-100 pt-8 mt-4">
-                                        <dt className="text-sm font-extrabold text-gray-900 uppercase tracking-[0.1em]">Estimated Total</dt>
-                                        <dd className="text-3xl font-black text-gray-900 tracking-tighter">₵{cartTotal.toFixed(2)}</dd>
+                                    <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-2">
+                                        <dt className="text-sm font-semibold text-gray-900">Total</dt>
+                                        <dd className="text-xl font-bold text-gray-900">₵{cartTotal.toFixed(2)}</dd>
                                     </div>
                                 </div>
 
-                                <div className="mt-10 p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm">
-                                        <CheckCircle className="h-5 w-5 text-green-500" />
-                                    </div>
-                                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-relaxed">
-                                        End-to-end encrypted <br /> checkout sequence.
-                                    </p>
+                                <div className="mt-6 p-3 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-3">
+                                    <CheckCircle className="h-5 w-5 text-green-500 shrink-0" />
+                                    <p className="text-xs text-gray-600">Secure checkout</p>
                                 </div>
                             </div>
                         </div>

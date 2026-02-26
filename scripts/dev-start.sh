@@ -32,7 +32,7 @@ done
 echo ""
 
 echo "==> Starting backend on http://localhost:7000 (PORT=7000)..."
-PORT=7000 npm run dev:backend &
+(cd backend && PORT=7000 npm run start:dev) &
 BACKEND_PID=$!
 echo "    Backend PID: $BACKEND_PID"
 echo ""
