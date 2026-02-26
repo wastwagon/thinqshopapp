@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
-import { Truck, Package, Search, History as HistoryIcon, Info, CheckCircle, Plus, Copy, Camera } from 'lucide-react';
+import { Truck, Info, CheckCircle, Plus, Copy, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
@@ -41,7 +41,6 @@ export default function LogisticsPage() {
     const { user } = useAuth();
     const router = useRouter();
     const [zones, setZones] = useState<Zone[]>([]);
-    const [history, setHistory] = useState<any[]>([]);
 
     // Booking Form State
     const [selectedPickupId, setSelectedPickupId] = useState<number | null>(null);
@@ -92,13 +91,11 @@ export default function LogisticsPage() {
     useEffect(() => {
         const fetchInitial = async () => {
             try {
-                const [zonesRes, historyRes, warehousesRes] = await Promise.all([
+                const [zonesRes, warehousesRes] = await Promise.all([
                     api.get('/logistics/zones'),
-                    api.get('/logistics/history'),
                     api.get('/logistics/warehouses')
                 ]);
                 setZones(zonesRes.data);
-                setHistory(historyRes.data);
                 setWarehouses(warehousesRes.data);
 
                 const initialChina = warehousesRes.data.find((w: any) => w.country === 'China');
@@ -193,9 +190,6 @@ export default function LogisticsPage() {
             setCarrierTracking('');
             setDeclaredItems([{ description: '', value: '', quantity: 1 }]);
             router.push(`/dashboard/logistics/success?id=${data.id}`);
-            // Refresh history
-            const res = await api.get('/logistics/history');
-            setHistory(res.data);
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Booking failed");
         } finally {
@@ -219,9 +213,9 @@ export default function LogisticsPage() {
                 <p className="text-gray-500 text-sm max-w-sm md:text-right">Local delivery and freight from China to Ghana.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Booking Wizard - order-2 on mobile so widgets show first */}
-                <div className="lg:col-span-2 order-2 lg:order-1">
+            <div className="max-w-3xl">
+                {/* Booking Wizard */}
+                <div>
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="px-6 py-5 border-b border-gray-100">
                             <h2 className="text-lg font-bold text-gray-900 tracking-tight">Create New Shipment</h2>
@@ -460,90 +454,7 @@ export default function LogisticsPage() {
                         </div>
                     </div>
                 </div>
-
-                {/* Tracking History & Save on shipping - order-1 on mobile so visible first */}
-                <div className="space-y-4 md:space-y-8 order-1 lg:order-2">
-                    <div className="bg-white rounded-2xl md:rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
-                        <div className="px-4 py-4 md:px-8 md:py-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="text-xs font-bold tracking-[0.2em]  text-gray-400 flex items-center">
-                                <HistoryIcon className="h-4 w-4 mr-3 text-blue-600" />
-                                My shipments
-                            </h3>
-                            <div className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center">
-                                <Search className="h-3 w-3 text-gray-400" />
-                            </div>
-                        </div>
-                        <ul className="divide-y divide-gray-50 max-h-[600px] overflow-y-auto scrollbar-hide">
-                            {history.length === 0 ? (
-                                <li className="p-8 md:p-16 text-center text-gray-300">
-                                    <Package className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 md:mb-6 opacity-20" />
-                                    <p className="text-xs text-gray-500">No shipments yet</p>
-                                </li>
-                            ) : (
-                                history.map((shipment) => (
-                                    <li key={shipment.id} className="px-4 py-4 md:px-8 md:py-6 hover:bg-gray-50 transition-all group">
-                                        <div className="flex justify-between items-start">
-                                            <div className="space-y-1">
-                                                <p className="text-sm font-black text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors">{shipment.tracking_number || 'PENDING_ID'}</p>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
-                                                    <p className="text-[9px] font-bold text-gray-400  font-mono">
-                                                        {new Date(shipment.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="text-right flex flex-col items-end gap-2">
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black  ${shipment.status === 'delivered' ? 'bg-green-100 text-green-700 shadow-sm shadow-green-100' : 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-50'
-                                                    }`}>
-                                                    {shipment.status.replace('_', ' ')}
-                                                </span>
-                                                <p className="text-sm font-black text-gray-900 tracking-tighter">₵{Number(shipment.total_price).toFixed(2)}</p>
-                                            </div>
-                                        </div>
-
-                                        {/* Transit Timeline */}
-                                        <div className="mt-6 pt-6 border-t border-gray-50">
-                                            <div className="flex items-center justify-between relative px-2">
-                                                <div className="absolute left-4 right-4 h-0.5 bg-gray-100 top-1/2 -translate-y-1/2" />
-                                                {[
-                                                    { label: 'Origin', color: 'bg-blue-600' },
-                                                    { label: 'Transit', color: shipment.status !== 'booked' ? 'bg-blue-600' : 'bg-gray-200' },
-                                                    { label: 'Customs', color: ['in_transit', 'out_for_delivery', 'delivered'].includes(shipment.status) ? 'bg-blue-600' : 'bg-gray-200' },
-                                                    { label: 'Final Hub', color: shipment.status === 'delivered' ? 'bg-emerald-500' : 'bg-gray-200' }
-                                                ].map((point, idx) => (
-                                                    <div key={idx} className="relative z-10 flex flex-col items-center">
-                                                        <div className={`w-2.5 h-2.5 rounded-full ${point.color} border-4 border-white shadow-sm`} />
-                                                        <span className="text-[8px] font-black text-gray-400  mt-2">{point.label}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </li>
-                                ))
-                            )}
-                        </ul>
-                        <div className="p-4 md:p-6 border-t border-gray-50">
-                            <button className="w-full text-center text-[10px] font-bold text-gray-400 hover:text-blue-600  tracking-[0.2em] transition-all">
-                                View all shipments
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Tip Card */}
-                    <div className="bg-gray-900 rounded-2xl md:rounded-[2.5rem] p-5 md:p-10 text-white shadow-2xl shadow-blue-900/20 relative overflow-hidden group">
-                        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,#2563eb_0,transparent_50%)] opacity-20 group-hover:scale-125 transition-transform duration-1000" />
-                        <div className="relative z-10">
-                            <div className="w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded-xl md:rounded-2xl flex items-center justify-center mb-4 md:mb-6">
-                                <Info className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />
-                            </div>
-                            <h4 className="text-base md:text-xl font-bold mb-2 md:mb-3 tracking-tight">Save on shipping</h4>
-                            <p className="text-[11px] md:text-xs text-white/80 leading-relaxed font-medium">
-                                Sending several items in one shipment from our China warehouse to Ghana can be cheaper and faster than shipping them separately. Add your supplier’s tracking number when each parcel is on its way so we can receive and combine them.
-                            </p>
-                        </div>
-                    </div>
-                </div>
             </div>
-        </DashboardLayout >
+        </DashboardLayout>
     );
 }

@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
-import { ArrowRight, RefreshCw, Send, AlertCircle, Plus, CreditCard, Wallet, Upload, X, FileDown } from 'lucide-react';
+import { ArrowRight, Send, AlertCircle, Plus, CreditCard, Wallet, Upload, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -14,19 +13,6 @@ const PaystackTrigger = dynamic(
     () => import('@/components/transfers/PaystackTrigger').then((m) => m.default),
     { ssr: false }
 );
-
-interface Transfer {
-    id: number;
-    token: string;
-    amount_ghs: number;
-    amount_cny: number;
-    recipient_name: string;
-    status: string;
-    created_at: string;
-    admin_reply_images?: string[];
-    qr_codes?: Array<{ image: string; amount_ghs?: number; amount_cny?: number }>;
-    qr_fulfillments?: Array<{ qr_index: number; status: string; confirmation_image?: string; admin_notes?: string; fulfilled_at?: string }>;
-}
 
 export default function TransferPage() {
     const { user } = useAuth();
@@ -65,27 +51,16 @@ export default function TransferPage() {
         reader.readAsDataURL(file);
     };
 
-    const [history, setHistory] = useState<Transfer[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const [rateRes, historyRes] = await Promise.all([
-                api.get('/finance/transfers/rate'),
-                api.get('/finance/transfers')
-            ]);
-            setRate(rateRes.data.rate_ghs_to_cny);
-            setHistory(historyRes.data);
-        } catch (error) {
-            console.error("Failed to load transfer data", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
-        fetchData();
+        const fetchRate = async () => {
+            try {
+                const { data } = await api.get('/finance/transfers/rate');
+                setRate(data.rate_ghs_to_cny);
+            } catch (error) {
+                console.error("Failed to load transfer rate", error);
+            }
+        };
+        fetchRate();
     }, []);
 
     useEffect(() => {
@@ -109,7 +84,6 @@ export default function TransferPage() {
             setRecipientId('');
             setQrEntries([{ id: crypto.randomUUID(), dataUrl: '', amount: '', recipientName: '' }]);
             router.push(`/dashboard/transfers/success?id=${paystackConfig.transferId}`);
-            fetchData();
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Payment confirmation failed.");
         } finally {
@@ -190,7 +164,6 @@ export default function TransferPage() {
                 setQrEntries([{ id: crypto.randomUUID(), dataUrl: '', amount: '', recipientName: '' }]);
                 setRecipientId('');
                 router.push(`/dashboard/transfers/success?id=${data.id}`);
-                fetchData();
             } else if (data.paystack_reference) {
                 setPaystackConfig({
                     reference: data.paystack_reference,
@@ -230,9 +203,9 @@ export default function TransferPage() {
                 <p className="text-gray-500 text-sm max-w-sm md:text-right">Send to Alipay, WeChat Pay, or Chinese bank accounts.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                {/* Transfer Form - order-2 on mobile so Recent transfers shows first */}
-                <div className="lg:col-span-8 space-y-4 order-2 lg:order-1">
+            <div className="max-w-2xl">
+                {/* Transfer Form */}
+                <div className="space-y-4">
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 lg:p-5">
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* Direction Selection */}
@@ -445,76 +418,6 @@ export default function TransferPage() {
                                 {isSubmitting ? 'Processing...' : 'Send transfer'}
                             </button>
                         </form>
-                    </div>
-                </div>
-
-                {/* History Sidebar - order-1 on mobile so visible first */}
-                <div className="lg:col-span-4 space-y-4 order-1 lg:order-2">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="px-4 py-3 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="text-xs font-semibold  text-gray-500">Recent transfers</h3>
-                            <button onClick={fetchData} className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-colors" aria-label="Refresh">
-                                <RefreshCw className="h-4 w-4" />
-                            </button>
-                        </div>
-                        {loading && history.length === 0 ? (
-                            <div className="p-10 text-center">
-                                <div className="animate-spin h-6 w-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto" />
-                            </div>
-                        ) : history.length === 0 ? (
-                            <div className="p-10 text-center">
-                                <Send className="h-12 w-12 mx-auto mb-4 text-gray-200" />
-                                <p className="text-xs text-gray-400">No transfers yet</p>
-                            </div>
-                        ) : (
-                            <ul className="divide-y divide-gray-50">
-                                {history.map((tx) => (
-                                    <li key={tx.id} className="px-4 py-4 hover:bg-gray-50 transition-all group">
-                                        <div className="flex justify-between items-start gap-2">
-                                            <div className="min-w-0 space-y-0.5">
-                                                <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 truncate">{tx.recipient_name}</p>
-                                                <p className="text-[10px] text-gray-400">{new Date(tx.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                                                <p className="text-[9px] text-gray-400 font-mono">Ref: {tx.token.slice(0, 10)}</p>
-                                            </div>
-                                            <div className="text-right shrink-0 space-y-0.5">
-                                                <p className="text-base font-bold text-gray-900">¥{Number(tx.amount_cny).toFixed(2)}</p>
-                                                <p className="text-[10px] text-gray-500">₵{Number(tx.amount_ghs).toFixed(2)}</p>
-                                                <span className={`inline-flex px-2 py-0.5 rounded text-[9px] font-semibold uppercase mt-1 ${tx.status === 'completed' ? 'bg-green-50 text-green-700' :
-                                                    tx.status === 'failed' ? 'bg-red-50 text-red-700' : 'bg-yellow-50 text-yellow-600'
-                                                }`}>
-                                                    {tx.status.replace('_', ' ')}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        {tx.admin_reply_images && tx.admin_reply_images.length > 0 && (
-                                            <div className="mt-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                                                <p className="text-[9px] font-semibold text-gray-500  mb-2">Proof</p>
-                                                <div className="flex gap-2 overflow-x-auto pb-1">
-                                                    {tx.admin_reply_images.map((img: string, i: number) => (
-                                                        <a key={i} href={img} target="_blank" rel="noopener noreferrer" className="block w-12 h-12 flex-shrink-0 border bg-white rounded-lg overflow-hidden hover:opacity-90">
-                                                            <img src={img} alt="Proof" className="w-full h-full object-cover" />
-                                                        </a>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                        <div className="mt-2">
-                                            <Link
-                                                href={`/dashboard/transfers/${tx.id}/confirmation`}
-                                                className="inline-flex items-center gap-2 text-[10px] font-semibold text-blue-600 hover:text-blue-800"
-                                            >
-                                                <FileDown className="h-3.5 w-3.5" /> Download payment confirmation
-                                            </Link>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                        <div className="p-4 border-t border-gray-50 flex justify-center">
-                            <Link href="/dashboard/transfers" className="text-xs font-semibold text-blue-600 hover:text-gray-900 transition-colors">
-                                View all →
-                            </Link>
-                        </div>
                     </div>
                 </div>
             </div>
