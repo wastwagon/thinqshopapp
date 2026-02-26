@@ -5,6 +5,7 @@ import api from '@/lib/axios';
 import { Truck, CheckCircle, Plus, Copy, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import BarcodeScanner from '@/components/ui/BarcodeScanner';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -68,6 +69,7 @@ export default function LogisticsPage() {
     const [declaredItems, setDeclaredItems] = useState([{ description: '', value: '', quantity: 1 }]);
     const [freightRates, setFreightRates] = useState<FreightRate[]>([]);
     const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
+    const [scannerOpen, setScannerOpen] = useState(false);
 
     // Only Lapaz for local pickup (no Kumasi)
     const lapazWarehouse = warehouses.find(w => w.country === 'Ghana' && (w.name.toLowerCase().includes('lapaz') || (w.code && String(w.code).toLowerCase().includes('lapaz'))));
@@ -320,7 +322,12 @@ Shipping Mark: (${customerId}) +${phone}`;
                                             placeholder="Carrier tracking ID"
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 pr-12"
                                         />
-                                        <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-400" title="Scan Barcode">
+                                        <button
+                                            type="button"
+                                            onClick={() => setScannerOpen(true)}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:border-blue-200 transition-colors"
+                                            title="Scan barcode from package"
+                                        >
                                             <Camera className="h-4 w-4" />
                                         </button>
                                     </div>
@@ -447,6 +454,15 @@ Shipping Mark: (${customerId}) +${phone}`;
                     </div>
                 </div>
             </div>
+
+            <BarcodeScanner
+                open={scannerOpen}
+                onClose={() => setScannerOpen(false)}
+                onScan={(value) => {
+                    setCarrierTracking(value);
+                    setScannerOpen(false);
+                }}
+            />
         </DashboardLayout>
     );
 }
