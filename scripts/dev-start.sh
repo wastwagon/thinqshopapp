@@ -4,7 +4,16 @@
 set -e
 cd "$(dirname "$0")/.."
 
-# Wait for DB port (e.g. Docker Postgres on 5440) so backend can connect
+# Wait for DB port. Use 5432 for local Postgres, 5440 for Docker.
+# Set DB_PORT in env or it auto-detects from DATABASE_URL in .env
+if [ -z "$DB_PORT" ] && [ -f .env ]; then
+  _url=$(grep -E '^DATABASE_URL=' .env 2>/dev/null | head -1)
+  if echo "$_url" | grep -q 'localhost:5432'; then
+    DB_PORT=5432
+  else
+    DB_PORT=5440
+  fi
+fi
 DB_PORT="${DB_PORT:-5440}"
 if command -v nc >/dev/null 2>&1; then
   echo "==> Waiting for database on port $DB_PORT (up to 30s)..."

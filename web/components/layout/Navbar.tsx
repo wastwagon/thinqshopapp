@@ -28,6 +28,7 @@ import {
     ArrowRight,
 } from 'lucide-react';
 import SearchModal from '@/components/ui/SearchModal';
+import CurrencySwitcher from '@/components/ui/CurrencySwitcher';
 import { useCart } from '@/context/CartContext';
 import { STATIC_CATEGORIES } from '@/lib/product-utils';
 
@@ -231,6 +232,13 @@ export default function Navbar() {
 
                 <div className="h-6 w-px bg-gray-200 hidden xl:block" aria-hidden />
 
+                {/* Currency switcher */}
+                <div className="hidden sm:block">
+                    <CurrencySwitcher />
+                </div>
+
+                <div className="h-6 w-px bg-gray-200 hidden xl:block" aria-hidden />
+
                 {/* Social links - desktop */}
                 <div className="hidden xl:flex items-center gap-2" role="group" aria-label="Social media">
                     <a href="#" className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" aria-label="Instagram"><Instagram className="h-4 w-4" /></a>
@@ -308,11 +316,14 @@ export default function Navbar() {
                     <button
                         type="button"
                         onClick={() => { setSearchOpen(true); closeMenu(); }}
-                        className="w-full mb-6 flex items-center gap-3 px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors focus:outline-none"
+                        className="w-full mb-4 flex items-center gap-3 px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors focus:outline-none"
                     >
                         <Search className="h-5 w-5 shrink-0" />
                         <span className="text-left text-sm font-medium">Search products...</span>
                     </button>
+                    <div className="mb-6">
+                        <CurrencySwitcher />
+                    </div>
                     <div className="flex gap-2 mb-6">
                         <a href="#" className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-100 text-gray-500 hover:bg-blue-50 hover:text-blue-600" aria-label="Instagram"><Instagram className="h-5 w-5" /></a>
                         <a href="#" className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-100 text-gray-500 hover:bg-blue-50 hover:text-blue-600" aria-label="Twitter"><Twitter className="h-5 w-5" /></a>

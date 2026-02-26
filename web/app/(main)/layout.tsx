@@ -3,6 +3,7 @@
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
+import { CurrencyProvider } from '@/context/CurrencyContext';
 import { Toaster } from 'react-hot-toast';
 import CartDrawer from '@/components/ui/CartDrawer';
 import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
@@ -12,6 +13,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     return (
         <>
             <AuthProvider>
+                <CurrencyProvider>
                 <WishlistProvider>
                 <CartProvider>
                     <OfflineBanner />
@@ -21,6 +23,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     {children}
                 </CartProvider>
                 </WishlistProvider>
+                </CurrencyProvider>
             </AuthProvider>
         </>
     );
