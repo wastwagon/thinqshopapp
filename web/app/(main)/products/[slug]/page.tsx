@@ -107,7 +107,6 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const qualifiesWholesale = hasWholesale && quantity >= minQty;
     const basePrice = parsePrice(product.price);
     const unitPrice = qualifiesWholesale ? basePrice * (1 - discountPct / 100) : basePrice;
-    const totalPrice = unitPrice * quantity;
     const moreNeeded = hasWholesale && quantity < minQty ? minQty - quantity : 0;
 
     return (
@@ -214,7 +213,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     onClick={() => addToCart(Number(product.id), quantity)}
                                 >
                                     <ShoppingCart className="h-5 w-5" />
-                                    Add to Cart · <PriceDisplay amountGhs={totalPrice} className="inline" />
+                                    Add to Cart
                                 </button>
                                 <button
                                     onClick={() => toggleWishlist({ id: Number(product.id), name: product.name, price: product.price, slug: product.slug ?? slug, images: product.images, gallery_images: product.gallery_images, category: product.category })}

@@ -31,17 +31,17 @@ export default function CurrencySwitcher() {
             <button
                 type="button"
                 onClick={() => setOpen((o) => !o)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 bg-white hover:border-blue-200 hover:bg-blue-50/50 transition-all text-sm font-semibold text-gray-700 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 min-w-[72px] justify-between"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl border border-gray-200 bg-white hover:border-blue-200 hover:bg-blue-50/50 transition-all text-sm font-semibold text-gray-700 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 min-w-[56px] sm:min-w-[72px] justify-between shrink-0"
                 aria-expanded={open}
                 aria-haspopup="listbox"
                 aria-label={`Currency: ${current.label}. Click to change`}
             >
-                <span className="flex items-center gap-1.5">
-                    <span className="text-base leading-none" aria-hidden>{current.flag}</span>
-                    <span className="text-base font-bold text-blue-600">{current.symbol}</span>
-                    <span className="text-xs font-bold uppercase tracking-wider">{current.label}</span>
+                <span className="flex items-center gap-1 sm:gap-1.5">
+                    <span className="text-sm sm:text-base leading-none" aria-hidden>{current.flag}</span>
+                    <span className="text-sm sm:text-base font-bold text-blue-600">{current.symbol}</span>
+                    <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider hidden sm:inline">{current.label}</span>
                 </span>
-                <ChevronDown className={`h-3.5 w-3.5 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`h-3 sm:h-3.5 w-3 sm:w-3.5 text-gray-400 transition-transform shrink-0 ${open ? 'rotate-180' : ''}`} />
             </button>
 
             {open && (

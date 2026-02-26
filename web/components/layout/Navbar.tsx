@@ -97,8 +97,8 @@ export default function Navbar() {
                     </div>
                 </Link>
 
-                {/* Right-aligned: menu button, nav, social, actions */}
-                <div className="ml-auto flex items-center gap-4 sm:gap-8 lg:gap-4">
+                {/* Right-aligned: nav, currency, actions */}
+                <div className="ml-auto flex items-center gap-2 sm:gap-6 lg:gap-4 min-w-0 flex-shrink">
                 {/* Main nav links - desktop only */}
                 <div className="hidden lg:flex items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-wider" role="menubar">
                     {mainNavItems.map((item) =>
@@ -192,10 +192,8 @@ export default function Navbar() {
 
                 <div className="h-5 w-px bg-gray-200 hidden xl:block flex-shrink-0" aria-hidden />
 
-                {/* Currency switcher */}
-                <div className="hidden sm:block">
-                    <CurrencySwitcher />
-                </div>
+                {/* Currency switcher - visible on all breakpoints */}
+                <CurrencySwitcher />
 
                 <div className="h-5 w-px bg-gray-200 hidden xl:block flex-shrink-0" aria-hidden />
 
@@ -209,28 +207,28 @@ export default function Navbar() {
                 <div className="h-5 w-px bg-gray-200 hidden xl:block flex-shrink-0" aria-hidden />
 
                 {/* Action icons */}
-                <div className="flex items-center gap-2 lg:gap-1" role="group" aria-label="Account and cart actions">
+                <div className="flex items-center gap-1 sm:gap-2 lg:gap-1 shrink-0" role="group" aria-label="Account and cart actions">
                     <Link
                         href="/dashboard"
-                        className="touch-target w-12 h-12 lg:w-10 lg:h-10 rounded-2xl lg:rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
+                        className="touch-target w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
                         aria-label="Account"
                     >
-                        <User className="h-5 w-5 lg:h-4 lg:w-4" aria-hidden />
+                        <User className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden />
                     </Link>
                     <Link
                         href="/wishlist"
-                        className="touch-target w-12 h-12 lg:w-10 lg:h-10 rounded-2xl lg:rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
+                        className="touch-target w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
                         aria-label="Wishlist"
                     >
-                        <Heart className="h-5 w-5 lg:h-4 lg:w-4" aria-hidden />
+                        <Heart className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden />
                     </Link>
                     <button
                         type="button"
                         onClick={toggleCart}
-                        className="touch-target w-12 h-12 lg:w-10 lg:h-10 rounded-2xl lg:rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors relative"
+                        className="touch-target w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors relative"
                         aria-label={`Shopping cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
                     >
-                        <ShoppingCart className="h-5 w-5 lg:h-4 lg:w-4" aria-hidden />
+                        <ShoppingCart className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden />
                         {cartCount > 0 && (
                             <span
                                 className="absolute top-1 right-1 min-w-[1.25rem] h-5 px-1 bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg"
@@ -243,10 +241,10 @@ export default function Navbar() {
                     <button
                         type="button"
                         onClick={() => setSearchOpen(true)}
-                        className="touch-target w-12 h-12 lg:w-10 lg:h-10 rounded-2xl lg:rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
+                        className="touch-target w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
                         aria-label="Search products"
                     >
-                        <Search className="h-5 w-5 lg:h-4 lg:w-4" aria-hidden />
+                        <Search className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden />
                     </button>
                 </div>
                 </div>
