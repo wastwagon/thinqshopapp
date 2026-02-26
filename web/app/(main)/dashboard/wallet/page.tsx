@@ -172,11 +172,11 @@ export default function WalletPage() {
                 </div>
             </motion.div>
 
-            <div className="grid grid-cols-1 gap-6 mb-6">
+            <div className="grid grid-cols-1 gap-4 md:gap-6 mb-4 md:mb-6">
                 {/* Balance Hero */}
                 <motion.div
                     variants={containerVariants}
-                    className="bg-gray-900 rounded-2xl p-6 lg:p-8 text-white relative overflow-hidden group shadow-lg border border-white/5"
+                    className="bg-gray-900 rounded-xl md:rounded-2xl p-4 md:p-6 lg:p-8 text-white relative overflow-hidden group shadow-lg border border-white/5"
                 >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[80px]" />
                     <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">

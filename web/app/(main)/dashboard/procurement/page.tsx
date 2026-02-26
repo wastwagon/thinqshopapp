@@ -165,7 +165,7 @@ export default function ProcurementPage() {
             </div>
 
             {isCreating && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-5 mb-4 md:mb-6">
                     <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
                         <Plus className="h-4 w-4 text-blue-600" />
                         New request

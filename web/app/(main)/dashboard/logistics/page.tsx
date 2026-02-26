@@ -462,9 +462,9 @@ export default function LogisticsPage() {
                 </div>
 
                 {/* Tracking History */}
-                <div className="space-y-8">
-                    <div className="bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
-                        <div className="px-8 py-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                <div className="space-y-4 md:space-y-8">
+                    <div className="bg-white rounded-2xl md:rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+                        <div className="px-4 py-4 md:px-8 md:py-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                             <h3 className="text-xs font-bold tracking-[0.2em]  text-gray-400 flex items-center">
                                 <HistoryIcon className="h-4 w-4 mr-3 text-blue-600" />
                                 My shipments
@@ -475,13 +475,13 @@ export default function LogisticsPage() {
                         </div>
                         <ul className="divide-y divide-gray-50 max-h-[600px] overflow-y-auto scrollbar-hide">
                             {history.length === 0 ? (
-                                <li className="p-16 text-center text-gray-300">
-                                    <Package className="h-12 w-12 mx-auto mb-6 opacity-20" />
+                                <li className="p-8 md:p-16 text-center text-gray-300">
+                                    <Package className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 md:mb-6 opacity-20" />
                                     <p className="text-xs text-gray-500">No shipments yet</p>
                                 </li>
                             ) : (
                                 history.map((shipment) => (
-                                    <li key={shipment.id} className="px-8 py-6 hover:bg-gray-50 transition-all group">
+                                    <li key={shipment.id} className="px-4 py-4 md:px-8 md:py-6 hover:bg-gray-50 transition-all group">
                                         <div className="flex justify-between items-start">
                                             <div className="space-y-1">
                                                 <p className="text-sm font-black text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors">{shipment.tracking_number || 'PENDING_ID'}</p>
@@ -522,7 +522,7 @@ export default function LogisticsPage() {
                                 ))
                             )}
                         </ul>
-                        <div className="p-6 border-t border-gray-50">
+                        <div className="p-4 md:p-6 border-t border-gray-50">
                             <button className="w-full text-center text-[10px] font-bold text-gray-400 hover:text-blue-600  tracking-[0.2em] transition-all">
                                 View all shipments
                             </button>
@@ -530,14 +530,14 @@ export default function LogisticsPage() {
                     </div>
 
                     {/* Tip Card */}
-                    <div className="bg-gray-900 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-blue-900/20 relative overflow-hidden group">
+                    <div className="bg-gray-900 rounded-2xl md:rounded-[2.5rem] p-5 md:p-10 text-white shadow-2xl shadow-blue-900/20 relative overflow-hidden group">
                         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,#2563eb_0,transparent_50%)] opacity-20 group-hover:scale-125 transition-transform duration-1000" />
                         <div className="relative z-10">
-                            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6">
-                                <Info className="h-6 w-6 text-blue-400" />
+                            <div className="w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded-xl md:rounded-2xl flex items-center justify-center mb-4 md:mb-6">
+                                <Info className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />
                             </div>
-                            <h4 className="text-xl font-bold mb-3 tracking-tight">Save on shipping</h4>
-                            <p className="text-xs text-white/80 leading-relaxed font-medium">
+                            <h4 className="text-base md:text-xl font-bold mb-2 md:mb-3 tracking-tight">Save on shipping</h4>
+                            <p className="text-[11px] md:text-xs text-white/80 leading-relaxed font-medium">
                                 Sending several items in one shipment from our China warehouse to Ghana can be cheaper and faster than shipping them separately. Add your supplier’s tracking number when each parcel is on its way so we can receive and combine them.
                             </p>
                         </div>
