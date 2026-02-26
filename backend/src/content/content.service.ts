@@ -1,5 +1,8 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+
+const FXR_API_BASE = 'https://dev.kwayisi.org/apis/forex';
+const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
 import { CreateHeroSlideDto, UpdateHeroSlideDto } from './dto/hero-slide.dto';
 import { CreateTrustBadgeDto, UpdateTrustBadgeDto } from './dto/trust-badge.dto';
 import { CreateTestimonialDto, UpdateTestimonialDto } from './dto/testimonial.dto';
@@ -61,6 +64,51 @@ export class ContentService {
             rows.forEach(r => { map[r.setting_key] = r.setting_value ?? ''; });
             return map;
         });
+    }
+
+    /** Shop display rates (GHS→USD, GHS→CNY). Fetches from FXR-API if stale; falls back to last stored. */
+    async getCurrencyRates(): Promise<{ ghs_to_usd: number; ghs_to_cny: number } | null> {
+        const latest = await this.prisma.shopCurrencyRate.findFirst({
+            orderBy: { fetched_at: 'desc' },
+        });
+        const now = Date.now();
+        const isStale = !latest || (now - latest.fetched_at.getTime()) > CACHE_MAX_AGE_MS;
+        if (isStale) {
+            const fetched = await this.fetchAndStoreRatesFromFxr();
+            if (fetched) return fetched;
+        }
+        if (latest) {
+            return {
+                ghs_to_usd: Number(latest.rate_ghs_to_usd),
+                ghs_to_cny: Number(latest.rate_ghs_to_cny),
+            };
+        }
+        return null;
+    }
+
+    /** Fetch USD/GHS and USD/CNY from FXR-API, derive GHS rates, store. Returns null on failure. */
+    private async fetchAndStoreRatesFromFxr(): Promise<{ ghs_to_usd: number; ghs_to_cny: number } | null> {
+        try {
+            const [usdGhsRes, usdCnyRes] = await Promise.all([
+                fetch(`${FXR_API_BASE}/usd/ghs`),
+                fetch(`${FXR_API_BASE}/usd/cny`),
+            ]);
+            if (!usdGhsRes.ok || !usdCnyRes.ok) return null;
+            const usdGhs = (await usdGhsRes.json()) as { pair: string; rate: number };
+            const usdCny = (await usdCnyRes.json()) as { pair: string; rate: number };
+            const usdPerGhs = usdGhs.rate > 0 ? 1 / usdGhs.rate : 0;
+            const cnyPerGhs = usdGhs.rate > 0 ? usdCny.rate / usdGhs.rate : 0;
+            if (usdPerGhs <= 0 || cnyPerGhs <= 0) return null;
+            await this.prisma.shopCurrencyRate.create({
+                data: {
+                    rate_ghs_to_usd: usdPerGhs,
+                    rate_ghs_to_cny: cnyPerGhs,
+                },
+            });
+            return { ghs_to_usd: usdPerGhs, ghs_to_cny: cnyPerGhs };
+        } catch {
+            return null;
+        }
     }
 
     // --- Admin: Hero slides ---

@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import { CreditCard, Truck, CheckCircle } from 'lucide-react';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
+import PriceDisplay from '@/components/ui/PriceDisplay';
 import { trackBeginCheckout, trackPurchase } from '@/lib/analytics';
 
 const CheckoutPaystackTrigger = dynamic(
@@ -204,7 +205,7 @@ export default function CheckoutClient() {
                                         disabled={isProcessing}
                                         className="w-full min-h-[44px] bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-4 shadow-lg touch-manipulation"
                                     >
-                                        {isProcessing ? 'Processing…' : `Pay ₵${cartTotal.toFixed(2)}`}
+                                        {isProcessing ? 'Processing…' : <>Pay <PriceDisplay amountGhs={cartTotal} checkoutStyle /></>}
                                     </button>
                                     <p className="mt-2 text-center text-xs text-gray-500">
                                         {publicSettings.free_shipping_threshold_ghs && Number(publicSettings.free_shipping_threshold_ghs) > 0 ? (
@@ -237,7 +238,7 @@ export default function CheckoutClient() {
                                                     <h4 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">{item.product.name}</h4>
                                                     <div className="flex items-center justify-between mt-1">
                                                         <p className="text-xs text-gray-500">Qty {item.quantity}</p>
-                                                        <p className="text-sm font-bold text-gray-900">₵{Number(item.product.price).toFixed(2)}</p>
+                                                        <p className="text-sm font-bold text-gray-900"><PriceDisplay amountGhs={Number(item.product.price)} /></p>
                                                     </div>
                                                 </div>
                                             </li>
@@ -248,7 +249,7 @@ export default function CheckoutClient() {
                                 <div className="space-y-3 border-t border-gray-100 pt-6">
                                     <div className="flex items-center justify-between">
                                         <dt className="text-sm text-gray-600">Subtotal</dt>
-                                        <dd className="text-sm font-semibold text-gray-900">₵{cartTotal.toFixed(2)}</dd>
+                                        <dd className="text-sm font-semibold text-gray-900"><PriceDisplay amountGhs={cartTotal} checkoutStyle /></dd>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <dt className="text-sm text-gray-600">Shipping</dt>
@@ -256,7 +257,7 @@ export default function CheckoutClient() {
                                     </div>
                                     <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-2">
                                         <dt className="text-sm font-semibold text-gray-900">Total</dt>
-                                        <dd className="text-xl font-bold text-gray-900">₵{cartTotal.toFixed(2)}</dd>
+                                        <dd className="text-xl font-bold text-gray-900"><PriceDisplay amountGhs={cartTotal} checkoutStyle /></dd>
                                     </div>
                                 </div>
 

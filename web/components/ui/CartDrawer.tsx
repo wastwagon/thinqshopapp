@@ -4,6 +4,7 @@ import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { X, Trash2, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import PriceDisplay from '@/components/ui/PriceDisplay';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -92,9 +93,13 @@ export default function CartDrawer() {
                                                                                 <h3 className="line-clamp-2 text-sm font-semibold text-gray-900">
                                                                                     <Link href={`/products/${(item.product as { slug?: string }).slug || item.product.id}`} onClick={toggleCart} className="hover:text-blue-600 transition-colors">{item.product.name}</Link>
                                                                                 </h3>
-                                                                                <p className="text-sm font-bold text-gray-900 whitespace-nowrap">₵{(parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity).toFixed(2)}</p>
+                                                                                <p className="text-sm font-bold text-gray-900 whitespace-nowrap">
+                                                                                    <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity} />
+                                                                                </p>
                                                                             </div>
-                                                                            <p className="text-[10px] text-gray-400 mt-1">₵{parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')).toFixed(2)} each</p>
+                                                                            <p className="text-[10px] text-gray-400 mt-1">
+                                                                                <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, ''))} /> each
+                                                                            </p>
                                                                         </div>
                                                                         <div className="flex flex-1 items-end justify-between mt-3">
                                                                             <div className="flex items-center gap-0 p-1 bg-gray-50 border border-gray-200 rounded-lg">
@@ -138,7 +143,7 @@ export default function CartDrawer() {
                                             <div className="space-y-2 mb-6">
                                                 <div className="flex justify-between items-center">
                                                     <p className="text-sm font-semibold text-gray-600">Subtotal</p>
-                                                    <p className="text-xl font-bold text-gray-900">₵{cartTotal.toFixed(2)}</p>
+                                                    <p className="text-xl font-bold text-gray-900"><PriceDisplay amountGhs={cartTotal} /></p>
                                                 </div>
                                                 <p className="text-xs text-gray-400">Tax and shipping calculated at checkout</p>
                                             </div>

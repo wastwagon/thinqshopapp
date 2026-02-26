@@ -78,6 +78,14 @@ export class ContentController {
         return this.content.getPublicSettings();
     }
 
+    @Get('currency-rates')
+    @Public()
+    @Header('Cache-Control', 'public, max-age=3600')
+    async getCurrencyRates() {
+        const rates = await this.content.getCurrencyRates();
+        return rates ?? { ghs_to_usd: null, ghs_to_cny: null };
+    }
+
     // --- Admin: Hero slides ---
 
     @Get('admin/hero-slides')

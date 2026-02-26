@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Heart, ShoppingCart, Star, Eye, ArrowRight } from 'lucide-react';
 import ProductImage from './ProductImage';
+import PriceDisplay from './PriceDisplay';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 
@@ -121,9 +122,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                 ₵{Number(product.compare_price).toFixed(2)}
                             </span>
                         )}
-                        <span className="text-base font-semibold text-gray-900">
-                            ₵{Number(price).toFixed(2)}
-                        </span>
+                        <PriceDisplay amountGhs={Number(price)} className="text-base font-semibold text-gray-900" />
                     </div>
                     <Link
                         href={`/products/${productSlug}`}

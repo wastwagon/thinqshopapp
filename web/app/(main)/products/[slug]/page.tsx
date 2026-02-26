@@ -10,6 +10,7 @@ import api from '@/lib/axios';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import ProductCard from '@/components/ui/ProductCard';
+import PriceDisplay from '@/components/ui/PriceDisplay';
 import localProducts from '@/lib/data/scraped_products.json';
 import { toSlug, parsePrice } from '@/lib/product-utils';
 import { useCart } from '@/context/CartContext';
@@ -159,7 +160,9 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                         </div>
 
                         <div className="flex flex-wrap items-baseline gap-4 mb-8">
-                            <p className="text-2xl font-bold text-gray-900 tracking-tight">₵{unitPrice.toFixed(2)} <span className="text-sm font-normal text-gray-500">each</span></p>
+                            <p className="text-2xl font-bold text-gray-900 tracking-tight">
+                                <PriceDisplay amountGhs={unitPrice} className="font-bold" /> <span className="text-sm font-normal text-gray-500">each</span>
+                            </p>
                             {qualifiesWholesale && (
                                 <span className="px-2 py-1 rounded-lg bg-green-100 text-green-700 text-xs font-bold">Wholesale {discountPct}% off</span>
                             )}
@@ -211,7 +214,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     onClick={() => addToCart(Number(product.id), quantity)}
                                 >
                                     <ShoppingCart className="h-5 w-5" />
-                                    Add to Cart · ₵{totalPrice.toFixed(2)}
+                                    Add to Cart · <PriceDisplay amountGhs={totalPrice} className="inline" />
                                 </button>
                                 <button
                                     onClick={() => toggleWishlist({ id: Number(product.id), name: product.name, price: product.price, slug: product.slug ?? slug, images: product.images, gallery_images: product.gallery_images, category: product.category })}

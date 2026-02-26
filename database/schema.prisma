@@ -435,6 +435,16 @@ model ExchangeRate {
   @@map("exchange_rates")
 }
 
+// Shop display rates (GHS→USD, GHS→CNY). Fetched from FXR-API. Not used for transfers.
+model ShopCurrencyRate {
+  id          Int      @id @default(autoincrement())
+  rate_ghs_to_usd Decimal @db.Decimal(12, 6)
+  rate_ghs_to_cny Decimal @db.Decimal(12, 6)
+  fetched_at  DateTime @default(now())
+
+  @@map("shop_currency_rates")
+}
+
 // --- LOGISTICS TABLES ---
 
 model Warehouse {
