@@ -3,43 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import {
-    CreditCard,
     Truck,
     ShoppingBag,
     ArrowUpRight,
-    Search,
-    Package,
-    AlertCircle,
-    Activity,
-    Globe,
     Shield,
     RefreshCw,
-    History as HistoryIcon
 } from 'lucide-react';
 import api from '@/lib/axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import {
-    AreaChart,
-    Area,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-} from 'recharts';
-
-const spendData = [
-    { name: 'Mon', value: 2400 },
-    { name: 'Tue', value: 1398 },
-    { name: 'Wed', value: 9800 },
-    { name: 'Thu', value: 3908 },
-    { name: 'Fri', value: 4800 },
-    { name: 'Sat', value: 3490 },
-    { name: 'Sun', value: 4300 },
-];
-
 import { motion } from 'framer-motion';
 
 export default function DashboardPage() {
@@ -125,28 +98,16 @@ export default function DashboardPage() {
                         <p className="text-xs text-gray-500">Logged in as {user?.email}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button className="h-9 px-4 border border-gray-200 rounded-xl text-xs font-semibold text-gray-500 hover:text-blue-600 hover:border-blue-600 transition-all flex items-center gap-2">
-                        <HistoryIcon className="h-3.5 w-3.5" />
-                        History
-                    </button>
-                    <button className="h-9 px-4 bg-gray-900 text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition-all flex items-center gap-2">
-                        <Activity className="h-3.5 w-3.5" />
-                        Report
-                    </button>
-                </div>
             </motion.div>
 
-            {/* Bento Grid Layout */}
+            {/* Stats & Actions */}
             <motion.div
                 initial="hidden"
                 animate="visible"
                 variants={containerVariants}
-                className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 mb-6"
+                className="grid grid-cols-1 gap-4 md:gap-6 mb-6"
             >
-
-                {/* Left Column: Stats & Actions */}
-                <div className="lg:col-span-4 space-y-4">
+                <div className="space-y-4">
                     {/* Wallet Hero Card */}
                     <motion.div
                         variants={itemVariants}
@@ -197,67 +158,6 @@ export default function DashboardPage() {
                         </motion.div>
                     </div>
                 </div>
-
-                {/* Right Column: Dynamic Analytics */}
-                <motion.div
-                    variants={itemVariants}
-                    className="lg:col-span-8 bg-white rounded-2xl p-6 lg:p-8 border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all"
-                >
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 blur-[80px]" />
-                    <div className="relative z-10 h-full flex flex-col">
-                        <div className="flex justify-between items-center mb-6">
-                            <div>
-                                <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Activity</h3>
-                                <p className="text-lg font-bold text-gray-900">Spend</p>
-                            </div>
-                            <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg border border-gray-100">
-                                <button className="px-3 py-1.5 bg-white text-xs font-semibold text-gray-900 rounded-md shadow-sm border border-gray-100">Weekly</button>
-                                <button className="px-3 py-1.5 text-xs font-semibold text-gray-400 hover:text-gray-600">Monthly</button>
-                            </div>
-                        </div>
-
-                        <div className="flex-1 w-full min-h-[260px]">
-                            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={100}>
-                                <AreaChart data={spendData}>
-                                    <defs>
-                                        <linearGradient id="userSpend" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1} />
-                                            <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                    <XAxis
-                                        dataKey="name"
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }}
-                                        dy={10}
-                                    />
-                                    <YAxis hide />
-                                    <Tooltip
-                                        contentStyle={{
-                                            backgroundColor: '#111827',
-                                            border: 'none',
-                                            borderRadius: '16px',
-                                            padding: '12px 16px',
-                                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-                                        }}
-                                        itemStyle={{ color: '#fff', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase' }}
-                                        labelStyle={{ display: 'none' }}
-                                    />
-                                    <Area
-                                        type="monotone"
-                                        dataKey="value"
-                                        stroke="#2563eb"
-                                        strokeWidth={4}
-                                        fillOpacity={1}
-                                        fill="url(#userSpend)"
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </motion.div>
             </motion.div>
 
             {/* Tracking & Support Matrix */}
