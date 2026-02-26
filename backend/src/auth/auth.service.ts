@@ -14,11 +14,11 @@ export class AuthService {
 
     async validateUser(email: string, pass: string): Promise<any> {
         const user = await this.prisma.user.findUnique({ where: { email } });
-        if (user && await bcrypt.compare(pass, user.password)) {
-            const { password, ...result } = user;
-            return result;
-        }
-        return null;
+        if (!user) return null;
+        if (!user.is_active) throw new UnauthorizedException('Account is deactivated');
+        if (!(await bcrypt.compare(pass, user.password))) return null;
+        const { password, ...result } = user;
+        return result;
     }
 
     async login(user: any) {

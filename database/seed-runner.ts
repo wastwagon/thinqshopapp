@@ -2,9 +2,26 @@
  * Seed logic — can be run from CLI (seed.ts) or from NestJS (DatabaseController).
  * Pass a PrismaClient instance. Does not disconnect.
  * Uses bcrypt at runtime so passwords always work.
+ *
+ * Production protection: refuses to run against production DB unless
+ * SEED_ALLOW_PRODUCTION=true. Prevents local/dev from overwriting production.
  */
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+
+function isProductionDb(): boolean {
+    const dbUrl = process.env.DATABASE_URL || '';
+    return (
+        process.env.NODE_ENV === 'production' ||
+        /\.railway\.app|\.render\.com|\.herokuapp|amazonaws\.com|supabase\.co|planetscale\.com|\.neon\.tech|coolify/i.test(dbUrl)
+    );
+}
+
+function ensureNotProduction(): void {
+    if (isProductionDb() && process.env.SEED_ALLOW_PRODUCTION !== 'true') {
+        throw new Error('Refusing to seed production database. Set SEED_ALLOW_PRODUCTION=true to override.');
+    }
+}
 
 const ADMIN_EMAIL = 'admin@thinqshopping.app';
 const ADMIN_PASSWORD = 'password';
@@ -12,6 +29,7 @@ const USER_EMAIL = 'user@thinqshopping.app';
 const USER_PASSWORD = 'password';
 
 export async function runSeed(prisma: PrismaClient) {
+    ensureNotProduction();
     const adminHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
     const userHash = await bcrypt.hash(USER_PASSWORD, 10);
 

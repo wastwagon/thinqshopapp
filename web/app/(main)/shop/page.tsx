@@ -5,11 +5,13 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/axios';
 import ProductGrid from '@/components/ui/ProductGrid';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import staticProducts from '@/lib/data/scraped_products.json';
 import { normalizeProduct, STATIC_CATEGORIES } from '@/lib/product-utils';
+
+const PAGE_SIZE = 24;
 
 function ShopContent() {
     const searchParams = useSearchParams();
@@ -17,52 +19,86 @@ function ShopContent() {
     const [products, setProducts] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const [page, setPage] = useState(1);
+    const [useApi, setUseApi] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const category = searchParams?.get('category') || '';
     const search = searchParams?.get('search') || '';
 
     useEffect(() => {
-        const fetchData = async () => {
+        setPage(1);
+        setHasMore(true);
+        const load = async () => {
             setLoading(true);
             try {
                 const [productsRes, categoriesRes] = await Promise.all([
-                    api.get('/products', { params: { category, search } }),
+                    api.get('/products', { params: { category, search, limit: PAGE_SIZE, page: 1 } }),
                     api.get('/products/categories'),
                 ]);
                 const apiProducts = productsRes.data?.data ?? [];
                 const apiCategories = categoriesRes.data ?? [];
+                const meta = productsRes.data?.meta ?? {};
                 if (apiProducts.length > 0) {
                     setProducts(apiProducts.map((p: any, i: number) => normalizeProduct(p, i)));
                     setCategories(Array.isArray(apiCategories) ? apiCategories : []);
-                    setLoading(false);
-                    return;
+                    setHasMore(1 < (meta.totalPages ?? 1));
+                    setUseApi(true);
+                } else {
+                    throw new Error('No API products');
                 }
-            } catch (_) {}
-            const normalized = (staticProducts as any[]).map((p, i) => normalizeProduct({ ...p, id: p.id ?? i + 1 }, i));
-            let filtered = normalized;
-            if (category) {
-                const catSlug = category.toLowerCase().replace(/\s+/g, '-');
-                filtered = filtered.filter((p) => {
-                    const c = typeof p.category === 'string' ? p.category : (p.category?.name ?? p.category?.slug ?? '');
-                    return (typeof c === 'string' ? c.toLowerCase().replace(/\s+/g, '-') : c) === catSlug || (p.category?.slug === catSlug);
-                });
+            } catch (_) {
+                const normalized = (staticProducts as any[]).map((p, i) => normalizeProduct({ ...p, id: p.id ?? i + 1 }, i));
+                let filtered = normalized;
+                if (category) {
+                    const catSlug = category.toLowerCase().replace(/\s+/g, '-');
+                    filtered = filtered.filter((p) => {
+                        const c = typeof p.category === 'string' ? p.category : (p.category?.name ?? p.category?.slug ?? '');
+                        return (typeof c === 'string' ? c.toLowerCase().replace(/\s+/g, '-') : c) === catSlug || (p.category?.slug === catSlug);
+                    });
+                }
+                if (search) {
+                    const q = search.toLowerCase();
+                    filtered = filtered.filter(
+                        (p) =>
+                            (p.name || '').toLowerCase().includes(q) ||
+                            (p.description || '').toLowerCase().includes(q) ||
+                            (typeof p.category === 'string' && p.category.toLowerCase().includes(q)) ||
+                            (q === 'deal' && (p.compare_price || Number(String(p.price).replace(/[^0-9.]/g, '')) < 1000))
+                    );
+                }
+                setProducts(filtered);
+                setCategories(STATIC_CATEGORIES);
+                setHasMore(false);
+                setUseApi(false);
             }
-            if (search) {
-                const q = search.toLowerCase();
-                filtered = filtered.filter(
-                    (p) =>
-                        (p.name || '').toLowerCase().includes(q) ||
-                        (p.description || '').toLowerCase().includes(q) ||
-                        (typeof p.category === 'string' && p.category.toLowerCase().includes(q)) ||
-                        (q === 'deal' && (p.compare_price || Number(String(p.price).replace(/[^0-9.]/g, '')) < 1000))
-                );
-            }
-            setProducts(filtered);
-            setCategories(STATIC_CATEGORIES);
             setLoading(false);
         };
-        fetchData();
+        load();
     }, [category, search]);
+
+    const loadMore = async () => {
+        if (!loadingMore && hasMore && useApi) {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            setLoadingMore(true);
+            try {
+                const productsRes = await api.get('/products', {
+                    params: { category, search, limit: PAGE_SIZE, page: nextPage },
+                });
+                const apiProducts = productsRes.data?.data ?? [];
+                const meta = productsRes.data?.meta ?? {};
+                const list = apiProducts.map((p: any, i: number) => normalizeProduct(p, (nextPage - 1) * PAGE_SIZE + i));
+                setProducts((prev) => [...prev, ...list]);
+                setHasMore(nextPage < (meta.totalPages ?? 1));
+            } catch (_) {
+                setUseApi(false);
+            } finally {
+                setLoadingMore(false);
+            }
+        }
+    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -126,6 +162,25 @@ function ShopContent() {
                     </aside>
                     <main className="flex-1">
                         <ProductGrid products={products} loading={loading} />
+                        {!loading && hasMore && useApi && (
+                            <div className="mt-12 flex justify-center">
+                                <button
+                                    type="button"
+                                    onClick={loadMore}
+                                    disabled={loadingMore}
+                                    className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 disabled:opacity-50 transition-all"
+                                >
+                                    {loadingMore ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            Loading...
+                                        </>
+                                    ) : (
+                                        'Load more'
+                                    )}
+                                </button>
+                            </div>
+                        )}
                     </main>
                 </div>
             </div>

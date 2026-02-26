@@ -51,7 +51,7 @@ export class ProductService {
     }
 
     async findAll(query: { category?: string; search?: string; page?: number; limit?: number }) {
-        const { category, search, page = 1, limit = 20 } = query;
+        const { category, search, page = 1, limit = 100 } = query;
         const skip = (page - 1) * limit;
 
         const where: any = { is_active: true };
