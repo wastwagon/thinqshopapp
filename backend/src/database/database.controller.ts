@@ -1,5 +1,6 @@
 import { Controller, Post, Req, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { execSync } from 'child_process';
+import { existsSync } from 'fs';
 import { join } from 'path';
 import { AuthGuard } from '../auth/auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
@@ -11,7 +12,20 @@ export class DatabaseController {
     private readonly projectRoot: string;
 
     constructor(private readonly prisma: PrismaService) {
-        this.projectRoot = join(__dirname, '..', '..', '..');
+        this.projectRoot = this.resolveProjectRoot();
+    }
+
+    private resolveProjectRoot(): string {
+        const candidates = [
+            process.cwd(),
+            join(process.cwd(), '..'),
+            join(__dirname, '..', '..', '..', '..'),
+        ];
+        for (const root of candidates) {
+            const schemaPath = join(root, 'database', 'schema.prisma');
+            if (existsSync(schemaPath)) return root;
+        }
+        return process.cwd();
     }
 
     private ensureAdmin(req: any) {

@@ -69,7 +69,6 @@ export default function LogisticsPage() {
     const [freightRates, setFreightRates] = useState<FreightRate[]>([]);
     const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
 
-    const chinaWarehouses = warehouses.filter(w => w.country === 'China');
     // Only Lapaz for local pickup (no Kumasi)
     const lapazWarehouse = warehouses.find(w => w.country === 'Ghana' && (w.name.toLowerCase().includes('lapaz') || (w.code && String(w.code).toLowerCase().includes('lapaz'))));
     const ghanaWarehouses = lapazWarehouse ? [lapazWarehouse] : warehouses.filter(w => w.country === 'Ghana').slice(0, 1);
@@ -223,37 +222,34 @@ export default function LogisticsPage() {
                         </div>
 
                         <div className="p-6 space-y-6 md:max-h-[calc(100vh-14rem)] md:overflow-y-auto">
-                            {/* Single China forwarding address (no duplication) */}
+                            {/* China forwarding address — static template, user details injected */}
                             <section>
                                 <h3 className="text-[10px] font-bold tracking-[0.2em]  text-gray-400 mb-3">Our Warehouse Address</h3>
-                                <p className="text-[10px] font-medium text-gray-500  mb-3">Forwarding Warehouse (China)</p>
-                                {(() => {
-                                    const w = chinaWarehouses.length > 0 ? chinaWarehouses[0] : null;
-                                    if (!w) return <p className="text-xs text-amber-600">No China warehouse configured. Run database seed or add one in Admin.</p>;
-                                    return (
-                                        <div className="rounded-xl border-2 border-gray-100 bg-gray-50/50 p-4 flex justify-between items-start gap-4">
-                                            <div className="min-w-0">
-                                                <p className="text-[10px] font-black  text-gray-400">{w.code}</p>
-                                                <p className="text-sm font-bold text-gray-900">{w.name}</p>
-                                                <p className="text-xs text-gray-500 mt-1">{w.address}</p>
-                                                <p className="text-[10px] text-gray-400 mt-1">Receiver: ThinQ ({user?.user_identifier || 'TQ-ID'}) · {w.phone}</p>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const tqId = user?.user_identifier || 'TQ-ID-PENDING';
-                                                    const shippingMark = `(${user?.first_name || 'USER'})+${user?.phone || 'PHONE-PENDING'}`;
-                                                    const copyText = `${w.name}\nPhone: ${w.phone}\nAddress: ${w.address}\nUser ID: ${tqId}\nShipping Mark: ${shippingMark}\nReceiver: ThinQ (${tqId})`;
-                                                    navigator.clipboard.writeText(copyText);
-                                                    toast.success("Address copied");
-                                                }}
-                                                className="shrink-0 h-8 px-3 rounded-lg bg-white border border-gray-200 text-[10px] font-bold  text-gray-600 hover:bg-gray-50"
-                                            >
-                                                Copy
-                                            </button>
-                                        </div>
-                                    );
-                                })()}
+                                <p className="text-[10px] font-medium text-gray-500  mb-3">Forwarding Warehouse (China) — Copy and send to your supplier</p>
+                                <div className="rounded-xl border-2 border-gray-100 bg-gray-50/50 p-4 flex justify-between items-start gap-4">
+                                    <div className="min-w-0 font-mono text-xs text-gray-800 whitespace-pre-wrap break-words">
+                                        <p>ThinQ:18320709024</p>
+                                        <p>广州市越秀区三元里大道499-523号四楼08号商铺({user?.first_name || 'Customer'})</p>
+                                        <p className="mt-2 text-gray-600">Shipping Mark: {user?.user_identifier || 'TQ-ID'} {user?.first_name || 'Customer'} + {user?.phone || 'Phone'}</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const firstName = user?.first_name || 'Customer';
+                                            const customerId = user?.user_identifier || 'TQ-ID';
+                                            const phone = user?.phone || 'Phone';
+                                            const copyText = `ThinQ:18320709024
+广州市越秀区三元里大道499-523号四楼08号商铺(${firstName})
+
+Shipping Mark: ${customerId} ${firstName} + ${phone}`;
+                                            navigator.clipboard.writeText(copyText);
+                                            toast.success("Address copied");
+                                        }}
+                                        className="shrink-0 h-8 px-3 rounded-lg bg-white border border-gray-200 text-[10px] font-bold  text-gray-600 hover:bg-gray-50"
+                                    >
+                                        Copy
+                                    </button>
+                                </div>
                             </section>
 
                             {/* Destination: Local Pick Up at Lapaz Warehouse */}

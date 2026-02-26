@@ -7,10 +7,10 @@ async function main() {
         {
             name: 'ThinQ China Hub',
             code: 'CN-GZ-001',
-            address: 'Building A, Logistics Park, Guangzhou, Guangdong, China',
+            address: '广州市越秀区三元里大道499-523号四楼08号商铺',
             city: 'Guangzhou',
             country: 'China',
-            phone: '+86 20 0000 0000',
+            phone: '18320709024',
             recipient_name: 'ThinQ China Team',
             is_active: true,
         },
