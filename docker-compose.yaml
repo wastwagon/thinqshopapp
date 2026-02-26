@@ -49,6 +49,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      # Server-side API proxy: internal URL (Coolify can override via env)
+      BACKEND_URL: ${BACKEND_URL:-http://backend:7000}
     depends_on:
       - backend
 

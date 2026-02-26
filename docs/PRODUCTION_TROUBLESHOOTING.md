@@ -10,8 +10,8 @@ This prevents local development from accidentally overwriting production data.
 
 - **Production deployments:** Use `npm run db:migrate` only (migrations only, no seed).
 - **To force seed on production** (e.g. fresh deploy): `SEED_ALLOW_PRODUCTION=true npm run db:seed`
+- **Coolify with SEED_ON_STARTUP=true:** When the backend starts with `SEED_ON_STARTUP=true`, seed is allowed (for fresh deploys). This creates admin/user accounts and sample products. Set `SEED_ON_STARTUP=false` after initial setup to avoid re-seeding on every deploy.
 - **Custom production hosts:** Add your host pattern to `isProductionDb()` in `database/seed-runner.ts` if needed.
-- **Coolify / VPS:** Coolify is supported. If `NODE_ENV=production` is set (typical for production deploys), seed is already blocked. For extra safety, `coolify` in `DATABASE_URL` also triggers protection.
 
 ---
 
@@ -32,9 +32,9 @@ The Next.js app proxies `/api/*` to the backend. Set these env vars in productio
 | `BACKEND_URL` | Next.js (server) | URL of your NestJS backend, e.g. `https://api.yourdomain.com` |
 | `NEXT_PUBLIC_API_URL` | Next.js (build) | Same as BACKEND_URL for SSR; used as fallback for proxy |
 
-**Important:** If frontend and backend are on different hosts (e.g. Vercel + Railway):
-- `BACKEND_URL` must be the **full URL** of your backend (e.g. `https://your-backend.railway.app`)
-- The backend must allow requests from your frontend origin (CORS)
+**Important:** 
+- **Coolify/Docker:** `docker-compose.yaml` sets `BACKEND_URL=http://backend:7000` (internal). No extra config needed.
+- **Split hosting** (e.g. Vercel + Railway): `BACKEND_URL` must be the full public URL (e.g. `https://your-backend.railway.app`). The backend must allow requests from your frontend origin (CORS).
 
 ### 3. **CORS**
 If the browser makes direct requests to the backend (not through `/api`), CORS must allow your frontend origin. Set in backend:

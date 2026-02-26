@@ -24,7 +24,11 @@ done
 # Optional: seed on startup (set SEED_ON_STARTUP=true for fresh deploys)
 if [ "$SEED_ON_STARTUP" = "true" ]; then
   echo "Running database seed..."
-  npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed.ts || echo "Seed failed or skipped."
+  if npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed.ts; then
+    echo "Seed complete."
+  else
+    echo "Seed failed (check logs above). Continuing startup..."
+  fi
 fi
 
 echo "Starting application..."

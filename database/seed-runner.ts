@@ -18,8 +18,10 @@ function isProductionDb(): boolean {
 }
 
 function ensureNotProduction(): void {
-    if (isProductionDb() && process.env.SEED_ALLOW_PRODUCTION !== 'true') {
-        throw new Error('Refusing to seed production database. Set SEED_ALLOW_PRODUCTION=true to override.');
+    // Allow when SEED_ON_STARTUP=true (Coolify/fresh deploy) or SEED_ALLOW_PRODUCTION=true
+    if (process.env.SEED_ON_STARTUP === 'true' || process.env.SEED_ALLOW_PRODUCTION === 'true') return;
+    if (isProductionDb()) {
+        throw new Error('Refusing to seed production database. Set SEED_ON_STARTUP=true (deploy) or SEED_ALLOW_PRODUCTION=true to override.');
     }
 }
 
