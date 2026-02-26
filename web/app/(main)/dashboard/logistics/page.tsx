@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
-import { Truck, Info, CheckCircle, Plus, Copy, Camera } from 'lucide-react';
+import { Truck, CheckCircle, Plus, Copy, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
@@ -230,14 +230,14 @@ export default function LogisticsPage() {
                                     <div className="min-w-0 font-mono text-xs text-gray-800 whitespace-pre-wrap break-words">
                                         <p>ThinQ:18320709024</p>
                                         <p>广州市越秀区三元里大道499-523号四楼08号商铺({user?.first_name || 'Customer'})</p>
-                                        <p className="mt-2 text-gray-600">Shipping Mark: ({user?.user_identifier || 'TQ-ID'}) +{user?.phone || 'Phone'}</p>
+                                        <p className="mt-2 text-gray-600">Shipping Mark: ({user?.user_identifier || 'TQ-ID'}) +{(user?.phone || 'Phone').replace(/^\+/, '')}</p>
                                     </div>
                                     <button
                                         type="button"
                                         onClick={() => {
                                             const firstName = user?.first_name || 'Customer';
                                             const customerId = user?.user_identifier || 'TQ-ID';
-                                            const phone = user?.phone || 'Phone';
+                                            const phone = (user?.phone || 'Phone').replace(/^\+/, '');
                                             const copyText = `ThinQ:18320709024
 广州市越秀区三元里大道499-523号四楼08号商铺(${firstName})
 
@@ -432,17 +432,13 @@ Shipping Mark: (${customerId}) +${phone}`;
                                 </section>
                             )}
 
-                            {/* Notice + Ship Now */}
-                            <div className="rounded-xl bg-blue-50 border border-blue-100 p-4 flex flex-wrap items-center justify-between gap-4">
-                                <div className="flex gap-3">
-                                    <Info className="h-5 w-5 text-blue-600 shrink-0" />
-                                    <p className="text-xs text-blue-800/90 font-medium">Final transit fees are calculated upon arrival at our CN repository. Ensure your wallet has sufficient liquidity.</p>
-                                </div>
+                            {/* Ship Now */}
+                            <div className="pt-2 pb-20 md:pb-4">
                                 <button
                                     type="button"
                                     onClick={handleBooking}
                                     disabled={isBooking}
-                                    className="h-12 px-8 bg-gray-900 text-white rounded-xl font-bold text-sm  hover:bg-blue-600 transition-all disabled:opacity-50 shrink-0"
+                                    className="w-full md:w-auto h-12 px-8 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-blue-600 transition-all disabled:opacity-50"
                                 >
                                     {isBooking ? 'Submitting…' : 'Ship Now'}
                                 </button>
