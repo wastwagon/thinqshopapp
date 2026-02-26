@@ -85,7 +85,7 @@ export default function Navbar() {
             className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-xl border-b border-gray-100 flex flex-col"
             aria-label="Main navigation"
         >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 w-full flex items-center gap-4 sm:gap-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 w-full flex items-center gap-4 sm:gap-8 lg:gap-4">
                 {/* Logo - left, sized to bar height */}
                 <Link
                     href="/"
@@ -98,9 +98,9 @@ export default function Navbar() {
                 </Link>
 
                 {/* Right-aligned: menu button, nav, social, actions */}
-                <div className="ml-auto flex items-center gap-4 sm:gap-8">
+                <div className="ml-auto flex items-center gap-4 sm:gap-8 lg:gap-4">
                 {/* Main nav links - desktop only */}
-                <div className="hidden lg:flex items-center gap-6 text-xs font-bold text-gray-500 uppercase tracking-wider" role="menubar">
+                <div className="hidden lg:flex items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-wider" role="menubar">
                     {mainNavItems.map((item) =>
                         item.mega ? (
                             <div
@@ -190,47 +190,47 @@ export default function Navbar() {
                     )}
                 </div>
 
-                <div className="h-6 w-px bg-gray-200 hidden xl:block" aria-hidden />
+                <div className="h-5 w-px bg-gray-200 hidden xl:block flex-shrink-0" aria-hidden />
 
                 {/* Currency switcher */}
                 <div className="hidden sm:block">
                     <CurrencySwitcher />
                 </div>
 
-                <div className="h-6 w-px bg-gray-200 hidden xl:block" aria-hidden />
+                <div className="h-5 w-px bg-gray-200 hidden xl:block flex-shrink-0" aria-hidden />
 
                 {/* Social links - desktop */}
-                <div className="hidden xl:flex items-center gap-2" role="group" aria-label="Social media">
-                    <a href="#" className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" aria-label="Instagram"><Instagram className="h-4 w-4" /></a>
-                    <a href="#" className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" aria-label="Twitter"><Twitter className="h-4 w-4" /></a>
-                    <a href="#" className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" aria-label="Facebook"><Facebook className="h-4 w-4" /></a>
+                <div className="hidden xl:flex items-center gap-1" role="group" aria-label="Social media">
+                    <a href="#" className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" aria-label="Instagram"><Instagram className="h-3.5 w-3.5" /></a>
+                    <a href="#" className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" aria-label="Twitter"><Twitter className="h-3.5 w-3.5" /></a>
+                    <a href="#" className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" aria-label="Facebook"><Facebook className="h-3.5 w-3.5" /></a>
                 </div>
 
-                <div className="h-6 w-px bg-gray-200 hidden xl:block" aria-hidden />
+                <div className="h-5 w-px bg-gray-200 hidden xl:block flex-shrink-0" aria-hidden />
 
                 {/* Action icons */}
-                <div className="flex items-center gap-2 sm:gap-4" role="group" aria-label="Account and cart actions">
+                <div className="flex items-center gap-2 lg:gap-1" role="group" aria-label="Account and cart actions">
                     <Link
                         href="/dashboard"
-                        className="touch-target w-12 h-12 rounded-2xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
+                        className="touch-target w-12 h-12 lg:w-10 lg:h-10 rounded-2xl lg:rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
                         aria-label="Account"
                     >
-                        <User className="h-5 w-5" aria-hidden />
+                        <User className="h-5 w-5 lg:h-4 lg:w-4" aria-hidden />
                     </Link>
                     <Link
                         href="/wishlist"
-                        className="touch-target w-12 h-12 rounded-2xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
+                        className="touch-target w-12 h-12 lg:w-10 lg:h-10 rounded-2xl lg:rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
                         aria-label="Wishlist"
                     >
-                        <Heart className="h-5 w-5" aria-hidden />
+                        <Heart className="h-5 w-5 lg:h-4 lg:w-4" aria-hidden />
                     </Link>
                     <button
                         type="button"
                         onClick={toggleCart}
-                        className="touch-target w-12 h-12 rounded-2xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors relative"
+                        className="touch-target w-12 h-12 lg:w-10 lg:h-10 rounded-2xl lg:rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors relative"
                         aria-label={`Shopping cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
                     >
-                        <ShoppingCart className="h-5 w-5" aria-hidden />
+                        <ShoppingCart className="h-5 w-5 lg:h-4 lg:w-4" aria-hidden />
                         {cartCount > 0 && (
                             <span
                                 className="absolute top-1 right-1 min-w-[1.25rem] h-5 px-1 bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg"
@@ -243,10 +243,10 @@ export default function Navbar() {
                     <button
                         type="button"
                         onClick={() => setSearchOpen(true)}
-                        className="touch-target w-12 h-12 rounded-2xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
+                        className="touch-target w-12 h-12 lg:w-10 lg:h-10 rounded-2xl lg:rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
                         aria-label="Search products"
                     >
-                        <Search className="h-5 w-5" aria-hidden />
+                        <Search className="h-5 w-5 lg:h-4 lg:w-4" aria-hidden />
                     </button>
                 </div>
                 </div>
