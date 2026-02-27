@@ -11,6 +11,9 @@ import {
 } from 'lucide-react';
 import api from '@/lib/axios';
 
+const DEFAULT_SUPPORT_PHONE = '+86 183 2070 9024';
+const DEFAULT_SUPPORT_EMAIL = 'info@thinqshopping.app';
+
 export default function Footer() {
     const [settings, setSettings] = useState<Record<string, string>>({});
 
@@ -18,8 +21,8 @@ export default function Footer() {
         api.get('/content/settings/public').then((res) => setSettings(res.data || {})).catch(() => {});
     }, []);
 
-    const supportPhone = settings.support_phone?.trim();
-    const supportEmail = settings.support_email?.trim();
+    const supportPhone = settings.support_phone?.trim() || DEFAULT_SUPPORT_PHONE;
+    const supportEmail = settings.support_email?.trim() || DEFAULT_SUPPORT_EMAIL;
     const ordersDelivered = settings.site_orders_delivered_text?.trim();
 
     return (
@@ -66,12 +69,10 @@ export default function Footer() {
                             <li><Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</Link></li>
                             <li><Link href="/contact" className="hover:text-blue-600 transition-colors">Contact Support</Link></li>
                         </ul>
-                        {(supportPhone || supportEmail) && (
-                            <div className="mt-4 text-xs text-gray-600 space-y-1">
-                                {supportPhone && <p><a href={`tel:${supportPhone}`} className="hover:text-blue-600">{supportPhone}</a></p>}
-                                {supportEmail && <p><a href={`mailto:${supportEmail}`} className="hover:text-blue-600">{supportEmail}</a></p>}
-                            </div>
-                        )}
+                        <div className="mt-4 text-xs text-gray-600 space-y-1">
+                            <p><a href={`tel:${supportPhone.replace(/\s/g, '')}`} className="hover:text-blue-600">{supportPhone}</a></p>
+                            <p><a href={`mailto:${supportEmail}`} className="hover:text-blue-600">{supportEmail}</a></p>
+                        </div>
                     </div>
                 </div>
 

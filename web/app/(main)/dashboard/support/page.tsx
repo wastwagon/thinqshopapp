@@ -171,7 +171,7 @@ export default function SupportPage() {
                             <Mail className="h-5 w-5 text-indigo-600" />
                         </div>
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1">Email</p>
-                        <h3 className="text-sm font-bold text-gray-900 tracking-tight mb-0.5 truncate">support@thinqshop.com</h3>
+                        <a href="mailto:info@thinqshopping.app" className="text-sm font-bold text-gray-900 tracking-tight mb-0.5 block truncate hover:text-blue-600">info@thinqshopping.app</a>
                         <p className="text-[10px] text-gray-400 flex items-center gap-1"><Clock className="h-3 w-3" /> 24h response</p>
                     </motion.div>
                 </div>

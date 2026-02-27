@@ -9,8 +9,8 @@ import api from '@/lib/axios';
 const FIELDS = [
     { key: 'free_shipping_threshold_ghs', label: 'Free shipping threshold (₵)', placeholder: '500', type: 'text' },
     { key: 'site_orders_delivered_text', label: 'Orders delivered text', placeholder: '10,000+ orders delivered', type: 'text' },
-    { key: 'support_phone', label: 'Support phone', placeholder: '+233 XX XXX XXXX', type: 'text' },
-    { key: 'support_email', label: 'Support email', placeholder: 'support@thinqshop.com', type: 'email' },
+    { key: 'support_phone', label: 'Support phone', placeholder: '+86 183 2070 9024', type: 'text' },
+    { key: 'support_email', label: 'Support email', placeholder: 'info@thinqshopping.app', type: 'email' },
 ] as const;
 
 export default function AdminStorefront() {

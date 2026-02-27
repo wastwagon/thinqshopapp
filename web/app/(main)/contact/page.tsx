@@ -36,7 +36,7 @@ export default function ContactPage() {
                         </div>
                         <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
                         <p className="text-sm text-gray-600">For orders, logistics, and general support.</p>
-                        <a href="mailto:support@thinqshop.com" className="text-blue-600 font-medium text-sm hover:text-blue-700 mt-2 inline-block">support@thinqshop.com</a>
+                        <a href="mailto:info@thinqshopping.app" className="text-blue-600 font-medium text-sm hover:text-blue-700 mt-2 inline-block">info@thinqshopping.app</a>
                     </div>
                     <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
                         <div className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center mb-4">
