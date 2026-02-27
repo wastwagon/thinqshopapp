@@ -155,18 +155,18 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[11px] font-bold tracking-wider text-blue-600 uppercase mb-4">
                                 Ships from abroad · 7–14 day delivery
                             </div>
-                            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 leading-[1.3]">{product.name}</h1>
+                            <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-gray-900 leading-[1.3]">{product.name}</h1>
                         </div>
 
-                        <div className="flex flex-wrap items-baseline gap-4 mb-8">
-                            <p className="text-2xl font-bold text-gray-900 tracking-tight">
-                                <PriceDisplay amountGhs={unitPrice} className="font-bold" /> <span className="text-sm font-normal text-gray-500">each</span>
+                        <div className="flex flex-wrap items-baseline gap-2 sm:gap-4 mb-6 sm:mb-8">
+                            <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight">
+                                <PriceDisplay amountGhs={unitPrice} className="font-bold" /> <span className="text-xs sm:text-sm font-normal text-gray-500">each</span>
                             </p>
                             {qualifiesWholesale && (
                                 <span className="px-2 py-1 rounded-lg bg-green-100 text-green-700 text-xs font-bold">Wholesale {discountPct}% off</span>
                             )}
                             {product.compare_price != null && Number(product.compare_price) > unitPrice && (
-                                <p className="text-base font-bold text-gray-400 line-through">₵{Number(product.compare_price).toFixed(2)}</p>
+                                <p className="text-sm sm:text-base font-bold text-gray-400 line-through">₵{Number(product.compare_price).toFixed(2)}</p>
                             )}
                         </div>
 
@@ -188,12 +188,12 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 </span>
                             </div>
 
-                            <div className="text-lg text-gray-600 leading-relaxed font-medium space-y-6" dangerouslySetInnerHTML={{ __html: product.description || '' }} />
+                            <div className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed font-medium space-y-4 sm:space-y-6" dangerouslySetInnerHTML={{ __html: product.description || '' }} />
                         </div>
 
                         <div className="space-y-3 mb-10">
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-1 p-1 bg-gray-50 border border-gray-200 rounded-xl">
+                            <div className="flex items-center gap-2 sm:gap-4">
+                                <div className="flex items-center gap-1 p-1 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl">
                                     <button
                                         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                                         className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all"
@@ -209,21 +209,21 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     </button>
                                 </div>
                                 <button
-                                    className="flex-1 h-12 bg-gray-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-gray-200"
+                                    className="flex-1 min-w-0 h-10 sm:h-12 bg-gray-900 text-white rounded-lg sm:rounded-xl font-bold text-[10px] sm:text-xs uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-gray-200"
                                     onClick={() => addToCart(Number(product.id), quantity)}
                                 >
-                                    <ShoppingCart className="h-5 w-5" />
-                                    Add to Cart
+                                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                                    <span className="truncate">Add to Cart</span>
                                 </button>
                                 <button
                                     onClick={() => toggleWishlist({ id: Number(product.id), name: product.name, price: product.price, slug: product.slug ?? slug, images: product.images, gallery_images: product.gallery_images, category: product.category })}
-                                    className={`w-12 h-12 border rounded-xl flex items-center justify-center transition-all shrink-0 ${
+                                    className={`w-10 h-10 sm:w-12 sm:h-12 border rounded-lg sm:rounded-xl flex items-center justify-center transition-all shrink-0 ${
                                         isInWishlist(Number(product.id))
                                             ? 'bg-red-50 border-red-200 text-red-500'
                                             : 'border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50'
                                     }`}
                                 >
-                                    <Heart className={`h-5 w-5 ${isInWishlist(Number(product.id)) ? 'fill-current' : ''}`} />
+                                    <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${isInWishlist(Number(product.id)) ? 'fill-current' : ''}`} />
                                 </button>
                             </div>
                             {hasWholesale && (
@@ -277,8 +277,8 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
 
                 {/* Reviews block — mobile-first */}
                 {(reviews.data.length > 0 || (product.review_count != null && product.review_count > 0)) && (
-                    <section className="mt-12 sm:mt-16 pt-8 sm:pt-12 border-t border-gray-100" aria-label="Customer reviews">
-                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Customer reviews</h2>
+                    <section className="mt-10 sm:mt-16 pt-6 sm:pt-12 border-t border-gray-100" aria-label="Customer reviews">
+                        <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Customer reviews</h2>
                         <div className="space-y-4">
                             {reviews.data.map((r) => (
                                 <div key={r.id} className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
@@ -303,12 +303,12 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
 
                 {/* Related Products Section */}
                 {product && (
-                    <div className="mt-24 border-t border-gray-100 pt-16">
-                        <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Related Assets</h2>
+                    <div className="mt-12 sm:mt-16 md:mt-24 border-t border-gray-100 pt-8 sm:pt-12 md:pt-16">
+                        <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
+                            <h2 className="text-lg sm:text-xl md:text-2xl font-bold sm:font-extrabold text-gray-900 tracking-tight">Related Products</h2>
                             {catName && <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{catName}</span>}
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
                             {localProducts
                                 .filter((p: any) => (typeof p.category === 'string' ? p.category : p.category?.name) === catName && p.name !== product.name)
                                 .slice(0, 4)
