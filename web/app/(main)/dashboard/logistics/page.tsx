@@ -34,8 +34,13 @@ interface FreightRate {
     price: string | number;
     type: string;
     duration: string | null;
+    currency?: string | null;
     is_active: boolean;
     sort_order: number;
+}
+
+function rateSymbol(r: FreightRate): string {
+    return r.currency === 'RMB' || ['air_phone', 'air_laptop'].includes(r.rate_id) ? '¥' : '$';
 }
 
 export default function LogisticsPage() {
@@ -66,7 +71,7 @@ export default function LogisticsPage() {
     const [selectedDestinationWarehouseId, setSelectedDestinationWarehouseId] = useState<number | null>(null);
     const [carrierTracking, setCarrierTracking] = useState('');
     const [isCod, setIsCod] = useState(false);
-    const [declaredItems, setDeclaredItems] = useState([{ description: '', value: '', quantity: 1 }]);
+    const [declaredItems, setDeclaredItems] = useState([{ description: '', value: '', quantity: '' }]);
     const [freightRates, setFreightRates] = useState<FreightRate[]>([]);
     const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
     const [scannerOpen, setScannerOpen] = useState(false);
@@ -181,7 +186,11 @@ export default function LogisticsPage() {
                 shipping_rate_id: selectedRateId || undefined,
                 is_cod: isCod,
                 weight: weight,
-                items_declaration: declaredItems,
+                items_declaration: declaredItems.map((i) => ({
+                    description: i.description,
+                    value: i.value,
+                    quantity: Number(i.quantity) || 1,
+                })),
                 payment_method: 'wallet',
                 notes: notes
             };
@@ -189,7 +198,7 @@ export default function LogisticsPage() {
             const { data } = await api.post('/logistics/book', payload);
             // Reset fields
             setCarrierTracking('');
-            setDeclaredItems([{ description: '', value: '', quantity: 1 }]);
+            setDeclaredItems([{ description: '', value: '', quantity: '' }]);
             router.push(`/dashboard/logistics/success?id=${data.id}`);
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Booking failed");
@@ -299,8 +308,9 @@ Shipping Mark: (${customerId}) +${phone}`;
                                         <option value="">— Select Rate —</option>
                                         {freightRates.map((r) => {
                                             const price = Number(r.price);
-                                            const unit = r.type === 'KG' ? '/KG' : r.type === 'UNIT' ? '/UNIT' : '/CBM';
-                                            const label = r.duration ? `${r.name} (${r.duration}) - $${price.toFixed(2)}${unit}` : `${r.name} - $${price.toFixed(2)}${unit}`;
+                                            const unit = r.type === 'KG' ? '/kg' : r.type === 'UNIT' ? '/unit' : '/CBM';
+                                            const sym = rateSymbol(r);
+                                            const label = r.duration ? `${r.name} (${r.duration}) - ${sym}${price.toFixed(0)}${unit}` : `${r.name} - ${sym}${price.toFixed(0)}${unit}`;
                                             return <option key={r.id} value={r.rate_id}>{label}</option>;
                                         })}
                                     </select>
@@ -377,11 +387,14 @@ Shipping Mark: (${customerId}) +${phone}`;
                                             />
                                             <input
                                                 type="number"
-                                                placeholder="QTY"
+                                                placeholder="0"
+                                                min={0}
+                                                inputMode="numeric"
                                                 value={item.quantity}
                                                 onChange={(e) => {
                                                     const n = [...declaredItems];
-                                                    n[index].quantity = Number(e.target.value);
+                                                    const v = e.target.value;
+                                                    n[index].quantity = v;
                                                     setDeclaredItems(n);
                                                 }}
                                                 className="col-span-2 px-3 py-2.5 bg-white border border-gray-100 rounded-lg text-xs font-bold"
@@ -407,7 +420,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                 </div>
                                 <button
                                     type="button"
-                                    onClick={() => setDeclaredItems([...declaredItems, { description: '', value: '', quantity: 1 }])}
+                                    onClick={() => setDeclaredItems([...declaredItems, { description: '', value: '', quantity: '' }])}
                                     className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-blue-600 "
                                 >
                                     <Plus className="h-3.5 w-3.5" /> Add item
@@ -421,17 +434,17 @@ Shipping Mark: (${customerId}) +${phone}`;
                                     <div className="flex flex-wrap items-baseline justify-between gap-4">
                                         <div>
                                             <p className="text-2xl font-black text-gray-900 tracking-tight">
-                                                {estimatedTotal != null ? `$${estimatedTotal.toFixed(2)}` : '—'}
+                                                {estimatedTotal != null ? `${rateSymbol(selectedRate)}${estimatedTotal.toFixed(0)}` : '—'}
                                             </p>
                                             <p className="text-xs text-gray-500 mt-1">
                                                 {selectedRate.type === 'KG' && (
-                                                    <>{selectedRate.name} × {weight} kg = ${Number(selectedRate.price).toFixed(2)}/kg</>
+                                                    <>{selectedRate.name} × {weight} kg = {rateSymbol(selectedRate)}{Number(selectedRate.price).toFixed(0)}/kg</>
                                                 )}
                                                 {selectedRate.type === 'UNIT' && (
-                                                    <>{selectedRate.name} × {Math.max(1, totalItemQuantity)} unit(s) = ${Number(selectedRate.price).toFixed(2)}/unit</>
+                                                    <>{selectedRate.name} × {Math.max(1, totalItemQuantity)} unit(s) = {rateSymbol(selectedRate)}{Number(selectedRate.price).toFixed(0)}/unit</>
                                                 )}
                                                 {selectedRate.type === 'CBM' && (
-                                                    <>{selectedRate.name} × {weight} (weight proxy) = ${Number(selectedRate.price).toFixed(2)}/CBM</>
+                                                    <>{selectedRate.name} × {weight} (weight proxy) = {rateSymbol(selectedRate)}{Number(selectedRate.price).toFixed(0)}/CBM</>
                                                 )}
                                             </p>
                                         </div>

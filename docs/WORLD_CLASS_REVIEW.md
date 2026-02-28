@@ -8,7 +8,7 @@ Honest assessment of what’s already strong and what’s missing to reach a **w
 
 - **Viewport & safe area:** `viewport-fit=cover`, safe-area insets in CSS and on key UI (sidebar, bottom nav, menu button).
 - **Touch targets:** 44px minimum (`--touch-min`, `.touch-target`) on primary nav, sidebar, and mobile menu.
-- **Mobile navigation:** Dedicated `MobileBottomNav` with Home, Logistics, Supply, Transfers, Account; respects bottom safe area.
+- **Mobile navigation:** Dedicated `MobileBottomNav` with Home, Logistics, Procurement, Transfers, Account; respects bottom safe area.
 - **Accessibility basics:** Skip link, `#main-content`, `:focus-visible`, `role="main"`, `LoadingSpinner` with `role="status"` and `aria-label`.
 - **Auth & protection:** Middleware protects `/dashboard` and `/admin`; redirects to login with `from` param.
 - **Responsive images:** `ProductImage` uses Next `Image` with `sizes` and error fallback; logo uses `priority`.

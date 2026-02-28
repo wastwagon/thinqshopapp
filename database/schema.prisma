@@ -482,6 +482,7 @@ model ShippingZone {
 }
 
 // Logistics only: freight rates for Ship for Me (China → Ghana). Not used for ecommerce/shop checkout.
+// currency: USD for most rates; RMB for Phone and Laptop (China-origin pricing).
 model ShippingMethodRate {
   id         Int      @id @default(autoincrement())
   rate_id    String   @unique @db.VarChar(50)   // e.g. air_express, sea_standard
@@ -490,6 +491,7 @@ model ShippingMethodRate {
   price      Decimal  @db.Decimal(10, 2)       // e.g. 17.00
   type       String   @db.VarChar(10)          // KG | UNIT | CBM
   duration   String?  @db.VarChar(50)          // e.g. "3-5 days", "45-60 days"
+  currency   String?  @db.VarChar(5)           // USD | RMB (default USD)
   is_active  Boolean  @default(true)
   sort_order Int      @default(0)
   created_at DateTime @default(now())

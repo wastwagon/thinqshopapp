@@ -221,7 +221,7 @@ export class LogisticsService {
         });
     }
 
-    async createFreightRate(dto: { rate_id: string; method: string; name: string; price: number; type: string; duration?: string; is_active?: boolean; sort_order?: number }) {
+    async createFreightRate(dto: { rate_id: string; method: string; name: string; price: number; type: string; duration?: string; currency?: string; is_active?: boolean; sort_order?: number }) {
         const existing = await this.prisma.shippingMethodRate.findUnique({ where: { rate_id: dto.rate_id } });
         if (existing) throw new BadRequestException(`Rate ID "${dto.rate_id}" already exists`);
         if (!['air_freight', 'sea_freight'].includes(dto.method)) throw new BadRequestException('method must be air_freight or sea_freight');
@@ -234,13 +234,14 @@ export class LogisticsService {
                 price: dto.price,
                 type: dto.type,
                 duration: dto.duration?.trim() || null,
+                currency: dto.currency || 'USD',
                 is_active: dto.is_active ?? true,
                 sort_order: dto.sort_order ?? 0,
             },
         });
     }
 
-    async updateFreightRate(id: number, dto: Partial<{ rate_id: string; method: string; name: string; price: number; type: string; duration: string; is_active: boolean; sort_order: number }>) {
+    async updateFreightRate(id: number, dto: Partial<{ rate_id: string; method: string; name: string; price: number; type: string; duration: string; currency: string; is_active: boolean; sort_order: number }>) {
         const rate = await this.prisma.shippingMethodRate.findUnique({ where: { id } });
         if (!rate) throw new NotFoundException('Shipping rate not found');
         if (dto.rate_id != null && dto.rate_id !== rate.rate_id) {
@@ -256,6 +257,7 @@ export class LogisticsService {
         if (dto.price != null) data.price = dto.price;
         if (dto.type != null) data.type = dto.type;
         if (dto.duration !== undefined) data.duration = dto.duration?.trim() || null;
+        if (dto.currency !== undefined) data.currency = dto.currency || 'USD';
         if (dto.is_active !== undefined) data.is_active = dto.is_active;
         if (dto.sort_order != null) data.sort_order = dto.sort_order;
         return this.prisma.shippingMethodRate.update({ where: { id }, data });

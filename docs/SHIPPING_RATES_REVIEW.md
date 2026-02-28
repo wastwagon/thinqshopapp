@@ -40,23 +40,25 @@ So: **Logistics freight rates** = Ship for Me only. **Ecommerce shipping** = you
 
 ---
 
-## 2. Default Rates (from migration seed)
+## 2. Default Rates (from seed)
 
 **Air Freight**
 
-| rate_id      | name                     | price   | type | duration   |
-|-------------|---------------------------|--------|------|------------|
-| air_express | Express (3-5 days)       | $17.00 | KG   | 3-5 days   |
-| air_laptop  | Laptop                    | $200.00| KG   | —          |
-| air_normal  | Normal (7-14 days)       | $13.00 | KG   | 7-14 days  |
-| air_phone   | Phone                     | $150.00| UNIT | —          |
-| air_special | Special/Battery Goods    | $20.00 | KG   | —          |
+| rate_id      | name                     | price   | currency | type | duration   |
+|-------------|---------------------------|--------|----------|------|------------|
+| air_express | Express (3-5 days)       | 17     | USD      | KG   | 3-5 days   |
+| air_normal  | Normal (7-14 days)       | 13     | USD      | KG   | 7-14 days  |
+| air_special | Special/Battery goods    | 20     | USD      | KG   | —          |
+| air_phone   | Phone                    | 150    | RMB      | UNIT | —          |
+| air_laptop  | Laptop                   | 200    | RMB      | KG   | —          |
 
 **Sea Freight**
 
-| rate_id      | name          | price   | type | duration   |
-|-------------|----------------|--------|------|------------|
-| sea_standard| Sea Standard   | $245.00| CBM  | 45-60 days |
+| rate_id      | name | price | currency | type | duration   |
+|-------------|------|-------|----------|------|------------|
+| sea_standard| Sea  | 245   | USD      | CBM  | 45-60 days |
+
+(Phone and Laptop use RMB; all other rates use USD.)
 
 ---
 
@@ -69,7 +71,7 @@ So: **Logistics freight rates** = Ship for Me only. **Ecommerce shipping** = you
 
 **Admin (auth + admin/superadmin role)**  
 - `GET /logistics/admin/freight-rates` – all rates (Air + Sea)  
-- `POST /logistics/admin/freight-rates` – create (body: rate_id, method, name, price, type, duration?, is_active?, sort_order?)  
+- `POST /logistics/admin/freight-rates` – create (body: rate_id, method, name, price, type, duration?, currency?, is_active?, sort_order?)  
 - `PATCH /logistics/admin/freight-rates/:id` – update  
 - `DELETE /logistics/admin/freight-rates/:id` – delete  
 

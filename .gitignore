@@ -6,6 +6,14 @@ build/
 out/
 .expo/
 
+# TypeScript build artifacts (don't commit compiled output)
+*.tsbuildinfo
+*.js.map
+backend/scripts/*.js
+backend/scripts/*.d.ts
+database/*.js
+database/*.d.ts
+
 # Environment and secrets (never commit)
 .env
 .env.local

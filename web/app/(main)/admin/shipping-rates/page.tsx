@@ -14,8 +14,13 @@ interface ShippingRate {
     price: string;
     type: string;
     duration: string | null;
+    currency?: string | null;
     is_active: boolean;
     sort_order: number;
+}
+
+function rateSymbol(r: ShippingRate): string {
+    return r.currency === 'RMB' || ['air_phone', 'air_laptop'].includes(r.rate_id) ? '¥' : '$';
 }
 
 export default function AdminShippingRatesPage() {
@@ -31,6 +36,7 @@ export default function AdminShippingRatesPage() {
         price: '',
         type: 'KG',
         duration: '',
+        currency: 'USD',
         is_active: true,
         sort_order: 0,
     });
@@ -58,6 +64,7 @@ export default function AdminShippingRatesPage() {
             price: '',
             type: 'KG',
             duration: '',
+            currency: 'USD',
             is_active: true,
             sort_order: 0,
         });
@@ -73,6 +80,7 @@ export default function AdminShippingRatesPage() {
             price: r.price,
             type: r.type,
             duration: r.duration || '',
+            currency: r.currency || 'USD',
             is_active: r.is_active,
             sort_order: r.sort_order,
         });
@@ -92,6 +100,7 @@ export default function AdminShippingRatesPage() {
                 await api.post('/logistics/admin/freight-rates', {
                     ...form,
                     price,
+                    currency: form.currency || 'USD',
                     sort_order: form.sort_order || 0,
                 });
                 toast.success('Rate added');
@@ -99,6 +108,7 @@ export default function AdminShippingRatesPage() {
                 await api.patch(`/logistics/admin/freight-rates/${editingId}`, {
                     ...form,
                     price,
+                    currency: form.currency || 'USD',
                     sort_order: form.sort_order ?? 0,
                 });
                 toast.success('Rate updated');
@@ -170,7 +180,7 @@ export default function AdminShippingRatesPage() {
                                 <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="px-3 py-2.5 text-xs font-mono text-gray-900">{r.rate_id}</td>
                                     <td className="px-3 py-2.5 text-xs font-medium text-gray-900">{r.name}</td>
-                                    <td className="px-3 py-2.5 text-xs font-semibold text-gray-900">${Number(r.price).toFixed(2)}/{r.type}</td>
+                                    <td className="px-3 py-2.5 text-xs font-semibold text-gray-900">{rateSymbol(r)}{Number(r.price).toFixed(2)}/{r.type}</td>
                                     <td className="px-3 py-2.5 text-[10px] font-semibold text-gray-600">{r.type}</td>
                                     <td className="px-3 py-2.5 text-[10px] text-gray-500">{r.duration || '—'}</td>
                                     <td className="px-3 py-2.5">
@@ -312,6 +322,17 @@ export default function AdminShippingRatesPage() {
                                         <option value="CBM">CBM</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-semibold text-gray-500 mb-1">Currency</label>
+                                <select
+                                    value={form.currency}
+                                    onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                >
+                                    <option value="USD">USD ($)</option>
+                                    <option value="RMB">RMB (¥)</option>
+                                </select>
                             </div>
                             <div>
                                 <label className="block text-[10px] font-semibold text-gray-500 mb-1">Duration (optional)</label>
