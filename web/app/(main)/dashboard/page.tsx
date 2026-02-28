@@ -4,10 +4,11 @@ import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import {
     Truck,
-    ShoppingBag,
-    ArrowUpRight,
+    Package,
+    Send,
     Shield,
     RefreshCw,
+    ShoppingCart,
 } from 'lucide-react';
 import api from '@/lib/axios';
 import Link from 'next/link';
@@ -22,8 +23,8 @@ export default function DashboardPage() {
     const [stats, setStats] = useState({
         walletBalance: '0.00',
         activeShipments: 0,
-        pendingProcurements: 0,
-        recentTransfers: 0
+        totalOrders: 0,
+        totalTransfers: 0,
     });
     const [loading, setLoading] = useState(true);
 
@@ -36,18 +37,22 @@ export default function DashboardPage() {
 
         const fetchStats = async () => {
             try {
-                const [walletRes, shipmentsRes, procRes, transRes] = await Promise.all([
+                const [walletRes, shipmentsRes, ordersRes, transRes] = await Promise.all([
                     api.get('/finance/wallet'),
                     api.get('/logistics/history'),
-                    api.get('/procurement/user'),
-                    api.get('/finance/transfers')
+                    api.get('/orders').catch(() => ({ data: [] })),
+                    api.get('/finance/transfers'),
                 ]);
+
+                const shipments = shipmentsRes.data || [];
+                const orders = ordersRes.data || [];
+                const transfers = transRes.data || [];
 
                 setStats({
                     walletBalance: Number(walletRes.data.balance_ghs).toFixed(2),
-                    activeShipments: (shipmentsRes.data || []).filter((s: any) => s.status !== 'delivered').length,
-                    pendingProcurements: (procRes.data || []).filter((p: any) => p.status === 'submitted').length,
-                    recentTransfers: (transRes.data || []).length
+                    activeShipments: shipments.filter((s: any) => s.status !== 'delivered').length,
+                    totalOrders: Array.isArray(orders) ? orders.length : 0,
+                    totalTransfers: Array.isArray(transfers) ? transfers.length : 0,
                 });
             } catch (error) {
                 console.error('Failed to fetch stats', error);
@@ -62,26 +67,38 @@ export default function DashboardPage() {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
-            transition: {
-                staggerChildren: 0.1
-            }
-        }
+            transition: { staggerChildren: 0.06 },
+        },
     };
 
     const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 }
+        hidden: { opacity: 0, y: 12 },
+        visible: { opacity: 1, y: 0 },
     };
 
     if (authLoading || loading) {
         return (
             <DashboardLayout>
-                <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="flex items-center justify-center min-h-[50vh] py-8">
                     <div className="text-gray-500 text-sm animate-pulse">Loading...</div>
                 </div>
             </DashboardLayout>
         );
     }
+
+    const kpiCards = [
+        { label: 'In transit', value: stats.activeShipments, icon: Truck, href: '/dashboard/shipments', color: 'blue' },
+        { label: 'Orders', value: stats.totalOrders, icon: Package, href: '/dashboard/orders', color: 'emerald' },
+        { label: 'Transfers', value: stats.totalTransfers, icon: Send, href: '/dashboard/transfers', color: 'violet' },
+        { label: 'Identity', value: 'Verified', icon: Shield, href: null, color: 'slate', isText: true },
+    ];
+
+    const colorClasses: Record<string, string> = {
+        blue: 'bg-blue-50 border-blue-100 text-blue-600',
+        emerald: 'bg-emerald-50 border-emerald-100 text-emerald-600',
+        violet: 'bg-violet-50 border-violet-100 text-violet-600',
+        slate: 'bg-slate-50 border-slate-100 text-slate-600',
+    };
 
     return (
         <DashboardLayout>
@@ -89,105 +106,93 @@ export default function DashboardPage() {
                 initial="hidden"
                 animate="visible"
                 variants={containerVariants}
-                className="mb-4 md:mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-3 md:gap-4"
+                className="pb-6 md:pb-8"
             >
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight leading-tight mb-1">Dashboard</h1>
-                    <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                        <p className="text-xs text-gray-500">Logged in as {user?.email}</p>
-                    </div>
-                </div>
-            </motion.div>
+                {/* Header - compact */}
+                <motion.div variants={itemVariants} className="mb-3 md:mb-4">
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+                    <p className="text-[11px] md:text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
+                        <span className="w-1 h-1 bg-green-500 rounded-full" />
+                        {user?.email}
+                    </p>
+                </motion.div>
 
-            {/* Stats & Actions */}
-            <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={containerVariants}
-                className="grid grid-cols-1 gap-3 md:gap-6 mb-4 md:mb-6"
-            >
-                <div className="space-y-3 md:space-y-4">
-                    {/* Wallet Hero Card */}
-                    <motion.div
-                        variants={itemVariants}
-                        whileHover={{ scale: 1.01 }}
-                        className="bg-gray-900 rounded-xl md:rounded-2xl p-4 md:p-6 text-white relative overflow-hidden group shadow-lg"
-                    >
-                        <div className="absolute top-0 right-0 w-40 h-40 bg-blue-600/20 blur-[80px]" />
-                        <div className="relative z-10">
-                            <p className="text-blue-300 text-[10px] font-semibold uppercase tracking-wider mb-2 md:mb-3">Wallet balance</p>
-                            <div className="flex items-baseline gap-2 mb-1 md:mb-2">
-                                <span className="text-3xl md:text-4xl font-bold tracking-tight">₵{stats.walletBalance.split('.')[0]}</span>
-                                <span className="text-base md:text-lg font-medium text-white/40">.{stats.walletBalance.split('.')[1]}</span>
-                            </div>
-                            <div className="flex gap-2 mt-3 pt-3 md:mt-4 md:pt-4 border-t border-white/10">
-                                <Link href="/dashboard/wallet" className="flex-1 h-9 md:h-10 bg-white text-gray-900 rounded-lg md:rounded-xl flex items-center justify-center font-semibold text-xs hover:bg-blue-50 transition-all">
-                                    Deposit
-                                </Link>
-                                <button className="w-9 h-9 md:w-10 md:h-10 bg-white/10 border border-white/10 rounded-lg md:rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition-all">
-                                    <RefreshCw className="h-4 w-4" />
-                                </button>
+                {/* Wallet - compact hero */}
+                <motion.div
+                    variants={itemVariants}
+                    className="bg-gray-900 rounded-xl p-3 md:p-5 text-white relative overflow-hidden mb-3 md:mb-4"
+                >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 blur-[60px]" />
+                    <div className="relative z-10 flex items-center justify-between gap-3">
+                        <div>
+                            <p className="text-blue-300 text-[9px] md:text-[10px] font-semibold uppercase tracking-wider">Wallet</p>
+                            <div className="flex items-baseline gap-1 mt-0.5">
+                                <span className="text-2xl md:text-3xl font-bold tracking-tight">₵{stats.walletBalance.split('.')[0]}</span>
+                                <span className="text-sm text-white/50">.{stats.walletBalance.split('.')[1]}</span>
                             </div>
                         </div>
-                    </motion.div>
+                        <div className="flex gap-1.5 shrink-0">
+                            <Link
+                                href="/dashboard/wallet"
+                                className="h-8 md:h-9 px-3 md:px-4 bg-white text-gray-900 rounded-lg flex items-center font-semibold text-[11px] md:text-xs hover:bg-blue-50 transition-all"
+                            >
+                                Deposit
+                            </Link>
+                            <button className="h-8 w-8 md:h-9 md:w-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-all">
+                                <RefreshCw className="h-3.5 w-3.5" />
+                            </button>
+                        </div>
+                    </div>
+                </motion.div>
 
-                    {/* Quick Stats Grid */}
-                    <div className="grid grid-cols-2 gap-3 md:gap-4">
-                        <motion.div
-                            variants={itemVariants}
-                            whileHover={{ y: -2 }}
-                            className="bg-white rounded-xl p-4 md:p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all group"
-                        >
-                            <div className="w-9 h-9 md:w-10 md:h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-2 md:mb-3 border border-blue-100">
-                                <Truck className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
-                            </div>
-                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">In transit</p>
-                            <p className="text-xl md:text-2xl font-bold text-gray-900">{stats.activeShipments}</p>
-                        </motion.div>
-                        <motion.div
-                            variants={itemVariants}
-                            whileHover={{ y: -2 }}
-                            className="bg-white rounded-xl p-4 md:p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all group"
-                        >
-                            <div className="w-9 h-9 md:w-10 md:h-10 bg-indigo-50 rounded-lg flex items-center justify-center mb-2 md:mb-3 border border-indigo-100">
-                                <ShoppingBag className="h-4 w-4 md:h-5 md:w-5 text-indigo-600" />
-                            </div>
-                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Pending</p>
-                            <p className="text-xl md:text-2xl font-bold text-gray-900">{stats.pendingProcurements}</p>
-                        </motion.div>
-                    </div>
-                </div>
-            </motion.div>
-
-            {/* Tracking & Support Matrix */}
-            <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={containerVariants}
-                className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4"
-            >
-                <div className="bg-gray-50 rounded-xl p-4 md:p-5 border border-gray-100 flex items-center gap-3 md:gap-4 hover:bg-white transition-all shadow-sm">
-                    <div className="w-9 h-9 md:w-10 md:h-10 bg-white rounded-lg flex items-center justify-center border border-gray-100 shadow-sm shrink-0">
-                        <Shield className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
-                    </div>
-                    <div className="min-w-0">
-                        <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Identity</h4>
-                        <p className="text-sm font-bold text-gray-900">Verified</p>
-                    </div>
+                {/* KPI Grid - 2x2 mobile, compact */}
+                <div className="grid grid-cols-2 gap-2 md:gap-3 mb-4 md:mb-5">
+                    {kpiCards.map((card) => {
+                        const Icon = card.icon;
+                        const color = colorClasses[card.color] || colorClasses.slate;
+                        const inner = (
+                            <motion.div
+                                variants={itemVariants}
+                                className={`rounded-xl p-3 md:p-4 border shadow-sm transition-all ${
+                                    card.href ? 'bg-white border-gray-100 hover:shadow-md hover:border-gray-200 cursor-pointer' : 'bg-gray-50/80 border-gray-100'
+                                }`}
+                            >
+                                <div className={`w-8 h-8 md:w-9 md:h-9 rounded-lg flex items-center justify-center border mb-1.5 ${color}`}>
+                                    <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                                </div>
+                                <p className="text-[9px] md:text-[10px] font-semibold text-gray-400 uppercase tracking-wider truncate">{card.label}</p>
+                                <p className="text-lg md:text-xl font-bold text-gray-900 mt-0.5 truncate">
+                                    {card.isText ? String(card.value) : card.value}
+                                </p>
+                            </motion.div>
+                        );
+                        return (
+                            <React.Fragment key={card.label}>
+                                {card.href ? <Link href={card.href}>{inner}</Link> : inner}
+                            </React.Fragment>
+                        );
+                    })}
                 </div>
 
-                <div className="md:col-span-2 bg-blue-600 rounded-xl p-4 md:p-5 lg:p-6 relative overflow-hidden group shadow-lg flex items-center justify-between text-white gap-3">
-                    <div className="relative z-10 min-w-0 flex-1">
-                        <h4 className="text-base md:text-lg font-bold tracking-tight mb-0.5 md:mb-1">Procurement</h4>
-                        <p className="text-blue-100 text-[11px] md:text-xs">Source products from our global supply chain.</p>
-                    </div>
-                    <Link href="/dashboard/procurement" className="relative z-10 w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-lg hover:scale-105 transition-transform shrink-0">
-                        <ArrowUpRight className="h-6 w-6" />
+                {/* Quick action - Shop */}
+                <motion.div variants={itemVariants}>
+                    <Link
+                        href="/shop"
+                        className="flex items-center justify-between gap-3 p-3 md:p-4 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all group"
+                    >
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                                <ShoppingCart className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-sm font-bold text-gray-900">Browse shop</p>
+                                <p className="text-[11px] text-gray-500 truncate">Electronics & imaging</p>
+                            </div>
+                        </div>
+                        <span className="text-blue-600 group-hover:translate-x-0.5 transition-transform shrink-0">→</span>
                     </Link>
-                </div>
+                </motion.div>
             </motion.div>
         </DashboardLayout>
     );
 }
-
