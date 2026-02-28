@@ -101,16 +101,22 @@ export default function LogisticsPage() {
                     api.get('/logistics/zones'),
                     api.get('/logistics/warehouses')
                 ]);
-                setZones(zonesRes.data);
-                setWarehouses(warehousesRes.data);
+                const zones = Array.isArray(zonesRes.data) ? zonesRes.data : zonesRes.data?.data ?? [];
+                const whList = Array.isArray(warehousesRes.data) ? warehousesRes.data : warehousesRes.data?.data ?? [];
+                setZones(zones);
+                setWarehouses(whList);
 
-                const initialChina = warehousesRes.data.find((w: any) => w.country === 'China');
-                const initialGhana = warehousesRes.data.find((w: any) => w.country === 'Ghana' && (String(w.name || '').toLowerCase().includes('lapaz') || String(w.code || '').toLowerCase().includes('lapaz')));
+                const chinaWarehouses = whList.filter((w: any) => String(w.country || '').toLowerCase() === 'china');
+                const chinaWarehouse = chinaWarehouses[0];
+                const ghanaWarehouse = whList.find((w: any) =>
+                    String(w.country || '').toLowerCase() === 'ghana' &&
+                    (String(w.name || '').toLowerCase().includes('lapaz') || String(w.code || '').toLowerCase().includes('lapaz'))
+                );
 
-                if (initialChina) setSelectedWarehouseId(initialChina.id);
-                if (initialGhana) setSelectedDestinationWarehouseId(initialGhana.id);
+                if (chinaWarehouse) setSelectedWarehouseId(chinaWarehouse.id);
+                if (ghanaWarehouse) setSelectedDestinationWarehouseId(ghanaWarehouse.id);
 
-                if (zonesRes.data.length > 0) setZoneId(zonesRes.data[0].id.toString());
+                if (zones.length > 0) setZoneId(zones[0].id.toString());
             } catch (error) {
                 console.error("Failed to load logistics data", error);
             }
@@ -157,8 +163,10 @@ export default function LogisticsPage() {
     };
 
     const handleBooking = async () => {
-        if (!selectedWarehouseId) {
-            toast.error("Select a forwarding warehouse (China)");
+        const chinaWarehouse = warehouses.find(w => String(w.country || '').toLowerCase() === 'china');
+        const originId = selectedWarehouseId ?? chinaWarehouse?.id;
+        if (!originId) {
+            toast.error("China warehouse not available. Please try again later.");
             return;
         }
         const destinationId = lapazWarehouse?.id ?? selectedDestinationWarehouseId;
@@ -179,7 +187,7 @@ export default function LogisticsPage() {
         try {
             const payload = {
                 type: 'freight_forwarding',
-                origin_warehouse_id: selectedWarehouseId,
+                origin_warehouse_id: originId,
                 destination_warehouse_id: destinationId,
                 carrier_tracking_number: carrierTracking.trim(),
                 shipping_method: serviceType,
