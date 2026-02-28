@@ -85,6 +85,7 @@ export default function AdminDashboard() {
 
     return (
         <DashboardLayout isAdmin={true}>
+            <div className="pb-6 md:pb-8">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
                     <Shield className="h-7 w-7 text-blue-600" />
@@ -203,6 +204,7 @@ export default function AdminDashboard() {
                     <p className="text-lg font-bold text-gray-900">Operational</p>
                     <p className="text-[9px] text-gray-400 mt-0.5">All systems normal</p>
                 </div>
+            </div>
             </div>
         </DashboardLayout>
     );

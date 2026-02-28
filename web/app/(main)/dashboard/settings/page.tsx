@@ -23,6 +23,7 @@ export default function SettingsPage() {
 
     return (
         <DashboardLayout>
+            <div className="pb-6 md:pb-8">
             <div className="mb-6 flex items-center gap-3">
                 <Settings className="h-8 w-8 text-blue-600" />
                 <div>
@@ -148,6 +149,7 @@ export default function SettingsPage() {
                         </Link>
                     </div>
                 </div>
+            </div>
             </div>
         </DashboardLayout>
     );

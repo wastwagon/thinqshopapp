@@ -76,6 +76,7 @@ export default function AdminEmailTemplatesPage() {
 
     return (
         <DashboardLayout isAdmin={true}>
+            <div className="pb-6 md:pb-8">
             <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div className="flex items-center gap-3">
                     <Mail className="h-8 w-8 text-blue-600" />
@@ -152,6 +153,7 @@ export default function AdminEmailTemplatesPage() {
                     ))}
                 </div>
             )}
+            </div>
         </DashboardLayout>
     );
 }

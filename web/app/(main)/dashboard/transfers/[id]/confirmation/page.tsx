@@ -99,7 +99,7 @@ export default function TransferConfirmationPage() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-3xl mx-auto pb-6">
+            <div className="max-w-3xl mx-auto pb-6 md:pb-8">
                 {/* Breadcrumb and actions - hidden when printing */}
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-4 print:hidden">
                     <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm">

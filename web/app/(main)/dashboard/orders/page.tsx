@@ -7,6 +7,7 @@ import { Package } from 'lucide-react';
 export default function OrdersPage() {
     return (
         <DashboardLayout>
+            <div className="pb-6 md:pb-8">
             <div className="mb-6 flex items-center gap-3">
                 <Package className="h-8 w-8 text-blue-600" />
                 <div>
@@ -18,6 +19,7 @@ export default function OrdersPage() {
                 </div>
             </div>
             <OrderHistory />
+            </div>
         </DashboardLayout>
     );
 }

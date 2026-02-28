@@ -83,7 +83,7 @@ export default function ProcurementResponsePage() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-3xl mx-auto pb-12">
+            <div className="max-w-3xl mx-auto pb-6 md:pb-8">
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-8 print:hidden">
                     <Link
                         href="/dashboard/procurement"

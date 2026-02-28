@@ -39,6 +39,7 @@ export default function TransferHistoryPage() {
 
     return (
         <DashboardLayout>
+            <div className="pb-6 md:pb-8">
             <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Recent transfers</h1>
@@ -119,6 +120,7 @@ export default function TransferHistoryPage() {
                         ))}
                     </ul>
                 )}
+            </div>
             </div>
         </DashboardLayout>
     );

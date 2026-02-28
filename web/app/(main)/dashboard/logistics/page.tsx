@@ -217,6 +217,7 @@ export default function LogisticsPage() {
 
     return (
         <DashboardLayout>
+            <div className="pb-6 md:pb-8">
             <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div className="flex items-center gap-3">
                     <Truck className="h-8 w-8 text-blue-600" />
@@ -474,6 +475,8 @@ Shipping Mark: (${customerId}) +${phone}`;
                         </div>
                     </div>
                 </div>
+            </div>
+
             </div>
 
             <BarcodeScanner

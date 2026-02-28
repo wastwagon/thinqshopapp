@@ -43,7 +43,7 @@ export default function TransferSuccessPage() {
     if (!id) {
         return (
             <DashboardLayout>
-                <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 px-4 py-6">
+                <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 px-4 py-6 pb-6 md:pb-8">
                     <p className="text-gray-500 text-sm">No transfer ID provided.</p>
                     <Link href="/dashboard/transfers" className="text-blue-600 font-semibold text-sm hover:underline">
                         Back to Transfers
@@ -56,7 +56,7 @@ export default function TransferSuccessPage() {
     if (loading || !transfer) {
         return (
             <DashboardLayout>
-                <div className="min-h-[60vh] flex items-center justify-center">
+                <div className="min-h-[60vh] flex items-center justify-center pb-6 md:pb-8">
                     <div className="animate-spin h-10 w-10 border-2 border-blue-600 border-t-transparent rounded-full" />
                 </div>
             </DashboardLayout>
@@ -68,7 +68,7 @@ export default function TransferSuccessPage() {
 
     return (
         <DashboardLayout>
-            <div className="min-h-[80vh] flex items-center justify-center px-4 py-6 sm:py-10 safe-area-inset-bottom bg-gradient-to-b from-gray-50 to-white">
+            <div className="min-h-[80vh] flex items-center justify-center px-4 py-6 sm:py-10 pb-6 md:pb-8 safe-area-inset-bottom bg-gradient-to-b from-gray-50 to-white">
                 <ThankYouCard
                     title="Transfer submitted successfully"
                     subtitle="Your cross-border transfer has been initiated. We will process it and send funds to your recipient."

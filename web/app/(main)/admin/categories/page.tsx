@@ -108,6 +108,7 @@ export default function AdminCategories() {
 
     return (
         <DashboardLayout isAdmin={true}>
+            <div className="pb-6 md:pb-8">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
                     <FolderTree className="h-7 w-7 text-blue-600" />
@@ -284,6 +285,7 @@ export default function AdminCategories() {
                     </div>
                 </div>
             )}
+            </div>
         </DashboardLayout>
     );
 }

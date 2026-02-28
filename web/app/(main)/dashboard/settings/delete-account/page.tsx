@@ -33,7 +33,7 @@ export default function DeleteAccountPage() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-xl mx-auto">
+            <div className="max-w-xl mx-auto pb-6 md:pb-8">
                 <div className="mb-6">
                     <Link href="/dashboard/settings" className="text-sm text-gray-500 hover:text-gray-700">
                         ← Back to Settings

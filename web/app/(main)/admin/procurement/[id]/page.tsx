@@ -145,7 +145,7 @@ export default function AdminProcurementDetailPage() {
     if (loading) {
         return (
             <DashboardLayout isAdmin={true}>
-                <div className="p-6 text-center">
+                <div className="p-6 pb-6 md:pb-8 text-center">
                     <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3" />
                     <p className="text-sm text-gray-500">Loading request...</p>
                 </div>
@@ -157,6 +157,7 @@ export default function AdminProcurementDetailPage() {
 
     return (
         <DashboardLayout isAdmin={true}>
+            <div className="pb-6 md:pb-8">
             <div className="mb-6 flex items-center justify-between gap-3">
                 <Link
                     href="/admin/procurement"
@@ -389,6 +390,7 @@ export default function AdminProcurementDetailPage() {
                         )}
                     </div>
                 </div>
+            </div>
             </div>
         </DashboardLayout>
     );

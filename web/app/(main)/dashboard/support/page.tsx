@@ -46,6 +46,7 @@ export default function SupportPage() {
 
     return (
         <DashboardLayout>
+            <div className="pb-6 md:pb-8">
             <motion.div
                 initial="hidden"
                 animate="visible"
@@ -209,6 +210,7 @@ export default function SupportPage() {
                     ))}
                 </div>
             </motion.div>
+            </div>
         </DashboardLayout>
     );
 }

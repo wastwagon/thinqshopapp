@@ -56,6 +56,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
 
     return (
         <DashboardLayout>
+            <div className="pb-6 md:pb-8">
             <div className="mb-6 flex items-center gap-3">
                 <Link href="/dashboard/orders" className="text-blue-600 hover:text-gray-900 flex items-center text-sm font-medium transition-colors">
                     <ArrowLeft className="h-4 w-4 mr-1.5" /> Orders
@@ -131,6 +132,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </DashboardLayout>
     );

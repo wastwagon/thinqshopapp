@@ -87,6 +87,7 @@ export default function AdminSettings() {
 
     return (
         <DashboardLayout isAdmin={true}>
+            <div className="pb-6 md:pb-8">
             <div className="mb-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
                 <div className="flex items-center gap-3">
                     <Settings className="h-7 w-7 text-blue-600" />
@@ -249,6 +250,7 @@ export default function AdminSettings() {
                         <p className="text-xs text-gray-400 leading-relaxed">Changes to settings are logged for security and compliance.</p>
                     </section>
                 </div>
+            </div>
             </div>
         </DashboardLayout>
     );

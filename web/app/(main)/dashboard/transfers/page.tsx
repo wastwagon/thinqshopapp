@@ -181,6 +181,7 @@ export default function TransferPage() {
 
     return (
         <DashboardLayout>
+            <div className="pb-6 md:pb-8">
             {paystackConfig && (
                 <PaystackTrigger
                     config={paystackConfig}
@@ -420,6 +421,7 @@ export default function TransferPage() {
                         </form>
                     </div>
                 </div>
+            </div>
             </div>
         </DashboardLayout>
     );
