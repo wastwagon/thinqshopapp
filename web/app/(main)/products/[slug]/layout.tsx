@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const description =
         typeof product.description === 'string' && product.description
             ? product.description.slice(0, 160)
-            : `Buy ${name} at ThinQShop. Premium electronics and imaging systems delivered to Ghana.`;
+            : `Buy ${name} at ThinQShop. Electronics and imaging systems delivered to Ghana.`;
     const image = product.images?.[0] || product.image || product.images;
     const imageUrl = Array.isArray(image) ? image[0] : image;
     const ogImage = imageUrl ? productImageUrl(imageUrl, true) : `${siteUrl}/thinqshop-logo.webp`;

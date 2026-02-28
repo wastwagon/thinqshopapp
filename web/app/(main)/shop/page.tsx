@@ -115,7 +115,7 @@ function ShopContent() {
             <div className="max-w-7xl mx-auto px-6 py-12">
                 <PageHeader
                     title={search ? 'Search Results' : 'Our Collection'}
-                    subtitle="Premium electronics and tech delivered to you"
+                    subtitle="Electronics and tech delivered to you"
                     breadcrumbs={breadcrumbs}
                 />
                 <div className="flex flex-col md:flex-row justify-end mb-8 -mt-4">

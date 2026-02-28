@@ -17,19 +17,19 @@ export default function AboutPage() {
 
                 <div className="prose prose-gray max-w-none">
                     <p className="text-gray-600 leading-relaxed mb-8">
-                        ThinQShop is redefining the high-end electronics market in West Africa. We source from global tech leaders and deliver with professional excellence—so you get the devices you need, when and where you need them.
+                        ThinQShop serves the high-end electronics market in West Africa. We source from global tech leaders and deliver with professional service—so you get the devices you need, when and where you need them.
                     </p>
 
                     <h2 className="text-lg font-bold text-gray-900 mt-10 mb-4">Our Mission</h2>
                     <p className="text-gray-600 leading-relaxed mb-6">
-                        We bridge the gap between world-class technology and West African businesses and consumers. By combining e-commerce, digital logistics, money transfer, and tech sourcing in one trusted platform, we make it simple to shop, ship, and source with confidence.
+                        We bridge the gap between global technology and West African businesses and consumers. By combining e-commerce, digital logistics, money transfer, and tech sourcing in one platform, we make it simple to shop, ship, and source.
                     </p>
 
                     <h2 className="text-lg font-bold text-gray-900 mt-10 mb-4">What We Offer</h2>
                     <ul className="space-y-4 text-gray-600 mb-10">
                         <li className="flex items-start gap-3">
                             <Zap className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-                            <span><strong className="text-gray-900">Shop</strong> — Premium electronics and tech, vetted and delivered. Items ship internationally with 7–14 day estimated delivery.</span>
+                            <span><strong className="text-gray-900">Shop</strong> — Electronics and tech, vetted and delivered. Items ship internationally with 7–14 day estimated delivery.</span>
                         </li>
                         <li className="flex items-start gap-3">
                             <Truck className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />

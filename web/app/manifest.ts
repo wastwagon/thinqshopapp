@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     return {
         name: 'ThinQShopping',
         short_name: 'ThinQShop',
-        description: 'Shop premium electronics and imaging systems delivered to Ghana. Money transfer, logistics, and procurement.',
+        description: 'Shop electronics and imaging systems delivered to Ghana. Money transfer, logistics, and procurement.',
         start_url: '/',
         scope: '/',
         display: 'standalone',

@@ -56,7 +56,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {/* Sale Badge */}
                 {product.compare_price && (
                     <div className="absolute top-3 left-3 bg-red-600 text-white text-[9px] font-semibold px-2 py-0.5 rounded z-10">
-                        SALE
+                        OFFER
                     </div>
                 )}
 

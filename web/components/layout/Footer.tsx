@@ -36,7 +36,7 @@ export default function Footer() {
                             </div>
                         </Link>
                         <p className="text-gray-500 max-w-sm mb-6 sm:mb-10 leading-relaxed font-medium text-sm sm:text-base">
-                            Redefining the high-end electronics market in West Africa.
+                            High-end electronics and services for West Africa.
                             Sourced from global tech leaders, delivered with professional excellence.
                         </p>
                         {ordersDelivered && (

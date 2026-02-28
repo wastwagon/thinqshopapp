@@ -152,7 +152,7 @@ export default function Home() {
                     </div>
                 ) : (
                     <>
-                {/* Flash Sales */}
+                {/* Featured Deals */}
                 <section className="py-8 sm:py-12">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6">
                         <div className="flex items-center justify-between mb-6">
@@ -161,8 +161,8 @@ export default function Home() {
                                     <Zap className="w-5 h-5 text-amber-600" />
                                 </span>
                                 <div>
-                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Flash Sales</h2>
-                                    <p className="text-xs text-gray-500">Limited time deals</p>
+                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Featured Deals</h2>
+                                    <p className="text-xs text-gray-500">Hand-picked offers</p>
                                 </div>
                             </div>
                             <Link

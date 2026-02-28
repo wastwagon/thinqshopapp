@@ -14,10 +14,10 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     const title = categoryTitle(category);
     return {
         title: `${title} – Shop`,
-        description: `Shop ${title} at ThinQShop. Premium electronics and imaging systems delivered to Ghana. Order in GHS.`,
+        description: `Shop ${title} at ThinQShop. Electronics and imaging systems delivered to Ghana. Order in GHS.`,
         openGraph: {
             title: `${title} | ThinQShop`,
-            description: `Browse ${title}. Premium electronics delivered to Ghana.`,
+            description: `Browse ${title}. Electronics delivered to Ghana.`,
             url: `${siteUrl}/shop/${category}`,
         },
     };

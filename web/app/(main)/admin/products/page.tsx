@@ -404,7 +404,7 @@ export default function AdminProducts() {
                                         placeholder="Original price for sale display"
                                         className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                     />
-                                    <p className="text-[9px] text-gray-400 mt-0.5">Shows in Flash Sales when set</p>
+                                    <p className="text-[9px] text-gray-400 mt-0.5">Shows in Featured Deals when set</p>
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-semibold text-gray-500 mb-1">Stock</label>
