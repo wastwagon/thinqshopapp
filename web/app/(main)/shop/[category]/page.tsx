@@ -8,6 +8,7 @@ import ProductGrid from '@/components/ui/ProductGrid';
 import { Search, Loader2 } from 'lucide-react';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
+import CategoryBadges from '@/components/shop/CategoryBadges';
 import staticProducts from '@/lib/data/scraped_products.json';
 import { normalizeProduct, STATIC_CATEGORIES } from '@/lib/product-utils';
 
@@ -118,8 +119,13 @@ function CategoryShopContent() {
                     </form>
                 </div>
 
+                <div className="mb-6 lg:mb-0">
+                    <h3 className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-3 lg:hidden">Categories</h3>
+                    <CategoryBadges categories={categories} currentSlug={categorySlug} />
+                </div>
+
                 <div className="flex flex-col lg:flex-row gap-12">
-                    <aside className="w-full lg:w-64 flex-shrink-0">
+                    <aside className="hidden lg:block w-full lg:w-64 flex-shrink-0">
                         <div className="sticky top-24">
                             <h3 className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-6">Categories</h3>
                             <div className="space-y-1.5">
