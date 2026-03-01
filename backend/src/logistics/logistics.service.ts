@@ -184,7 +184,7 @@ export class LogisticsService implements OnModuleInit {
                 delivery_address_id: isFreightForwarding ? null : delivery_address_id,
                 weight: weight || 0,
                 dimensions: dimensions || '',
-                service_type: isFreightForwarding ? dto.shipping_method : service_type,
+                service_type: isFreightForwarding ? 'standard' : service_type,
                 status: 'booked',
                 payment_method: payment_method || 'wallet',
                 payment_status: isFreightForwarding ? 'pending' : (payment_method === 'wallet' ? 'success' : 'pending'),
