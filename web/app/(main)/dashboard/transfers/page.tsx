@@ -181,7 +181,7 @@ export default function TransferPage() {
 
     return (
         <DashboardLayout>
-            <div className="pb-12 md:pb-10">
+            <div className="pb-20 md:pb-10">
             {paystackConfig && (
                 <PaystackTrigger
                     config={paystackConfig}

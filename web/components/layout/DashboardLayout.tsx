@@ -63,7 +63,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
 
                 <Topbar onMenuPress={toggleSidebar} />
 
-                <main id="main-content" className="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-6 pb-[calc(8rem+env(safe-area-inset-bottom,0px))] md:pb-6 relative z-10 safe-area-inset-bottom min-w-0" tabIndex={-1} role="main">
+                <main id="main-content" className="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-6 pb-[calc(10rem+env(safe-area-inset-bottom,0px))] md:pb-6 relative z-10 safe-area-inset-bottom min-w-0" tabIndex={-1} role="main">
                     <div className="max-w-7xl mx-auto space-y-4 md:space-y-6 min-w-0 w-full">
                         {children}
                     </div>
