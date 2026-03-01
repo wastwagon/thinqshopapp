@@ -86,6 +86,17 @@ export default function ProcurementPage() {
         setUploadedImages((prev) => prev.filter((_, i) => i !== index));
     };
 
+    const handleAcceptQuote = async (quoteId: number) => {
+        if (!confirm('Are you sure? This will deduct funds from your wallet.')) return;
+        try {
+            await api.post('/procurement/accept-quote', { quoteId });
+            toast.success('Order placed successfully!');
+            fetchRequests();
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Payment failed');
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!description.trim()) return;
@@ -129,17 +140,6 @@ export default function ProcurementPage() {
             fetchRequests();
         } catch (error) {
             toast.error('Failed to submit request');
-        }
-    };
-
-    const handleAcceptQuote = async (quoteId: number) => {
-        if (!confirm('Are you sure? This will deduct funds from your wallet.')) return;
-        try {
-            await api.post('/procurement/accept-quote', { quoteId });
-            toast.success('Order placed successfully!');
-            fetchRequests();
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Payment failed');
         }
     };
 
@@ -359,83 +359,85 @@ export default function ProcurementPage() {
                 </div>
             )}
 
-            <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xs font-semibold text-gray-600 flex items-center gap-2">
-                        <HistoryIcon className="h-4 w-4 text-blue-600" />
-                        Requests
-                    </h2>
-                </div>
-                <div className="grid grid-cols-1 gap-3">
-                    {loading && requests.length === 0 ? (
-                        <div className="py-10 text-center bg-white rounded-xl border border-gray-100">
-                            <div className="animate-pulse flex flex-col items-center">
-                                <div className="w-8 h-8 bg-gray-100 rounded-full mb-2" />
-                                <p className="text-xs text-gray-400">Loading...</p>
-                            </div>
-                        </div>
-                    ) : requests.length === 0 ? (
-                        <div className="py-10 text-center bg-white rounded-xl border border-gray-100">
-                            <ShoppingBag className="h-10 w-10 text-gray-200 mx-auto mb-3" />
-                            <p className="text-xs text-gray-400">No requests yet</p>
-                        </div>
-                    ) : (
-                        requests.map((req) => (
-                            <div key={req.id} className="bg-white rounded-xl border border-gray-100 hover:shadow-md transition-all p-4 group">
-                                <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
-                                    <div className="space-y-2 flex-1">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <p className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{req.description}</p>
-                                            {req.request_type && (
-                                                <span className="text-[9px] font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600">
-                                                    {req.request_type === 'print' ? 'Print' : 'Sourcing'}
-                                                </span>
-                                            )}
-                                            <span className={`px-3 py-1 rounded-full text-[9px] font-black ${req.status === 'submitted' ? 'bg-blue-50 text-blue-600' : req.status === 'quote_provided' ? 'bg-orange-50 text-orange-600' : req.status === 'accepted' ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'}`}>
-                                                {req.status.replace('_', ' ')}
-                                            </span>
-                                        </div>
-                                        <div className="flex flex-wrap items-center gap-4 text-[10px] text-gray-500">
-                                            <span className="font-mono">{req.request_number}</span>
-                                            <span>{new Date(req.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                            {req.orders?.length > 0 && (
-                                                <span className="text-green-600 flex items-center gap-1"><CheckCircle className="h-3 w-3" /> {req.orders[0].order_number}</span>
-                                            )}
-                                            <Link href={`/dashboard/procurement/${req.id}/response`} className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
-                                                <FileDown className="h-3 w-3" /> Download response
-                                            </Link>
-                                        </div>
-                                    </div>
-                                    {req.quotes?.length > 0 && req.status !== 'accepted' ? (
-                                        <div className="bg-gray-900 rounded-lg p-3 flex items-center gap-4">
-                                            <div>
-                                                <p className="text-[9px] text-blue-300">Quote</p>
-                                                <p className="text-lg font-bold text-white">₵{Number(req.quotes[0].quote_amount).toFixed(2)}</p>
-                                            </div>
-                                            <button
-                                                onClick={() => handleAcceptQuote(req.quotes[0].id)}
-                                                className="h-9 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-white hover:text-gray-900 flex items-center gap-1"
-                                            >
-                                                Pay <ChevronRight className="h-3.5 w-3.5" />
-                                            </button>
-                                        </div>
-                                    ) : req.status === 'accepted' ? (
-                                        <div className="bg-green-50 px-3 py-2 rounded-lg border border-green-100">
-                                            <p className="text-[9px] font-semibold text-green-600">Status</p>
-                                            <p className="text-xs font-medium text-green-900">In progress</p>
-                                        </div>
-                                    ) : (
-                                        <div className="bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
-                                            <p className="text-[9px] font-semibold text-gray-500">Status</p>
-                                            <p className="text-xs font-medium text-gray-700">Awaiting quote</p>
-                                        </div>
-                                    )}
+            {!isCreating && (
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xs font-semibold text-gray-600 flex items-center gap-2">
+                            <HistoryIcon className="h-4 w-4 text-blue-600" />
+                            Requests
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                        {loading && requests.length === 0 ? (
+                            <div className="py-10 text-center bg-white rounded-xl border border-gray-100">
+                                <div className="animate-pulse flex flex-col items-center">
+                                    <div className="w-8 h-8 bg-gray-100 rounded-full mb-2" />
+                                    <p className="text-xs text-gray-400">Loading...</p>
                                 </div>
                             </div>
-                        ))
-                    )}
+                        ) : requests.length === 0 ? (
+                            <div className="py-10 text-center bg-white rounded-xl border border-gray-100">
+                                <ShoppingBag className="h-10 w-10 text-gray-200 mx-auto mb-3" />
+                                <p className="text-xs text-gray-400">No requests yet</p>
+                            </div>
+                        ) : (
+                            requests.map((req) => (
+                                <div key={req.id} className="bg-white rounded-xl border border-gray-100 hover:shadow-md transition-all p-4 group">
+                                    <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
+                                        <div className="space-y-2 flex-1">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <p className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{req.description}</p>
+                                                {req.request_type && (
+                                                    <span className="text-[9px] font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+                                                        {req.request_type === 'print' ? 'Print' : 'Sourcing'}
+                                                    </span>
+                                                )}
+                                                <span className={`px-3 py-1 rounded-full text-[9px] font-black ${req.status === 'submitted' ? 'bg-blue-50 text-blue-600' : req.status === 'quote_provided' ? 'bg-orange-50 text-orange-600' : req.status === 'accepted' ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'}`}>
+                                                    {req.status.replace('_', ' ')}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-4 text-[10px] text-gray-500">
+                                                <span className="font-mono">{req.request_number}</span>
+                                                <span>{new Date(req.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                {req.orders?.length > 0 && (
+                                                    <span className="text-green-600 flex items-center gap-1"><CheckCircle className="h-3 w-3" /> {req.orders[0].order_number}</span>
+                                                )}
+                                                <Link href={`/dashboard/procurement/${req.id}/response`} className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                                                    <FileDown className="h-3 w-3" /> Download response
+                                                </Link>
+                                            </div>
+                                        </div>
+                                        {req.quotes?.length > 0 && req.status !== 'accepted' ? (
+                                            <div className="bg-gray-900 rounded-lg p-3 flex items-center gap-4">
+                                                <div>
+                                                    <p className="text-[9px] text-blue-300">Quote</p>
+                                                    <p className="text-lg font-bold text-white">₵{Number(req.quotes[0].quote_amount).toFixed(2)}</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleAcceptQuote(req.quotes[0].id)}
+                                                    className="h-9 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-white hover:text-gray-900 flex items-center gap-1"
+                                                >
+                                                    Pay <ChevronRight className="h-3.5 w-3.5" />
+                                                </button>
+                                            </div>
+                                        ) : req.status === 'accepted' ? (
+                                            <div className="bg-green-50 px-3 py-2 rounded-lg border border-green-100">
+                                                <p className="text-[9px] font-semibold text-green-600">Status</p>
+                                                <p className="text-xs font-medium text-green-900">In progress</p>
+                                            </div>
+                                        ) : (
+                                            <div className="bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                                                <p className="text-[9px] font-semibold text-gray-500">Status</p>
+                                                <p className="text-xs font-medium text-gray-700">Awaiting quote</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
             </div>
         </DashboardLayout>
     );

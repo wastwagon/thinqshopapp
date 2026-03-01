@@ -76,6 +76,11 @@ export default function LogisticsPage() {
     const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
     const [scannerOpen, setScannerOpen] = useState(false);
 
+    // China warehouse: match by country or known code (CN-GZ-001)
+    const chinaWarehouse = warehouses.find(w =>
+        String(w.country || '').toLowerCase() === 'china' ||
+        String(w.code || '').toUpperCase().startsWith('CN-')
+    );
     // Only Lapaz for local pickup (no Kumasi)
     const lapazWarehouse = warehouses.find(w => w.country === 'Ghana' && (w.name.toLowerCase().includes('lapaz') || (w.code && String(w.code).toLowerCase().includes('lapaz'))));
     const ghanaWarehouses = lapazWarehouse ? [lapazWarehouse] : warehouses.filter(w => w.country === 'Ghana').slice(0, 1);
@@ -106,14 +111,16 @@ export default function LogisticsPage() {
                 setZones(zones);
                 setWarehouses(whList);
 
-                const chinaWarehouses = whList.filter((w: any) => String(w.country || '').toLowerCase() === 'china');
-                const chinaWarehouse = chinaWarehouses[0];
+                const chinaWh = whList.find((w: any) =>
+                    String(w.country || '').toLowerCase() === 'china' ||
+                    String(w.code || '').toUpperCase().startsWith('CN-')
+                );
                 const ghanaWarehouse = whList.find((w: any) =>
                     String(w.country || '').toLowerCase() === 'ghana' &&
                     (String(w.name || '').toLowerCase().includes('lapaz') || String(w.code || '').toLowerCase().includes('lapaz'))
                 );
 
-                if (chinaWarehouse) setSelectedWarehouseId(chinaWarehouse.id);
+                if (chinaWh) setSelectedWarehouseId(chinaWh.id);
                 if (ghanaWarehouse) setSelectedDestinationWarehouseId(ghanaWarehouse.id);
 
                 if (zones.length > 0) setZoneId(zones[0].id.toString());
@@ -163,7 +170,6 @@ export default function LogisticsPage() {
     };
 
     const handleBooking = async () => {
-        const chinaWarehouse = warehouses.find(w => String(w.country || '').toLowerCase() === 'china');
         const originId = selectedWarehouseId ?? chinaWarehouse?.id;
         if (!originId) {
             toast.error("China warehouse not available. Please try again later.");
