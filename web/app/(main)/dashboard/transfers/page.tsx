@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
-import { ArrowRight, Send, AlertCircle, Plus, CreditCard, Wallet, Upload, X } from 'lucide-react';
+import { ArrowRight, Send, AlertCircle, Plus, CreditCard, Wallet, Upload, X, History as HistoryIcon, RefreshCw, FileDown } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
@@ -14,9 +15,23 @@ const PaystackTrigger = dynamic(
     { ssr: false }
 );
 
+interface Transfer {
+    id: number;
+    token: string;
+    amount_ghs: number;
+    amount_cny: number;
+    recipient_name: string;
+    status: string;
+    created_at: string;
+    admin_reply_images?: string[];
+}
+
 export default function TransferPage() {
     const { user } = useAuth();
     const router = useRouter();
+    const [transfers, setTransfers] = useState<Transfer[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [isCreating, setIsCreating] = useState(false);
     const [rate, setRate] = useState<number>(0);
     const [transferDirection, setTransferDirection] = useState('send_to_china');
     const [purpose, setPurpose] = useState('Personal');
@@ -50,6 +65,22 @@ export default function TransferPage() {
         reader.onload = () => setQrEntryImage(id, reader.result as string);
         reader.readAsDataURL(file);
     };
+
+    const fetchTransfers = async () => {
+        setLoading(true);
+        try {
+            const { data } = await api.get('/finance/transfers');
+            setTransfers(data);
+        } catch (error) {
+            console.error('Failed to load transfers', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchTransfers();
+    }, []);
 
     useEffect(() => {
         const fetchRate = async () => {
@@ -190,7 +221,7 @@ export default function TransferPage() {
                     userEmail={user?.email}
                 />
             )}
-            <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div className="mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                 <div className="flex items-center gap-3">
                     <Send className="h-8 w-8 text-blue-600" />
                     <div>
@@ -201,9 +232,15 @@ export default function TransferPage() {
                         </p>
                     </div>
                 </div>
-                <p className="text-gray-500 text-sm max-w-sm md:text-right">Send to Alipay, WeChat Pay, or Chinese bank accounts.</p>
+                <button
+                    onClick={() => setIsCreating(!isCreating)}
+                    className={`h-9 px-4 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-blue-600 text-white hover:bg-gray-900'}`}
+                >
+                    {isCreating ? 'Cancel' : <><Plus className="h-4 w-4" /> New transfer</>}
+                </button>
             </div>
 
+            {isCreating && (
             <div className="max-w-2xl">
                 {/* Transfer Form */}
                 <div className="space-y-4">
@@ -422,6 +459,84 @@ export default function TransferPage() {
                     </div>
                 </div>
             </div>
+            )}
+
+            {!isCreating && (
+                <div className="space-y-3">
+                    <h2 className="text-xs font-semibold text-gray-600 flex items-center gap-2">
+                        <HistoryIcon className="h-4 w-4 text-blue-600" />
+                        Transfers
+                    </h2>
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="px-4 py-4 md:px-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">All transfers</p>
+                            <button onClick={fetchTransfers} className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-blue-600" aria-label="Refresh">
+                                <RefreshCw className="h-4 w-4" />
+                            </button>
+                        </div>
+                        {loading ? (
+                            <div className="p-12 text-center">
+                                <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto" />
+                            </div>
+                        ) : transfers.length === 0 ? (
+                            <div className="p-12 md:p-16 text-center">
+                                <Send className="h-12 w-12 mx-auto mb-6 text-gray-200" />
+                                <p className="text-sm text-gray-500 mb-4">No transfers yet</p>
+                                <button
+                                    onClick={() => setIsCreating(true)}
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                                >
+                                    Send your first transfer
+                                </button>
+                            </div>
+                        ) : (
+                            <ul className="divide-y divide-gray-50 max-h-[70vh] overflow-y-auto">
+                                {transfers.map((tx) => (
+                                    <li key={tx.id} className="px-4 py-4 md:px-6 hover:bg-gray-50 transition-all group">
+                                        <div className="flex justify-between items-start gap-4">
+                                            <div className="min-w-0 space-y-0.5">
+                                                <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 truncate">{tx.recipient_name}</p>
+                                                <p className="text-xs text-gray-500">{new Date(tx.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                                <p className="text-xs text-gray-400 font-mono">Ref: {tx.token.slice(0, 12)}</p>
+                                            </div>
+                                            <div className="text-right shrink-0 space-y-0.5">
+                                                <p className="text-base font-bold text-gray-900">¥{Number(tx.amount_cny).toFixed(2)}</p>
+                                                <p className="text-xs text-gray-500">₵{Number(tx.amount_ghs).toFixed(2)}</p>
+                                                <span className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold uppercase mt-1 ${
+                                                    tx.status === 'completed' ? 'bg-green-50 text-green-700' :
+                                                    tx.status === 'failed' ? 'bg-red-50 text-red-700' : 'bg-yellow-50 text-yellow-600'
+                                                }`}>
+                                                    {tx.status?.replace(/_/g, ' ') || 'Pending'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {tx.admin_reply_images && tx.admin_reply_images.length > 0 && (
+                                            <div className="mt-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                                <p className="text-xs font-semibold text-gray-500 mb-2">Proof</p>
+                                                <div className="flex gap-2 overflow-x-auto pb-1">
+                                                    {tx.admin_reply_images.map((img: string, i: number) => (
+                                                        <a key={i} href={img} target="_blank" rel="noopener noreferrer" className="block w-12 h-12 flex-shrink-0 border bg-white rounded-lg overflow-hidden hover:opacity-90">
+                                                            <img src={img} alt="Proof" className="w-full h-full object-cover" />
+                                                        </a>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="mt-4">
+                                            <Link
+                                                href={`/dashboard/transfers/${tx.id}/confirmation`}
+                                                className="inline-flex items-center gap-2 text-xs font-semibold text-blue-600 hover:text-blue-800"
+                                            >
+                                                <FileDown className="h-3.5 w-3.5" /> View details
+                                            </Link>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </div>
+            )}
             </div>
         </DashboardLayout>
     );

@@ -28,6 +28,12 @@ export class LogisticsController {
         });
     }
 
+    @Get('shipments/:id')
+    @UseGuards(AuthGuard)
+    async getShipment(@Request() req, @Param('id') id: string) {
+        return this.logisticsService.getShipmentById(req.user.sub, Number(id));
+    }
+
     @Get('track/:trackingNumber')
     async trackShipment(@Param('trackingNumber') trackingNumber: string) {
         return this.logisticsService.trackShipment(trackingNumber);
