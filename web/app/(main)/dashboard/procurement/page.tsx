@@ -145,7 +145,7 @@ export default function ProcurementPage() {
 
     return (
         <DashboardLayout>
-            <div className="pb-6 md:pb-8">
+            <div className="pb-20 md:pb-10">
             <div className="mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                 <div className="flex items-center gap-2">
                     <ShoppingBag className="h-8 w-8 text-blue-600" />
