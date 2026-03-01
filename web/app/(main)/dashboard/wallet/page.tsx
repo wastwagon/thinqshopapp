@@ -128,7 +128,7 @@ export default function WalletPage() {
 
     return (
         <DashboardLayout>
-            <div className="pb-6 md:pb-8">
+            <div className="pb-20 md:pb-10">
             {paystackTopUpConfig && (
                 <WalletPaystackTrigger
                     config={paystackTopUpConfig}
