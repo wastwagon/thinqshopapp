@@ -1,17 +1,36 @@
-import { Injectable, BadRequestException, NotFoundException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, Inject, forwardRef, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WalletService } from '../finance/wallet.service';
 import { ShipmentStatus } from '@prisma/client';
 import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
-export class LogisticsService {
+export class LogisticsService implements OnModuleInit {
     constructor(
         private prisma: PrismaService,
         @Inject(forwardRef(() => WalletService))
         private walletService: WalletService,
         private notificationService: NotificationService
     ) { }
+
+    async onModuleInit() {
+        await this.ensureWarehouses();
+    }
+
+    /** Ensures China + Lapaz warehouses exist (Ship for Me flow). Idempotent — safe on every startup. */
+    private async ensureWarehouses() {
+        const essential = [
+            { code: 'CN-GZ-001', name: 'ThinQ China Hub', address: '广州市越秀区三元里大道499-523号四楼08号商铺', city: 'Guangzhou', country: 'China', phone: '18320709024', recipient_name: 'ThinQ China Team', is_active: true },
+            { code: 'GH-LAPAZ-001', name: 'Lapaz Hub', address: 'Lapaz Main Road, Opposite Las Palmas, Accra', city: 'Accra', country: 'Ghana', phone: '+233 24 000 0000', recipient_name: 'ThinQ Lapaz Team', is_active: true },
+        ];
+        for (const w of essential) {
+            await this.prisma.warehouse.upsert({
+                where: { code: w.code },
+                update: w,
+                create: w,
+            });
+        }
+    }
 
     async getWarehouses() {
         return this.prisma.warehouse.findMany({
