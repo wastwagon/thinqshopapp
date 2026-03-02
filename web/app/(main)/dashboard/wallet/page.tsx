@@ -182,7 +182,7 @@ export default function WalletPage() {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[80px]" />
                     <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <p className="text-blue-200 text-[10px] font-semibold uppercase tracking-wider mb-4">Balance</p>
+                            <p className="text-blue-200 text-xs font-semibold uppercase tracking-wider mb-4">Balance</p>
                             <div className="flex items-baseline gap-1 mb-4">
                                 <span className="text-4xl font-bold tracking-tight text-white">
                                     ₵{balance !== null ? balance.toFixed(2).split('.')[0] : '0'}
@@ -207,7 +207,7 @@ export default function WalletPage() {
                         </div>
 
                         <div className="h-[160px] md:h-full min-h-[180px]">
-                            <p className="text-blue-200 text-[10px] font-semibold uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <p className="text-blue-200 text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-2">
                                 <Activity className="h-3 w-3" /> Forecast
                             </p>
                             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={100}>
@@ -240,7 +240,7 @@ export default function WalletPage() {
                         <h3 className="text-sm font-bold text-gray-900 mb-4">Top-up wallet</h3>
                         <form onSubmit={handleTopUp} className="space-y-4">
                             <div>
-                                <label htmlFor="modal-amount" className="text-[10px] font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">
+                                <label htmlFor="modal-amount" className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">
                                     Amount (GHS)
                                 </label>
                                 <div className="relative">
@@ -318,7 +318,7 @@ export default function WalletPage() {
                                             <p className="text-sm font-black text-gray-900 capitalize tracking-tight">
                                                 {tx.service_type.replace('_', ' ')}
                                             </p>
-                                            <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest font-mono">
+                                            <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest font-mono">
                                                 {new Date(tx.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
@@ -328,7 +328,7 @@ export default function WalletPage() {
                                             }`}>
                                             {tx.service_type === 'wallet_topup' ? '+' : '-'} ₵{Number(tx.amount).toFixed(2)}
                                         </p>
-                                        <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-full ${tx.status === 'success' ? 'bg-green-100 text-green-700 shadow-sm shadow-green-100' :
+                                        <span className={`px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full ${tx.status === 'success' ? 'bg-green-100 text-green-700 shadow-sm shadow-green-100' :
                                             tx.status === 'failed' ? 'bg-red-50 text-red-600 shadow-sm shadow-red-50' :
                                                 'bg-yellow-50 text-yellow-600 shadow-sm shadow-yellow-50'
                                             }`}>

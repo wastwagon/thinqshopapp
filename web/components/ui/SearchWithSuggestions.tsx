@@ -10,6 +10,8 @@ import staticProducts from '@/lib/data/scraped_products.json';
 
 interface SearchWithSuggestionsProps {
     id?: string;
+    /** Optional unique id for the suggestions listbox (for multiple instances on page). */
+    listboxId?: string;
     className?: string;
     inputClassName?: string;
     placeholder?: string;
@@ -27,7 +29,7 @@ function useDebounce<T>(value: T, delay: number): T {
     return debouncedValue;
 }
 
-export default function SearchWithSuggestions({ id = 'nav-search', className = '', inputClassName = '', placeholder = 'Search products...', mobile = false, onNavigate }: SearchWithSuggestionsProps) {
+export default function SearchWithSuggestions({ id = 'nav-search', listboxId = 'search-suggestions', className = '', inputClassName = '', placeholder = 'Search products...', mobile = false, onNavigate }: SearchWithSuggestionsProps) {
     const router = useRouter();
     const [query, setQuery] = useState('');
     const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -151,7 +153,7 @@ export default function SearchWithSuggestions({ id = 'nav-search', className = '
                         className={`${baseInputClass} ${inputClassName}`}
                         aria-label="Search products"
                         aria-autocomplete="list"
-                        aria-controls="search-suggestions"
+                        aria-controls={listboxId}
                         aria-expanded={showDropdown && suggestions.length > 0}
                     />
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" aria-hidden />
@@ -160,9 +162,9 @@ export default function SearchWithSuggestions({ id = 'nav-search', className = '
 
             {showDropdown && (suggestions.length > 0 || loading) && (
                 <div
-                    id="search-suggestions"
+                    id={listboxId}
                     role="listbox"
-                    className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl shadow-gray-200/50 z-[100] overflow-hidden"
+                    className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl shadow-gray-200/50 z-[100] overflow-hidden max-h-[60vh] overflow-y-auto"
                 >
                     {loading ? (
                         <div className="px-4 py-6 text-center text-sm text-gray-500">Searching...</div>

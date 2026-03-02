@@ -91,7 +91,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                                     <div className={`flex h-7 w-7 items-center justify-center rounded-full border-2 bg-white z-10 ${isCompleted ? 'border-blue-600 text-blue-600' : 'border-gray-200'}`}>
                                         {isCompleted ? <CheckCircle className="h-4 w-4" /> : <span className="h-1.5 w-1.5 rounded-full bg-transparent" />}
                                     </div>
-                                    <p className={`text-[10px] font-medium mt-2 uppercase tracking-wider ${isCompleted ? 'text-blue-600' : 'text-gray-400'}`}>{step}</p>
+                                    <p className={`text-xs font-medium mt-2 uppercase tracking-wider ${isCompleted ? 'text-blue-600' : 'text-gray-400'}`}>{step}</p>
                                 </div>
                             );
                         })}

@@ -150,7 +150,7 @@ export default function Navbar() {
                                                             </span>
                                                             <span className="text-xs font-semibold leading-tight">{cat.name}</span>
                                                             {cat.tagline && (
-                                                                <span className={`text-[10px] ${isActive ? 'text-slate-300' : 'text-gray-400'}`}>{cat.tagline}</span>
+                                                                <span className={`text-xs ${isActive ? 'text-slate-300' : 'text-gray-400'}`}>{cat.tagline}</span>
                                                             )}
                                                         </Link>
                                                     );
@@ -210,14 +210,14 @@ export default function Navbar() {
                 <div className="flex items-center gap-1 sm:gap-2 lg:gap-1 shrink-0" role="group" aria-label="Account and cart actions">
                     <Link
                         href="/dashboard"
-                        className="touch-target w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
+                        className="touch-target min-w-[44px] min-h-[44px] w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
                         aria-label="Account"
                     >
                         <User className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden />
                     </Link>
                     <Link
                         href="/wishlist"
-                        className="touch-target w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
+                        className="touch-target min-w-[44px] min-h-[44px] w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
                         aria-label="Wishlist"
                     >
                         <Heart className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden />
@@ -225,13 +225,13 @@ export default function Navbar() {
                     <button
                         type="button"
                         onClick={toggleCart}
-                        className="touch-target w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors relative"
+                        className="touch-target min-w-[44px] min-h-[44px] w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors relative"
                         aria-label={`Shopping cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
                     >
                         <ShoppingCart className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden />
                         {cartCount > 0 && (
                             <span
-                                className="absolute top-1 right-1 min-w-[1.25rem] h-5 px-1 bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg"
+                                className="absolute top-1 right-1 min-w-[1.25rem] h-5 px-1 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg"
                                 aria-hidden
                             >
                                 {cartCount > 99 ? '99+' : cartCount}
@@ -241,7 +241,7 @@ export default function Navbar() {
                     <button
                         type="button"
                         onClick={() => setSearchOpen(true)}
-                        className="touch-target w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
+                        className="touch-target min-w-[44px] min-h-[44px] w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
                         aria-label="Search products"
                     >
                         <Search className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden />

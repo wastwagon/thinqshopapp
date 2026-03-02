@@ -91,28 +91,28 @@ export default function ShipmentDetailPage() {
                         <div className="p-6 space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Weight</p>
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Weight</p>
                                     <p className="text-sm font-semibold text-gray-900">{shipment.weight} kg</p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total</p>
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total</p>
                                     <p className="text-lg font-bold text-gray-900">₵{Number(shipment.total_price || 0).toFixed(2)}</p>
                                 </div>
                                 {shipment.carrier_tracking_number && (
                                     <div>
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Carrier tracking</p>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Carrier tracking</p>
                                         <p className="text-sm font-mono text-gray-900">{shipment.carrier_tracking_number}</p>
                                     </div>
                                 )}
                                 {shipment.shipping_method && (
                                     <div>
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Method</p>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Method</p>
                                         <p className="text-sm font-semibold text-gray-900">{shipment.shipping_method.replace('_', ' ')}</p>
                                     </div>
                                 )}
                                 {shipment.is_cod && (
                                     <div>
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Payment</p>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Payment</p>
                                         <p className="text-sm font-semibold text-gray-900">Cash on Delivery</p>
                                     </div>
                                 )}
@@ -120,29 +120,29 @@ export default function ShipmentDetailPage() {
 
                             {shipment.origin_warehouse && (
                                 <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
                                         <MapPin className="h-3.5 w-3.5" /> Origin
                                     </p>
                                     <p className="text-sm font-bold text-gray-900">{shipment.origin_warehouse.name}</p>
                                     <p className="text-xs text-gray-500 mt-0.5">{shipment.origin_warehouse.address}</p>
-                                    <p className="text-[10px] font-mono text-gray-400 mt-1">{shipment.origin_warehouse.code}</p>
+                                    <p className="text-xs font-mono text-gray-400 mt-1">{shipment.origin_warehouse.code}</p>
                                 </div>
                             )}
 
                             {shipment.destination_warehouse && (
                                 <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
                                         <MapPin className="h-3.5 w-3.5" /> Destination
                                     </p>
                                     <p className="text-sm font-bold text-gray-900">{shipment.destination_warehouse.name}</p>
                                     <p className="text-xs text-gray-500 mt-0.5">{shipment.destination_warehouse.address}</p>
-                                    <p className="text-[10px] font-mono text-gray-400 mt-1">{shipment.destination_warehouse.code}</p>
+                                    <p className="text-xs font-mono text-gray-400 mt-1">{shipment.destination_warehouse.code}</p>
                                 </div>
                             )}
 
                             {items.length > 0 && (
                                 <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Items declared</p>
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Items declared</p>
                                     <div className="space-y-2">
                                         {items.map((item, i) => (
                                             <div key={i} className="flex justify-between items-center text-sm">
@@ -156,7 +156,7 @@ export default function ShipmentDetailPage() {
 
                             {trackingList.length > 0 && (
                                 <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                         <Truck className="h-3.5 w-3.5" /> Tracking
                                     </p>
                                     <ul className="space-y-3">
@@ -166,7 +166,7 @@ export default function ShipmentDetailPage() {
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-900">{t.status?.replace(/_/g, ' ')}</p>
                                                     {t.notes && <p className="text-xs text-gray-500 mt-0.5">{t.notes}</p>}
-                                                    <p className="text-[10px] text-gray-400 mt-1">{new Date(t.created_at).toLocaleString()}</p>
+                                                    <p className="text-xs text-gray-400 mt-1">{new Date(t.created_at).toLocaleString()}</p>
                                                 </div>
                                             </li>
                                         ))}

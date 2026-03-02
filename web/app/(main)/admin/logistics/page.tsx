@@ -101,7 +101,7 @@ export default function AdminLogisticsPage() {
             cancelled: 'bg-red-50 text-red-700 border-red-200',
         };
         return (
-            <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+            <span className={`px-2 py-0.5 text-xs font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
                 {status.replace(/_/g, ' ')}
             </span>
         );
@@ -136,7 +136,7 @@ export default function AdminLogisticsPage() {
                         <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
                             <s.icon className="h-4 w-4" />
                         </div>
-                        <p className="text-[10px] font-semibold text-gray-500 mb-0.5">{s.label}</p>
+                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
                         <p className="text-xl font-bold text-gray-900">{s.value}</p>
                     </div>
                 ))}
@@ -147,10 +147,10 @@ export default function AdminLogisticsPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Tracking</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Customer</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center">Status</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right">Actions</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 min-w-0">Tracking</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 min-w-0">Customer</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-center min-w-0">Status</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right min-w-0">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -174,20 +174,20 @@ export default function AdminLogisticsPage() {
                                         <td className="px-3 py-2.5">
                                             <div className="flex flex-col gap-0.5">
                                                 <span className="text-xs font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{shipment.tracking_number || '—'}</span>
-                                                <span className="text-[10px] text-gray-500">{shipment.service_type || 'Standard'}</span>
+                                                <span className="text-xs text-gray-500">{shipment.service_type || 'Standard'}</span>
                                                 {shipment.origin_warehouse && (
                                                     <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                                        <span className="text-[9px] font-semibold py-0.5 px-1.5 bg-blue-50 text-blue-700 rounded border border-blue-100">{shipment.origin_warehouse.code}</span>
+                                                        <span className="text-xs font-semibold py-0.5 px-1.5 bg-blue-50 text-blue-700 rounded border border-blue-100">{shipment.origin_warehouse.code}</span>
                                                         {shipment.destination_warehouse && (
                                                             <>
                                                                 <span className="text-gray-300">→</span>
-                                                                <span className="text-[9px] font-semibold py-0.5 px-1.5 bg-green-50 text-green-700 rounded border border-green-100">{shipment.destination_warehouse.code}</span>
+                                                                <span className="text-xs font-semibold py-0.5 px-1.5 bg-green-50 text-green-700 rounded border border-green-100">{shipment.destination_warehouse.code}</span>
                                                             </>
                                                         )}
                                                     </div>
                                                 )}
                                                 {shipment.carrier_tracking_number && (
-                                                    <span className="text-[9px] text-gray-500">Carrier: {shipment.carrier_tracking_number}</span>
+                                                    <span className="text-xs text-gray-500">Carrier: {shipment.carrier_tracking_number}</span>
                                                 )}
                                             </div>
                                         </td>
@@ -200,7 +200,7 @@ export default function AdminLogisticsPage() {
                                                     <p className="text-xs font-medium text-gray-900 truncate">
                                                         {[shipment.user?.profile?.first_name, shipment.user?.profile?.last_name].filter(Boolean).join(' ') || '—'}
                                                     </p>
-                                                    <p className="text-[10px] text-gray-500 truncate flex items-center gap-1">
+                                                    <p className="text-xs text-gray-500 truncate flex items-center gap-1">
                                                         <Mail className="h-2.5 w-2.5 shrink-0" />{shipment.user?.email}
                                                     </p>
                                                 </div>
@@ -208,26 +208,26 @@ export default function AdminLogisticsPage() {
                                         </td>
                                         <td className="px-3 py-2.5 text-center">
                                             <StatusBadge status={shipment.status} />
-                                            <p className="text-[10px] text-gray-500 mt-1 flex items-center justify-center gap-1">
+                                            <p className="text-xs text-gray-500 mt-1 flex items-center justify-center gap-1">
                                                 <Calendar className="h-2.5 w-2.5" />{new Date(shipment.created_at).toLocaleDateString()}
                                             </p>
                                         </td>
                                         <td className="px-3 py-2.5 text-right">
-                                            <div className="flex items-center justify-end gap-1.5">
+                                            <div className="flex items-center justify-end gap-1.5 flex-wrap">
                                                 <button
                                                     type="button"
                                                     onClick={() => handleSimulateWebhook(shipment.id)}
                                                     disabled={updatingId === shipment.id || shipment.status === 'delivered'}
                                                     title="Advance status"
-                                                    className="w-7 h-7 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50 shrink-0"
+                                                    className="min-w-[44px] min-h-[44px] w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50 shrink-0"
                                                     aria-label="Advance status"
                                                 >
-                                                    <Zap className="h-3 w-3" />
+                                                    <Zap className="h-4 w-4" />
                                                 </button>
                                                 <div className="relative inline-block">
                                                     <select
                                                         disabled={updatingId === shipment.id}
-                                                        className="appearance-none bg-gray-50 border border-gray-100 text-gray-700 text-xs font-semibold rounded-lg py-2 pl-2.5 pr-7 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+                                                        className="appearance-none bg-gray-50 border border-gray-100 text-gray-700 text-xs font-semibold rounded-lg min-h-[44px] py-2 pl-2.5 pr-7 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
                                                         value={shipment.status}
                                                         onChange={(e) => handleStatusUpdate(shipment.id, e.target.value)}
                                                     >

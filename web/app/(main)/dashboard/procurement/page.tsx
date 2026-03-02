@@ -187,7 +187,7 @@ export default function ProcurementPage() {
                                             className={`flex-1 p-3 rounded-lg text-left border-2 transition-all ${requestType === t.id ? 'border-blue-600 bg-blue-50' : 'border-gray-100 hover:border-gray-200'}`}
                                         >
                                             <span className={`text-xs font-semibold block ${requestType === t.id ? 'text-blue-600' : 'text-gray-600'}`}>{t.label}</span>
-                                            <span className="text-[10px] text-gray-500 mt-0.5 block">{t.desc}</span>
+                                            <span className="text-xs text-gray-500 mt-0.5 block">{t.desc}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -277,7 +277,7 @@ export default function ProcurementPage() {
                                     {uploading ? 'Uploading…' : 'Upload images'}
                                 </button>
                                 <div className="min-h-[120px] rounded-lg border-2 border-dashed border-gray-100 bg-gray-50/50 p-3">
-                                    <p className="text-[10px] font-semibold text-gray-500 mb-2">
+                                    <p className="text-xs font-semibold text-gray-500 mb-2">
                                         {uploadedImages.length > 0
                                             ? `Uploaded images (${uploadedImages.length})`
                                             : 'Image preview — uploads will appear here'}
@@ -309,8 +309,8 @@ export default function ProcurementPage() {
                                         <div className="flex items-center justify-center py-6 text-gray-400">
                                             <div className="text-center">
                                                 <Upload className="h-8 w-8 mx-auto mb-1 opacity-50" />
-                                                <p className="text-[10px]">No images yet</p>
-                                                <p className="text-[9px]">Click above to upload</p>
+                                                <p className="text-xs">No images yet</p>
+                                                <p className="text-xs">Click above to upload</p>
                                             </div>
                                         </div>
                                     )}
@@ -337,12 +337,12 @@ export default function ProcurementPage() {
                                         <Info className="h-4 w-4 text-blue-600" />
                                         <span className="text-xs font-semibold text-gray-700">How it works</span>
                                     </div>
-                                    <ul className="space-y-1 text-[10px] text-gray-500">
+                                    <ul className="space-y-1 text-xs text-gray-500">
                                         <li className="flex items-center gap-2"><Shield className="h-3 w-3 text-blue-500" /> Verified suppliers</li>
                                         <li className="flex items-center gap-2"><Globe className="h-3 w-3 text-blue-500" /> China supply chain</li>
                                         <li className="flex items-center gap-2"><Zap className="h-3 w-3 text-blue-500" /> Wallet checked before quote</li>
                                     </ul>
-                                    <p className="text-[10px] text-gray-400 mt-2">Budget indicative; quotes may vary ±5%.</p>
+                                    <p className="text-xs text-gray-400 mt-2">Budget indicative; quotes may vary ±5%.</p>
                                 </div>
                             </div>
                         </div>
@@ -388,15 +388,15 @@ export default function ProcurementPage() {
                                             <div className="flex flex-wrap items-center gap-2">
                                                 <p className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{req.description}</p>
                                                 {req.request_type && (
-                                                    <span className="text-[9px] font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+                                                    <span className="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600">
                                                         {req.request_type === 'print' ? 'Print' : 'Sourcing'}
                                                     </span>
                                                 )}
-                                                <span className={`px-3 py-1 rounded-full text-[9px] font-black ${req.status === 'submitted' ? 'bg-blue-50 text-blue-600' : req.status === 'quote_provided' ? 'bg-orange-50 text-orange-600' : req.status === 'accepted' ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'}`}>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-black ${req.status === 'submitted' ? 'bg-blue-50 text-blue-600' : req.status === 'quote_provided' ? 'bg-orange-50 text-orange-600' : req.status === 'accepted' ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'}`}>
                                                     {req.status.replace('_', ' ')}
                                                 </span>
                                             </div>
-                                            <div className="flex flex-wrap items-center gap-4 text-[10px] text-gray-500">
+                                            <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
                                                 <span className="font-mono">{req.request_number}</span>
                                                 <span>{new Date(req.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                                 {req.orders?.length > 0 && (
@@ -410,7 +410,7 @@ export default function ProcurementPage() {
                                         {req.quotes?.length > 0 && req.status !== 'accepted' ? (
                                             <div className="bg-gray-900 rounded-lg p-3 flex items-center gap-4">
                                                 <div>
-                                                    <p className="text-[9px] text-blue-300">Quote</p>
+                                                    <p className="text-xs text-blue-300">Quote</p>
                                                     <p className="text-lg font-bold text-white">₵{Number(req.quotes[0].quote_amount).toFixed(2)}</p>
                                                 </div>
                                                 <button
@@ -422,12 +422,12 @@ export default function ProcurementPage() {
                                             </div>
                                         ) : req.status === 'accepted' ? (
                                             <div className="bg-green-50 px-3 py-2 rounded-lg border border-green-100">
-                                                <p className="text-[9px] font-semibold text-green-600">Status</p>
+                                                <p className="text-xs font-semibold text-green-600">Status</p>
                                                 <p className="text-xs font-medium text-green-900">In progress</p>
                                             </div>
                                         ) : (
                                             <div className="bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
-                                                <p className="text-[9px] font-semibold text-gray-500">Status</p>
+                                                <p className="text-xs font-semibold text-gray-500">Status</p>
                                                 <p className="text-xs font-medium text-gray-700">Awaiting quote</p>
                                             </div>
                                         )}

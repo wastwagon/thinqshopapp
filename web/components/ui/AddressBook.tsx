@@ -118,27 +118,27 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
                 <form onSubmit={handleSubmit(onSubmit)} className="bg-gray-50 p-8 rounded-[2rem] border border-gray-100 mb-8 space-y-6 shadow-sm">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Full Name</label>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Full Name</label>
                             <input {...register('full_name')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium" />
-                            {errors.full_name && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase tracking-wider">{errors.full_name.message}</p>}
+                            {errors.full_name && <p className="text-red-500 text-xs font-bold mt-2 ml-1 uppercase tracking-wider">{errors.full_name.message}</p>}
                         </div>
                         <div>
-                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Phone Number</label>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Phone Number</label>
                             <input {...register('phone')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium" />
-                            {errors.phone && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase tracking-wider">{errors.phone.message}</p>}
+                            {errors.phone && <p className="text-red-500 text-xs font-bold mt-2 ml-1 uppercase tracking-wider">{errors.phone.message}</p>}
                         </div>
                         <div className="md:col-span-2">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Delivery Address / Street</label>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Delivery Address / Street</label>
                             <input {...register('street')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium" />
-                            {errors.street && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase tracking-wider">{errors.street.message}</p>}
+                            {errors.street && <p className="text-red-500 text-xs font-bold mt-2 ml-1 uppercase tracking-wider">{errors.street.message}</p>}
                         </div>
                         <div>
-                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">City / Town</label>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">City / Town</label>
                             <input {...register('city')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium" />
-                            {errors.city && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase tracking-wider">{errors.city.message}</p>}
+                            {errors.city && <p className="text-red-500 text-xs font-bold mt-2 ml-1 uppercase tracking-wider">{errors.city.message}</p>}
                         </div>
                         <div>
-                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Region</label>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Region</label>
                             <select {...register('region')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium">
                                 <option value="">Select Region</option>
                                 <option value="Greater Accra">Greater Accra</option>
@@ -147,7 +147,7 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
                                 <option value="Eastern">Eastern</option>
                                 <option value="Western">Western</option>
                             </select>
-                            {errors.region && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1 uppercase tracking-wider">{errors.region.message}</p>}
+                            {errors.region && <p className="text-red-500 text-xs font-bold mt-2 ml-1 uppercase tracking-wider">{errors.region.message}</p>}
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -155,8 +155,8 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
                         <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Set as primary destination</label>
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
-                        <button type="button" onClick={() => setIsAdding(false)} className="px-6 py-3 rounded-xl text-xs font-bold text-gray-500 uppercase tracking-widest hover:bg-gray-100 transition-all">Cancel</button>
-                        <button type="submit" disabled={isSubmitting} className="px-8 py-3 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition-all shadow-lg shadow-gray-200">
+                        <button type="button" onClick={() => setIsAdding(false)} className="min-h-[44px] px-6 py-3 rounded-xl text-xs font-bold text-gray-500 uppercase tracking-widest hover:bg-gray-100 transition-all flex items-center">Cancel</button>
+                        <button type="submit" disabled={isSubmitting} className="min-h-[44px] px-8 py-3 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition-all shadow-lg shadow-gray-200 flex items-center">
                             {isSubmitting ? 'Saving...' : 'Save Address'}
                         </button>
                     </div>
@@ -167,7 +167,7 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
                 {addresses.map((address) => (
                     <div key={address.id} className={`group bg-white border rounded-[2rem] p-6 relative hover:shadow-xl transition-all duration-300 ${selectedId === address.id ? 'border-blue-600 ring-4 ring-blue-50' : 'border-gray-100'}`}>
                         {address.is_default && (
-                            <span className="absolute top-6 right-6 bg-blue-50 text-blue-600 text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-widest">Primary</span>
+                            <span className="absolute top-6 right-6 bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded-full uppercase tracking-widest">Primary</span>
                         )}
                         <div className="flex items-start mb-6">
                             <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center mr-4 group-hover:bg-blue-50 transition-colors">
@@ -176,7 +176,7 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
                             <div>
                                 <p className="text-sm font-bold text-gray-900 mb-1">{address.street}</p>
                                 <p className="text-xs font-medium text-gray-500">{address.city}, {address.region}</p>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">{address.full_name} • {address.phone}</p>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-2">{address.full_name} • {address.phone}</p>
                             </div>
                         </div>
 
@@ -184,7 +184,7 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
                             {onSelect ? (
                                 <button
                                     onClick={() => onSelect(address)}
-                                    className={`flex-1 text-[10px] font-bold uppercase tracking-widest py-3 rounded-xl transition-all ${selectedId === address.id
+                                    className={`flex-1 text-xs font-bold uppercase tracking-widest py-3 rounded-xl transition-all ${selectedId === address.id
                                         ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
                                         : 'bg-gray-100 text-gray-600 hover:bg-gray-900 hover:text-white'
                                         }`}
@@ -193,10 +193,10 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
                                 </button>
                             ) : (
                                 <>
-                                    <button onClick={() => startEdit(address)} className="flex-1 flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-900 hover:text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest text-gray-500 transition-all">
+                                    <button onClick={() => startEdit(address)} className="flex-1 flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-900 hover:text-white py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-500 transition-all">
                                         <Edit2 className="h-3.5 w-3.5" /> Edit
                                     </button>
-                                    <button onClick={() => handleDelete(address.id)} className="flex-1 flex items-center justify-center gap-2 bg-gray-50 hover:bg-red-50 hover:text-red-600 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest text-gray-500 transition-all">
+                                    <button onClick={() => handleDelete(address.id)} className="flex-1 flex items-center justify-center gap-2 bg-gray-50 hover:bg-red-50 hover:text-red-600 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-500 transition-all">
                                         <Trash2 className="h-3.5 w-3.5" /> Remove
                                     </button>
                                 </>

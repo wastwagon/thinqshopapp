@@ -247,13 +247,13 @@ export default function TransferPage() {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 lg:p-5">
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* Direction Selection */}
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 <button
                                     type="button"
                                     onClick={() => setTransferDirection('send_to_china')}
                                     className={`relative py-2.5 px-3 rounded-lg border-2 transition-all text-left ${transferDirection === 'send_to_china' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
                                 >
-                                    <p className={`text-[10px] font-semibold  mb-0.5 ${transferDirection === 'send_to_china' ? 'text-blue-600' : 'text-gray-400'}`}>Send</p>
+                                    <p className={`text-xs font-semibold mb-0.5 ${transferDirection === 'send_to_china' ? 'text-blue-600' : 'text-gray-400'}`}>Send</p>
                                     <p className="text-xs font-bold text-gray-900">GHS → CNY</p>
                                     {transferDirection === 'send_to_china' && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-600 rounded-full" />}
                                 </button>
@@ -262,15 +262,15 @@ export default function TransferPage() {
                                     onClick={() => setTransferDirection('receive_from_china')}
                                     className={`relative py-2.5 px-3 rounded-lg border-2 transition-all text-left ${transferDirection === 'receive_from_china' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
                                 >
-                                    <p className={`text-[10px] font-semibold  mb-0.5 ${transferDirection === 'receive_from_china' ? 'text-blue-600' : 'text-gray-400'}`}>Receive</p>
+                                    <p className={`text-xs font-semibold mb-0.5 ${transferDirection === 'receive_from_china' ? 'text-blue-600' : 'text-gray-400'}`}>Receive</p>
                                     <p className="text-xs font-bold text-gray-900">CNY → GHS</p>
                                     {transferDirection === 'receive_from_china' && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-600 rounded-full" />}
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label className="text-[10px] font-medium text-gray-500  ml-1 mb-1 block">Amount (GHS)</label>
+                                    <label className="text-xs font-medium text-gray-500 ml-1 mb-1 block">Amount (GHS)</label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <span className="text-gray-700 font-medium text-sm">₵</span>
@@ -285,7 +285,7 @@ export default function TransferPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-medium text-gray-500  ml-1 mb-1 block">Amount (CNY)</label>
+                                    <label className="text-xs font-medium text-gray-500 ml-1 mb-1 block">Amount (CNY)</label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <span className="text-gray-400 font-medium text-sm">¥</span>
@@ -301,8 +301,8 @@ export default function TransferPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] font-medium text-gray-500  ml-1 block">Payment</label>
-                                <div className="grid grid-cols-2 gap-2">
+                                <label className="text-xs font-medium text-gray-500 ml-1 block">Payment</label>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     <button
                                         type="button"
                                         onClick={() => setPaymentMethod('wallet')}
@@ -311,7 +311,7 @@ export default function TransferPage() {
                                         <Wallet className={`h-5 w-5 shrink-0 ${paymentMethod === 'wallet' ? 'text-blue-600' : 'text-gray-400'}`} />
                                         <div className="min-w-0">
                                             <p className={`text-xs font-semibold ${paymentMethod === 'wallet' ? 'text-blue-600' : 'text-gray-700'}`}>Wallet</p>
-                                            <p className="text-[9px] text-gray-500 truncate">Use balance</p>
+                                            <p className="text-xs text-gray-500 truncate">Use balance</p>
                                         </div>
                                     </button>
                                     <button
@@ -322,21 +322,21 @@ export default function TransferPage() {
                                         <CreditCard className={`h-5 w-5 shrink-0 ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-400'}`} />
                                         <div className="min-w-0">
                                             <p className={`text-xs font-semibold ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-700'}`}>Paystack</p>
-                                            <p className="text-[9px] text-gray-500 truncate">Card / mobile money</p>
+                                            <p className="text-xs text-gray-500 truncate">Card / mobile money</p>
                                         </div>
                                     </button>
                                 </div>
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-[10px] font-medium text-gray-500  ml-1 block">Recipient type</label>
+                                <label className="text-xs font-medium text-gray-500 ml-1 block">Recipient type</label>
                                 <div className="flex flex-wrap gap-1.5">
                                     {['alipay', 'wechat_pay', 'bank_account'].map((type) => (
                                         <button
                                             key={type}
                                             type="button"
                                             onClick={() => setRecipientType(type)}
-                                            className={`px-3 py-2 rounded-lg border-2 font-semibold text-[10px]  transition-all ${recipientType === type ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'}`}
+                                            className={`px-3 py-2 rounded-lg border-2 font-semibold text-xs transition-all min-h-[44px] ${recipientType === type ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'}`}
                                         >
                                             {type.replace('_', ' ')}
                                         </button>
@@ -347,7 +347,7 @@ export default function TransferPage() {
                                     {recipientType === 'bank_account' ? (
                                         <>
                                             <div>
-                                                <label className="text-[10px] font-medium text-gray-500  ml-1 mb-1 block">Recipient name</label>
+                                                <label className="text-xs font-medium text-gray-500 ml-1 mb-1 block">Recipient name</label>
                                                 <input
                                                     type="text"
                                                     value={recipientName}
@@ -357,7 +357,7 @@ export default function TransferPage() {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="text-[10px] font-medium text-gray-500  ml-1 mb-1 block">Bank name</label>
+                                                <label className="text-xs font-medium text-gray-500 ml-1 mb-1 block">Bank name</label>
                                                 <input
                                                     type="text"
                                                     value={bankName}
@@ -367,7 +367,7 @@ export default function TransferPage() {
                                                 />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="text-[10px] font-medium text-gray-500  ml-1 mb-1 block">Account number</label>
+                                                <label className="text-xs font-medium text-gray-500 ml-1 mb-1 block">Account number</label>
                                                 <input
                                                     type="text"
                                                     value={accountNumber}
@@ -380,13 +380,13 @@ export default function TransferPage() {
                                     ) : (
                                         <div className="md:col-span-2 space-y-3">
                                             <div>
-                                                <label className="text-[10px] font-medium text-gray-500  ml-1 mb-1 block">QR codes & amounts</label>
-                                                <p className="text-[10px] text-gray-500 mb-2 ml-1">Add at least one QR: upload image, recipient name and amount (CNY). Total must equal converted amount above.</p>
+                                                <label className="text-xs font-medium text-gray-500 ml-1 mb-1 block">QR codes & amounts</label>
+                                                <p className="text-xs text-gray-500 mb-2 ml-1">Add at least one QR: upload image, recipient name and amount (CNY). Total must equal converted amount above.</p>
                                                 <div className="space-y-3">
                                                     {qrEntries.map((entry) => (
                                                         <div key={entry.id} className="flex flex-wrap items-start gap-2 p-2.5 bg-gray-50 rounded-lg border border-gray-100">
                                                             <div className="flex items-center gap-2 shrink-0">
-                                                                <label className="cursor-pointer flex items-center gap-1.5 px-2.5 py-2 bg-white border border-gray-200 rounded-lg text-[10px] font-medium text-gray-700 hover:bg-gray-50">
+                                                                <label className="cursor-pointer flex items-center gap-1.5 px-2.5 py-2 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 min-h-[44px]">
                                                                     <Upload className="h-3.5 w-3.5" /> Upload QR
                                                                     <input
                                                                         type="file"
@@ -422,13 +422,13 @@ export default function TransferPage() {
                                                                 />
                                                             </div>
                                                             {qrEntries.length > 1 && (
-                                                                <button type="button" onClick={() => removeQrEntry(entry.id)} className="p-2 text-red-400 hover:text-red-600 shrink-0" aria-label="Remove">
+                                                                <button type="button" onClick={() => removeQrEntry(entry.id)} className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-red-400 hover:text-red-600 shrink-0 rounded-lg hover:bg-red-50" aria-label="Remove">
                                                                     <X className="h-4 w-4" />
                                                                 </button>
                                                             )}
                                                         </div>
                                                     ))}
-                                                    <button type="button" onClick={addQrEntry} className="text-[10px] font-semibold text-blue-600 hover:text-gray-900 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
+                                                    <button type="button" onClick={addQrEntry} className="text-xs font-semibold text-blue-600 hover:text-gray-900 flex items-center gap-1 bg-blue-50 px-3 py-2 rounded-lg border border-blue-100 min-h-[44px]">
                                                         <Plus className="h-3 w-3" /> Upload new code
                                                     </button>
                                                 </div>
@@ -441,7 +441,7 @@ export default function TransferPage() {
                             <div className="p-3 bg-amber-50 rounded-lg border border-amber-100 flex items-start gap-2">
                                 <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                                 <div className="min-w-0">
-                                    <p className="text-[10px] font-semibold text-amber-800  mb-0.5">Please verify</p>
+                                    <p className="text-xs font-semibold text-amber-800 mb-0.5">Please verify</p>
                                     <p className="text-[11px] text-amber-700 leading-snug">
                                         Cross-border transfers cannot be reversed. Double-check recipient name and details.
                                     </p>

@@ -102,14 +102,14 @@ export default function ProfilePage() {
                                 <Camera className="h-3.5 w-3.5" />
                             </span>
                         </div>
-                        <p className="text-[10px] text-gray-500 mb-2">Add a photo via URL below</p>
+                        <p className="text-xs text-gray-500 mb-2">Add a photo via URL below</p>
                         <h2 className="text-lg font-bold text-gray-900 mb-1">{formData.first_name || '—'} {formData.last_name || '—'}</h2>
-                        <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wider mb-2">{user?.role || 'User'}</p>
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">{user?.role || 'User'}</p>
                         <div className="px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 inline-block">
-                            <p className="text-[9px] font-semibold text-gray-600">ID: {user?.user_identifier || '—'}</p>
+                            <p className="text-xs font-semibold text-gray-600">ID: {user?.user_identifier || '—'}</p>
                         </div>
                         <div className="mt-4 pt-4 border-t border-gray-50">
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-lg border border-emerald-100 text-[10px] font-semibold text-emerald-600">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-lg border border-emerald-100 text-xs font-semibold text-emerald-600">
                                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
                                 Verified
                             </span>
@@ -117,17 +117,17 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="mt-4 bg-gray-900 rounded-2xl p-5 text-white">
-                        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-blue-300 mb-3 flex items-center gap-2">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-300 mb-3 flex items-center gap-2">
                             <Shield className="h-3 w-3" /> Security
                         </h3>
                         <p className="text-xs text-white/70 leading-relaxed mb-4">Your data is encrypted and secure.</p>
-                        <button type="button" className="text-[10px] font-semibold text-white flex items-center gap-2 hover:text-blue-300 transition-colors">
+                        <button type="button" className="text-xs font-semibold text-white flex items-center gap-2 hover:text-blue-300 transition-colors">
                             <Lock className="h-3 w-3" /> Change password
                         </button>
                     </div>
 
                     <div className="mt-4 bg-white rounded-2xl p-5 border border-red-100">
-                        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-red-600 mb-3 flex items-center gap-2">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-red-600 mb-3 flex items-center gap-2">
                             <Trash2 className="h-3 w-3" /> Account
                         </h3>
                         <p className="text-xs text-gray-600 leading-relaxed mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
@@ -151,7 +151,7 @@ export default function ProfilePage() {
                         <form onSubmit={handleUpdate} className="space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">First name</label>
+                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">First name</label>
                                     <input
                                         type="text"
                                         value={formData.first_name}
@@ -160,7 +160,7 @@ export default function ProfilePage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Last name</label>
+                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Last name</label>
                                     <input
                                         type="text"
                                         value={formData.last_name}
@@ -169,7 +169,7 @@ export default function ProfilePage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Email</label>
+                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Email</label>
                                     <div className="relative">
                                         <input
                                             type="email"
@@ -181,7 +181,7 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">WhatsApp / Phone</label>
+                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">WhatsApp / Phone</label>
                                     <input
                                         type="text"
                                         value={formData.phone}
@@ -190,7 +190,7 @@ export default function ProfilePage() {
                                     />
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Profile image URL <span className="text-gray-400 font-normal">(optional)</span></label>
+                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Profile image URL <span className="text-gray-400 font-normal">(optional)</span></label>
                                     <input
                                         type="url"
                                         value={formData.profile_image}
@@ -208,7 +208,7 @@ export default function ProfilePage() {
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Ghana Card</label>
+                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Ghana Card</label>
                                         <input
                                             type="text"
                                             value={formData.ghana_card || ''}
@@ -218,7 +218,7 @@ export default function ProfilePage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Voter ID</label>
+                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Voter ID</label>
                                         <input
                                             type="text"
                                             value={formData.voter_id || ''}

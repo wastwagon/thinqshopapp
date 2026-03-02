@@ -102,7 +102,7 @@ export default function AdminDashboard() {
                         <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
                             <s.icon className="h-4 w-4" />
                         </div>
-                        <p className="text-[10px] font-semibold text-gray-500 mb-0.5">{s.label}</p>
+                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
                         <p className="text-xl font-bold text-gray-900">{s.value}</p>
                     </div>
                 ))}
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
                     <div className="absolute top-0 right-0 w-48 h-48 bg-blue-600/5 blur-[60px]" />
                     <div className="relative z-10">
                         <div className="mb-3">
-                            <p className="text-[10px] font-semibold text-gray-500 mb-0.5">Activity</p>
+                            <p className="text-xs font-semibold text-gray-500 mb-0.5">Activity</p>
                             <p className="text-base font-bold text-gray-900">Shipments in the last 7 days</p>
                         </div>
                         <div className="h-[200px] w-full mt-3">
@@ -169,7 +169,7 @@ export default function AdminDashboard() {
                     <div className="absolute bottom-0 right-0 w-40 h-40 bg-blue-600/20 blur-[50px]" />
                     <div className="relative z-10 flex flex-col h-full text-white">
                         <div className="flex justify-between items-center mb-3">
-                            <p className="text-[10px] font-semibold text-white/50">Needs attention</p>
+                            <p className="text-xs font-semibold text-white/50">Needs attention</p>
                             <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
                         </div>
                         <div className="space-y-2">
@@ -178,17 +178,17 @@ export default function AdminDashboard() {
                                     <p className="text-2xl font-bold tracking-tight">{loading ? '—' : stats.pendingTransfers}</p>
                                     <ArrowUpRight className="h-3.5 w-3.5 text-white/30 group-hover/item:text-blue-400 transition-colors" />
                                 </div>
-                                <p className="text-[10px] font-semibold text-blue-300 mt-1">Pending transfers</p>
+                                <p className="text-xs font-semibold text-blue-300 mt-1">Pending transfers</p>
                             </a>
                             <a href="/admin/procurement" className="block p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors group/item">
                                 <div className="flex justify-between items-start">
                                     <p className="text-2xl font-bold tracking-tight">{loading ? '—' : stats.pendingRequests}</p>
                                     <ArrowUpRight className="h-3.5 w-3.5 text-white/30 group-hover/item:text-blue-400 transition-colors" />
                                 </div>
-                                <p className="text-[10px] font-semibold text-indigo-300 mt-1">Procurement requests</p>
+                                <p className="text-xs font-semibold text-indigo-300 mt-1">Procurement requests</p>
                             </a>
                         </div>
-                        <a href="/admin/transfers" className="mt-3 block w-full h-9 bg-white text-gray-900 rounded-lg font-semibold text-xs hover:bg-blue-50 transition-colors flex items-center justify-center">
+                        <a href="/admin/transfers" className="mt-3 block w-full min-h-[44px] h-9 bg-white text-gray-900 rounded-lg font-semibold text-xs hover:bg-blue-50 transition-colors flex items-center justify-center">
                             View all ({loading ? 0 : stats.pendingTransfers + stats.pendingRequests})
                         </a>
                     </div>
@@ -200,9 +200,9 @@ export default function AdminDashboard() {
                     <div className="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center border border-green-100 mb-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
                     </div>
-                    <p className="text-[10px] font-semibold text-gray-500 mb-0.5">System</p>
+                    <p className="text-xs font-semibold text-gray-500 mb-0.5">System</p>
                     <p className="text-lg font-bold text-gray-900">Operational</p>
-                    <p className="text-[9px] text-gray-400 mt-0.5">All systems normal</p>
+                    <p className="text-xs text-gray-400 mt-0.5">All systems normal</p>
                 </div>
             </div>
             </div>

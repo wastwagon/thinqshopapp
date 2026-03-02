@@ -13,14 +13,14 @@ export default function WishlistPage() {
 
     return (
         <ShopLayout>
-            <div className="max-w-7xl mx-auto px-6 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
                 <PageHeader
                     title="Your Wishlist"
                     subtitle="Items you've saved for later"
                     breadcrumbs={[{ label: 'Wishlist' }]}
                 />
                 <div className="flex justify-end -mt-8 mb-12">
-                    <Link href="/shop" className="group flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
+                    <Link href="/shop" className="group flex items-center gap-2 min-h-[44px] text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
                         <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
                         Back to Shop
                     </Link>
@@ -51,8 +51,10 @@ export default function WishlistPage() {
                             <div key={product.id} className="relative group">
                                 <ProductCard product={product as any} />
                                 <button
+                                    type="button"
                                     onClick={() => removeFromWishlist(product.id)}
-                                    className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur border border-gray-200 rounded-xl flex items-center justify-center text-red-500 hover:bg-red-50 transition-all z-10 opacity-0 group-hover:opacity-100"
+                                    className="absolute top-4 right-4 min-w-[44px] min-h-[44px] w-10 h-10 bg-white/90 backdrop-blur border border-gray-200 rounded-xl flex items-center justify-center text-red-500 hover:bg-red-50 transition-all z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                                    aria-label="Remove from wishlist"
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </button>

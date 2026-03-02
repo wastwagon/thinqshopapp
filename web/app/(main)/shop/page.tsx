@@ -113,7 +113,7 @@ function ShopContent() {
 
     return (
         <ShopLayout>
-            <div className="max-w-7xl mx-auto px-6 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
                 <PageHeader
                     title={search ? 'Search Results' : 'Our Collection'}
                     subtitle="Electronics and tech delivered to you"
@@ -161,7 +161,7 @@ function ShopContent() {
                                 ))}
                             </div>
                             <div className="mt-12 bg-blue-50 p-6 rounded-xl border border-blue-100">
-                                <p className="text-[10px] font-bold tracking-widest text-blue-600 uppercase mb-2">Shipping</p>
+                                <p className="text-xs font-bold tracking-widest text-blue-600 uppercase mb-2">Shipping</p>
                                 <p className="text-xs font-bold text-gray-900 leading-tight">International delivery. Items ship from abroad with 7–14 day estimated delivery.</p>
                             </div>
                         </div>
@@ -174,7 +174,7 @@ function ShopContent() {
                                     type="button"
                                     onClick={loadMore}
                                     disabled={loadingMore}
-                                    className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 disabled:opacity-50 transition-all"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[44px] px-8 py-4 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 disabled:opacity-50 transition-all"
                                 >
                                     {loadingMore ? (
                                         <>

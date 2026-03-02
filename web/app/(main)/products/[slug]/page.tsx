@@ -111,7 +111,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
 
     return (
         <ShopLayout>
-            <div className="max-w-7xl mx-auto px-6 py-12 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 bg-white">
                 <PageHeader title={product.name} breadcrumbs={breadcrumbs} />
                 <div className="lg:grid lg:grid-cols-2 lg:gap-x-16 lg:items-start">
                     {/* Image Gallery */}
@@ -152,7 +152,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     </span>
                                 </div>
                             )}
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[11px] font-bold tracking-wider text-blue-600 uppercase mb-4">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-xs font-bold tracking-wider text-blue-600 uppercase mb-4">
                                 Ships from abroad · 7–14 day delivery
                             </div>
                             <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-gray-900 leading-[1.3]">{product.name}</h1>
@@ -195,29 +195,35 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             <div className="flex items-center gap-2 sm:gap-4">
                                 <div className="flex items-center gap-1 p-1 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl">
                                     <button
+                                        type="button"
                                         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                                        className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all"
+                                        className="min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all"
+                                        aria-label="Decrease quantity"
                                     >
                                         <Minus className="h-4 w-4" />
                                     </button>
                                     <span className="w-12 text-center text-sm font-bold text-gray-900">{quantity}</span>
                                     <button
+                                        type="button"
                                         onClick={() => setQuantity((q) => q + 1)}
-                                        className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all"
+                                        className="min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all"
+                                        aria-label="Increase quantity"
                                     >
                                         <Plus className="h-4 w-4" />
                                     </button>
                                 </div>
                                 <button
-                                    className="flex-1 min-w-0 h-10 sm:h-12 bg-gray-900 text-white rounded-lg sm:rounded-xl font-bold text-[10px] sm:text-xs uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-gray-200"
+                                    type="button"
+                                    className="flex-1 min-w-0 min-h-[44px] h-10 sm:h-12 bg-gray-900 text-white rounded-lg sm:rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-gray-200"
                                     onClick={() => addToCart(Number(product.id), quantity)}
                                 >
                                     <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
                                     <span className="truncate">Add to Cart</span>
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => toggleWishlist({ id: Number(product.id), name: product.name, price: product.price, slug: product.slug ?? slug, images: product.images, gallery_images: product.gallery_images, category: product.category })}
-                                    className={`w-10 h-10 sm:w-12 sm:h-12 border rounded-lg sm:rounded-xl flex items-center justify-center transition-all shrink-0 ${
+                                    className={`min-w-[44px] min-h-[44px] w-10 h-10 sm:w-12 sm:h-12 border rounded-lg sm:rounded-xl flex items-center justify-center transition-all shrink-0 ${
                                         isInWishlist(Number(product.id))
                                             ? 'bg-red-50 border-red-200 text-red-500'
                                             : 'border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50'
@@ -239,7 +245,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {policies.filter((p) => p.type === 'delivery').map((p) => (
                                 <div key={p.type} className="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100">
-                                    <p className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-2 flex items-center gap-1.5">
+                                    <p className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-2 flex items-center gap-1.5">
                                         <Truck className="h-3.5 w-3.5" /> Delivery
                                     </p>
                                     <p className="text-xs sm:text-sm font-medium text-gray-900">{p.short_text || '7–14 days (international)'}</p>
@@ -250,7 +256,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             ))}
                             {policies.filter((p) => p.type === 'returns').map((p) => (
                                 <div key={p.type} className="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100">
-                                    <p className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-2 flex items-center gap-1.5">
+                                    <p className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-2 flex items-center gap-1.5">
                                         <RotateCcw className="h-3.5 w-3.5" /> Returns
                                     </p>
                                     <p className="text-xs sm:text-sm font-medium text-gray-900">{p.short_text || '14-day returns on unused items'}</p>
@@ -262,11 +268,11 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             {policies.length === 0 && (
                                 <>
                                     <div className="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100">
-                                        <p className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-2">Delivery</p>
+                                        <p className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-2">Delivery</p>
                                         <p className="text-xs font-bold text-gray-900">7–14 days (international)</p>
                                     </div>
                                     <div className="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100">
-                                        <p className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-2">Returns</p>
+                                        <p className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-2">Returns</p>
                                         <p className="text-xs font-bold text-gray-900">14-day returns on unused items</p>
                                     </div>
                                 </>

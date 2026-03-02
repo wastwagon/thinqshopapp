@@ -83,7 +83,7 @@ export default function AdminOrdersPage() {
             cancelled: 'bg-red-50 text-red-700 border-red-200',
         };
         return (
-            <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+            <span className={`px-2 py-0.5 text-xs font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
                 {status?.replace(/_/g, ' ')}
             </span>
         );
@@ -133,7 +133,7 @@ export default function AdminOrdersPage() {
                         <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
                             <s.icon className="h-4 w-4" />
                         </div>
-                        <p className="text-[10px] font-semibold text-gray-500 mb-0.5">{s.label}</p>
+                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
                         <p className="text-xl font-bold text-gray-900">{s.value}</p>
                     </div>
                 ))}
@@ -144,13 +144,13 @@ export default function AdminOrdersPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Order</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Customer</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Items</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Total</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Status</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Date</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right">Actions</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Order</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Customer</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Items</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Total</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Status</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Date</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -183,12 +183,12 @@ export default function AdminOrdersPage() {
                                         <td className="px-3 py-2.5"><span className="text-xs text-gray-600">{o.items?.length ?? 0} items</span></td>
                                         <td className="px-3 py-2.5"><span className="text-xs font-semibold text-gray-900">₵{Number(o.total).toFixed(2)}</span></td>
                                         <td className="px-3 py-2.5"><StatusBadge status={o.status} /></td>
-                                        <td className="px-3 py-2.5 text-[10px] text-gray-500">{o.created_at ? new Date(o.created_at).toLocaleDateString() : '—'}</td>
+                                        <td className="px-3 py-2.5 text-xs text-gray-500">{o.created_at ? new Date(o.created_at).toLocaleDateString() : '—'}</td>
                                         <td className="px-3 py-2.5 text-right">
                                             <div className="flex items-center gap-2 justify-end">
                                                 <Link
                                                     href={`/admin/orders/${o.id}`}
-                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold text-blue-600 hover:bg-blue-50 border border-blue-100"
+                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-blue-600 hover:bg-blue-50 border border-blue-100"
                                                 >
                                                     <Eye className="h-3 w-3" /> View
                                                 </Link>
@@ -197,7 +197,7 @@ export default function AdminOrdersPage() {
                                                         value={o.status}
                                                         onChange={(e) => handleStatusUpdate(o.id, e.target.value)}
                                                         disabled={updatingId === o.id}
-                                                        className="text-[10px] font-semibold border border-gray-100 rounded-lg pl-2 pr-6 py-1.5 bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer"
+                                                        className="text-xs font-semibold border border-gray-100 rounded-lg pl-2 pr-6 py-1.5 bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer"
                                                     >
                                                         {ORDER_STATUSES.map((s) => (
                                                             <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>

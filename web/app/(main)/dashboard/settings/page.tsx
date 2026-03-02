@@ -64,7 +64,7 @@ export default function SettingsPage() {
                             </div>
                             <div>
                                 <h3 className="text-base font-bold text-gray-900">Notifications</h3>
-                                <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Alerts & updates</p>
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Alerts & updates</p>
                             </div>
                         </div>
 
@@ -106,7 +106,7 @@ export default function SettingsPage() {
                             </div>
                             <div>
                                 <h3 className="text-base font-bold text-gray-900">Appearance</h3>
-                                <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Display options</p>
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Display options</p>
                             </div>
                         </div>
 
@@ -114,17 +114,17 @@ export default function SettingsPage() {
                             <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer">
                                 <div className="flex justify-between items-start mb-3">
                                     <Globe className="h-4 w-4 text-gray-400" />
-                                    <span className="px-2 py-0.5 bg-white rounded border border-gray-100 text-[10px] font-semibold text-blue-600">Active</span>
+                                    <span className="px-2 py-0.5 bg-white rounded border border-gray-100 text-xs font-semibold text-blue-600">Active</span>
                                 </div>
                                 <p className="text-xs font-semibold text-gray-900 mb-0.5">Language & region</p>
-                                <p className="text-[10px] text-gray-500">English, GMT</p>
+                                <p className="text-xs text-gray-500">English, GMT</p>
                             </div>
                             <div className="p-4 bg-white rounded-xl border border-gray-100 hover:border-blue-200 transition-all cursor-pointer">
                                 <div className="flex justify-between items-start mb-3">
                                     <Smartphone className="h-4 w-4 text-gray-400" />
                                 </div>
                                 <p className="text-xs font-semibold text-gray-900 mb-0.5">Compact layout</p>
-                                <p className="text-[10px] text-gray-500">Better on small screens</p>
+                                <p className="text-xs text-gray-500">Better on small screens</p>
                             </div>
                         </div>
                     </div>
@@ -136,7 +136,7 @@ export default function SettingsPage() {
                             </div>
                             <div>
                                 <h3 className="text-base font-bold text-gray-900">Delete account</h3>
-                                <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Permanently remove your account</p>
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Permanently remove your account</p>
                             </div>
                         </div>
                         <p className="text-sm text-gray-600 mb-4">Once you delete your account, all your data will be permanently removed. This cannot be undone.</p>

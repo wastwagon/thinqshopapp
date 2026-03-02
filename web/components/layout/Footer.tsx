@@ -44,7 +44,7 @@ export default function Footer() {
                         )}
                         <div className="flex gap-4">
                             {[Instagram, Twitter, Facebook].map((Icon, idx) => (
-                                <Link key={idx} href="#" className="h-10 w-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all group">
+                                <Link key={idx} href="#" className="min-h-[44px] min-w-[44px] h-11 w-11 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all group" aria-label={`Follow us on ${idx === 0 ? 'Instagram' : idx === 1 ? 'Twitter' : 'Facebook'}`}>
                                     <Icon className="h-4 w-4 group-hover:scale-110 transition-transform" />
                                 </Link>
                             ))}
@@ -80,7 +80,7 @@ export default function Footer() {
                     <p className="text-xs font-medium text-gray-400 text-center md:text-left">© 2026 ThinQShop Global. All rights reserved.</p>
                     <div className="flex items-center gap-3 py-2 px-5 bg-white border border-gray-100 rounded-full">
                         <ShieldCheck className="h-4 w-4 text-green-500" />
-                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Secure Shop Environment</span>
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Secure Shop Environment</span>
                     </div>
                 </div>
             </div>

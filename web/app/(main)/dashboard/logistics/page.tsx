@@ -265,7 +265,7 @@ export default function LogisticsPage() {
                 </div>
                 <button
                     onClick={() => setIsCreating(!isCreating)}
-                    className={`h-9 px-4 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-blue-600 text-white hover:bg-gray-900'}`}
+                    className={`min-h-[44px] h-9 px-4 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-blue-600 text-white hover:bg-gray-900'}`}
                 >
                     {isCreating ? 'Cancel' : <><Plus className="h-4 w-4" /> New shipment</>}
                 </button>
@@ -284,8 +284,8 @@ export default function LogisticsPage() {
                         <div className="p-6 space-y-6 md:max-h-[calc(100vh-14rem)] md:overflow-y-auto">
                             {/* China forwarding address — static template, user details injected */}
                             <section>
-                                <h3 className="text-[10px] font-bold tracking-[0.2em]  text-gray-400 mb-3">Our Warehouse Address</h3>
-                                <p className="text-[10px] font-medium text-gray-500  mb-3">Forwarding Warehouse (China) — Copy and send to your supplier</p>
+                                <h3 className="text-xs font-bold tracking-[0.2em]  text-gray-400 mb-3">Our Warehouse Address</h3>
+                                <p className="text-xs font-medium text-gray-500  mb-3">Forwarding Warehouse (China) — Copy and send to your supplier</p>
                                 <div className="rounded-xl border-2 border-gray-100 bg-gray-50/50 p-4 flex justify-between items-start gap-4">
                                     <div className="min-w-0 font-mono text-xs text-gray-800 whitespace-pre-wrap break-words">
                                         <p>ThinQ:18320709024</p>
@@ -305,7 +305,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                             navigator.clipboard.writeText(copyText);
                                             toast.success("Address copied");
                                         }}
-                                        className="shrink-0 h-8 px-3 rounded-lg bg-white border border-gray-200 text-[10px] font-bold  text-gray-600 hover:bg-gray-50"
+                                        className="shrink-0 min-h-[44px] h-9 px-3 rounded-lg bg-white border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 flex items-center"
                                     >
                                         Copy
                                     </button>
@@ -314,7 +314,7 @@ Shipping Mark: (${customerId}) +${phone}`;
 
                             {/* Destination: Local Pick Up at Lapaz Warehouse */}
                             <section>
-                                <h3 className="text-[10px] font-bold tracking-[0.2em]  text-gray-400 mb-3">Destination (Ghana)</h3>
+                                <h3 className="text-xs font-bold tracking-[0.2em]  text-gray-400 mb-3">Destination (Ghana)</h3>
                                 {lapazWarehouse ? (
                                     <div
                                         className="rounded-xl border-2 border-gray-100 bg-gray-50/50 p-4 flex items-center justify-between gap-4"
@@ -323,7 +323,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                             <p className="text-sm font-bold text-gray-900">Local Pick Up at Lapaz Warehouse</p>
                                             <p className="text-xs text-gray-500 mt-0.5">{lapazWarehouse.address}</p>
                                         </div>
-                                        <span className="text-[10px] font-black  text-gray-400">{lapazWarehouse.code}</span>
+                                        <span className="text-xs font-black  text-gray-400">{lapazWarehouse.code}</span>
                                     </div>
                                 ) : (
                                     <p className="text-xs text-gray-400">Loading…</p>
@@ -333,7 +333,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                             {/* Shipping method + rate */}
                             <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-[10px] font-bold text-gray-400  block mb-2">Shipping Method</label>
+                                    <label className="text-xs font-bold text-gray-400  block mb-2">Shipping Method</label>
                                     <div className="flex gap-2">
                                         {(['air_freight', 'sea_freight'] as const).map((m) => (
                                             <button
@@ -348,7 +348,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-bold text-gray-400  block mb-2">Select Rate</label>
+                                    <label className="text-xs font-bold text-gray-400  block mb-2">Select Rate</label>
                                     <select
                                         value={selectedRateId ?? ''}
                                         onChange={(e) => setSelectedRateId(e.target.value || null)}
@@ -372,7 +372,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                             {/* Tracking + Weight + COD row */}
                             <section className="grid grid-cols-1 md:grid-cols-12 gap-4">
                                 <div className="md:col-span-6">
-                                    <label className="text-[10px] font-medium text-gray-500  block mb-2">Tracking number</label>
+                                    <label className="text-xs font-medium text-gray-500  block mb-2">Tracking number</label>
                                     <div className="relative">
                                         <input
                                             type="text"
@@ -384,7 +384,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                         <button
                                             type="button"
                                             onClick={() => setScannerOpen(true)}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:border-blue-200 transition-colors"
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:border-blue-200 transition-colors"
                                             title="Scan barcode from package"
                                         >
                                             <Camera className="h-4 w-4" />
@@ -392,7 +392,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                     </div>
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="text-[10px] font-medium text-gray-500  block mb-2">Weight (kg)</label>
+                                    <label className="text-xs font-medium text-gray-500  block mb-2">Weight (kg)</label>
                                     <input
                                         type="number"
                                         value={weight}
@@ -414,8 +414,8 @@ Shipping Mark: (${customerId}) +${phone}`;
 
                             {/* Items declaration */}
                             <section className="bg-gray-50/50 rounded-xl border border-gray-100 p-4">
-                                <h3 className="text-[10px] font-bold text-gray-500  mb-3">Items Declaration</h3>
-                                <div className="grid grid-cols-12 gap-2 mb-2 text-[9px] font-black text-gray-400 ">
+                                <h3 className="text-xs font-bold text-gray-500  mb-3">Items Declaration</h3>
+                                <div className="grid grid-cols-12 gap-2 mb-2 text-xs font-black text-gray-400 ">
                                     <div className="col-span-6">Description</div>
                                     <div className="col-span-2">QTY</div>
                                     <div className="col-span-3">Value (¥)</div>
@@ -461,7 +461,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                                     className="flex-1 px-3 py-2.5 bg-white border border-gray-100 rounded-lg text-xs font-bold"
                                                 />
                                                 {declaredItems.length > 1 && (
-                                                    <button type="button" onClick={() => setDeclaredItems(declaredItems.filter((_, i) => i !== index))} className="w-8 h-8 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50">×</button>
+                                                    <button type="button" onClick={() => setDeclaredItems(declaredItems.filter((_, i) => i !== index))} className="min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50" aria-label="Remove item">×</button>
                                                 )}
                                             </div>
                                         </div>
@@ -470,7 +470,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                 <button
                                     type="button"
                                     onClick={() => setDeclaredItems([...declaredItems, { description: '', value: '', quantity: '' }])}
-                                    className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-blue-600 "
+                                    className="mt-2 flex items-center gap-1.5 text-xs font-bold text-blue-600 "
                                 >
                                     <Plus className="h-3.5 w-3.5" /> Add item
                                 </button>
@@ -479,7 +479,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                             {/* Estimated cost summary */}
                             {selectedRate && (
                                 <section className="rounded-xl border-2 border-gray-100 bg-gray-50/50 p-4">
-                                    <h3 className="text-[10px] font-bold text-gray-400  mb-3">Estimated shipping cost</h3>
+                                    <h3 className="text-xs font-bold text-gray-400  mb-3">Estimated shipping cost</h3>
                                     <div className="flex flex-wrap items-baseline justify-between gap-4">
                                         <div>
                                             <p className="text-2xl font-black text-gray-900 tracking-tight">
@@ -507,7 +507,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                     type="button"
                                     onClick={handleBooking}
                                     disabled={isBooking}
-                                    className="w-full md:w-auto h-12 px-8 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-blue-600 transition-all disabled:opacity-50"
+                                    className="w-full md:w-auto min-h-[44px] h-12 px-8 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-blue-600 transition-all disabled:opacity-50 flex items-center justify-center"
                                 >
                                     {isBooking ? 'Submitting…' : 'Ship Now'}
                                 </button>
@@ -530,7 +530,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                 <Package className="h-4 w-4 text-blue-600" />
                                 All shipments
                             </h3>
-                            <button onClick={fetchShipments} className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-blue-600" aria-label="Refresh">
+                            <button type="button" onClick={fetchShipments} className="min-w-[44px] min-h-[44px] w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-blue-600" aria-label="Refresh">
                                 <RefreshCw className="h-3 w-3" />
                             </button>
                         </div>

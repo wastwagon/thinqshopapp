@@ -57,7 +57,7 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
                     <button
                         type="button"
                         onClick={onClose}
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors shrink-0"
+                        className="min-w-[44px] min-h-[44px] w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors shrink-0"
                         aria-label="Close search"
                     >
                         <X className="h-5 w-5" />

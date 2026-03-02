@@ -172,7 +172,7 @@ export default function AdminMediaPage() {
                                         <Trash2 className="h-4 w-4" />
                                     </button>
                                 </div>
-                                <p className="absolute bottom-0 left-0 right-0 text-[10px] text-white bg-gradient-to-t from-black/70 to-transparent p-2 truncate">
+                                <p className="absolute bottom-0 left-0 right-0 text-xs text-white bg-gradient-to-t from-black/70 to-transparent p-2 truncate">
                                     {m.filename}
                                 </p>
                             </div>

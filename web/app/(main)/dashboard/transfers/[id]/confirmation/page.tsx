@@ -222,11 +222,11 @@ export default function TransferConfirmationPage() {
                                                     <div>
                                                         {entry.recipient_name && (
                                                             <>
-                                                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Recipient</p>
+                                                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Recipient</p>
                                                                 <p className="text-sm font-semibold text-gray-900 mb-1">{entry.recipient_name}</p>
                                                             </>
                                                         )}
-                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Amount</p>
+                                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Amount</p>
                                                         <p className="text-lg font-bold text-gray-900">¥{(entry.amount_cny ?? entry.amount_ghs) != null ? Number(entry.amount_cny ?? entry.amount_ghs).toFixed(2) : '—'}</p>
                                                     </div>
                                                     <div className="flex items-center gap-2">

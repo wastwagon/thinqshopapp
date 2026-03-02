@@ -163,7 +163,7 @@ export default function AdminTransfersPage() {
             cancelled: 'bg-gray-50 text-gray-600 border-gray-200'
         };
         return (
-            <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+            <span className={`px-2 py-0.5 text-xs font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
                 {status.replace(/_/g, ' ')}
             </span>
         );
@@ -205,7 +205,7 @@ export default function AdminTransfersPage() {
                         <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
                             <s.icon className="h-4 w-4" />
                         </div>
-                        <p className="text-[10px] font-semibold text-gray-500 mb-0.5">{s.label}</p>
+                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
                         <p className="text-xl font-bold text-gray-900">{s.value}</p>
                     </div>
                 ))}
@@ -216,12 +216,12 @@ export default function AdminTransfersPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Reference</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center">Amount</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Customer</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-center">Status</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Proof</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right">Actions</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Reference</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-center">Amount</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Customer</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-center">Status</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Proof</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -272,7 +272,7 @@ export default function AdminTransfersPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setQrModalTransferId(transfer.id)}
-                                                    className="mt-1 inline-flex items-center text-[9px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 py-0.5 rounded px-1.5"
+                                                    className="mt-1 inline-flex items-center text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 py-0.5 rounded px-1.5"
                                                 >
                                                     <QrCode className="h-2.5 w-2.5 mr-1" /> QR ({transfer.qr_codes.length})
                                                 </button>
@@ -310,7 +310,7 @@ export default function AdminTransfersPage() {
                                                             type="button"
                                                             onClick={() => handleAddFeedbackImage(transfer.id)}
                                                             disabled={uploadingId === transfer.id || !feedbackUrl[transfer.id]?.trim()}
-                                                            className="px-3 py-1.5 bg-blue-600 text-white text-[10px] font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1 shrink-0"
+                                                            className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1 shrink-0"
                                                         >
                                                             {uploadingId === transfer.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Upload className="h-3 w-3" /> Add</>}
                                                         </button>
@@ -368,12 +368,12 @@ export default function AdminTransfersPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
                 <div className="bg-blue-600 rounded-xl p-4 text-white">
-                    <h4 className="text-[10px] font-semibold text-blue-100 mb-1">Amount in progress</h4>
+                    <h4 className="text-xs font-semibold text-blue-100 mb-1">Amount in progress</h4>
                     <p className="text-xl font-bold tracking-tight">₵{inProgressAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                    <p className="text-blue-100/80 text-[10px] mt-2 pt-2 border-t border-white/10">Total GHS not yet completed</p>
+                    <p className="text-blue-100/80 text-xs mt-2 pt-2 border-t border-white/10">Total GHS not yet completed</p>
                 </div>
                 <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-                    <h4 className="text-[10px] font-semibold text-gray-500 mb-2">Completion rate</h4>
+                    <h4 className="text-xs font-semibold text-gray-500 mb-2">Completion rate</h4>
                     <div className="flex items-center gap-3">
                         <div className="relative w-14 h-14 shrink-0">
                             <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
@@ -418,38 +418,38 @@ export default function AdminTransfersPage() {
                                                         <a
                                                             href={entry.image}
                                                             download={`${transfer?.token}-qr-${i + 1}.png`}
-                                                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-900 text-white text-[10px] font-semibold hover:bg-gray-800"
+                                                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-900 text-white text-xs font-semibold hover:bg-gray-800"
                                                         >
                                                             <Download className="h-3 w-3" /> Download
                                                         </a>
                                                     </div>
                                                     <div className="min-w-0">
                                                         {entry.recipient_name && <p className="text-xs font-semibold text-gray-900 mb-0.5">{entry.recipient_name}</p>}
-                                                        <p className="text-[10px] text-gray-500">Amount</p>
+                                                        <p className="text-xs text-gray-500">Amount</p>
                                                         <p className="text-lg font-bold text-gray-900">¥{(entry.amount_cny ?? entry.amount_ghs) != null ? Number(entry.amount_cny ?? entry.amount_ghs).toFixed(2) : '—'}</p>
                                                         {fulfillment?.status === 'fulfilled' && (
-                                                            <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded">
+                                                            <span className="inline-flex items-center gap-1 mt-1.5 text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded">
                                                                 <CheckCircle className="h-2.5 w-2.5" /> Fulfilled
                                                             </span>
                                                         )}
                                                     </div>
                                                 </div>
                                                 <div className="p-3 space-y-2">
-                                                    <p className="text-[10px] font-semibold text-gray-500">Confirmation</p>
+                                                    <p className="text-xs font-semibold text-gray-500">Confirmation</p>
                                                     {displayImage && (
                                                         <div className="flex items-start gap-2">
                                                             <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
                                                                 <img src={displayImage} alt="Confirmation" className="w-full h-full object-cover" />
                                                             </div>
                                                             {fulfillment?.status === 'fulfilled' && fulfillment.admin_notes && (
-                                                                <p className="text-[10px] text-gray-600 flex-1">{fulfillment.admin_notes}</p>
+                                                                <p className="text-xs text-gray-600 flex-1">{fulfillment.admin_notes}</p>
                                                             )}
                                                         </div>
                                                     )}
                                                     {(!fulfillment || fulfillment.status !== 'fulfilled') && (
                                                         <>
                                                             <div className="flex flex-wrap gap-2">
-                                                                <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-blue-200 bg-blue-50/50 text-blue-700 text-[10px] font-semibold hover:bg-blue-100">
+                                                                <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-blue-200 bg-blue-50/50 text-blue-700 text-xs font-semibold hover:bg-blue-100">
                                                                     <Upload className="h-3 w-3" /> Upload
                                                                     <input
                                                                         type="file"

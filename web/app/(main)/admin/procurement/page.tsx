@@ -116,7 +116,7 @@ export default function AdminProcurementPage() {
             cancelled: 'bg-red-50 text-red-700 border-red-200'
         };
         return (
-            <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+            <span className={`px-2 py-0.5 text-xs font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
                 {status.replace(/_/g, ' ')}
             </span>
         );
@@ -158,7 +158,7 @@ export default function AdminProcurementPage() {
                         <div className={`w-9 h-9 rounded-lg ${stat.bg} ${stat.border} border flex items-center justify-center ${stat.color} mb-2`}>
                             <stat.icon className="h-4 w-4" />
                         </div>
-                        <p className="text-[10px] font-semibold text-gray-500 mb-0.5">{stat.label}</p>
+                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{stat.label}</p>
                         <p className="text-xl font-bold text-gray-900">{stat.value}</p>
                     </div>
                 ))}
@@ -190,7 +190,7 @@ export default function AdminProcurementPage() {
                                             <span>{new Date(req.created_at).toLocaleDateString()}</span>
                                             <span className="font-medium text-gray-600">{req.request_number}</span>
                                             {Array.isArray(req.reference_images) && req.reference_images.length > 0 && (
-                                                <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
+                                                <span className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
                                                     {req.reference_images.length} image{req.reference_images.length !== 1 ? 's' : ''}
                                                 </span>
                                             )}
@@ -203,7 +203,7 @@ export default function AdminProcurementPage() {
                                         </div>
                                         {req.specifications && (
                                             <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                                                <p className="text-[10px] font-semibold text-gray-500 mb-1">Specifications</p>
+                                                <p className="text-xs font-semibold text-gray-500 mb-1">Specifications</p>
                                                 <p className="text-gray-600 text-xs leading-relaxed whitespace-pre-wrap line-clamp-3">{req.specifications}</p>
                                             </div>
                                         )}
@@ -215,14 +215,14 @@ export default function AdminProcurementPage() {
                                                 <p className="text-xs font-semibold text-gray-900 truncate">
                                                     {[req.user?.profile?.first_name, req.user?.profile?.last_name].filter(Boolean).join(' ') || 'Customer'}
                                                 </p>
-                                                <p className="text-[10px] text-gray-500 truncate">{req.user?.email}</p>
+                                                <p className="text-xs text-gray-500 truncate">{req.user?.email}</p>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="lg:w-64 flex flex-col gap-3 shrink-0">
                                         <div>
-                                            <p className="text-[10px] font-semibold text-gray-500 mb-1.5">Status</p>
+                                            <p className="text-xs font-semibold text-gray-500 mb-1.5">Status</p>
                                             <div className="relative">
                                                 <select
                                                     disabled={updatingId === req.id}
@@ -256,7 +256,7 @@ export default function AdminProcurementPage() {
                                             <div className="bg-blue-600 rounded-xl p-4 text-white relative">
                                                 <form onSubmit={handleAddQuote} className="space-y-3">
                                                     <div>
-                                                        <label className="text-[10px] font-semibold text-blue-100 block mb-1">Amount (GHS)</label>
+                                                        <label className="text-xs font-semibold text-blue-100 block mb-1">Amount (GHS)</label>
                                                         <input
                                                             type="number"
                                                             step="0.01"
@@ -268,7 +268,7 @@ export default function AdminProcurementPage() {
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="text-[10px] font-semibold text-blue-100 block mb-1">Details</label>
+                                                        <label className="text-xs font-semibold text-blue-100 block mb-1">Details</label>
                                                         <textarea
                                                             placeholder="Timeline, notes..."
                                                             rows={2}
@@ -299,12 +299,12 @@ export default function AdminProcurementPage() {
 
                                         {req.quotes?.length > 0 && (
                                             <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                                                <p className="text-[10px] font-semibold text-blue-600 mb-1">Quote</p>
+                                                <p className="text-xs font-semibold text-blue-600 mb-1">Quote</p>
                                                 <p className="text-lg font-bold text-gray-900">
                                                     ₵{Number(req.quotes[0].quote_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                 </p>
                                                 {req.quotes[0].quote_details && (
-                                                    <p className="mt-2 pt-2 border-t border-blue-100 text-[10px] text-gray-600 line-clamp-2">{req.quotes[0].quote_details}</p>
+                                                    <p className="mt-2 pt-2 border-t border-blue-100 text-xs text-gray-600 line-clamp-2">{req.quotes[0].quote_details}</p>
                                                 )}
                                             </div>
                                         )}

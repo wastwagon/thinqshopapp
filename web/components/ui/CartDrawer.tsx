@@ -51,7 +51,7 @@ export default function CartDrawer() {
                                             <div className="flex items-start justify-between mb-8">
                                                 <div>
                                                     <Dialog.Title className="text-xl font-bold text-gray-900 tracking-tight">Shopping Bag</Dialog.Title>
-                                                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mt-1">Your selection</p>
+                                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">Your selection</p>
                                                 </div>
                                                 <button
                                                     type="button"
@@ -97,7 +97,7 @@ export default function CartDrawer() {
                                                                                     <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity} />
                                                                                 </p>
                                                                             </div>
-                                                                            <p className="text-[10px] text-gray-400 mt-1">
+                                                                            <p className="text-xs text-gray-400 mt-1">
                                                                                 <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, ''))} /> each
                                                                             </p>
                                                                         </div>
@@ -124,7 +124,7 @@ export default function CartDrawer() {
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => removeFromCart(item.id)}
-                                                                                className="min-h-[44px] flex items-center text-[10px] font-semibold text-gray-400 hover:text-red-500 uppercase tracking-wider transition-all gap-2 px-2"
+                                                                                className="min-h-[44px] flex items-center text-xs font-semibold text-gray-400 hover:text-red-500 uppercase tracking-wider transition-all gap-2 px-2"
                                                                                 aria-label={`Remove ${item.product.name} from cart`}
                                                                             >
                                                                                 <Trash2 className="h-3 w-3" aria-hidden /> Remove
@@ -152,13 +152,13 @@ export default function CartDrawer() {
                                                 <button
                                                     onClick={handleCheckout}
                                                     disabled={cart.length === 0}
-                                                    className="w-full bg-gray-900 text-white h-12 rounded-xl font-semibold text-sm hover:bg-gray-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    className="w-full min-h-[44px] bg-gray-900 text-white h-12 rounded-xl font-semibold text-sm hover:bg-gray-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
                                                 >
                                                     Checkout
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className="w-full h-12 rounded-xl border border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-all"
+                                                    className="w-full min-h-[44px] h-12 rounded-xl border border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-all flex items-center justify-center"
                                                     onClick={toggleCart}
                                                 >
                                                     Continue Shopping

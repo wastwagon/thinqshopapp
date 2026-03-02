@@ -115,7 +115,7 @@ export default function AdminWalletPage() {
                         <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
                             <s.icon className="h-4 w-4" />
                         </div>
-                        <p className="text-[10px] font-semibold text-gray-500 mb-0.5">{s.label}</p>
+                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
                         <p className="text-xl font-bold text-gray-900">{s.value}</p>
                     </div>
                 ))}
@@ -126,11 +126,11 @@ export default function AdminWalletPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">User</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Email</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Balance</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Updated</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right">Actions</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">User</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Email</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Balance</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Updated</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -160,7 +160,7 @@ export default function AdminWalletPage() {
                                         <td className="px-3 py-2.5">
                                             <span className="text-xs font-semibold text-gray-900">₵{(w.balance_ghs ?? 0).toFixed(2)}</span>
                                         </td>
-                                        <td className="px-3 py-2.5 text-[10px] text-gray-500">
+                                        <td className="px-3 py-2.5 text-xs text-gray-500">
                                             {w.updated_at ? new Date(w.updated_at).toLocaleDateString() : '—'}
                                         </td>
                                         <td className="px-3 py-2.5 text-right">
@@ -168,7 +168,7 @@ export default function AdminWalletPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => { setAdjusting({ user_id: w.user_id, email: w.user?.email ?? '' }); setAdjustType('credit'); setAdjustAmount(''); }}
-                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold bg-green-50 text-green-700 border border-green-100 hover:bg-green-100 transition-colors"
+                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-green-50 text-green-700 border border-green-100 hover:bg-green-100 transition-colors"
                                                 >
                                                     <Plus className="h-3 w-3" /> Credit
                                                 </button>
@@ -176,7 +176,7 @@ export default function AdminWalletPage() {
                                                     type="button"
                                                     onClick={() => { setAdjusting({ user_id: w.user_id, email: w.user?.email ?? '' }); setAdjustType('debit'); setAdjustAmount(''); }}
                                                     disabled={(w.balance_ghs ?? 0) <= 0}
-                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold bg-red-50 text-red-700 border border-red-100 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-red-50 text-red-700 border border-red-100 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     <Minus className="h-3 w-3" /> Debit
                                                 </button>
@@ -200,7 +200,7 @@ export default function AdminWalletPage() {
                         <p className="text-xs text-gray-500 mb-4">{adjusting.email}</p>
                         <form onSubmit={handleAdjust} className="space-y-4">
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-semibold text-gray-500">Amount (GHS)</label>
+                                <label className="text-xs font-semibold text-gray-500">Amount (GHS)</label>
                                 <input
                                     required
                                     type="number"

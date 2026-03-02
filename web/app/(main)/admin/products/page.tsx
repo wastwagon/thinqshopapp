@@ -259,7 +259,7 @@ export default function AdminProducts() {
                     <button
                         type="button"
                         onClick={() => handleOpenModal()}
-                        className="h-9 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900 transition-all flex items-center gap-1.5 shrink-0"
+                        className="min-h-[44px] h-9 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900 transition-all flex items-center gap-1.5 shrink-0"
                     >
                         <Plus className="h-3.5 w-3.5" /> Add product
                     </button>
@@ -272,7 +272,7 @@ export default function AdminProducts() {
                         <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
                             <s.icon className="h-4 w-4" />
                         </div>
-                        <p className="text-[10px] font-semibold text-gray-500 mb-0.5">{s.label}</p>
+                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
                         <p className="text-xl font-bold text-gray-900">{s.value}</p>
                     </div>
                 ))}
@@ -283,11 +283,11 @@ export default function AdminProducts() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Product</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Category</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Price</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Status</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right">Actions</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Product</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Category</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Price</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Status</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -315,12 +315,12 @@ export default function AdminProducts() {
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className="text-xs font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">{p.name}</p>
-                                                    <p className="text-[9px] text-gray-400">ID: {p.id}</p>
+                                                    <p className="text-xs text-gray-400">ID: {p.id}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-3 py-2.5">
-                                            <span className="px-2 py-0.5 bg-gray-50 border border-gray-100 rounded-lg text-[9px] font-semibold text-gray-600">
+                                            <span className="px-2 py-0.5 bg-gray-50 border border-gray-100 rounded-lg text-xs font-semibold text-gray-600">
                                                 {getCategoryName(p)}
                                             </span>
                                         </td>
@@ -330,16 +330,16 @@ export default function AdminProducts() {
                                             </span>
                                         </td>
                                         <td className="px-3 py-2.5">
-                                            <span className={`inline-flex items-center gap-1 text-[10px] font-semibold ${p.is_active !== false ? 'text-green-600' : 'text-gray-500'}`}>
+                                            <span className={`inline-flex items-center gap-1 text-xs font-semibold ${p.is_active !== false ? 'text-green-600' : 'text-gray-500'}`}>
                                                 <span className={`w-1.5 h-1.5 rounded-full ${p.is_active !== false ? 'bg-green-500' : 'bg-gray-400'}`} />
                                                 {p.is_active !== false ? 'Active' : 'Inactive'}
                                             </span>
                                         </td>
                                         <td className="px-3 py-2.5 text-right">
                                             <div className="flex justify-end gap-1.5">
-                                                <button type="button" className="w-7 h-7 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all" aria-label="View"><Eye className="h-3 w-3" /></button>
-                                                <button type="button" onClick={() => handleOpenModal(p)} className="w-7 h-7 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all" aria-label="Edit"><Edit3 className="h-3 w-3" /></button>
-                                                <button type="button" onClick={() => handleDelete(p.id)} className="w-7 h-7 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-all" aria-label="Delete"><Trash2 className="h-3 w-3" /></button>
+                                                <button type="button" className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all" aria-label="View"><Eye className="h-4 w-4" /></button>
+                                                <button type="button" onClick={() => handleOpenModal(p)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all" aria-label="Edit"><Edit3 className="h-4 w-4" /></button>
+                                                <button type="button" onClick={() => handleDelete(p.id)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-all" aria-label="Delete"><Trash2 className="h-4 w-4" /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -359,7 +359,7 @@ export default function AdminProducts() {
                         </h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-[10px] font-semibold text-gray-500 mb-1">Name</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Name</label>
                                 <input
                                     type="text"
                                     required
@@ -369,7 +369,7 @@ export default function AdminProducts() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-semibold text-gray-500 mb-1">Category</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Category</label>
                                 <select
                                     required
                                     value={formData.category_id}
@@ -384,7 +384,7 @@ export default function AdminProducts() {
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-[10px] font-semibold text-gray-500 mb-1">Price (GHS)</label>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Price (GHS)</label>
                                     <input
                                         type="number"
                                         step="0.01"
@@ -395,7 +395,7 @@ export default function AdminProducts() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-semibold text-gray-500 mb-1">Compare price (GHS)</label>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Compare price (GHS)</label>
                                     <input
                                         type="number"
                                         step="0.01"
@@ -405,10 +405,10 @@ export default function AdminProducts() {
                                         placeholder="Original price for sale display"
                                         className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                     />
-                                    <p className="text-[9px] text-gray-400 mt-0.5">Shows in Featured Deals when set</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">Shows in Featured Deals when set</p>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-semibold text-gray-500 mb-1">Stock</label>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Stock</label>
                                     <input
                                         type="number"
                                         min="0"
@@ -430,7 +430,7 @@ export default function AdminProducts() {
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-[10px] font-semibold text-gray-500 mb-1">Minimum quantity for wholesale</label>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Minimum quantity for wholesale</label>
                                     <input
                                         type="number"
                                         min="0"
@@ -441,7 +441,7 @@ export default function AdminProducts() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-semibold text-gray-500 mb-1">Wholesale discount (%)</label>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Wholesale discount (%)</label>
                                     <input
                                         type="number"
                                         min="0"
@@ -455,7 +455,7 @@ export default function AdminProducts() {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-[10px] font-semibold text-gray-500 mb-1">Featured image</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Featured image</label>
                                 <div className="flex items-start gap-2">
                                     <div className="w-20 h-20 rounded-lg border border-gray-100 bg-gray-50 overflow-hidden shrink-0">
                                         {formData.featuredImage ? (
@@ -476,18 +476,18 @@ export default function AdminProducts() {
                                     </div>
                                     <div className="flex flex-col gap-1.5">
                                         <input ref={featuredInputRef} type="file" accept="image/*" className="hidden" onChange={handleFeaturedUpload} />
-                                        <button type="button" onClick={() => featuredInputRef.current?.click()} disabled={uploadingFeatured} className="h-8 px-3 rounded-lg border border-gray-200 text-xs font-medium flex items-center gap-1.5 disabled:opacity-60">
+                                        <button type="button" onClick={() => featuredInputRef.current?.click()} disabled={uploadingFeatured} className="min-h-[44px] h-9 px-3 rounded-lg border border-gray-200 text-xs font-medium flex items-center gap-1.5 disabled:opacity-60">
                                             {uploadingFeatured ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
                                             Upload
                                         </button>
-                                        <button type="button" onClick={() => setMediaPickerOpen('featured')} className="h-8 px-3 rounded-lg border border-gray-200 text-xs font-medium text-left">
+                                        <button type="button" onClick={() => setMediaPickerOpen('featured')} className="min-h-[44px] h-9 px-3 rounded-lg border border-gray-200 text-xs font-medium text-left flex items-center">
                                             Choose from library
                                         </button>
                                     </div>
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-[10px] font-semibold text-gray-500 mb-1">Product gallery</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Product gallery</label>
                                 <div className="space-y-1.5">
                                     <div className="flex flex-wrap gap-1.5">
                                         {formData.gallery.map((path, i) => (
@@ -509,21 +509,21 @@ export default function AdminProducts() {
                                     </div>
                                     <div className="flex gap-1.5">
                                         <input ref={galleryInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleGalleryUpload} />
-                                        <button type="button" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery} className="h-8 px-3 rounded-lg border border-gray-200 text-xs font-medium flex items-center gap-1.5 disabled:opacity-60">
+                                        <button type="button" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery} className="min-h-[44px] h-9 px-3 rounded-lg border border-gray-200 text-xs font-medium flex items-center gap-1.5 disabled:opacity-60">
                                             {uploadingGallery ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
                                             Upload
                                         </button>
-                                        <button type="button" onClick={() => setMediaPickerOpen('gallery')} className="h-8 px-3 rounded-lg border border-gray-200 text-xs font-medium">
+                                        <button type="button" onClick={() => setMediaPickerOpen('gallery')} className="min-h-[44px] h-9 px-3 rounded-lg border border-gray-200 text-xs font-medium flex items-center">
                                             Choose from library
                                         </button>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex gap-2 pt-2">
-                                <button type="submit" className="flex-1 h-10 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900">
+                                <button type="submit" className="flex-1 min-h-[44px] h-10 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900 flex items-center justify-center">
                                     {editingProduct ? 'Update' : 'Create'}
                                 </button>
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="h-10 px-4 border border-gray-200 rounded-lg font-semibold text-sm text-gray-600 hover:bg-gray-50">
+                                <button type="button" onClick={() => setIsModalOpen(false)} className="min-h-[44px] h-10 px-4 border border-gray-200 rounded-lg font-semibold text-sm text-gray-600 hover:bg-gray-50 flex items-center">
                                     Cancel
                                 </button>
                             </div>

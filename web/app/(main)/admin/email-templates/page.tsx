@@ -85,7 +85,7 @@ export default function AdminEmailTemplatesPage() {
                         <p className="text-xs text-gray-500 mt-0.5">Notification templates and triggers. Placeholders: &#123;&#123;order_number&#125;&#125;, &#123;&#123;total&#125;&#125;, &#123;&#123;user_name&#125;&#125;, &#123;&#123;amount&#125;&#125;, &#123;&#123;transfer_token&#125;&#125;</p>
                     </div>
                 </div>
-                <button type="button" onClick={fetchTemplates} disabled={loading} className="h-9 px-4 border border-gray-200 rounded-lg font-medium text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50">
+                <button type="button" onClick={fetchTemplates} disabled={loading} className="min-h-[44px] h-9 px-4 border border-gray-200 rounded-lg font-medium text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50">
                     <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     Refresh
                 </button>

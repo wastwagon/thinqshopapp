@@ -219,7 +219,7 @@ export default function AdminProcurementDetailPage() {
                                 </div>
                                 {request.specifications && (
                                     <div>
-                                        <p className="text-[10px] font-semibold text-gray-500 mb-1">Specifications</p>
+                                        <p className="text-xs font-semibold text-gray-500 mb-1">Specifications</p>
                                         <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{request.specifications}</p>
                                     </div>
                                 )}
@@ -329,7 +329,7 @@ export default function AdminProcurementDetailPage() {
                                     ) : (
                                         <form onSubmit={handleAddQuote} className="space-y-3">
                                             <div>
-                                                <label className="text-[10px] font-semibold text-gray-500 block mb-1">Amount (GHS)</label>
+                                                <label className="text-xs font-semibold text-gray-500 block mb-1">Amount (GHS)</label>
                                                 <input
                                                     type="number"
                                                     step="0.01"
@@ -341,7 +341,7 @@ export default function AdminProcurementDetailPage() {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="text-[10px] font-semibold text-gray-500 block mb-1">Details</label>
+                                                <label className="text-xs font-semibold text-gray-500 block mb-1">Details</label>
                                                 <textarea
                                                     placeholder="Timeline, notes..."
                                                     rows={2}

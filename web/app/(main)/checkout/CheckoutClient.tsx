@@ -259,7 +259,7 @@ export default function CheckoutClient() {
                                         <dt className="text-sm font-semibold text-gray-900">Total</dt>
                                         <dd className="text-right">
                                             <span className="text-xl font-bold text-gray-900"><PriceDisplay amountGhs={cartTotal} forceGhs /></span>
-                                            <p className="text-[10px] text-gray-500 mt-0.5 font-medium">Amount charged in GHS</p>
+                                            <p className="text-xs text-gray-500 mt-0.5 font-medium">Amount charged in GHS</p>
                                         </dd>
                                     </div>
                                 </div>

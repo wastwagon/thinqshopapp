@@ -114,7 +114,7 @@ export default function AdminSettings() {
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-semibold text-gray-500">GHS to CNY (1 GHS = ? CNY)</label>
+                                <label className="text-xs font-semibold text-gray-500">GHS to CNY (1 GHS = ? CNY)</label>
                                 <div className="relative">
                                     <input
                                         type="number"
@@ -127,13 +127,13 @@ export default function AdminSettings() {
                                         disabled={rateLoading}
                                     />
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                        {rateLoading ? <RefreshCw className="h-3.5 w-3.5 text-blue-600 animate-spin" /> : <span className="text-[9px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">Live</span>}
+                                        {rateLoading ? <RefreshCw className="h-3.5 w-3.5 text-blue-600 animate-spin" /> : <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">Live</span>}
                                     </div>
                                 </div>
-                                <p className="text-[10px] text-gray-400">Used for transfers.</p>
+                                <p className="text-xs text-gray-400">Used for transfers.</p>
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-semibold text-gray-500">Procurement fee (%)</label>
+                                <label className="text-xs font-semibold text-gray-500">Procurement fee (%)</label>
                                 <div className="relative">
                                     <input
                                         type="number"
@@ -164,7 +164,7 @@ export default function AdminSettings() {
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-sm font-semibold text-gray-900">{t.label}</p>
-                                            <p className="text-[10px] text-gray-500 mt-0.5">{t.desc}</p>
+                                            <p className="text-xs text-gray-500 mt-0.5">{t.desc}</p>
                                         </div>
                                     </div>
                                     <button
@@ -189,11 +189,11 @@ export default function AdminSettings() {
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <p className="text-[10px] font-semibold text-gray-500 mb-1">Uptime</p>
+                                <p className="text-xs font-semibold text-gray-500 mb-1">Uptime</p>
                                 <p className="text-2xl font-bold text-gray-900">99.9%</p>
                             </div>
                             <div>
-                                <p className="text-[10px] font-semibold text-gray-500 mb-2">Services</p>
+                                <p className="text-xs font-semibold text-gray-500 mb-2">Services</p>
                                 <div className="flex gap-1.5">
                                     {[1, 2, 3, 4, 5].map((n) => (
                                         <div key={n} className="flex-1 h-8 bg-gray-100 rounded-md overflow-hidden relative">
@@ -204,7 +204,7 @@ export default function AdminSettings() {
                             </div>
                             {/* Database migration & seeding */}
                         <div className="space-y-2">
-                            <p className="text-[10px] font-semibold text-gray-500 mb-2">Database</p>
+                            <p className="text-xs font-semibold text-gray-500 mb-2">Database</p>
                             <div className="flex flex-col gap-2">
                                 <button
                                     type="button"
@@ -234,7 +234,7 @@ export default function AdminSettings() {
                                     Migrate + seed
                                 </button>
                             </div>
-                            <p className="text-[9px] text-gray-400">Apply migrations and/or seed data. Admin only.</p>
+                            <p className="text-xs text-gray-400">Apply migrations and/or seed data. Admin only.</p>
                         </div>
                         <button type="button" className="w-full h-9 border border-red-200 text-red-600 rounded-lg text-xs font-semibold hover:bg-red-50 transition-colors">
                             Clear cache

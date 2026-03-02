@@ -144,7 +144,7 @@ export default function AdminCategories() {
                         <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
                             <s.icon className="h-4 w-4" />
                         </div>
-                        <p className="text-[10px] font-semibold text-gray-500 mb-0.5">{s.label}</p>
+                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
                         <p className="text-xl font-bold text-gray-900">{s.value}</p>
                     </div>
                 ))}
@@ -155,10 +155,10 @@ export default function AdminCategories() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Name</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Slug</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500">Status</th>
-                                <th className="px-3 py-2.5 text-[10px] font-semibold text-gray-500 text-right">Actions</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Name</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Slug</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Status</th>
+                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -187,9 +187,9 @@ export default function AdminCategories() {
                                                 <span className="text-xs font-semibold text-gray-900">{c.name}</span>
                                             </div>
                                         </td>
-                                        <td className="px-3 py-2.5 text-[10px] font-mono text-gray-500">{c.slug}</td>
+                                        <td className="px-3 py-2.5 text-xs font-mono text-gray-500">{c.slug}</td>
                                         <td className="px-3 py-2.5">
-                                            <span className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold border ${c.is_active ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-50 text-gray-500 border-gray-100'}`}>
+                                            <span className={`px-2 py-0.5 rounded-lg text-xs font-semibold border ${c.is_active ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-50 text-gray-500 border-gray-100'}`}>
                                                 {c.is_active ? 'Active' : 'Inactive'}
                                             </span>
                                         </td>
@@ -215,7 +215,7 @@ export default function AdminCategories() {
                         </h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-[10px] font-semibold text-gray-500 mb-1">Name</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Name</label>
                                 <input
                                     type="text"
                                     required
@@ -225,7 +225,7 @@ export default function AdminCategories() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-semibold text-gray-500 mb-1">Slug (optional)</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Slug (optional)</label>
                                 <input
                                     type="text"
                                     value={formData.slug}
@@ -235,7 +235,7 @@ export default function AdminCategories() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-semibold text-gray-500 mb-1">Description</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Description</label>
                                 <textarea
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -245,7 +245,7 @@ export default function AdminCategories() {
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-[10px] font-semibold text-gray-500 mb-1">Sort order</label>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Sort order</label>
                                     <input
                                         type="number"
                                         min="0"
@@ -255,7 +255,7 @@ export default function AdminCategories() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-semibold text-gray-500 mb-1">Status</label>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Status</label>
                                     <select
                                         value={formData.is_active}
                                         onChange={(e) => setFormData({ ...formData, is_active: e.target.value })}

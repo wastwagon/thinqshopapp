@@ -16,7 +16,7 @@ const navItems = [
     { name: 'Logistics', href: '/dashboard/logistics', icon: Truck },
     { name: 'Procurement', href: '/dashboard/procurement', icon: ShoppingBag },
     { name: 'Transfers', href: '/dashboard/transfers', icon: Send },
-    { name: 'Account', href: '/dashboard', icon: User },
+    { name: 'Account', href: '/dashboard/account', icon: User },
 ];
 
 export default function MobileBottomNav() {
@@ -40,7 +40,7 @@ export default function MobileBottomNav() {
                             <div className={`p-1.5 rounded-lg transition-all duration-200 ${isActive ? 'bg-blue-500 text-white' : 'text-white'}`}>
                                 <Icon className="h-4 w-4" strokeWidth={isActive ? 2.5 : 2} aria-hidden />
                             </div>
-                            <span className={`text-[8px] font-semibold uppercase tracking-wider truncate w-full text-center ${isActive ? 'text-blue-300' : 'text-white'}`}>
+                            <span className={`text-xs font-semibold uppercase tracking-wider truncate w-full text-center ${isActive ? 'text-blue-300' : 'text-white'}`}>
                                 {item.name}
                             </span>
                         </Link>

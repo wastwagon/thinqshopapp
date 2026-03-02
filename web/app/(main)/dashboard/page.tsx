@@ -87,7 +87,7 @@ export default function DashboardPage() {
     }
 
     const kpiCards = [
-        { label: 'In transit', value: stats.activeShipments, icon: Truck, href: '/dashboard/shipments', color: 'blue' },
+        { label: 'In transit', value: stats.activeShipments, icon: Truck, href: '/dashboard/logistics', color: 'blue' },
         { label: 'Orders', value: stats.totalOrders, icon: Package, href: '/dashboard/orders', color: 'emerald' },
         { label: 'Transfers', value: stats.totalTransfers, icon: Send, href: '/dashboard/transfers', color: 'violet' },
         { label: 'Identity', value: 'Verified', icon: Shield, href: null, color: 'slate', isText: true },
@@ -125,7 +125,7 @@ export default function DashboardPage() {
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 blur-[60px]" />
                     <div className="relative z-10 flex items-center justify-between gap-3">
                         <div>
-                            <p className="text-blue-300 text-[9px] md:text-[10px] font-semibold uppercase tracking-wider">Wallet</p>
+                            <p className="text-blue-300 text-xs font-semibold uppercase tracking-wider">Wallet</p>
                             <div className="flex items-baseline gap-1 mt-0.5">
                                 <span className="text-2xl md:text-3xl font-bold tracking-tight">₵{stats.walletBalance.split('.')[0]}</span>
                                 <span className="text-sm text-white/50">.{stats.walletBalance.split('.')[1]}</span>
@@ -160,7 +160,7 @@ export default function DashboardPage() {
                                 <div className={`w-8 h-8 md:w-9 md:h-9 rounded-lg flex items-center justify-center border mb-1.5 ${color}`}>
                                     <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
                                 </div>
-                                <p className="text-[9px] md:text-[10px] font-semibold text-gray-400 uppercase tracking-wider truncate">{card.label}</p>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider truncate">{card.label}</p>
                                 <p className="text-lg md:text-xl font-bold text-gray-900 mt-0.5 truncate">
                                     {card.isText ? String(card.value) : card.value}
                                 </p>

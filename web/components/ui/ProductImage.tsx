@@ -35,7 +35,7 @@ export default function ProductImage({ src, alt, width = 400, height = 400, clas
             <div className={`flex items-center justify-center bg-gray-100 ${className}`}>
                 <div className="flex flex-col items-center justify-center gap-2 text-gray-400">
                     <ImageIcon className="w-12 h-12" strokeWidth={1.5} />
-                    <span className="text-[10px] font-medium uppercase tracking-wider">No image</span>
+                    <span className="text-xs font-medium uppercase tracking-wider">No image</span>
                 </div>
             </div>
         );

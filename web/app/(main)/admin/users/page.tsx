@@ -107,7 +107,7 @@ export default function AdminUsers() {
                         <div className={`w-9 h-9 rounded-lg ${stat.bg} ${stat.border} border flex items-center justify-center ${stat.color} mb-2`}>
                             <stat.icon className="h-4 w-4" />
                         </div>
-                        <p className="text-[10px] font-semibold text-gray-500 mb-0.5">{stat.label}</p>
+                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{stat.label}</p>
                         <p className="text-xl font-bold text-gray-900">{stat.value}</p>
                     </div>
                 ))}
@@ -139,7 +139,7 @@ export default function AdminUsers() {
                                     <Users className="h-4 w-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
                                 </div>
                                 <div className="flex flex-col items-end gap-1 min-w-0">
-                                    <span className={`px-2 py-0.5 rounded text-[9px] font-semibold uppercase shrink-0 ${isAdminRole ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                    <span className={`px-2 py-0.5 rounded text-xs font-semibold uppercase shrink-0 ${isAdminRole ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'}`}>
                                         {user.role ?? 'user'}
                                     </span>
                                     {verified && (
@@ -166,10 +166,10 @@ export default function AdminUsers() {
                                 </p>
                             )}
                             <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-                                <span className="text-[9px] text-gray-400 flex items-center gap-1">
+                                <span className="text-xs text-gray-400 flex items-center gap-1">
                                     <Calendar className="h-3 w-3 shrink-0" /> {created}
                                 </span>
-                                <span className={`px-2 py-0.5 rounded text-[9px] font-semibold shrink-0 ${isActive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                                <span className={`px-2 py-0.5 rounded text-xs font-semibold shrink-0 ${isActive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                                     {isActive ? 'Active' : 'Inactive'}
                                 </span>
                             </div>

@@ -55,13 +55,13 @@ export default function ProductCard({ product }: ProductCardProps) {
 
                 {/* Sale Badge */}
                 {product.compare_price && (
-                    <div className="absolute top-3 left-3 bg-red-600 text-white text-[9px] font-semibold px-2 py-0.5 rounded z-10">
+                    <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded z-10">
                         OFFER
                     </div>
                 )}
 
-                {/* Quick Actions - 44px min touch targets for mobile */}
-                <div className="absolute bottom-3 right-3 flex flex-col gap-1 translate-x-10 group-hover:translate-x-0 transition-transform duration-300 z-20">
+                {/* Quick Actions - always visible on mobile; hover reveal on desktop */}
+                <div className="absolute bottom-3 right-3 flex flex-col gap-1 translate-x-0 md:translate-x-10 md:group-hover:translate-x-0 transition-transform duration-300 z-20">
                     <button
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist({ id: Number(productId), name: product.name, price: typeof product.price === 'string' ? parseFloat(product.price.replace(/[^0-9.]/g, '')) : product.price, slug: productSlug, images: product.images, gallery_images: product.gallery_images, category: product.category }); }}
                         className={`min-w-[44px] min-h-[44px] w-11 h-11 bg-white/95 shadow border rounded-full flex items-center justify-center transition-all ${
@@ -94,12 +94,12 @@ export default function ProductCard({ product }: ProductCardProps) {
             {/* Content */}
             <div className="p-4 flex flex-col flex-1">
                 <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-[9px] font-semibold text-blue-600 uppercase tracking-wider truncate">
+                    <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider truncate">
                         {typeof product.category === 'string' ? product.category : product.category?.name || 'Vetted Asset'}
                     </span>
                     <div className="flex items-center gap-0.5 shrink-0">
                         <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-[9px] text-gray-500">{product.rating || 4.8}</span>
+                        <span className="text-xs text-gray-500">{product.rating || 4.8}</span>
                     </div>
                 </div>
 
@@ -118,7 +118,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <div className="flex items-center justify-between mt-auto pt-3">
                     <div className="flex flex-col">
                         {product.compare_price && (
-                            <span className="text-[9px] text-gray-400 line-through">
+                            <span className="text-xs text-gray-400 line-through">
                                 ₵{Number(product.compare_price).toFixed(2)}
                             </span>
                         )}

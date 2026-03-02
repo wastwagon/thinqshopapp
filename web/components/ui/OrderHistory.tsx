@@ -72,7 +72,7 @@ export default function OrderHistory() {
                                         </p>
                                     </div>
                                     <div className="flex-shrink-0 flex flex-col items-end gap-0.5">
-                                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold capitalize ${order.status === 'delivered' ? 'bg-green-50 text-green-700' : order.status === 'cancelled' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+                                        <span className={`px-2 py-0.5 rounded text-xs font-semibold capitalize ${order.status === 'delivered' ? 'bg-green-50 text-green-700' : order.status === 'cancelled' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
                                             {order.status.replace('_', ' ')}
                                         </span>
                                         <p className="text-sm font-semibold text-gray-900">₵{Number(order.total).toFixed(2)}</p>

@@ -92,7 +92,7 @@ export default function SupportPage() {
                             <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center border border-white/10 mb-4">
                                 <MessageSquare className="h-6 w-6 text-blue-400" />
                             </div>
-                            <p className="text-blue-300 text-[10px] font-semibold uppercase tracking-wider mb-1">Contact</p>
+                            <p className="text-blue-300 text-xs font-semibold uppercase tracking-wider mb-1">Contact</p>
                             <h2 className="text-2xl font-bold mb-3 tracking-tight">New support request</h2>
                             <p className="text-gray-400 text-sm mb-6 max-w-md leading-relaxed">
                                 Open a ticket and our team will respond within 2–4 hours.
@@ -109,15 +109,16 @@ export default function SupportPage() {
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-lg font-bold tracking-tight">New ticket</h2>
                                 <button
+                                    type="button"
                                     onClick={() => setIsCreatingTicket(false)}
-                                    className="text-xs font-medium text-gray-400 hover:text-white transition-colors"
+                                    className="min-h-[44px] min-w-[44px] px-3 text-xs font-medium text-gray-400 hover:text-white transition-colors flex items-center justify-center -m-2"
                                 >
                                     Cancel
                                 </button>
                             </div>
                             <form onSubmit={handleSubmitTicket} className="space-y-4">
                                 <div>
-                                    <label className="text-[10px] font-medium text-gray-400 uppercase tracking-wider ml-1 mb-1.5 block">Category</label>
+                                    <label className="text-xs font-medium text-gray-400 uppercase tracking-wider ml-1 mb-1.5 block">Category</label>
                                     <select
                                         value={ticketCategory}
                                         onChange={(e) => setTicketCategory(e.target.value)}
@@ -130,7 +131,7 @@ export default function SupportPage() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-medium text-gray-400 uppercase tracking-wider ml-1 mb-1.5 block">Message</label>
+                                    <label className="text-xs font-medium text-gray-400 uppercase tracking-wider ml-1 mb-1.5 block">Message</label>
                                     <textarea
                                         value={ticketMessage}
                                         onChange={(e) => setTicketMessage(e.target.value)}
@@ -141,7 +142,7 @@ export default function SupportPage() {
                                 </div>
                                 <button
                                     type="submit"
-                                    className="w-full h-10 flex items-center justify-center gap-2 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-white hover:text-gray-900 transition-all"
+                                    className="w-full min-h-[44px] h-10 flex items-center justify-center gap-2 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-white hover:text-gray-900 transition-all"
                                 >
                                     Submit <Send className="h-3.5 w-3.5" />
                                 </button>
@@ -159,9 +160,9 @@ export default function SupportPage() {
                         <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center border border-blue-100 mb-3">
                             <PhoneCall className="h-5 w-5 text-blue-600" />
                         </div>
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1">Phone & WhatsApp</p>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Phone & WhatsApp</p>
                         <a href="tel:+8618320709024" className="text-base font-bold text-gray-900 tracking-tight mb-0.5 block hover:text-blue-600 transition-colors">+86 183 2070 9024</a>
-                        <a href="https://wa.me/8618320709024" target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-600 hover:text-blue-700 font-medium">Chat on WhatsApp →</a>
+                        <a href="https://wa.me/8618320709024" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:text-blue-700 font-medium">Chat on WhatsApp →</a>
                     </motion.div>
 
                     <motion.div
@@ -171,9 +172,9 @@ export default function SupportPage() {
                         <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center border border-indigo-100 mb-3">
                             <Mail className="h-5 w-5 text-indigo-600" />
                         </div>
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1">Email</p>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Email</p>
                         <a href="mailto:info@thinqshopping.app" className="text-sm font-bold text-gray-900 tracking-tight mb-0.5 block truncate hover:text-blue-600">info@thinqshopping.app</a>
-                        <p className="text-[10px] text-gray-400 flex items-center gap-1"><Clock className="h-3 w-3" /> 24h response</p>
+                        <p className="text-xs text-gray-400 flex items-center gap-1"><Clock className="h-3 w-3" /> 24h response</p>
                     </motion.div>
                 </div>
             </motion.div>

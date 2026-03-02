@@ -123,12 +123,12 @@ export default function ProcurementResponsePage() {
                             </h2>
                             <div className="space-y-3">
                                 <div>
-                                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Description</p>
+                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Description</p>
                                     <p className="text-gray-900 font-medium">{request.description}</p>
                                 </div>
                                 {request.specifications && (
                                     <div>
-                                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Specifications</p>
+                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Specifications</p>
                                         <p className="text-sm text-gray-700 whitespace-pre-wrap">{request.specifications}</p>
                                     </div>
                                 )}
@@ -173,7 +173,7 @@ export default function ProcurementResponsePage() {
                                 </div>
                                 {quote.quote_details && (
                                     <div className="mt-4 pt-4 border-t border-gray-200">
-                                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Details</p>
+                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Details</p>
                                         <p className="text-sm text-gray-700 whitespace-pre-wrap">{quote.quote_details}</p>
                                     </div>
                                 )}
