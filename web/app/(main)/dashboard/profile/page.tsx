@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import Link from 'next/link';
 import {
     User,
     Phone,
@@ -10,6 +11,7 @@ import {
     Save,
     Camera,
     Lock,
+    Trash2,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
@@ -122,6 +124,20 @@ export default function ProfilePage() {
                         <button type="button" className="text-[10px] font-semibold text-white flex items-center gap-2 hover:text-blue-300 transition-colors">
                             <Lock className="h-3 w-3" /> Change password
                         </button>
+                    </div>
+
+                    <div className="mt-4 bg-white rounded-2xl p-5 border border-red-100">
+                        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-red-600 mb-3 flex items-center gap-2">
+                            <Trash2 className="h-3 w-3" /> Account
+                        </h3>
+                        <p className="text-xs text-gray-600 leading-relaxed mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
+                        <Link
+                            href="/dashboard/settings/delete-account"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200 transition-all"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                            Delete my account
+                        </Link>
                     </div>
                 </div>
 

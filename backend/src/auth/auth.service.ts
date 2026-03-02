@@ -92,8 +92,20 @@ export class AuthService {
     }
 
     async deleteAccount(userId: number): Promise<{ message: string }> {
-        await this.prisma.user.delete({
-            where: { id: userId },
+        await this.prisma.$transaction(async (tx) => {
+            // Delete in dependency order (relations without onDelete: Cascade from User)
+            await tx.couponUsage.deleteMany({ where: { user_id: userId } });
+            await tx.order.deleteMany({ where: { user_id: userId } });
+            await tx.moneyTransfer.deleteMany({ where: { user_id: userId } });
+            await tx.shipment.deleteMany({ where: { user_id: userId } });
+            const requests = await tx.procurementRequest.findMany({ where: { user_id: userId }, select: { id: true } });
+            const requestIds = requests.map((r) => r.id);
+            if (requestIds.length > 0) {
+                await tx.procurementQuote.deleteMany({ where: { request_id: { in: requestIds } } });
+            }
+            await tx.procurementOrder.deleteMany({ where: { user_id: userId } });
+            await tx.procurementRequest.deleteMany({ where: { user_id: userId } });
+            await tx.user.delete({ where: { id: userId } });
         });
         return { message: 'Account deleted successfully' };
     }

@@ -53,6 +53,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
         { name: 'Wishlist', href: '/wishlist', icon: Heart },
         { name: 'Order History', href: '/dashboard/orders', icon: History },
         { name: 'Support', href: '/dashboard/support', icon: LifeBuoy },
+        { name: 'Settings', href: '/dashboard/settings', icon: Settings },
     ];
 
     const adminLinks = [
