@@ -14,7 +14,7 @@ import {
 const navItems = [
     { name: 'Home', href: '/', icon: Home },
     { name: 'Logistics', href: '/dashboard/logistics', icon: Truck },
-    { name: 'Procurement', href: '/dashboard/procurement', icon: ShoppingBag },
+    { name: 'Procure', href: '/dashboard/procurement', icon: ShoppingBag },
     { name: 'Transfers', href: '/dashboard/transfers', icon: Send },
     { name: 'Account', href: '/dashboard/account', icon: User },
 ];
