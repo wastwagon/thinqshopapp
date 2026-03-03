@@ -69,7 +69,7 @@ export default function RegisterPage() {
                 >
                     <div className="bg-white/95 backdrop-blur-xl rounded-[2.5rem] p-10 md:p-14 border border-white/20 shadow-2xl shadow-black/20">
                         <div className="mb-10 text-center">
-                            <h1 className="text-2xl font-semibold text-gray-900 tracking-tight mb-3">Create your account</h1>
+                            <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 tracking-tight mb-3">Create your account</h1>
                             <p className="text-gray-500 text-sm">
                                 Sign up to start shopping for electronics and services.
                             </p>

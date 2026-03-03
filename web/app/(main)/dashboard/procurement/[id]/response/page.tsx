@@ -107,7 +107,7 @@ export default function ProcurementResponsePage() {
                                 <ShoppingBag className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold text-gray-900">Procurement response</h1>
+                                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Procurement response</h1>
                                 <p className="text-sm text-gray-500">{request.request_number}</p>
                             </div>
                         </div>

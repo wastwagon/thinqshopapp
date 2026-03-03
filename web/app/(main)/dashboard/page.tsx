@@ -110,7 +110,7 @@ export default function DashboardPage() {
             >
                 {/* Header - compact */}
                 <motion.div variants={itemVariants} className="mb-3 md:mb-4">
-                    <h1 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
                     <p className="text-[11px] md:text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
                         <span className="w-1 h-1 bg-green-500 rounded-full" />
                         {user?.email}

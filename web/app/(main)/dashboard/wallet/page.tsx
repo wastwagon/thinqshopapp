@@ -146,7 +146,7 @@ export default function WalletPage() {
                 <div className="flex items-center gap-3">
                     <Wallet className="h-8 w-8 text-blue-600" />
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight leading-tight">Wallet</h1>
+                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight leading-tight">Wallet</h1>
                         <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                             Connected

@@ -57,7 +57,7 @@ export default function LoginPage() {
                 >
                     <div className="bg-white/95 backdrop-blur-xl rounded-[2.5rem] p-10 md:p-14 border border-white/20 shadow-2xl shadow-black/20 relative overflow-hidden">
                         <div className="mb-12 text-center">
-                            <h1 className="text-2xl font-semibold text-gray-900 tracking-tight mb-3">Sign in</h1>
+                            <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 tracking-tight mb-3">Sign in</h1>
                             <p className="text-gray-500 text-sm">
                                 Sign in to your account to continue shopping.
                             </p>

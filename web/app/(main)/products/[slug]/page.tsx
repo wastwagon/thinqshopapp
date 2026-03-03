@@ -112,7 +112,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     return (
         <ShopLayout>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 bg-white">
-                <PageHeader title={product.name} breadcrumbs={breadcrumbs} />
+                <PageHeader breadcrumbs={breadcrumbs} />
                 <div className="lg:grid lg:grid-cols-2 lg:gap-x-16 lg:items-start">
                     {/* Image Gallery */}
                     <div className="flex flex-col-reverse">
@@ -159,7 +159,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                         </div>
 
                         <div className="flex flex-wrap items-baseline gap-2 sm:gap-4 mb-6 sm:mb-8">
-                            <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight">
+                            <p className="text-base sm:text-lg md:text-xl font-bold text-gray-900 tracking-tight">
                                 <PriceDisplay amountGhs={unitPrice} className="font-bold" /> <span className="text-xs sm:text-sm font-normal text-gray-500">each</span>
                             </p>
                             {qualifiesWholesale && (
@@ -192,8 +192,9 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                         </div>
 
                         <div className="space-y-3 mb-10">
-                            <div className="flex items-center gap-2 sm:gap-4">
-                                <div className="flex items-center gap-1 p-1 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                                <div className="flex items-center gap-2 sm:gap-4">
+                                    <div className="flex items-center gap-1 p-1 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl">
                                     <button
                                         type="button"
                                         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -211,18 +212,10 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     >
                                         <Plus className="h-4 w-4" />
                                     </button>
-                                </div>
-                                <button
-                                    type="button"
-                                    className="flex-1 min-w-0 min-h-[44px] h-10 sm:h-12 bg-gray-900 text-white rounded-lg sm:rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-gray-200"
-                                    onClick={() => addToCart(Number(product.id), quantity)}
-                                >
-                                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                                    <span className="truncate">Add to Cart</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => toggleWishlist({ id: Number(product.id), name: product.name, price: product.price, slug: product.slug ?? slug, images: product.images, gallery_images: product.gallery_images, category: product.category })}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleWishlist({ id: Number(product.id), name: product.name, price: product.price, slug: product.slug ?? slug, images: product.images, gallery_images: product.gallery_images, category: product.category })}
                                     className={`min-w-[44px] min-h-[44px] w-10 h-10 sm:w-12 sm:h-12 border rounded-lg sm:rounded-xl flex items-center justify-center transition-all shrink-0 ${
                                         isInWishlist(Number(product.id))
                                             ? 'bg-red-50 border-red-200 text-red-500'
@@ -230,7 +223,16 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     }`}
                                 >
                                     <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${isInWishlist(Number(product.id)) ? 'fill-current' : ''}`} />
-                                </button>
+                                    </button>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="w-full sm:flex-1 min-h-[44px] bg-gray-900 text-white rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-blue-600 transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-gray-200 py-2.5 px-3"
+                                        onClick={() => addToCart(Number(product.id), quantity)}
+                                    >
+                                        <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" aria-hidden />
+                                        <span className="whitespace-nowrap">Add to Cart</span>
+                                    </button>
                             </div>
                             {hasWholesale && (
                                 <div className={`text-sm font-medium px-4 py-3 rounded-xl ${qualifiesWholesale ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-amber-50 text-amber-800 border border-amber-200'}`}>

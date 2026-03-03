@@ -53,7 +53,7 @@ export default function ThankYouCard({
 
                     {/* Title & subtitle - mobile-first typography */}
                     <div className="text-center mb-5 sm:mb-6">
-                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight mb-1.5 sm:mb-2">
+                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight mb-1.5 sm:mb-2">
                             {title}
                         </h1>
                         <p className="text-xs sm:text-sm text-gray-500 leading-snug max-w-[280px] sm:max-w-sm mx-auto">

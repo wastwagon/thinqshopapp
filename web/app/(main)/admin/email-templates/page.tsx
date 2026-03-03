@@ -81,7 +81,7 @@ export default function AdminEmailTemplatesPage() {
                 <div className="flex items-center gap-3">
                     <Mail className="h-8 w-8 text-blue-600" />
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Email templates</h1>
+                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Email templates</h1>
                         <p className="text-xs text-gray-500 mt-0.5">Notification templates and triggers. Placeholders: &#123;&#123;order_number&#125;&#125;, &#123;&#123;total&#125;&#125;, &#123;&#123;user_name&#125;&#125;, &#123;&#123;amount&#125;&#125;, &#123;&#123;transfer_token&#125;&#125;</p>
                     </div>
                 </div>

@@ -56,7 +56,7 @@ export default function SupportPage() {
                 <div className="flex items-center gap-3">
                     <LifeBuoy className="h-8 w-8 text-blue-600" />
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight leading-tight">Support</h1>
+                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight leading-tight">Support</h1>
                         <p className="text-xs text-green-600 flex items-center gap-1.5 mt-0.5">
                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                             Agents available
@@ -93,7 +93,7 @@ export default function SupportPage() {
                                 <MessageSquare className="h-6 w-6 text-blue-400" />
                             </div>
                             <p className="text-blue-300 text-xs font-semibold uppercase tracking-wider mb-1">Contact</p>
-                            <h2 className="text-2xl font-bold mb-3 tracking-tight">New support request</h2>
+                            <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 tracking-tight">New support request</h2>
                             <p className="text-gray-400 text-sm mb-6 max-w-md leading-relaxed">
                                 Open a ticket and our team will respond within 2–4 hours.
                             </p>

@@ -26,7 +26,7 @@ export default function AccountHubPage() {
         <DashboardLayout>
             <div className="pb-20 md:pb-10">
                 <div className="mb-6">
-                    <h1 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Account</h1>
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Account</h1>
                     <p className="text-xs text-gray-500 mt-0.5">Quick access to your account areas</p>
                 </div>
                 <nav className="space-y-2" aria-label="Account sections">

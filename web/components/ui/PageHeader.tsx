@@ -9,7 +9,7 @@ export type BreadcrumbItem = {
 };
 
 interface PageHeaderProps {
-    title: string;
+    title?: string;
     subtitle?: string;
     breadcrumbs?: BreadcrumbItem[];
 }
@@ -19,7 +19,7 @@ export default function PageHeader({ title, subtitle, breadcrumbs = [] }: PageHe
         <div className="w-screen relative left-1/2 -translate-x-1/2 bg-slate-900 border-b border-slate-700 mb-10 -mt-4 pt-5 pb-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
             {breadcrumbs.length > 0 && (
-                <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 mb-4 text-xs">
+                <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs">
                     <Link href="/" className="text-slate-400 hover:text-white transition-colors font-medium">
                         Home
                     </Link>
@@ -37,9 +37,11 @@ export default function PageHeader({ title, subtitle, breadcrumbs = [] }: PageHe
                     ))}
                 </nav>
             )}
-            <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight leading-tight">
-                {title}
-            </h1>
+            {title != null && title !== '' && (
+                <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight leading-tight mt-4">
+                    {title}
+                </h1>
+            )}
             {subtitle && (
                 <p className="mt-1.5 text-sm text-slate-400">
                     {subtitle}

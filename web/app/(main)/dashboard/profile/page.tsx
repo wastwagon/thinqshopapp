@@ -72,7 +72,7 @@ export default function ProfilePage() {
             <div className="mb-6 flex items-center gap-3">
                 <User className="h-8 w-8 text-blue-600" />
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight leading-tight">Profile</h1>
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight leading-tight">Profile</h1>
                     <p className="text-xs text-blue-600 flex items-center gap-1.5 mt-0.5">
                         <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
                         Active

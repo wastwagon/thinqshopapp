@@ -213,7 +213,7 @@ export default function AdminShippingRatesPage() {
                 <div className="flex items-center gap-3">
                     <Package className="h-7 w-7 text-blue-600" />
                     <div>
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Shipping rates</h1>
+                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Shipping rates</h1>
                         <p className="text-xs text-gray-500 mt-0.5">Air & sea freight (Ship for Me). Does not affect shop checkout.</p>
                     </div>
                 </div>

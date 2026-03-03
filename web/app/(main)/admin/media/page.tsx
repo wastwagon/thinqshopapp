@@ -92,7 +92,7 @@ export default function AdminMediaPage() {
                 <div className="flex items-center gap-3">
                     <ImageIcon className="h-8 w-8 text-blue-600" />
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight leading-tight">Media</h1>
+                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight leading-tight">Media</h1>
                         <p className="text-xs text-blue-600 flex items-center gap-1.5 mt-0.5">
                             Upload and reuse images across products
                         </p>
