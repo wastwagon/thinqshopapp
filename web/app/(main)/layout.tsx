@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import CartDrawer from '@/components/ui/CartDrawer';
 import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
 import OfflineBanner from '@/components/ui/OfflineBanner';
+import WebViewGoldBridge from '@/components/WebViewGoldBridge';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -16,6 +17,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 <CurrencyProvider>
                 <WishlistProvider>
                 <CartProvider>
+                    <WebViewGoldBridge />
                     <OfflineBanner />
                     <AnalyticsProvider />
                     <Toaster position="top-right" />
