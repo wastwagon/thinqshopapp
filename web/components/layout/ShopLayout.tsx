@@ -11,16 +11,16 @@ interface ShopLayoutProps {
 
 export default function ShopLayout({ children }: ShopLayoutProps) {
     return (
-        <div className="flex flex-col min-h-screen bg-white relative pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:pb-0 overflow-x-hidden min-w-0">
+        <div className="flex flex-col h-screen bg-white relative overflow-hidden min-w-0">
             <Navbar />
 
-            <main id="main-content" className="flex-1 w-full relative" tabIndex={-1}>
+            <main id="main-content" className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden overscroll-y-contain relative pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:pb-0" tabIndex={-1} role="main">
                 <div className="relative z-10 pt-14 sm:pt-16">
                     {children}
                 </div>
+                <Footer />
             </main>
 
-            <Footer />
             <MobileBottomNav />
         </div>
     );

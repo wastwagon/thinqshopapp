@@ -209,7 +209,7 @@ export default function AdminCategories() {
 
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setIsModalOpen(false)}>
-                    <div className="bg-white rounded-xl border border-gray-100 shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-white rounded-xl border border-gray-100 shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto overscroll-y-contain p-5" onClick={(e) => e.stopPropagation()}>
                         <h2 className="text-lg font-bold text-gray-900 mb-4">
                             {editingCategory ? 'Edit category' : 'New category'}
                         </h2>

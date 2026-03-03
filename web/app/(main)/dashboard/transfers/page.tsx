@@ -490,7 +490,7 @@ export default function TransferPage() {
                                 </button>
                             </div>
                         ) : (
-                            <ul className="divide-y divide-gray-50 max-h-[70vh] overflow-y-auto">
+                            <ul className="divide-y divide-gray-50 max-h-[70vh] overflow-y-auto overscroll-y-contain">
                                 {transfers.map((tx) => (
                                     <li key={tx.id} className="px-4 py-4 md:px-6 hover:bg-gray-50 transition-all group">
                                         <div className="flex justify-between items-start gap-4">

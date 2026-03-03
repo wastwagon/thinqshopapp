@@ -281,7 +281,7 @@ export default function LogisticsPage() {
                             <p className="text-xs text-gray-500 mt-1">Ship from our China warehouse to Ghana. All fields on one page.</p>
                         </div>
 
-                        <div className="p-6 space-y-6 md:max-h-[calc(100vh-14rem)] md:overflow-y-auto">
+                        <div className="p-6 space-y-6 md:max-h-[calc(100vh-14rem)] md:overflow-y-auto overscroll-y-contain">
                             {/* China forwarding address — static template, user details injected */}
                             <section>
                                 <h3 className="text-xs font-bold tracking-[0.2em]  text-gray-400 mb-3">Our Warehouse Address</h3>
@@ -550,7 +550,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                 </button>
                             </div>
                         ) : (
-                            <ul className="divide-y divide-gray-50 max-h-[70vh] overflow-y-auto">
+                            <ul className="divide-y divide-gray-50 max-h-[70vh] overflow-y-auto overscroll-y-contain">
                                 {shipments.map((shipment) => (
                                     <li key={shipment.id} className="px-4 py-4 md:px-8 md:py-6 hover:bg-gray-50 transition-all group">
                                         <div className="flex justify-between items-start">

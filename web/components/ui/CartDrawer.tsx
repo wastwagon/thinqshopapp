@@ -46,8 +46,8 @@ export default function CartDrawer() {
                                 leaveTo="translate-x-full"
                             >
                                 <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
-                                    <div className="flex h-full flex-col overflow-y-scroll bg-white shadow-2xl border-l border-gray-100 relative">
-                                        <div className="flex-1 overflow-y-auto px-6 py-8 relative z-10">
+                                    <div className="flex h-full flex-col overflow-y-scroll overscroll-y-contain bg-white shadow-2xl border-l border-gray-100 relative">
+                                        <div className="flex-1 overflow-y-auto overscroll-y-contain px-6 py-8 relative z-10">
                                             <div className="flex items-start justify-between mb-8">
                                                 <div>
                                                     <Dialog.Title className="text-xl font-bold text-gray-900 tracking-tight">Shopping Bag</Dialog.Title>

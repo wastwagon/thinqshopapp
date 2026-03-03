@@ -161,6 +161,10 @@
   .overflow-touch {
     -webkit-overflow-scrolling: touch;
   }
+  /* Contain overscroll in nested dashboard scroll areas (transfers, logistics) to prevent refresh/back */
+  .overscroll-y-contain {
+    overscroll-behavior-y: contain;
+  }
   /* Mobile menu button: keep in safe area on notched devices (use with Tailwind "fixed") */
   .menu-button-safe {
     top: max(1rem, env(safe-area-inset-top, 0px));
