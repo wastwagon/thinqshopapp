@@ -106,7 +106,7 @@
     }
   }
 
-  /* Mobile: hide scrollbar, prevent horizontal scroll */
+  /* Mobile: hide scrollbar, prevent horizontal scroll, contain overscroll to avoid pull-to-refresh */
   @media (max-width: 767px) {
     html, body {
       overflow-x: hidden;
@@ -118,6 +118,8 @@
     #main-content {
       -ms-overflow-style: none;
       scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
     }
   }
 }

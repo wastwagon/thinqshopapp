@@ -13,7 +13,6 @@ import {
     Store,
     User,
     ChevronLeft,
-    Menu,
     ShieldCheck,
     History,
     Heart,
@@ -79,17 +78,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
 
     return (
         <>
-            {/* Mobile: open menu button in safe area (not under notch); min 44px touch target */}
-            {!isOpen && (
-                <button
-                    type="button"
-                    onClick={toggleSidebar}
-                    className="fixed menu-button-safe z-[60] md:hidden touch-target min-w-[44px] min-h-[44px] bg-white rounded-xl shadow-lg border border-gray-100 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    aria-label="Open navigation menu"
-                >
-                    <Menu className="h-6 w-6 text-gray-900" aria-hidden />
-                </button>
-            )}
+            {/* Mobile: menu is opened via Topbar hamburger only (no duplicate floating button) */}
 
             <aside
                 className={`fixed inset-y-0 left-0 z-40 w-64 max-w-[85vw] bg-white border-r border-gray-100 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
