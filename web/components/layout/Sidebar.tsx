@@ -103,7 +103,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
                         </button>
                     </div>
 
-                    <nav className="flex-1 overflow-y-auto overflow-touch overscroll-y-contain px-3 py-4 space-y-0.5 custom-scrollbar min-h-0">
+                    <nav className="flex-1 overflow-y-auto overflow-touch overscroll-y-contain scrollbar-thin px-3 py-4 space-y-0.5 min-h-0">
                         <p className="px-3 text-xs font-semibold text-gray-400 mb-3">Navigation</p>
                         {links.map((link) => {
                             const Icon = link.icon;

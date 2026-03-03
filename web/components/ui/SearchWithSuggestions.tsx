@@ -164,7 +164,7 @@ export default function SearchWithSuggestions({ id = 'nav-search', listboxId = '
                 <div
                     id={listboxId}
                     role="listbox"
-                    className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl shadow-gray-200/50 z-[100] overflow-hidden max-h-[60vh] overflow-y-auto overscroll-y-contain"
+                    className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl shadow-gray-200/50 z-[100] overflow-hidden max-h-[60vh] overflow-y-auto overscroll-y-contain scrollbar-thin"
                 >
                     {loading ? (
                         <div className="px-4 py-6 text-center text-sm text-gray-500">Searching...</div>

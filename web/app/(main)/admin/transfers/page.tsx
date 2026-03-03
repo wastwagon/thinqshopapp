@@ -399,7 +399,7 @@ export default function AdminTransfersPage() {
                                 <h3 className="text-sm font-bold text-gray-900">Fulfill by QR · {transfer?.token}</h3>
                                 <button type="button" onClick={() => { setQrModalTransferId(null); setFulfillmentDraft({}); }} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close">×</button>
                             </div>
-                            <div className="p-4 overflow-y-auto overscroll-y-contain space-y-4">
+                            <div className="p-4 overflow-y-auto overscroll-y-contain scrollbar-thin space-y-4">
                                 {entries.length === 0 ? (
                                     <p className="text-sm text-gray-500">No QR codes.</p>
                                 ) : (

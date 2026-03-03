@@ -71,7 +71,7 @@ export default function MediaPickerModal({
                         <X className="h-4 w-4" />
                     </button>
                 </div>
-                <div className="flex-1 overflow-y-auto overscroll-y-contain p-4">
+                <div className="flex-1 overflow-y-auto overscroll-y-contain scrollbar-thin p-4">
                     {loading ? (
                         <div className="flex justify-center py-12">
                             <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />

@@ -122,7 +122,7 @@ export default function TopbarView(props: TopbarViewProps) {
                                         </button>
                                     )}
                                 </div>
-                                <div className="overflow-y-auto overscroll-y-contain flex-1 p-2 space-y-2">
+                                <div className="overflow-y-auto overscroll-y-contain scrollbar-thin flex-1 p-2 space-y-2">
                                     {notifications.length > 0 ? (
                                         notifications.map(notification => (
                                             <div
