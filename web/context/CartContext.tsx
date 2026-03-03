@@ -72,7 +72,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             trackAddToCart(String(productId), quantity);
             toast.success('Added to cart');
             fetchCart();
-            setIsCartOpen(true);
+            if (typeof window !== 'undefined' && window.innerWidth >= 768) setIsCartOpen(true);
         } catch (error) {
             toast.error('Failed to add to cart');
         }

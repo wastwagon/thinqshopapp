@@ -222,13 +222,28 @@ export default function Navbar() {
                     >
                         <Heart className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden />
                     </Link>
+                    <Link
+                        href="/cart"
+                        className="md:hidden touch-target min-w-[44px] min-h-[44px] w-10 h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors relative"
+                        aria-label={`Shopping cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
+                    >
+                        <ShoppingCart className="h-4 w-4" aria-hidden />
+                        {cartCount > 0 && (
+                            <span
+                                className="absolute top-1 right-1 min-w-[1.25rem] h-5 px-1 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg"
+                                aria-hidden
+                            >
+                                {cartCount > 99 ? '99+' : cartCount}
+                            </span>
+                        )}
+                    </Link>
                     <button
                         type="button"
                         onClick={toggleCart}
-                        className="touch-target min-w-[44px] min-h-[44px] w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors relative"
+                        className="hidden md:flex touch-target min-w-[44px] min-h-[44px] w-10 h-10 rounded-xl items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors relative"
                         aria-label={`Shopping cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
                     >
-                        <ShoppingCart className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden />
+                        <ShoppingCart className="h-4 w-4" aria-hidden />
                         {cartCount > 0 && (
                             <span
                                 className="absolute top-1 right-1 min-w-[1.25rem] h-5 px-1 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg"
