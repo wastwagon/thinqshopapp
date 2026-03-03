@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
+import AppLoadedMarker from "@/components/AppLoadedMarker";
 
 const outfit = Outfit({ subsets: ["latin"] });
 
@@ -45,8 +46,15 @@ export default function RootLayout({
             <head>
                 {/* Single viewport meta: viewport-fit=cover enables safe-area insets on notched iOS / WebView apps */}
                 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+                {/* Match app splash background so no white flash when WebView loads (smooth launch) */}
+                <style
+                    dangerouslySetInnerHTML={{
+                        __html: 'html,body{background-color:#0f172a;min-height:100vh}',
+                    }}
+                />
             </head>
             <body className={outfit.className}>
+                <AppLoadedMarker />
                 <a href="#main-content" className="skip-link">Skip to main content</a>
                 <script
                     type="application/ld+json"

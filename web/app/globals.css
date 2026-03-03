@@ -54,11 +54,16 @@
   }
 
   body {
-    background-color: #f8fafc;
     color: hsl(var(--foreground));
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  /* After app shell is ready, switch to normal background (smooth transition from splash) */
+  html.app-loaded,
+  body.app-loaded {
+    background-color: #f8fafc;
+    transition: background-color 0.35s ease-out;
   }
 
   /* Skip link - visible on focus only */
