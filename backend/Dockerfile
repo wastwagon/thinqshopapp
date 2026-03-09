@@ -13,8 +13,8 @@ COPY database/ ./database/
 COPY web/lib/data/scraped_products.json ./database/scraped_products.json
 COPY packages/ ./packages/
 
-# Install all deps (needed for workspace resolution)
-RUN npm ci
+# Install all deps (needed for workspace resolution); retry on transient network errors
+RUN for i in 1 2 3; do npm ci && break; sleep 15; done
 
 # Generate Prisma client (Debian/OpenSSL 3.x)
 ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"

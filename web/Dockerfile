@@ -11,8 +11,8 @@ COPY package.json package-lock.json ./
 COPY web/ ./web/
 COPY packages/ ./packages/
 
-# Install all deps
-RUN npm ci
+# Install all deps (retry on transient network errors e.g. ECONNRESET from registry)
+RUN for i in 1 2 3; do npm ci && break; sleep 15; done
 
 # Build Next.js (args for build-time env vars)
 ARG NEXT_PUBLIC_API_URL=http://localhost:7000
