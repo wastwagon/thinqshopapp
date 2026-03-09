@@ -30,7 +30,12 @@ export class OrderService {
         }
 
         const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        const subtotal = cartItems.reduce((sum, item) => sum + (Number(item.product.price) * item.quantity), 0);
+        const subtotal = cartItems.reduce((sum, item) => {
+            const unitPrice = item.variant
+                ? Number(item.product.price) + Number(item.variant.price_adjust)
+                : Number(item.product.price);
+            return sum + unitPrice * item.quantity;
+        }, 0);
         const isPaystack = dto.payment_method === 'card' || dto.payment_method === 'mobile_money';
 
         return this.prisma.$transaction(async (prisma) => {
@@ -71,16 +76,24 @@ export class OrderService {
                 });
             }
 
-            const orderItemsData = cartItems.map(item => ({
-                order_id: order.id,
-                product_id: item.product_id,
-                variant_id: item.variant_id ?? undefined,
-                quantity: item.quantity,
-                price: item.product.price,
-                product_name: item.product.name,
-                variant_details: null,
-                total: Number(item.product.price) * item.quantity,
-            }));
+            const orderItemsData = cartItems.map((item) => {
+                const unitPrice = item.variant
+                    ? Number(item.product.price) + Number(item.variant.price_adjust)
+                    : Number(item.product.price);
+                const variantDetails = item.variant
+                    ? `${item.variant.variant_type}: ${item.variant.variant_value}`.replace(/_/g, ' ')
+                    : null;
+                return {
+                    order_id: order.id,
+                    product_id: item.product_id,
+                    variant_id: item.variant_id ?? undefined,
+                    quantity: item.quantity,
+                    price: unitPrice,
+                    product_name: item.product.name,
+                    variant_details: variantDetails,
+                    total: unitPrice * item.quantity,
+                };
+            });
 
             await prisma.orderItem.createMany({
                 data: orderItemsData,
@@ -193,7 +206,7 @@ export class OrderService {
     async findOne(id: number, userId: number) {
         const order = await this.prisma.order.findFirst({
             where: { id, user_id: userId },
-            include: { items: { include: { product: true } } }, // Correct relation name
+            include: { items: { include: { product: true, variant: true } } },
         });
         if (!order) throw new NotFoundException('Order not found');
         return order;
@@ -203,7 +216,7 @@ export class OrderService {
         const order = await this.prisma.order.findUnique({
             where: { id },
             include: {
-                items: { include: { product: true } },
+                items: { include: { product: true, variant: true } },
                 user: { include: { profile: true } },
                 shipping_address: true,
             },

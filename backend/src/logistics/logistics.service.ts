@@ -61,6 +61,34 @@ export class LogisticsService implements OnModuleInit {
         });
     }
 
+    async getAdminShipmentById(id: number) {
+        const shipment = await this.prisma.shipment.findUnique({
+            where: { id },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        email: true,
+                        profile: {
+                            select: {
+                                first_name: true,
+                                last_name: true,
+                                phone: true
+                            }
+                        }
+                    }
+                },
+                tracking: { orderBy: { created_at: 'desc' } },
+                pickup_address: true,
+                delivery_address: true,
+                origin_warehouse: true,
+                destination_warehouse: true
+            },
+        });
+        if (!shipment) throw new NotFoundException('Shipment not found');
+        return shipment;
+    }
+
     async updateShipmentStatus(id: number, status: ShipmentStatus, notes?: string) {
         const shipment = await this.prisma.shipment.update({
             where: { id },

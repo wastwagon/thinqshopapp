@@ -9,7 +9,7 @@ export class CartService {
     async getCart(userId: number) {
         return this.prisma.cartItem.findMany({
             where: { user_id: userId },
-            include: { product: true },
+            include: { product: true, variant: true },
         });
     }
 

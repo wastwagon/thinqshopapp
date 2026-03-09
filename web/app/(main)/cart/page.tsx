@@ -63,8 +63,14 @@ export default function CartPage() {
                                                 <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity} />
                                             </p>
                                         </div>
+                                        {(item as { variant?: { variant_type: string; variant_value: string } }).variant && (
+                                            <p className="text-xs text-gray-600 mt-0.5">
+                                                {(item as { variant: { variant_type: string; variant_value: string } }).variant.variant_type.replace(/_/g, ' ')}: {(item as { variant: { variant_value: string } }).variant.variant_value}
+                                            </p>
+                                        )}
                                         <p className="text-xs text-gray-400 mt-1">
-                                            <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, ''))} /> each
+                                            <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity} /> total
+                                            <span className="text-gray-400"> · <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, ''))} /> each</span>
                                         </p>
                                         <div className="flex flex-1 items-end justify-between mt-3 flex-wrap gap-2">
                                             <div className="flex items-center gap-0 p-1 bg-gray-50 border border-gray-200 rounded-lg">

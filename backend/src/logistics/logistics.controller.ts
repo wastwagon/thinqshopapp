@@ -100,6 +100,15 @@ export class LogisticsController {
         return this.logisticsService.getAllShipments();
     }
 
+    @Get('admin/shipments/:id')
+    @UseGuards(AuthGuard)
+    async getAdminShipmentById(@Request() req, @Param('id') id: string) {
+        if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+            throw new ForbiddenException('Admin access required');
+        }
+        return this.logisticsService.getAdminShipmentById(Number(id));
+    }
+
     @Patch('admin/shipments/:id/status')
     @UseGuards(AuthGuard)
     async updateShipmentStatus(@Request() req, @Param('id') id: string, @Body() body: any) {

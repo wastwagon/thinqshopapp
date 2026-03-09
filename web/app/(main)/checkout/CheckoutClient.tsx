@@ -236,9 +236,14 @@ export default function CheckoutClient() {
                                                 </div>
                                                 <div className="flex-1 flex flex-col justify-center">
                                                     <h4 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">{item.product.name}</h4>
+                                                    {(item as { variant?: { variant_type: string; variant_value: string } }).variant && (
+                                                        <p className="text-xs text-gray-600 mb-0.5">
+                                                            {(item as { variant: { variant_type: string; variant_value: string } }).variant.variant_type.replace(/_/g, ' ')}: {(item as { variant: { variant_value: string } }).variant.variant_value}
+                                                        </p>
+                                                    )}
                                                     <div className="flex items-center justify-between mt-1">
                                                         <p className="text-xs text-gray-500">Qty {item.quantity}</p>
-                                                        <p className="text-sm font-bold text-gray-900"><PriceDisplay amountGhs={Number(item.product.price)} forceGhs /></p>
+                                                        <p className="text-sm font-bold text-gray-900"><PriceDisplay amountGhs={Number(item.product.price) * item.quantity} forceGhs /></p>
                                                     </div>
                                                 </div>
                                             </li>

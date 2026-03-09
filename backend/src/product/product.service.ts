@@ -10,9 +10,27 @@ export class ProductService {
 
     async create(createProductDto: CreateProductDto) {
         const slug = createProductDto.slug || this.slugify(createProductDto.name);
-        const data = { ...createProductDto, slug };
-        return this.prisma.product.create({
-            data: data as any,
+        const { variants, ...rest } = createProductDto as CreateProductDto & { variants?: Array<{ variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number; image?: string }> };
+        const data = { ...rest, slug } as any;
+        const product = await this.prisma.product.create({
+            data,
+        });
+        if (variants?.length) {
+            await this.prisma.productVariant.createMany({
+                data: variants.map((v) => ({
+                    product_id: product.id,
+                    variant_type: v.variant_type,
+                    variant_value: v.variant_value,
+                    sku: v.sku ?? null,
+                    price_adjust: v.price_adjust ?? 0,
+                    stock_quantity: v.stock_quantity ?? 0,
+                    image: v.image ?? null,
+                })),
+            });
+        }
+        return this.prisma.product.findUnique({
+            where: { id: product.id },
+            include: { category: true, variants: true },
         });
     }
 
@@ -40,7 +58,7 @@ export class ProductService {
         const [products, total] = await Promise.all([
             this.prisma.product.findMany({
                 where,
-                include: { category: true },
+                include: { category: true, variants: true },
                 skip: Number(skip),
                 take: Number(limit),
                 orderBy: { created_at: 'desc' },
@@ -194,9 +212,30 @@ export class ProductService {
     }
 
     async update(id: number, updateProductDto: UpdateProductDto) {
-        return this.prisma.product.update({
+        const { variants, ...rest } = updateProductDto as UpdateProductDto & { variants?: Array<{ variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number; image?: string }> };
+        await this.prisma.product.update({
             where: { id },
-            data: updateProductDto,
+            data: rest as any,
+        });
+        if (variants !== undefined) {
+            await this.prisma.productVariant.deleteMany({ where: { product_id: id } });
+            if (variants?.length) {
+                await this.prisma.productVariant.createMany({
+                    data: variants.map((v) => ({
+                        product_id: id,
+                        variant_type: v.variant_type,
+                        variant_value: v.variant_value,
+                        sku: v.sku ?? null,
+                        price_adjust: v.price_adjust ?? 0,
+                        stock_quantity: v.stock_quantity ?? 0,
+                        image: v.image ?? null,
+                    })),
+                });
+            }
+        }
+        return this.prisma.product.findUnique({
+            where: { id },
+            include: { category: true, variants: true },
         });
     }
 

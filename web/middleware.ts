@@ -12,7 +12,8 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    // Allow camera for same origin (barcode scanner on dashboard/admin logistics); restrict mic and geolocation
+    response.headers.set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
     return response;
 }
 

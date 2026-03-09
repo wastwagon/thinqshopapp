@@ -12,9 +12,12 @@ import {
     Loader2,
     Save,
     X,
+    Upload,
+    Image as ImageIcon,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
+import { getMediaUrl } from '@/lib/media';
 
 type HeroSlide = { id: number; title: string; subtitle?: string | null; cta_text?: string | null; cta_url?: string | null; image_path?: string | null; sort_order: number; is_active: boolean };
 type TrustBadge = { id: number; icon: string; label: string; optional_link?: string | null; sort_order: number; is_active: boolean };
@@ -164,6 +167,8 @@ function HeroSection({
 }) {
     const [editing, setEditing] = useState<HeroSlide | null>(null);
     const [form, setForm] = useState({ title: '', subtitle: '', cta_text: '', cta_url: '', image_path: '', is_active: true });
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const heroImageInputRef = React.useRef<HTMLInputElement>(null);
 
     const saveSlide = async () => {
         if (editing) {
@@ -208,13 +213,94 @@ function HeroSection({
         }
     };
 
+    const handleHeroImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please select an image (JPEG, PNG, GIF, WebP)');
+            return;
+        }
+        setUploadingImage(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const { data } = await api.post('/media/upload', formData, { headers: { 'Content-Type': undefined } });
+            if (data?.url || data?.path) {
+                const path = data.url || data.path;
+                setForm((f) => ({ ...f, image_path: path }));
+                toast.success('Image uploaded');
+            } else {
+                toast.error(data?.error || 'Upload failed');
+            }
+        } catch {
+            toast.error('Upload failed');
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
+    const heroImageBlock = (
+        <div className="space-y-2">
+            <label className="text-xs font-semibold text-gray-700">Hero background image</label>
+            <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                    <input
+                        ref={heroImageInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        className="hidden"
+                        onChange={handleHeroImageUpload}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => heroImageInputRef.current?.click()}
+                        disabled={uploadingImage}
+                        className="min-h-[44px] px-4 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 flex items-center gap-2 disabled:opacity-60"
+                    >
+                        {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                        {uploadingImage ? 'Uploading…' : 'Upload image'}
+                    </button>
+                    {form.image_path && (
+                        <button
+                            type="button"
+                            onClick={() => setForm((f) => ({ ...f, image_path: '' }))}
+                            className="min-h-[44px] px-3 rounded-lg border border-red-100 text-red-600 text-sm"
+                        >
+                            Remove
+                        </button>
+                    )}
+                </div>
+                {form.image_path && (
+                    <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 border border-gray-100">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 shrink-0">
+                            <img
+                                src={form.image_path.startsWith('http') ? form.image_path : getMediaUrl(form.image_path)}
+                                alt="Hero"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                        <p className="text-xs text-gray-500 truncate flex-1 min-w-0" title={form.image_path}>{form.image_path}</p>
+                    </div>
+                )}
+                <input
+                    type="text"
+                    placeholder="Or paste image URL (optional)"
+                    value={form.image_path?.startsWith('http') ? form.image_path : ''}
+                    onChange={(e) => setForm((f) => ({ ...f, image_path: e.target.value }))}
+                    className="w-full min-h-[40px] px-3 rounded-lg border border-gray-200 text-sm placeholder:text-gray-400"
+                />
+            </div>
+        </div>
+    );
+
     return (
         <div className="space-y-3 pt-3">
             {editing && editing.id === 0 && (
                 <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 space-y-2">
                     <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
                     <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Subtitle" value={form.subtitle} onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))} />
-                    <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Image URL (hero background)" value={form.image_path} onChange={(e) => setForm((f) => ({ ...f, image_path: e.target.value }))} />
+                    {heroImageBlock}
                     <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="CTA text" value={form.cta_text} onChange={(e) => setForm((f) => ({ ...f, cta_text: e.target.value }))} />
                     <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="CTA URL" value={form.cta_url} onChange={(e) => setForm((f) => ({ ...f, cta_url: e.target.value }))} />
                     <div className="flex gap-2">
@@ -234,7 +320,7 @@ function HeroSection({
                         <div className="space-y-2">
                             <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
                             <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Subtitle" value={form.subtitle} onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))} />
-                            <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Image URL (hero background)" value={form.image_path} onChange={(e) => setForm((f) => ({ ...f, image_path: e.target.value }))} />
+                            {heroImageBlock}
                             <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="CTA text" value={form.cta_text} onChange={(e) => setForm((f) => ({ ...f, cta_text: e.target.value }))} />
                             <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="CTA URL" value={form.cta_url} onChange={(e) => setForm((f) => ({ ...f, cta_url: e.target.value }))} />
                             <div className="flex gap-2">

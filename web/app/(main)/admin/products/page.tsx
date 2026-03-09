@@ -15,7 +15,8 @@ import {
     Loader2,
     FileText,
     CheckCircle,
-    AlertTriangle
+    AlertTriangle,
+    Layers
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
@@ -41,8 +42,10 @@ export default function AdminProducts() {
         featuredImage: '',
         gallery: [] as string[],
         wholesale_min_quantity: '',
-        wholesale_discount_pct: ''
+        wholesale_discount_pct: '',
+        variants: [] as { variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number }[],
     });
+    const [variationOptions, setVariationOptions] = useState<{ id: number; name: string; slug: string; values: { id: number; value: string }[] }[]>([]);
     const [mediaPickerOpen, setMediaPickerOpen] = useState<'featured' | 'gallery' | null>(null);
     const [uploadingFeatured, setUploadingFeatured] = useState(false);
     const [uploadingGallery, setUploadingGallery] = useState(false);
@@ -53,6 +56,15 @@ export default function AdminProducts() {
         fetchProducts();
         fetchCategories();
     }, []);
+
+    const fetchVariationOptions = async () => {
+        try {
+            const { data } = await api.get('/variations/options');
+            setVariationOptions(Array.isArray(data) ? data : []);
+        } catch {
+            setVariationOptions([]);
+        }
+    };
 
     const fetchProducts = async () => {
         try {
@@ -75,11 +87,19 @@ export default function AdminProducts() {
     };
 
     const handleOpenModal = (product: any = null) => {
+        fetchVariationOptions();
         if (product) {
             setEditingProduct(product);
             const catName = product.category?.name ?? product.category;
             const catId = product.category_id ?? categories.find(c => c.name === catName)?.id ?? '';
             const imgs = Array.isArray(product.images) ? product.images.filter(Boolean) : product.image ? [product.image] : [];
+            const variants = (product.variants || []).map((v: any) => ({
+                variant_type: v.variant_type ?? '',
+                variant_value: v.variant_value ?? '',
+                sku: v.sku ?? undefined,
+                price_adjust: v.price_adjust != null ? Number(v.price_adjust) : undefined,
+                stock_quantity: v.stock_quantity != null ? Number(v.stock_quantity) : undefined,
+            }));
             setFormData({
                 name: product.name ?? '',
                 category_id: String(catId),
@@ -90,7 +110,8 @@ export default function AdminProducts() {
                 featuredImage: imgs[0] ?? '',
                 gallery: imgs.slice(1),
                 wholesale_min_quantity: String(product.wholesale_min_quantity ?? ''),
-                wholesale_discount_pct: String(product.wholesale_discount_pct ?? '')
+                wholesale_discount_pct: String(product.wholesale_discount_pct ?? ''),
+                variants,
             });
         } else {
             setEditingProduct(null);
@@ -104,7 +125,8 @@ export default function AdminProducts() {
                 featuredImage: '',
                 gallery: [],
                 wholesale_min_quantity: '',
-                wholesale_discount_pct: ''
+                wholesale_discount_pct: '',
+                variants: [],
             });
         }
         setIsModalOpen(true);
@@ -184,6 +206,13 @@ export default function AdminProducts() {
             if (formData.compare_price) payload.compare_price = parseFloat(formData.compare_price);
             if (formData.wholesale_min_quantity) payload.wholesale_min_quantity = parseInt(formData.wholesale_min_quantity, 10);
             if (formData.wholesale_discount_pct) payload.wholesale_discount_pct = parseFloat(formData.wholesale_discount_pct);
+            payload.variants = (formData.variants || []).map((v) => ({
+                variant_type: v.variant_type,
+                variant_value: v.variant_value,
+                sku: v.sku || undefined,
+                price_adjust: v.price_adjust ?? 0,
+                stock_quantity: v.stock_quantity ?? 0,
+            }));
             if (editingProduct) {
                 await api.patch(`/products/${editingProduct.id}`, payload);
                 toast.success("Product updated");
@@ -427,6 +456,86 @@ export default function AdminProducts() {
                                     className="w-4 h-4 rounded border-gray-200 text-blue-600 focus:ring-blue-500"
                                 />
                                 <label htmlFor="is_featured" className="text-sm font-medium text-gray-700">Show in Featured section on homepage</label>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1.5">
+                                    <Layers className="h-3.5 w-3.5" /> Variants (optional)
+                                </label>
+                                <p className="text-xs text-gray-400 mb-2">Add options from Variations (e.g. Size, Color). Define SKU, price adjustment and stock per variant.</p>
+                                <div className="space-y-2">
+                                    {formData.variants.map((v, idx) => (
+                                        <div key={idx} className="flex flex-wrap items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-100">
+                                            <select
+                                                value={v.variant_type}
+                                                onChange={(e) => setFormData((f) => ({
+                                                    ...f,
+                                                    variants: f.variants.map((x, i) => i === idx ? { ...x, variant_type: e.target.value, variant_value: '' } : x),
+                                                }))}
+                                                className="h-9 px-2 rounded-lg border border-gray-200 text-sm min-w-[100px]"
+                                            >
+                                                <option value="">Option</option>
+                                                {variationOptions.map((o) => (
+                                                    <option key={o.id} value={o.slug}>{o.name}</option>
+                                                ))}
+                                            </select>
+                                            <select
+                                                value={v.variant_value}
+                                                onChange={(e) => setFormData((f) => ({
+                                                    ...f,
+                                                    variants: f.variants.map((x, i) => i === idx ? { ...x, variant_value: e.target.value } : x),
+                                                }))}
+                                                className="h-9 px-2 rounded-lg border border-gray-200 text-sm min-w-[90px]"
+                                            >
+                                                <option value="">Value</option>
+                                                {variationOptions.find((o) => o.slug === v.variant_type)?.values?.map((val) => (
+                                                    <option key={val.id} value={val.value}>{val.value}</option>
+                                                ))}
+                                            </select>
+                                            <input
+                                                type="text"
+                                                placeholder="SKU"
+                                                value={v.sku ?? ''}
+                                                onChange={(e) => setFormData((f) => ({
+                                                    ...f,
+                                                    variants: f.variants.map((x, i) => i === idx ? { ...x, sku: e.target.value || undefined } : x),
+                                                }))}
+                                                className="h-9 px-2 rounded-lg border border-gray-200 text-sm w-20"
+                                            />
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="Price ±"
+                                                value={v.price_adjust ?? ''}
+                                                onChange={(e) => setFormData((f) => ({
+                                                    ...f,
+                                                    variants: f.variants.map((x, i) => i === idx ? { ...x, price_adjust: e.target.value ? parseFloat(e.target.value) : undefined } : x),
+                                                }))}
+                                                className="h-9 px-2 rounded-lg border border-gray-200 text-sm w-20"
+                                            />
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                placeholder="Stock"
+                                                value={v.stock_quantity ?? ''}
+                                                onChange={(e) => setFormData((f) => ({
+                                                    ...f,
+                                                    variants: f.variants.map((x, i) => i === idx ? { ...x, stock_quantity: e.target.value ? parseInt(e.target.value, 10) : undefined } : x),
+                                                }))}
+                                                className="h-9 px-2 rounded-lg border border-gray-200 text-sm w-20"
+                                            />
+                                            <button type="button" onClick={() => setFormData((f) => ({ ...f, variants: f.variants.filter((_, i) => i !== idx) }))} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50" aria-label="Remove variant">
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData((f) => ({ ...f, variants: [...f.variants, { variant_type: '', variant_value: '' }] }))}
+                                        className="min-h-[40px] px-3 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm font-medium flex items-center gap-1.5 hover:border-blue-400 hover:text-blue-600"
+                                    >
+                                        <Plus className="h-3.5 w-3.5" /> Add variant
+                                    </button>
+                                </div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>

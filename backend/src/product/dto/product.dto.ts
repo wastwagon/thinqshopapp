@@ -1,5 +1,30 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, IsArray } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsBoolean, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { PartialType } from '@nestjs/mapped-types';
+
+export class ProductVariantDto {
+    @IsString()
+    variant_type: string;
+
+    @IsString()
+    variant_value: string;
+
+    @IsOptional()
+    @IsString()
+    sku?: string;
+
+    @IsOptional()
+    @IsNumber()
+    price_adjust?: number;
+
+    @IsOptional()
+    @IsNumber()
+    stock_quantity?: number;
+
+    @IsOptional()
+    @IsString()
+    image?: string;
+}
 
 export class CreateProductDto {
     @IsString()
@@ -42,6 +67,12 @@ export class CreateProductDto {
     @IsOptional()
     @IsNumber()
     wholesale_discount_pct?: number;
+
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => ProductVariantDto)
+    variants?: ProductVariantDto[];
 }
 
 export class UpdateProductDto extends PartialType(CreateProductDto) {}

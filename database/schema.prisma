@@ -167,10 +167,38 @@ model Product {
   @@map("products")
 }
 
+// Global variation options (e.g. Size, Color) and values (e.g. S, M, L / Red, Blue) for products
+model VariationOption {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(100)
+  slug       String   @unique @db.VarChar(100)
+  sort_order Int      @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  values     VariationValue[]
+
+  @@map("variation_options")
+}
+
+model VariationValue {
+  id                 Int             @id @default(autoincrement())
+  variation_option_id Int
+  value              String          @db.VarChar(100)
+  sort_order         Int             @default(0)
+  created_at         DateTime        @default(now())
+  updated_at         DateTime        @updatedAt
+
+  variation_option   VariationOption @relation(fields: [variation_option_id], references: [id], onDelete: Cascade)
+
+  @@unique([variation_option_id, value])
+  @@map("variation_values")
+}
+
 model ProductVariant {
   id             Int      @id @default(autoincrement())
   product_id     Int
-  variant_type   String   @db.VarChar(50) // size, color, etc.
+  variant_type   String   @db.VarChar(50) // option slug, e.g. size, color
   variant_value  String   @db.VarChar(100)
   sku            String?  @db.VarChar(100)
   price_adjust   Decimal  @default(0.00) @db.Decimal(10, 2)

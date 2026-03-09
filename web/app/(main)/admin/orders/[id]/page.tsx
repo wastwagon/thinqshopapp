@@ -23,6 +23,8 @@ interface OrderItem {
     quantity: number;
     price: number;
     total: number;
+    variant_details?: string | null;
+    variant?: { variant_type: string; variant_value: string } | null;
     product?: { images?: string[]; slug?: string };
 }
 
@@ -174,6 +176,11 @@ export default function AdminOrderDetailPage() {
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <h4 className="text-sm font-semibold text-gray-900">{item.product_name}</h4>
+                                            {(item.variant_details || item.variant) && (
+                                                <p className="text-xs text-gray-600 mt-0.5">
+                                                    {item.variant_details ?? `${item.variant!.variant_type}: ${item.variant!.variant_value}`.replace(/_/g, ' ')}
+                                                </p>
+                                            )}
                                             <p className="text-xs text-gray-500 mt-0.5">
                                                 Qty {item.quantity} × ₵{Number(item.price).toFixed(2)}
                                             </p>

@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Truck, Search, Package, User, Mail, Calendar, Clock, Zap, FileText, CheckCircle, ChevronRight } from 'lucide-react';
+import BarcodeScanner from '@/components/ui/BarcodeScanner';
+import { Truck, Search, Package, User, Mail, Calendar, Clock, Zap, FileText, CheckCircle, ChevronRight, Camera, ExternalLink } from 'lucide-react';
 
 interface Shipment {
     id: number;
@@ -24,10 +27,12 @@ interface Shipment {
 }
 
 export default function AdminLogisticsPage() {
+    const router = useRouter();
     const [shipments, setShipments] = useState<Shipment[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [updatingId, setUpdatingId] = useState<number | null>(null);
+    const [scannerOpen, setScannerOpen] = useState(false);
 
     useEffect(() => {
         fetchShipments();
@@ -79,6 +84,26 @@ export default function AdminLogisticsPage() {
             (s.carrier_tracking_number ?? '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const exactTrackingMatch = searchTerm.trim()
+        ? shipments.find((s) => (s.tracking_number ?? '').toLowerCase() === searchTerm.trim().toLowerCase())
+        : null;
+
+    const goToShipmentDetail = () => {
+        if (exactTrackingMatch) {
+            router.push(`/admin/logistics/${exactTrackingMatch.id}`);
+            return;
+        }
+        if (filteredShipments.length === 1) {
+            router.push(`/admin/logistics/${filteredShipments[0].id}`);
+            return;
+        }
+        if (filteredShipments.length === 0 && searchTerm.trim()) {
+            toast.error('No shipment found for this tracking or customer');
+        } else if (filteredShipments.length > 1) {
+            toast('Multiple matches — refine search or click a row to view details', { icon: '🔍' });
+        }
+    };
+
     const bookedCount = shipments.filter((s) => s.status === 'booked').length;
     const inTransitCount = shipments.filter((s) => s.status === 'in_transit').length;
     const deliveredCount = shipments.filter((s) => s.status === 'delivered').length;
@@ -118,15 +143,37 @@ export default function AdminLogisticsPage() {
                         <p className="text-xs text-gray-500 mt-0.5">Freight and delivery</p>
                     </div>
                 </div>
-                <div className="relative min-w-0 sm:w-56">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search tracking or customer..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full h-9 pl-9 pr-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                    />
+                <div className="flex gap-2 min-w-0 flex-1 sm:flex-initial sm:max-w-md">
+                    <div className="relative flex-1 min-w-0">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+                        <input
+                            type="text"
+                            placeholder="Search tracking or customer..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && goToShipmentDetail()}
+                            className="w-full h-9 pl-9 pr-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setScannerOpen(true)}
+                        className="h-9 px-3 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-1.5 shrink-0"
+                        title="Scan barcode to find shipment"
+                        aria-label="Scan barcode"
+                    >
+                        <Camera className="h-4 w-4" />
+                        <span className="hidden xs:inline text-xs font-medium">Scan</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={goToShipmentDetail}
+                        className="h-9 px-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center gap-1.5 shrink-0 text-sm font-medium"
+                        title="Open shipment details"
+                    >
+                        <span className="hidden xs:inline">Go</span>
+                        <ChevronRight className="h-4 w-4" />
+                    </button>
                 </div>
             </div>
 
@@ -173,7 +220,12 @@ export default function AdminLogisticsPage() {
                                     <tr key={shipment.id} className="hover:bg-gray-50/50 transition-colors group">
                                         <td className="px-3 py-2.5">
                                             <div className="flex flex-col gap-0.5">
-                                                <span className="text-xs font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{shipment.tracking_number || '—'}</span>
+                                                <Link
+                                                    href={`/admin/logistics/${shipment.id}`}
+                                                    className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                                                >
+                                                    {shipment.tracking_number || '—'}
+                                                </Link>
                                                 <span className="text-xs text-gray-500">{shipment.service_type || 'Standard'}</span>
                                                 {shipment.origin_warehouse && (
                                                     <div className="flex items-center gap-1 mt-1 flex-wrap">
@@ -214,6 +266,14 @@ export default function AdminLogisticsPage() {
                                         </td>
                                         <td className="px-3 py-2.5 text-right">
                                             <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                                                <Link
+                                                    href={`/admin/logistics/${shipment.id}`}
+                                                    className="min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg border border-gray-200 bg-white text-gray-700 flex items-center justify-center hover:bg-gray-50 hover:border-gray-300 transition-all shrink-0"
+                                                    title="View details"
+                                                    aria-label="View shipment details"
+                                                >
+                                                    <ExternalLink className="h-4 w-4" />
+                                                </Link>
                                                 <button
                                                     type="button"
                                                     onClick={() => handleSimulateWebhook(shipment.id)}
@@ -251,6 +311,21 @@ export default function AdminLogisticsPage() {
                 </div>
             </div>
             </div>
+
+            <BarcodeScanner
+                open={scannerOpen}
+                onClose={() => setScannerOpen(false)}
+                onScan={(value) => {
+                    setSearchTerm(value);
+                    setScannerOpen(false);
+                    const match = shipments.find((s) => (s.tracking_number ?? '').toLowerCase() === value.toLowerCase());
+                    if (match) {
+                        router.push(`/admin/logistics/${match.id}`);
+                    } else {
+                        toast('Scan saved to search — click Go if one result, or refine', { icon: '✓' });
+                    }
+                }}
+            />
         </DashboardLayout>
     );
 }

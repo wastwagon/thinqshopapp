@@ -18,7 +18,9 @@ interface CartItem {
     id: number;
     product_id: number;
     quantity: number;
+    variant_id?: number | null;
     product: Product;
+    variant?: { variant_type: string; variant_value: string; price_adjust?: number } | null;
 }
 
 interface CartContextType {

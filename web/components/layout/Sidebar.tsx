@@ -30,6 +30,7 @@ import {
     Image as ImageIcon,
     Layout,
     Type,
+    Layers,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -62,6 +63,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
         { name: 'Reviews', href: '/admin/reviews', icon: Eye },
         { name: 'Products', href: '/admin/products', icon: Package },
         { name: 'Categories', href: '/admin/categories', icon: FolderTree },
+        { name: 'Variations', href: '/admin/variations', icon: Layers },
         { name: 'Media', href: '/admin/media', icon: ImageIcon },
         { name: 'Orders', href: '/admin/orders', icon: History },
         { name: 'Shipments', href: '/admin/logistics', icon: Package },
