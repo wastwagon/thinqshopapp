@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import { Zap, ArrowRight, ChevronRight, Flame } from 'lucide-react';
 import products from '@/lib/data/scraped_products.json';
 import api from '@/lib/axios';
-import { getMediaUrl } from '@/lib/media';
 import ProductCard from '@/components/ui/ProductCard';
 import ShopLayout from '@/components/layout/ShopLayout';
 import HomeHero from '@/components/home/HomeHero';
@@ -47,32 +46,6 @@ function normalizeProduct(p: any, index: number): Product {
 
 const STATIC_CATEGORIES = ['Photography', 'Computers', 'Pro Video'];
 
-const HERO_SLIDE_COUNT = 5;
-
-function getProductFirstImage(p: Product): string | null {
-    const arr = (p.gallery_images ?? p.images) as string[] | undefined;
-    if (Array.isArray(arr) && arr.length > 0 && arr[0]) return arr[0];
-    if (p.image && typeof p.image === 'string') return p.image;
-    return null;
-}
-
-function buildHeroSlidesFromProducts(productList: Product[], count: number): HeroSlide[] {
-    const withImages = productList.filter((p) => getProductFirstImage(p));
-    if (withImages.length === 0) return [];
-    const shuffled = [...withImages].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count).map((p, i) => {
-        const firstImage = getProductFirstImage(p);
-        return {
-            id: p.id ?? i + 1,
-            title: p.name,
-            subtitle: typeof p.price === 'string' ? p.price : p.price != null ? String(p.price) : null,
-            cta_text: 'View',
-            cta_url: `/products/${p.slug ?? (typeof p.name === 'string' ? p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : '')}`,
-            image_path: firstImage ? getMediaUrl(firstImage) : null,
-        };
-    });
-}
-
 type HeroSlide = { id: number; title: string; subtitle?: string | null; cta_text?: string | null; cta_url?: string | null; image_path?: string | null };
 type TrustBadge = { id: number; icon: string; label: string; optional_link?: string | null };
 type Testimonial = { id: number; quote: string; author_name: string; author_role?: string | null };
@@ -111,8 +84,7 @@ export default function Home() {
                     setProductsList(list);
                     setCategories(apiCategories.map((c: any) => ({ name: c.name, slug: c.slug })));
                     setSource('api');
-                    const productSlides = buildHeroSlidesFromProducts(list, HERO_SLIDE_COUNT);
-                    setHeroSlides(productSlides.length > 0 ? productSlides : contentHeroSlides);
+                    setHeroSlides(contentHeroSlides);
                     return;
                 }
             } catch (_) {
@@ -122,8 +94,7 @@ export default function Home() {
             setProductsList(staticProducts);
             setCategories(STATIC_CATEGORIES.map(name => ({ name, slug: name.toLowerCase().replace(/\s+/g, '-') })));
             setSource('static');
-            const productSlides = buildHeroSlidesFromProducts(staticProducts, HERO_SLIDE_COUNT);
-            setHeroSlides(productSlides.length > 0 ? productSlides : []);
+            setHeroSlides([]);
         };
         load();
     }, [mounted]);

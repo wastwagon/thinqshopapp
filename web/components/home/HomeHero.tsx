@@ -20,16 +20,47 @@ export type Slide = {
     image_path?: string | null;
 };
 
+// Premium e-commerce hero imagery — consistent 16:9 hero size (1920×1080) for no layout shift
 const HERO_IMAGES = [
-    'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1200&q=85',
-    'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1200&q=85',
-    'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=1200&q=85',
+    'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1920&q=90', // shopping bags / retail
+    'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&q=90',   // delivery / shipping
+    'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1920&q=90', // laptop / tech workspace
+    'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1920&q=90', // camera / pro gear
 ];
 
 const FALLBACK_SLIDES: Slide[] = [
-    { id: 1, title: 'Pro gear for creators', subtitle: 'Cameras, computers, and pro video — sourced globally, delivered to Ghana.', cta_text: 'Shop now', cta_url: '/shop' },
-    { id: 2, title: 'International shipping to Ghana', subtitle: 'All orders shipped from abroad. Estimated delivery 7–14 days.', cta_text: 'Delivery info', cta_url: '/privacy' },
-    { id: 3, title: 'Delivery in 7–14 days', subtitle: 'We ship worldwide to Ghana. Track your order from dispatch to delivery.', cta_text: 'Track order', cta_url: '/track' },
+    {
+        id: 1,
+        title: 'Shop electronics & pro gear',
+        subtitle: 'Cameras, computers, and imaging — sourced globally, delivered to Ghana. Pay in GHS.',
+        cta_text: 'Shop now',
+        cta_url: '/shop',
+        image_path: HERO_IMAGES[0],
+    },
+    {
+        id: 2,
+        title: 'International shipping to Ghana',
+        subtitle: 'Reliable delivery in 7–14 days. Track your order from dispatch to your door.',
+        cta_text: 'View delivery info',
+        cta_url: '/privacy',
+        image_path: HERO_IMAGES[1],
+    },
+    {
+        id: 3,
+        title: 'Tech that works where you work',
+        subtitle: 'From content creators to professionals — the right gear, transparent pricing.',
+        cta_text: 'Browse categories',
+        cta_url: '/shop',
+        image_path: HERO_IMAGES[2],
+    },
+    {
+        id: 4,
+        title: 'Pro cameras & imaging',
+        subtitle: 'Mirrorless, cinema, and instant — order online, we handle the rest.',
+        cta_text: 'Shop photography',
+        cta_url: '/shop',
+        image_path: HERO_IMAGES[3],
+    },
 ];
 
 function getSlideImage(slide: Slide, index: number): string {
@@ -104,7 +135,7 @@ function HeroSlideCard({
                 <div className="px-5 sm:px-8 md:px-10 lg:px-14 pb-8 sm:pb-10 md:pb-12 lg:pb-14 pt-20">
                     <div className="max-w-xl">
                         <p className="text-[11px] sm:text-xs font-semibold text-white/80 uppercase tracking-[0.2em] mb-2">
-                            Featured
+                            ThinQShop
                         </p>
                         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight mb-3">
                             {slide.title}
