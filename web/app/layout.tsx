@@ -59,22 +59,23 @@ export default function RootLayout({
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{
-                        __html: JSON.stringify([
-                            {
-                                '@context': 'https://schema.org',
-                                '@type': 'WebSite',
-                                name: 'ThinQShop',
-                                url: process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app',
-                                description: 'E-commerce and services for Ghana. Shop electronics and imaging systems.',
-                            },
-                            {
-                                '@context': 'https://schema.org',
-                                '@type': 'Organization',
-                                name: 'ThinQShop',
-                                url: process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app',
-                                description: 'E-commerce, logistics, money transfer, and procurement services for Ghana and West Africa.',
-                            },
-                        ]),
+                        __html: JSON.stringify({
+                            '@context': 'https://schema.org',
+                            '@graph': [
+                                {
+                                    '@type': 'WebSite',
+                                    name: 'ThinQShop',
+                                    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app',
+                                    description: 'E-commerce and services for Ghana. Shop electronics and imaging systems.',
+                                },
+                                {
+                                    '@type': 'Organization',
+                                    name: 'ThinQShop',
+                                    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app',
+                                    description: 'E-commerce, logistics, money transfer, and procurement services for Ghana and West Africa.',
+                                },
+                            ],
+                        }).replace(/</g, '\\u003c'),
                     }}
                 />
                 {children}
