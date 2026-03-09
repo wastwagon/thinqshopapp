@@ -65,8 +65,11 @@ async function proxy(request: NextRequest, pathSegments: string[]) {
         });
     } catch (err) {
         console.error('[API proxy]', targetUrl, err);
+        const hint = BACKEND_URL.startsWith('http://backend:')
+            ? ' Check that the backend container is running and on the same Docker network.'
+            : '';
         return NextResponse.json(
-            { message: 'Backend unreachable. Is the API running on ' + BACKEND_URL + '?' },
+            { message: 'Backend unreachable. Is the API running on ' + BACKEND_URL + '?' + hint },
             { status: 502 }
         );
     }

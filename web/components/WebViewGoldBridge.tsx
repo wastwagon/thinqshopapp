@@ -5,15 +5,21 @@ import { useEffect, useRef } from 'react';
 /**
  * When the site is loaded inside WebViewGold (Android app), tell the app to
  * disable pull-to-refresh so our in-page scroll behavior takes precedence.
- * Config.ENABLE_PULL_REFRESH can stay true in the app; we disable it dynamically
- * via the custom scheme so no app update is required.
- * See WebViewGold Config: "call disablepulltorefresh:// from your website"
+ * Only runs when the app is detected to avoid "scheme does not have a registered
+ * handler" errors in the browser. Set window.__WEBVIEWGOLD__ = true in the app
+ * or ensure the WebView user agent includes "WebViewGold".
  */
+function isWebViewGold(): boolean {
+    if (typeof window === 'undefined') return false;
+    if ((window as unknown as { __WEBVIEWGOLD__?: boolean }).__WEBVIEWGOLD__ === true) return true;
+    return /WebViewGold/i.test(navigator.userAgent);
+}
+
 export default function WebViewGoldBridge() {
     const done = useRef(false);
 
     useEffect(() => {
-        if (done.current) return;
+        if (done.current || !isWebViewGold()) return;
         done.current = true;
         try {
             const iframe = document.createElement('iframe');
@@ -25,7 +31,7 @@ export default function WebViewGoldBridge() {
                 if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
             }, 500);
         } catch {
-            // Ignore (e.g. in non-WebView environment)
+            // Ignore
         }
     }, []);
 
