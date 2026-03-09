@@ -69,11 +69,11 @@ export class LogisticsService implements OnModuleInit {
                     select: {
                         id: true,
                         email: true,
+                        phone: true,
                         profile: {
                             select: {
                                 first_name: true,
-                                last_name: true,
-                                phone: true
+                                last_name: true
                             }
                         }
                     }

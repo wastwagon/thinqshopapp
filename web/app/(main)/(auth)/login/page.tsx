@@ -13,8 +13,17 @@ import ShopLayout from '@/components/layout/ShopLayout';
 import { ShieldCheck, Lock, Mail, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const emailOrPhone = z.string().min(1, 'Enter your email or phone number').refine(
+    (v) => {
+        const t = (v || '').trim();
+        if (t.includes('@')) return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t);
+        const digits = t.replace(/\D/g, '');
+        return digits.length >= 10 && digits.length <= 15;
+    },
+    'Enter a valid email address or phone number (e.g. +233XXXXXXXXX)'
+);
 const loginSchema = z.object({
-    email: z.string().email('Please enter a valid email address'),
+    email: emailOrPhone,
     password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
@@ -31,11 +40,17 @@ export default function LoginPage() {
 
     const onSubmit = async (data: LoginFormData) => {
         try {
-            const response = await api.post('/auth/login', data);
+            let emailOrPhone = (data.email || '').trim();
+            if (emailOrPhone && !emailOrPhone.includes('@')) {
+                const digits = emailOrPhone.replace(/\D/g, '');
+                emailOrPhone = digits.length >= 10 ? `+${digits}` : emailOrPhone;
+            }
+            const payload = { email: emailOrPhone, password: data.password };
+            const response = await api.post('/auth/login', payload);
             login(response.data.access_token, from);
             toast.success('Welcome back!');
         } catch (error: any) {
-            const msg = error.response?.data?.message || 'Invalid email or password';
+            const msg = error.response?.data?.message || 'Invalid email, phone or password';
             toast.error(msg);
         }
     };
@@ -66,13 +81,15 @@ export default function LoginPage() {
                         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                             <div className="space-y-5">
                                 <div>
-                                    <label className="text-sm font-medium text-gray-700 ml-1 mb-2 block">Email</label>
+                                    <label className="text-sm font-medium text-gray-700 ml-1 mb-2 block">Email or phone</label>
                                     <div className="relative">
                                         <input
                                             {...register('email')}
-                                            type="email"
-                                        placeholder="you@example.com"
-                                        className="block w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
+                                            type="text"
+                                            inputMode="email"
+                                            autoComplete="username"
+                                            placeholder="you@example.com or +233..."
+                                            className="block w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
                                         />
                                         <Mail className="absolute right-6 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-200" />
                                     </div>

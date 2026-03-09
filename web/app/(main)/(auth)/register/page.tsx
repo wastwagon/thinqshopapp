@@ -12,7 +12,17 @@ import ShopLayout from '@/components/layout/ShopLayout';
 import { ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-/** Accept international numbers: +country + digits, 10-15 digits total. */
+/** Accept either email or phone for main identifier. */
+const emailOrPhone = z.string().min(1, 'Enter your email or phone number').refine(
+    (v) => {
+        const t = (v || '').trim();
+        if (t.includes('@')) return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t);
+        const digits = t.replace(/\D/g, '');
+        return digits.length >= 10 && digits.length <= 15;
+    },
+    'Enter a valid email address or phone number (e.g. +233XXXXXXXXX)'
+);
+/** Optional phone: international 10–15 digits. */
 const phoneOptional = (v: string | undefined) => {
     if (!v || v.trim() === '') return true;
     const digits = v.replace(/\D/g, '');
@@ -21,7 +31,7 @@ const phoneOptional = (v: string | undefined) => {
 const registerSchema = z.object({
     first_name: z.string().min(2, "First name is required"),
     last_name: z.string().min(2, "Last name is required"),
-    email: z.string().email("Please enter a valid email address"),
+    email: emailOrPhone,
     password: z.string().min(8, "Password must be at least 8 characters long"),
     confirmPassword: z.string().min(8, "Please confirm your password"),
     phone: z.string().optional().refine(phoneOptional, "Please enter a valid phone number (e.g. +233XXXXXXXXX, +86138..., +1234567890)"),
@@ -43,7 +53,12 @@ export default function RegisterPage() {
     const onSubmit = async (data: RegisterFormData) => {
         try {
             const { confirmPassword, ...rest } = data;
-            const payload = { ...rest, phone: data.phone?.trim() || undefined };
+            let emailOrPhone = (rest.email || '').trim();
+            if (emailOrPhone && !emailOrPhone.includes('@')) {
+                const digits = emailOrPhone.replace(/\D/g, '');
+                emailOrPhone = digits.length >= 10 ? `+${digits}` : emailOrPhone;
+            }
+            const payload = { ...rest, email: emailOrPhone, phone: data.phone?.trim() || undefined };
             await api.post('/auth/register', payload);
             toast.success('Registration successful! Please login.');
             router.push('/login');
@@ -100,11 +115,13 @@ export default function RegisterPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-sm font-medium text-gray-700 ml-1 mb-2 block">Email</label>
+                                    <label className="text-sm font-medium text-gray-700 ml-1 mb-2 block">Email or phone</label>
                                     <input
                                         {...register('email')}
-                                        type="email"
-                                        placeholder="you@example.com"
+                                        type="text"
+                                        inputMode="email"
+                                        autoComplete="username"
+                                        placeholder="you@example.com or +233..."
                                         className="block w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
                                     />
                                     {errors.email && <p className="text-red-500 text-xs mt-2 ml-1">{errors.email.message}</p>}

@@ -56,7 +56,8 @@ interface Shipment {
     estimated_delivery?: string | null;
     user?: {
         email: string;
-        profile?: { first_name?: string; last_name?: string; phone?: string | null };
+        phone?: string | null;
+        profile?: { first_name?: string; last_name?: string };
     };
     tracking?: ShipmentTracking[];
     pickup_address?: Address | null;
@@ -254,9 +255,9 @@ export default function AdminShipmentDetailPage() {
                                             <Mail className="h-3.5 w-3.5" /> {shipment.user.email}
                                         </a>
                                     )}
-                                    {shipment.user?.profile?.phone && (
-                                        <a href={`tel:${shipment.user.profile.phone}`} className="flex items-center gap-2 text-xs text-blue-600 hover:underline">
-                                            <Phone className="h-3.5 w-3.5" /> {shipment.user.profile.phone}
+                                    {shipment.user?.phone && (
+                                        <a href={`tel:${shipment.user.phone}`} className="flex items-center gap-2 text-xs text-blue-600 hover:underline">
+                                            <Phone className="h-3.5 w-3.5" /> {shipment.user.phone}
                                         </a>
                                     )}
                                 </div>

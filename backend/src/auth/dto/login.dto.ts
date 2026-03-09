@@ -1,7 +1,14 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsString, MinLength, Matches } from 'class-validator';
+
+/** Accept either email or phone (10–15 digits, optional +). */
+const EMAIL_OR_PHONE_REGEX = /^([^\s@]+@[^\s@]+\.[^\s@]+)|(\+?\d{10,15})$/;
 
 export class LoginDto {
-    @IsEmail()
+    @IsString()
+    @MinLength(1, { message: 'Enter your email or phone number' })
+    @Matches(EMAIL_OR_PHONE_REGEX, {
+        message: 'Enter a valid email address or phone number (e.g. +233XXXXXXXXX)',
+    })
     email: string;
 
     @IsString()

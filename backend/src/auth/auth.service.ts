@@ -12,8 +12,19 @@ export class AuthService {
         private jwtService: JwtService,
     ) { }
 
-    async validateUser(email: string, pass: string): Promise<any> {
-        const user = await this.prisma.user.findUnique({ where: { email } });
+    async validateUser(emailOrPhone: string, pass: string): Promise<any> {
+        const input = (emailOrPhone || '').trim();
+        const isEmail = input.includes('@');
+        let user: any = null;
+        if (isEmail) {
+            user = await this.prisma.user.findUnique({ where: { email: input } });
+        } else {
+            const digits = input.replace(/\D/g, '');
+            const variants = [input, digits, `+${digits}`].filter(Boolean);
+            user = await this.prisma.user.findFirst({
+                where: { phone: { in: variants } },
+            });
+        }
         if (!user) return null;
         if (!user.is_active) throw new UnauthorizedException('Account is deactivated');
         if (!(await bcrypt.compare(pass, user.password))) return null;
@@ -30,8 +41,23 @@ export class AuthService {
     }
 
     async register(data: RegisterDto) {
-        const { first_name, last_name, password, phone, email } = data;
+        const { first_name, last_name, password, phone: optionalPhone, email: emailOrPhone } = data;
         const hashedPassword = await bcrypt.hash(password, 10);
+
+        const isEmail = (emailOrPhone || '').trim().includes('@');
+        const normalized = (emailOrPhone || '').trim();
+        let email: string;
+        let phone: string | null = null;
+        if (isEmail) {
+            email = normalized;
+            if (optionalPhone && String(optionalPhone).trim()) {
+                phone = String(optionalPhone).trim();
+            }
+        } else {
+            const digits = normalized.replace(/\D/g, '');
+            phone = digits.length >= 10 ? `+${digits}` : normalized;
+            email = `phone-${digits}@thinqshop.local`;
+        }
 
         // Generate TQ-ID: TQ-[FIRST_NAME]-[4-DIGITS]
         const randomDigits = Math.floor(1000 + Math.random() * 9000);
@@ -40,7 +66,7 @@ export class AuthService {
         const user = await this.prisma.user.create({
             data: {
                 email,
-                phone: phone && String(phone).trim() ? String(phone).trim() : null,
+                phone,
                 password: hashedPassword,
                 user_identifier: tqId,
                 profile: {
