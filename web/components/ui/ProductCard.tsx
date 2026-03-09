@@ -126,10 +126,10 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </div>
                     <Link
                         href={`/products/${productSlug}`}
-                        className="min-w-[44px] min-h-[44px] w-11 h-11 bg-gray-900 text-white rounded-lg flex items-center justify-center hover:bg-blue-600 transition-all group/btn"
+                        className="w-9 h-9 min-w-[36px] min-h-[36px] p-1.5 bg-gray-100 text-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-200 hover:text-blue-600 transition-all group/btn"
                         aria-label="View product"
                     >
-                        <ArrowRight className="h-4 w-4 group-hover/btn:scale-110 transition-transform" aria-hidden />
+                        <ArrowRight className="h-4 w-4 shrink-0 group-hover/btn:scale-110 transition-transform" aria-hidden />
                     </Link>
                 </div>
             </div>
