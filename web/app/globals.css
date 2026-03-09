@@ -284,24 +284,38 @@
   scrollbar-width: none;
 }
 
-/* Mobile hero: app-style slider – pagination above safe area */
-.hero-mobile-swiper .swiper-pagination {
-  padding-bottom: env(safe-area-inset-bottom, 8px);
-  position: relative;
-  bottom: 0;
-  margin-top: 0;
-}
-
-/* Hero circular container: gentle float animation */
-@keyframes hero-circle-float {
-  0%, 100% {
-    transform: translateY(0);
+/* Hero: progress bar (fills over autoplay interval) */
+@keyframes hero-progress-fill {
+  from {
+    transform: scaleX(0);
   }
-  50% {
-    transform: translateY(-6px);
+  to {
+    transform: scaleX(1);
   }
 }
 
-.hero-circle-animate {
-  animation: hero-circle-float 4s ease-in-out infinite;
+.hero-progress-bar {
+  width: 100%;
+  animation: hero-progress-fill 5000ms linear forwards;
+  transform: scaleX(0);
+}
+
+/* Hero: pagination dots – minimal, at bottom */
+.hero-swiper .swiper-pagination {
+  bottom: 1rem;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.hero-swiper .hero-bullet {
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 1;
+  transition: width 0.25s ease, background 0.2s ease;
+}
+
+.hero-swiper .hero-bullet-active {
+  width: 20px;
+  border-radius: 3px;
+  background: #fff;
 }
