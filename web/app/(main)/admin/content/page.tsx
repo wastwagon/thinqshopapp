@@ -163,13 +163,13 @@ function HeroSection({
     saving: string | null;
 }) {
     const [editing, setEditing] = useState<HeroSlide | null>(null);
-    const [form, setForm] = useState({ title: '', subtitle: '', cta_text: '', cta_url: '', is_active: true });
+    const [form, setForm] = useState({ title: '', subtitle: '', cta_text: '', cta_url: '', image_path: '', is_active: true });
 
     const saveSlide = async () => {
         if (editing) {
             setSaving('hero');
             try {
-                await api.patch(`/content/admin/hero-slides/${editing.id}`, form);
+                await api.patch(`/content/admin/hero-slides/${editing.id}`, { ...form, image_path: form.image_path || undefined });
                 toast.success('Slide updated');
                 setEditing(null);
                 onReload();
@@ -181,9 +181,9 @@ function HeroSection({
         } else {
             setSaving('hero');
             try {
-                await api.post('/content/admin/hero-slides', form);
+                await api.post('/content/admin/hero-slides', { ...form, image_path: form.image_path || undefined });
                 toast.success('Slide added');
-                setForm({ title: '', subtitle: '', cta_text: '', cta_url: '', is_active: true });
+                setForm({ title: '', subtitle: '', cta_text: '', cta_url: '', image_path: '', is_active: true });
                 onReload();
             } catch {
                 toast.error('Failed to add');
@@ -214,6 +214,7 @@ function HeroSection({
                 <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 space-y-2">
                     <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
                     <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Subtitle" value={form.subtitle} onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))} />
+                    <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Image URL (hero background)" value={form.image_path} onChange={(e) => setForm((f) => ({ ...f, image_path: e.target.value }))} />
                     <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="CTA text" value={form.cta_text} onChange={(e) => setForm((f) => ({ ...f, cta_text: e.target.value }))} />
                     <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="CTA URL" value={form.cta_url} onChange={(e) => setForm((f) => ({ ...f, cta_url: e.target.value }))} />
                     <div className="flex gap-2">
@@ -233,6 +234,7 @@ function HeroSection({
                         <div className="space-y-2">
                             <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
                             <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Subtitle" value={form.subtitle} onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))} />
+                            <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Image URL (hero background)" value={form.image_path} onChange={(e) => setForm((f) => ({ ...f, image_path: e.target.value }))} />
                             <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="CTA text" value={form.cta_text} onChange={(e) => setForm((f) => ({ ...f, cta_text: e.target.value }))} />
                             <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="CTA URL" value={form.cta_url} onChange={(e) => setForm((f) => ({ ...f, cta_url: e.target.value }))} />
                             <div className="flex gap-2">
@@ -250,9 +252,10 @@ function HeroSection({
                             <div>
                                 <p className="font-medium text-gray-900">{s.title}</p>
                                 {s.subtitle && <p className="text-xs text-gray-500 mt-0.5">{s.subtitle}</p>}
+                                {s.image_path && <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[200px]" title={s.image_path}>Image set</p>}
                             </div>
                             <div className="flex gap-1">
-                                <button type="button" className="min-w-[44px] min-h-[44px] rounded-lg border border-gray-200 flex items-center justify-center" onClick={() => { setEditing(s); setForm({ title: s.title, subtitle: s.subtitle ?? '', cta_text: s.cta_text ?? '', cta_url: s.cta_url ?? '', is_active: s.is_active }); }}>
+                                <button type="button" className="min-w-[44px] min-h-[44px] rounded-lg border border-gray-200 flex items-center justify-center" onClick={() => { setEditing(s); setForm({ title: s.title, subtitle: s.subtitle ?? '', cta_text: s.cta_text ?? '', cta_url: s.cta_url ?? '', image_path: s.image_path ?? '', is_active: s.is_active }); }}>
                                     <Pencil className="h-4 w-4" />
                                 </button>
                                 <button type="button" className="min-w-[44px] min-h-[44px] rounded-lg border border-red-100 text-red-600 flex items-center justify-center" onClick={() => deleteSlide(s.id)}>
@@ -267,7 +270,7 @@ function HeroSection({
                 <button
                     type="button"
                     className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 text-gray-600 font-medium text-sm touch-manipulation"
-                    onClick={() => { setEditing({ id: 0, title: '', subtitle: '', cta_text: '', cta_url: '', sort_order: 0, is_active: true } as HeroSlide); setForm({ title: '', subtitle: '', cta_text: '', cta_url: '', is_active: true }); }}
+                    onClick={() => { setEditing({ id: 0, title: '', subtitle: '', cta_text: '', cta_url: '', image_path: '', sort_order: 0, is_active: true } as HeroSlide); setForm({ title: '', subtitle: '', cta_text: '', cta_url: '', image_path: '', is_active: true }); }}
                 >
                     <Plus className="h-5 w-5" /> Add slide
                 </button>

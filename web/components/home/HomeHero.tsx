@@ -22,7 +22,7 @@ export type Slide = {
 
 // Premium e-commerce hero imagery — consistent 16:9 hero size (1920×1080) for no layout shift
 const HERO_IMAGES = [
-    'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1920&q=90', // shopping bags / retail
+    'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920&q=90', // electronics / tech products
     'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&q=90',   // delivery / shipping
     'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1920&q=90', // laptop / tech workspace
     'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1920&q=90', // camera / pro gear
