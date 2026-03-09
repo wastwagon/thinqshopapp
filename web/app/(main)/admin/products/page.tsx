@@ -43,6 +43,9 @@ export default function AdminProducts() {
         gallery: [] as string[],
         wholesale_min_quantity: '',
         wholesale_discount_pct: '',
+        short_description: '',
+        description: '',
+        specifications_json: '', // JSON text for specs (e.g. {"Screen": "14\"", "RAM": "8GB"})
         variants: [] as { variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number }[],
     });
     const [variationOptions, setVariationOptions] = useState<{ id: number; name: string; slug: string; values: { id: number; value: string }[] }[]>([]);
@@ -111,6 +114,11 @@ export default function AdminProducts() {
                 gallery: imgs.slice(1),
                 wholesale_min_quantity: String(product.wholesale_min_quantity ?? ''),
                 wholesale_discount_pct: String(product.wholesale_discount_pct ?? ''),
+                short_description: product.short_description ?? '',
+                description: product.description ?? '',
+                specifications_json: typeof product.specifications === 'object' && product.specifications != null
+                    ? JSON.stringify(product.specifications, null, 2)
+                    : '',
                 variants,
             });
         } else {
@@ -126,6 +134,9 @@ export default function AdminProducts() {
                 gallery: [],
                 wholesale_min_quantity: '',
                 wholesale_discount_pct: '',
+                short_description: '',
+                description: '',
+                specifications_json: '',
                 variants: [],
             });
         }
@@ -206,6 +217,13 @@ export default function AdminProducts() {
             if (formData.compare_price) payload.compare_price = parseFloat(formData.compare_price);
             if (formData.wholesale_min_quantity) payload.wholesale_min_quantity = parseInt(formData.wholesale_min_quantity, 10);
             if (formData.wholesale_discount_pct) payload.wholesale_discount_pct = parseFloat(formData.wholesale_discount_pct);
+            if (formData.short_description !== undefined) payload.short_description = formData.short_description.trim() || null;
+            if (formData.description !== undefined) payload.description = formData.description.trim() || null;
+            try {
+                payload.specifications = (formData.specifications_json?.trim() ? JSON.parse(formData.specifications_json) : null) as Record<string, unknown> | null;
+            } catch {
+                payload.specifications = null;
+            }
             payload.variants = (formData.variants || []).map((v) => ({
                 variant_type: v.variant_type,
                 variant_value: v.variant_value,
@@ -411,6 +429,26 @@ export default function AdminProducts() {
                                     ))}
                                 </select>
                             </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Short description</label>
+                                <input
+                                    type="text"
+                                    value={formData.short_description}
+                                    onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
+                                    placeholder="One line summary (e.g. Reliable computing for everyday tasks)"
+                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Product description / details</label>
+                                <textarea
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    placeholder="Full description, features, or HTML. Shown on the product page."
+                                    rows={4}
+                                    className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y min-h-[80px]"
+                                />
+                            </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 mb-1">Price (GHS)</label>
@@ -562,6 +600,17 @@ export default function AdminProducts() {
                                         className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                     />
                                 </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Specifications (JSON)</label>
+                                <textarea
+                                    value={formData.specifications_json}
+                                    onChange={(e) => setFormData({ ...formData, specifications_json: e.target.value })}
+                                    placeholder='{"Screen": "14\"", "RAM": "8GB", "Storage": "128GB"}'
+                                    rows={3}
+                                    className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y min-h-[60px]"
+                                />
+                                <p className="text-xs text-gray-400 mt-0.5">Key-value pairs as JSON. Shown in a table on the product page.</p>
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Featured image</label>

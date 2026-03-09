@@ -1,5 +1,30 @@
 # Production Troubleshooting
 
+## 502 Backend Unreachable (Coolify/Docker)
+
+If you see **502** or *"Backend unreachable. Is the API running on http://backend:7000?"*:
+
+1. **Backend container must be running**
+   - In Coolify: open the application → check that the **backend** service is running (not stopped or restarting).
+   - From the server: `docker ps` and confirm a container for your app’s backend is up.
+
+2. **Same Docker network**
+   - The **web** and **backend** services must be on the same Docker network so `http://backend:7000` resolves from the web container.
+   - In `docker-compose.yaml`, both services are in the same file with no custom `networks:`; Compose puts them on one network by default. If you split services or use custom networks, attach both to the same network.
+
+3. **Service name**
+   - The web app uses `BACKEND_URL=http://backend:7000`, so the backend service **name** in Compose must be `backend` (e.g. `services: backend: ...`).
+
+4. **Backend health**
+   - Backend may be starting (e.g. waiting for DB). Check backend logs in Coolify or `docker logs <backend-container>` for errors (DB connection, crash on startup). Ensure the **db** service is healthy and `DATABASE_URL` points at it (e.g. `postgresql://...@db:5432/...`).
+
+5. **Quick checks from the host**
+   - Run another container on the same network and try:  
+     `docker run --rm --network <your-app-network> curlimages/curl -s -o /dev/null -w "%{http_code}" http://backend:7000/health`  
+     (if you have a `/health` route). Or exec into the web container and `curl http://backend:7000` to confirm connectivity.
+
+---
+
 ## Protecting Production from Seed Overwrites
 
 **Seed is blocked on production by default.** Running `npm run db:seed` or `db:migrate-seed` will refuse to run if:

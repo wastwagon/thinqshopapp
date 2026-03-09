@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, IsArray, ValidateNested } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsBoolean, IsArray, IsObject, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PartialType } from '@nestjs/mapped-types';
 
@@ -37,6 +37,14 @@ export class CreateProductDto {
     @IsOptional()
     @IsString()
     description?: string;
+
+    @IsOptional()
+    @IsString()
+    short_description?: string;
+
+    @IsOptional()
+    @IsObject()
+    specifications?: Record<string, unknown>;
 
     @IsNumber()
     price: number;

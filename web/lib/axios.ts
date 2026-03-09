@@ -19,9 +19,22 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+// One-time toast for 502 so user sees "Backend unavailable" instead of only console errors
+let last502Toast = 0;
+const BACKEND_502_COOLDOWN_MS = 15000;
+
 api.interceptors.response.use(
     (res) => res,
     (error) => {
+        if (typeof window !== 'undefined' && error.response?.status === 502) {
+            const now = Date.now();
+            if (now - last502Toast > BACKEND_502_COOLDOWN_MS) {
+                last502Toast = now;
+                import('react-hot-toast').then(({ default: toast }) => {
+                    toast.error('Backend unavailable. Check that the API service is running.', { duration: 6000 });
+                });
+            }
+        }
         if (typeof window !== 'undefined' && error.response?.status === 401) {
             const isAuthRequest = error.config?.url?.includes('/auth/');
             if (!isAuthRequest) {

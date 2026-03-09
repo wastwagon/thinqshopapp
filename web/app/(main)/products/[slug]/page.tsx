@@ -188,7 +188,27 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 </span>
                             </div>
 
-                            <div className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed font-medium space-y-4 sm:space-y-6" dangerouslySetInnerHTML={{ __html: product.description || '' }} />
+                            {product.short_description && (
+                                <p className="text-sm sm:text-base text-gray-600 leading-relaxed font-medium">{product.short_description}</p>
+                            )}
+
+                            {product.description && (
+                                <div className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed font-medium space-y-4 sm:space-y-6" dangerouslySetInnerHTML={{ __html: product.description }} />
+                            )}
+
+                            {product.specifications && typeof product.specifications === 'object' && Object.keys(product.specifications).length > 0 && (
+                                <div className="rounded-2xl border border-gray-100 bg-gray-50 overflow-hidden">
+                                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest px-4 py-3 border-b border-gray-100">Specifications</h3>
+                                    <dl className="divide-y divide-gray-100">
+                                        {Object.entries(product.specifications).map(([key, value]) => (
+                                            <div key={key} className="flex flex-wrap gap-2 px-4 py-3 sm:flex-nowrap">
+                                                <dt className="text-sm font-semibold text-gray-500 min-w-[8rem]">{key}</dt>
+                                                <dd className="text-sm font-medium text-gray-900">{value != null ? String(value) : '—'}</dd>
+                                            </div>
+                                        ))}
+                                    </dl>
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-3 mb-10">
