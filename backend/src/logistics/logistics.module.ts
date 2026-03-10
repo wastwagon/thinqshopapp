@@ -4,9 +4,10 @@ import { LogisticsController } from './logistics.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { FinanceModule } from '../finance/finance.module';
+import { SmsModule } from '../sms/sms.module';
 
 @Module({
-    imports: [PrismaModule, AuthModule, FinanceModule],
+    imports: [PrismaModule, AuthModule, FinanceModule, SmsModule],
     providers: [LogisticsService],
     controllers: [LogisticsController],
     exports: [LogisticsService],

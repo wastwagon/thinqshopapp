@@ -6,6 +6,7 @@ import { PaymentMethod } from '@prisma/client';
 import { AddressService } from '../address/address.service';
 import { PaymentService } from '../finance/payment.service';
 import { EmailTemplateService } from '../email-template/email-template.service';
+import { SmsService } from '../sms/sms.service';
 
 @Injectable()
 export class OrderService {
@@ -15,6 +16,7 @@ export class OrderService {
         private addressService: AddressService,
         private paymentService: PaymentService,
         private emailTemplateService: EmailTemplateService,
+        private smsService: SmsService,
     ) { }
 
     async create(userId: number, dto: CreateOrderDto) {
@@ -112,6 +114,7 @@ export class OrderService {
 
             if (!isPaystack && finalOrder) {
                 this.queueOrderConfirmationEmail(userId, finalOrder.order_number, String(finalOrder.total));
+                this.smsService.sendToUser(userId, `Your order ${finalOrder.order_number} has been placed. Total: GHS ${finalOrder.total}. Thank you for shopping with ThinQShop!`).catch(() => {});
             }
 
             if (isPaystack) {
@@ -173,6 +176,7 @@ export class OrderService {
         });
         if (updated) {
             this.queueOrderConfirmationEmail(userId, updated.order_number, String(updated.total));
+            this.smsService.sendToUser(userId, `Payment confirmed. Your order ${updated.order_number} (GHS ${updated.total}) is being processed. Thank you!`).catch(() => {});
         }
         return updated;
     }
@@ -267,9 +271,12 @@ export class OrderService {
     }
 
     async updateOrderStatus(id: number, status: string) {
-        return this.prisma.order.update({
+        const order = await this.prisma.order.update({
             where: { id },
             data: { status: status as any },
         });
+        const statusMsg = status.replace(/_/g, ' ');
+        this.smsService.sendToUser(order.user_id, `Your order ${order.order_number} status: ${statusMsg}. Track at ThinQShop.`).catch(() => {});
+        return order;
     }
 }

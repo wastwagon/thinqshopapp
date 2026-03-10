@@ -21,6 +21,7 @@ import { ContentModule } from './content/content.module';
 import { DatabaseModule } from './database/database.module';
 import { TrackModule } from './track/track.module';
 import { VariationModule } from './variation/variation.module';
+import { SmsModule } from './sms/sms.module';
 
 @Module({
     imports: [
@@ -46,6 +47,7 @@ import { VariationModule } from './variation/variation.module';
         DatabaseModule,
         TrackModule,
         VariationModule,
+        SmsModule,
     ],
     controllers: [AppController],
     providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { WalletService } from '../finance/wallet.service';
 import { ShipmentStatus } from '@prisma/client';
 import { NotificationService } from '../notification/notification.service';
+import { SmsService } from '../sms/sms.service';
 
 @Injectable()
 export class LogisticsService implements OnModuleInit {
@@ -10,7 +11,8 @@ export class LogisticsService implements OnModuleInit {
         private prisma: PrismaService,
         @Inject(forwardRef(() => WalletService))
         private walletService: WalletService,
-        private notificationService: NotificationService
+        private notificationService: NotificationService,
+        private smsService: SmsService,
     ) { }
 
     async onModuleInit() {
@@ -120,6 +122,8 @@ export class LogisticsService implements OnModuleInit {
             message: notes || `Your shipment has advanced to ${status}. Log in to view realtime data.`,
             link: `/dashboard/logistics`
         });
+
+        this.smsService.sendToUser(shipment.user_id, `ThinQShop: Shipment ${shipment.tracking_number} - ${humanStatus}. ${notes || 'Track at ThinQShop.'}`).catch(() => {});
 
         return shipment;
     }

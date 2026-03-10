@@ -72,6 +72,16 @@ Ensure `JWT_SECRET` is set in the backend and is the same across restarts (do no
 
 ---
 
+## User SMS Notifications (Arkesel)
+
+User-facing SMS (order confirmations, order status, shipment updates, transfer confirmations) are sent via [Arkesel](https://arkesel.com). Admin notifications remain email-only.
+
+- Set **`ARKESEL_API_KEY`** in the backend environment (get it from [Arkesel Dashboard → SMS API](https://sms.arkesel.com/user/sms-api/info)).
+- Optional **`ARKESEL_SENDER_ID`** (default `ThinQShop`; max 11 characters).
+- SMS is sent only when the user has a **phone number** on their account; international numbers (including Ghana) are supported. If the key is missing or invalid, SMS is skipped without failing the request.
+
+---
+
 ## Products Not Showing
 
 ### 1. **Product limit**

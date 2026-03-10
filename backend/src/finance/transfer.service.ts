@@ -1,8 +1,8 @@
-
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WalletService } from './wallet.service';
 import { PaymentService } from './payment.service';
+import { SmsService } from '../sms/sms.service';
 import { TransferDirection, RecipientType, PaymentMethod, PaymentStatus } from '@prisma/client';
 
 @Injectable()
@@ -10,7 +10,8 @@ export class TransferService {
     constructor(
         private prisma: PrismaService,
         private walletService: WalletService,
-        private paymentService: PaymentService
+        private paymentService: PaymentService,
+        private smsService: SmsService,
     ) { }
 
     private getPaystackSecret(): string {
@@ -139,6 +140,10 @@ export class TransferService {
                 transfer.id,
                 paystackRef
             );
+        }
+
+        if (isWallet) {
+            this.smsService.sendToUser(userId, `ThinQShop Transfer: GHS ${amount_ghs} (Token: ${token}) received. We will process your transfer.`).catch(() => {});
         }
 
         return { ...transfer, paystack_reference: paystackRef };
@@ -283,6 +288,8 @@ export class TransferService {
             where: { transaction_ref: paystackReference, service_type: 'money_transfer', service_id: transferId },
             data: { status: 'success', paystack_reference: paystackReference, paystack_response: json }
         });
+
+        this.smsService.sendToUser(userId, `ThinQShop Transfer: Payment confirmed for transfer #${transferId}. We will process your transfer.`).catch(() => {});
 
         return this.prisma.moneyTransfer.findUnique({ where: { id: transferId } });
     }
