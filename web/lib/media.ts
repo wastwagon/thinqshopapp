@@ -4,13 +4,16 @@ export function getMediaBaseUrl(): string {
     return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000';
 }
 
-/** Full URL for a media path stored in DB (e.g. /media/files/xxx.jpg). */
+/** Full URL for a media path stored in DB (e.g. /media/files/xxx.jpg). Handles bare filenames. */
 export function getMediaUrl(pathOrUrl: string | null | undefined): string {
     if (!pathOrUrl) return '';
     const path = pathOrUrl.startsWith('http') ? pathOrUrl : pathOrUrl.replace(/^\/+/, '');
     if (path.startsWith('http')) return path;
     const base = getMediaBaseUrl();
     const baseClean = base.replace(/\/$/, '');
-    const pathClean = path.startsWith('/') ? path : `/${path}`;
+    // Bare filename (e.g. 1717616198_1833503_1.jpg) -> serve from /media/files/
+    const pathClean = path.includes('/') || path.startsWith('media')
+        ? (path.startsWith('/') ? path : `/${path}`)
+        : `/media/files/${path}`;
     return `${baseClean}${pathClean}`;
 }

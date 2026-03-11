@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Delete, UnauthorizedException, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, Delete, UnauthorizedException, HttpCode, HttpStatus, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -22,6 +22,15 @@ export class AuthController {
 
     @Post('register')
     async register(@Body() dto: RegisterDto) {
+        return this.authService.register(dto);
+    }
+
+    @Post('admin/register')
+    @UseGuards(AuthGuard)
+    async adminRegister(@Request() req: any, @Body() dto: RegisterDto) {
+        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
+            throw new ForbiddenException('Admin access required');
+        }
         return this.authService.register(dto);
     }
 

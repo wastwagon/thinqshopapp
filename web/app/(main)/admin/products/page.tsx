@@ -116,9 +116,13 @@ export default function AdminProducts() {
                 wholesale_discount_pct: String(product.wholesale_discount_pct ?? ''),
                 short_description: product.short_description ?? '',
                 description: product.description ?? '',
-                specifications_json: typeof product.specifications === 'object' && product.specifications != null
-                    ? JSON.stringify(product.specifications, null, 2)
-                    : '',
+                specifications_json: (() => {
+                    const s = product.specifications;
+                    if (!s || typeof s !== 'object' || Array.isArray(s)) return '';
+                    return Object.entries(s)
+                        .map(([k, v]) => `${k}: ${v == null ? '' : String(v)}`)
+                        .join('\n');
+                })(),
                 variants,
             });
         } else {
@@ -219,11 +223,29 @@ export default function AdminProducts() {
             if (formData.wholesale_discount_pct) payload.wholesale_discount_pct = parseFloat(formData.wholesale_discount_pct);
             if (formData.short_description !== undefined) payload.short_description = formData.short_description.trim() || null;
             if (formData.description !== undefined) payload.description = formData.description.trim() || null;
-            try {
-                payload.specifications = (formData.specifications_json?.trim() ? JSON.parse(formData.specifications_json) : null) as Record<string, unknown> | null;
-            } catch {
-                payload.specifications = null;
+            // Parse specifications: accept JSON object or "Key: Value" lines; only send valid object (backend rejects null)
+            let specsObj: Record<string, unknown> | null = null;
+            const raw = formData.specifications_json?.trim();
+            if (raw) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) specsObj = parsed;
+                } catch {
+                    // Try "Key: Value" lines
+                    const lines = raw.split(/\r?\n/).filter((l) => l.trim());
+                    const obj: Record<string, string> = {};
+                    for (const line of lines) {
+                        const idx = line.indexOf(':');
+                        if (idx > 0) {
+                            const k = line.slice(0, idx).trim();
+                            const v = line.slice(idx + 1).trim();
+                            if (k) obj[k] = v;
+                        }
+                    }
+                    if (Object.keys(obj).length) specsObj = obj;
+                }
             }
+            payload.specifications = specsObj && typeof specsObj === 'object' ? specsObj : {};
             payload.variants = (formData.variants || []).map((v) => ({
                 variant_type: v.variant_type,
                 variant_value: v.variant_value,
@@ -240,8 +262,10 @@ export default function AdminProducts() {
             }
             setIsModalOpen(false);
             fetchProducts();
-        } catch {
-            toast.error('Failed to save product');
+        } catch (err: any) {
+            const msg = err?.response?.data?.message ?? err?.message ?? 'Failed to save product';
+            const details = Array.isArray(err?.response?.data?.message) ? err.response.data.message.join(', ') : msg;
+            toast.error(details);
         }
     };
 
@@ -602,15 +626,15 @@ export default function AdminProducts() {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Specifications (JSON)</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Specifications</label>
                                 <textarea
                                     value={formData.specifications_json}
                                     onChange={(e) => setFormData({ ...formData, specifications_json: e.target.value })}
-                                    placeholder='{"Screen": "14\"", "RAM": "8GB", "Storage": "128GB"}'
-                                    rows={3}
-                                    className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y min-h-[60px]"
+                                    placeholder={'Screen: 14"\nRAM: 8GB\nStorage: 128GB\nProcessor: Intel Core i7'}
+                                    rows={4}
+                                    className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y min-h-[80px]"
                                 />
-                                <p className="text-xs text-gray-400 mt-0.5">Key-value pairs as JSON. Shown in a table on the product page.</p>
+                                <p className="text-xs text-gray-400 mt-0.5">One per line as <strong>Label: Value</strong>. Or valid JSON object. Shown in a table on the product page.</p>
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Featured image</label>

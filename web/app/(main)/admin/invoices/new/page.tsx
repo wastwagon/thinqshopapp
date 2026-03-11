@@ -1,20 +1,31 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FileText, Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { FileText, Plus, Trash2, ArrowLeft, Search, User } from 'lucide-react';
 
 const UNITS = ['pcs', 'kg', 'CBM', 'hour', 'box', 'set'];
+
+function displayUserName(u: any) {
+    const p = u?.profile;
+    if (p?.first_name || p?.last_name) return `${p.first_name || ''} ${p.last_name || ''}`.trim();
+    return u?.email ?? '—';
+}
 
 export default function NewInvoicePage() {
     const router = useRouter();
     const today = new Date().toISOString().slice(0, 10);
     const [rates, setRates] = useState<any[]>([]);
     const [submitting, setSubmitting] = useState(false);
+    const [customerSearch, setCustomerSearch] = useState('');
+    const [customerSearchResults, setCustomerSearchResults] = useState<any[]>([]);
+    const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
+    const [customerSearching, setCustomerSearching] = useState(false);
+    const customerSearchRef = useRef<HTMLDivElement>(null);
     const [form, setForm] = useState({
         customer_name: '',
         customer_email: '',
@@ -37,6 +48,46 @@ export default function NewInvoicePage() {
             .then(({ data }) => setRates(Array.isArray(data) ? data : []))
             .catch(() => {});
     }, []);
+
+    useEffect(() => {
+        if (!customerSearch.trim()) {
+            setCustomerSearchResults([]);
+            setCustomerSearchOpen(false);
+            return;
+        }
+        const t = setTimeout(() => {
+            setCustomerSearching(true);
+            api.get('/users/admin/list', { params: { search: customerSearch.trim(), limit: 20 } })
+                .then(({ data }) => {
+                    setCustomerSearchResults(data?.data ?? []);
+                    setCustomerSearchOpen(true);
+                })
+                .catch(() => setCustomerSearchResults([]))
+                .finally(() => setCustomerSearching(false));
+        }, 300);
+        return () => clearTimeout(t);
+    }, [customerSearch]);
+
+    useEffect(() => {
+        const onDocClick = (e: MouseEvent) => {
+            if (customerSearchRef.current && !customerSearchRef.current.contains(e.target as Node)) setCustomerSearchOpen(false);
+        };
+        document.addEventListener('click', onDocClick);
+        return () => document.removeEventListener('click', onDocClick);
+    }, []);
+
+    const selectCustomer = (u: any) => {
+        const name = displayUserName(u);
+        setForm((f) => ({
+            ...f,
+            customer_name: name || '',
+            customer_email: u?.email ?? '',
+            customer_phone: u?.phone ?? '',
+        }));
+        setCustomerSearch('');
+        setCustomerSearchOpen(false);
+        setCustomerSearchResults([]);
+    };
 
     const addLine = () => {
         setForm((f) => ({ ...f, items: [...f.items, { description: '', quantity: 1, unit: 'pcs', unit_price: '' }] }));
@@ -141,6 +192,43 @@ export default function NewInvoicePage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
                         <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Customer</h2>
+                        <div className="relative" ref={customerSearchRef}>
+                            <label className="block text-xs font-semibold text-gray-500 mb-1">Search & select existing user</label>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <input
+                                    type="text"
+                                    value={customerSearch}
+                                    onChange={(e) => setCustomerSearch(e.target.value)}
+                                    onFocus={() => customerSearchResults.length > 0 && setCustomerSearchOpen(true)}
+                                    placeholder="Type email or phone to search users..."
+                                    className="w-full h-10 pl-9 pr-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                />
+                                {customerSearching && (
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">Searching...</span>
+                                )}
+                            </div>
+                            {customerSearchOpen && customerSearchResults.length > 0 && (
+                                <ul className="absolute z-20 mt-1 w-full max-h-48 overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg py-1">
+                                    {customerSearchResults.map((u) => (
+                                        <li key={u.id}>
+                                            <button
+                                                type="button"
+                                                onClick={() => selectCustomer(u)}
+                                                className="w-full px-3 py-2.5 text-left flex items-center gap-2 hover:bg-gray-50 text-sm"
+                                            >
+                                                <User className="h-4 w-4 text-gray-400 shrink-0" />
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="font-medium text-gray-900 truncate">{displayUserName(u)}</p>
+                                                    <p className="text-xs text-gray-500 truncate">{u.email} {u.phone ? ` · ${u.phone}` : ''}</p>
+                                                </div>
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                        <p className="text-xs text-gray-500">Or enter customer details manually below.</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Name *</label>

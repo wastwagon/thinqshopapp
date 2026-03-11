@@ -116,14 +116,15 @@ export default function AdminDashboard() {
                             <p className="text-xs font-semibold text-gray-500 mb-0.5">Activity</p>
                             <p className="text-base font-bold text-gray-900">Shipments in the last 7 days</p>
                         </div>
-                        <div className="h-[200px] w-full mt-3">
+                        <div className="mt-3 w-full" style={{ minHeight: 200 }}>
                             {loading ? (
-                                <div className="h-full flex items-center justify-center text-gray-400 text-sm">Loading…</div>
+                                <div className="h-[200px] flex items-center justify-center text-gray-400 text-sm">Loading…</div>
                             ) : !hasChartData ? (
-                                <div className="h-full flex items-center justify-center text-gray-400 text-sm">No shipment data for the last 7 days</div>
+                                <div className="h-[200px] flex items-center justify-center text-gray-400 text-sm">No shipment data for the last 7 days</div>
                             ) : (
-                                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={100}>
-                                    <AreaChart data={chartData}>
+                                <div className="h-[200px] w-full">
+                                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={100}>
+                                        <AreaChart data={chartData}>
                                         <defs>
                                             <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1} />
@@ -159,7 +160,8 @@ export default function AdminDashboard() {
                                             fill="url(#colorSales)"
                                         />
                                     </AreaChart>
-                                </ResponsiveContainer>
+                                    </ResponsiveContainer>
+                                </div>
                             )}
                         </div>
                     </div>
