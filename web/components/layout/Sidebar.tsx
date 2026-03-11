@@ -32,6 +32,7 @@ import {
     Type,
     Layers,
     FileText,
+    Calculator,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -68,6 +69,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
         { name: 'Media', href: '/admin/media', icon: ImageIcon },
         { name: 'Orders', href: '/admin/orders', icon: History },
         { name: 'Invoices', href: '/admin/invoices', icon: FileText },
+        { name: 'Shipping Calculator', href: '/admin/invoices/new', icon: Calculator },
         { name: 'Invoice rates', href: '/admin/invoice-rates', icon: DollarSign },
         { name: 'Shipments', href: '/admin/logistics', icon: Package },
         { name: 'Shipping Rates', href: '/admin/shipping-rates', icon: DollarSign },

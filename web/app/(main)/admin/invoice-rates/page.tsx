@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { DollarSign, Plus, Edit3, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import { DollarSign, Plus, Edit3, Trash2, Calculator, Info } from 'lucide-react';
 
 const UNITS = ['kg', 'CBM', 'pcs', 'hour', 'box', 'set'];
 const MODES = ['', 'sea', 'air', 'standard'];
@@ -13,6 +14,7 @@ export default function AdminInvoiceRatesPage() {
     const [rates, setRates] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [unitFilter, setUnitFilter] = useState<string>('');
+    const [modeFilter, setModeFilter] = useState<string>('');
     const [activeFilter, setActiveFilter] = useState<string>('');
     const [modalOpen, setModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -28,13 +30,14 @@ export default function AdminInvoiceRatesPage() {
 
     useEffect(() => {
         fetchRates();
-    }, [unitFilter, activeFilter]);
+    }, [unitFilter, modeFilter, activeFilter]);
 
     const fetchRates = async () => {
         try {
             setLoading(true);
-            const params: { unit?: string; is_active?: string } = {};
+            const params: { unit?: string; mode?: string; is_active?: string } = {};
             if (unitFilter) params.unit = unitFilter;
+            if (modeFilter) params.mode = modeFilter;
             if (activeFilter !== '') params.is_active = activeFilter;
             const { data } = await api.get('/invoice-rates', { params });
             setRates(Array.isArray(data) ? data : []);
@@ -137,6 +140,20 @@ export default function AdminInvoiceRatesPage() {
                     </button>
                 </div>
 
+                <div className="mb-5 p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-100 flex gap-3 shadow-sm">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-100 text-blue-600 shrink-0">
+                        <Info className="h-5 w-5" />
+                    </div>
+                    <div className="text-sm text-gray-700 min-w-0">
+                        <p className="font-semibold text-gray-900 mb-1">Shipping Calculator</p>
+                        <p className="mb-2">Rates here drive the <Link href="/admin/invoices/new" className="text-blue-600 hover:text-blue-700 hover:underline font-medium inline-flex items-center gap-1"><Calculator className="h-3.5 w-3.5" /> Shipping Calculator</Link>.</p>
+                        <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                            <li><strong className="text-gray-800">Air:</strong> mode = air, unit = kg → weight × rate × quantity. Est. 3–10 days.</li>
+                            <li><strong className="text-gray-800">Sea:</strong> mode = sea, unit = CBM → volume (L×W×H in cm/m/mm) × rate × quantity. Est. 35–40 days.</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div className="flex flex-wrap gap-2 mb-4">
                     <select
                         value={unitFilter}
@@ -149,6 +166,16 @@ export default function AdminInvoiceRatesPage() {
                         ))}
                     </select>
                     <select
+                        value={modeFilter}
+                        onChange={(e) => setModeFilter(e.target.value)}
+                        className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none bg-white"
+                    >
+                        <option value="">All modes</option>
+                        <option value="air">Air</option>
+                        <option value="sea">Sea</option>
+                        <option value="standard">Standard</option>
+                    </select>
+                    <select
                         value={activeFilter}
                         onChange={(e) => setActiveFilter(e.target.value)}
                         className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none bg-white"
@@ -159,20 +186,20 @@ export default function AdminInvoiceRatesPage() {
                     </select>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-gray-50/50 border-b border-gray-50">
-                                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Name</th>
-                                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Unit</th>
-                                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Rate per unit</th>
-                                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Mode</th>
-                                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Status</th>
-                                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
+                                <tr className="bg-gray-50/80 border-b border-gray-100">
+                                    <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Unit</th>
+                                    <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Rate per unit</th>
+                                    <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Mode</th>
+                                    <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y divide-gray-100">
                                 {loading ? (
                                     <tr>
                                         <td colSpan={6} className="py-10 text-center text-gray-500 text-sm">Loading...</td>
@@ -187,19 +214,19 @@ export default function AdminInvoiceRatesPage() {
                                     </tr>
                                 ) : (
                                     rates.map((r) => (
-                                        <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
-                                            <td className="px-3 py-2.5 text-sm font-medium text-gray-900">{r.name}</td>
-                                            <td className="px-3 py-2.5 text-sm text-gray-600">{r.unit}</td>
-                                            <td className="px-3 py-2.5 text-sm font-semibold text-gray-900">
+                                        <tr key={r.id} className="hover:bg-gray-50/60 transition-colors">
+                                            <td className="px-4 py-3 text-sm font-medium text-gray-900">{r.name}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-600">{r.unit}</td>
+                                            <td className="px-4 py-3 text-sm font-semibold text-gray-900">
                                                 GHS {Number(r.rate_per_unit).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                             </td>
-                                            <td className="px-3 py-2.5 text-sm text-gray-600">{r.mode || '—'}</td>
-                                            <td className="px-3 py-2.5">
-                                                <span className={`px-2 py-0.5 text-xs font-semibold rounded-lg border ${r.is_active ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                                            <td className="px-4 py-3 text-sm text-gray-600">{r.mode || '—'}</td>
+                                            <td className="px-4 py-3">
+                                                <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg border ${r.is_active ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                                                     {r.is_active ? 'Active' : 'Inactive'}
                                                 </span>
                                             </td>
-                                            <td className="px-3 py-2.5 text-right">
+                                            <td className="px-4 py-3 text-right">
                                                 <button
                                                     type="button"
                                                     onClick={() => openEdit(r)}
@@ -227,8 +254,8 @@ export default function AdminInvoiceRatesPage() {
             </div>
 
             {modalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={closeModal}>
-                    <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={closeModal}>
+                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
                         <h2 className="text-lg font-bold text-gray-900 mb-4">{editingId ? 'Edit rate' : 'Add rate'}</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
@@ -302,11 +329,11 @@ export default function AdminInvoiceRatesPage() {
                                 <button
                                     type="submit"
                                     disabled={submitting}
-                                    className="min-h-[44px] px-6 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900 disabled:opacity-50"
+                                    className="min-h-[44px] px-6 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 disabled:opacity-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                 >
                                     {submitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
                                 </button>
-                                <button type="button" onClick={closeModal} className="min-h-[44px] px-6 border border-gray-200 rounded-lg font-semibold text-sm text-gray-700 hover:bg-gray-50">
+                                <button type="button" onClick={closeModal} className="min-h-[44px] px-6 border border-gray-200 rounded-xl font-semibold text-sm text-gray-700 hover:bg-gray-50">
                                     Cancel
                                 </button>
                             </div>

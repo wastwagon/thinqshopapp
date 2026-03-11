@@ -20,11 +20,14 @@ export class InvoiceRateService {
         });
     }
 
-    async findAll(query: { unit?: string; is_active?: string }) {
+    async findAll(query: { unit?: string; is_active?: string; mode?: string }) {
         const where: any = {};
         if (query.unit) where.unit = query.unit;
         if (query.is_active !== undefined) {
             where.is_active = query.is_active === 'true';
+        }
+        if (query.mode && query.mode.trim()) {
+            where.mode = query.mode.trim().toLowerCase();
         }
         return this.prisma.invoiceRate.findMany({
             where,

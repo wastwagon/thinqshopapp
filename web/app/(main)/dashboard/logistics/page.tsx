@@ -83,7 +83,7 @@ export default function LogisticsPage() {
     const [selectedDestinationWarehouseId, setSelectedDestinationWarehouseId] = useState<number | null>(null);
     const [carrierTracking, setCarrierTracking] = useState('');
     const [isCod, setIsCod] = useState(false);
-    const [declaredItems, setDeclaredItems] = useState([{ description: '', quantity: '' }]);
+    const [declaredItems, setDeclaredItems] = useState([{ description: '', quantity: '', value: '' }]);
     const [declarationImages, setDeclarationImages] = useState<{ file: File; preview: string }[]>([]);
     const [freightRates, setFreightRates] = useState<FreightRate[]>([]);
     const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
@@ -243,6 +243,7 @@ export default function LogisticsPage() {
                 items_declaration: declaredItems.map((i) => ({
                     description: i.description,
                     quantity: Number(i.quantity) || 1,
+                    value: i.value?.trim() || undefined,
                 })),
                 declaration_image_urls: declaration_image_urls.length ? declaration_image_urls : undefined,
                 payment_method: 'wallet',
@@ -253,7 +254,7 @@ export default function LogisticsPage() {
             declarationImages.forEach(({ preview }) => URL.revokeObjectURL(preview));
             setDeclarationImages([]);
             setCarrierTracking('');
-            setDeclaredItems([{ description: '', quantity: '' }]);
+            setDeclaredItems([{ description: '', quantity: '', value: '' }]);
             router.push(`/dashboard/logistics/success?id=${data.id}`);
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Booking failed");
@@ -471,8 +472,9 @@ Shipping Mark: (${customerId}) +${phone}`;
                             <section className="bg-gray-50/50 rounded-xl border border-gray-100 p-4">
                                 <h3 className="text-xs font-bold text-gray-500 mb-3">Items Declaration</h3>
                                 <div className="grid grid-cols-12 gap-2 mb-2 text-xs font-semibold text-gray-400">
-                                    <div className="col-span-8">Description</div>
+                                    <div className="col-span-6">Description</div>
                                     <div className="col-span-2">QTY</div>
+                                    <div className="col-span-2">Value</div>
                                     <div className="col-span-2 text-right">Action</div>
                                 </div>
                                 <div className="space-y-2">
@@ -487,7 +489,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                                     n[index].description = e.target.value;
                                                     setDeclaredItems(n);
                                                 }}
-                                                className="col-span-8 px-3 py-2.5 bg-white border border-gray-100 rounded-lg text-xs font-medium"
+                                                className="col-span-6 px-3 py-2.5 bg-white border border-gray-100 rounded-lg text-xs font-medium"
                                             />
                                             <input
                                                 type="number"
@@ -502,6 +504,17 @@ Shipping Mark: (${customerId}) +${phone}`;
                                                 }}
                                                 className="col-span-2 px-3 py-2.5 bg-white border border-gray-100 rounded-lg text-xs font-bold"
                                             />
+                                            <input
+                                                type="text"
+                                                placeholder="e.g. 100"
+                                                value={item.value}
+                                                onChange={(e) => {
+                                                    const n = [...declaredItems];
+                                                    n[index].value = e.target.value;
+                                                    setDeclaredItems(n);
+                                                }}
+                                                className="col-span-2 px-3 py-2.5 bg-white border border-gray-100 rounded-lg text-xs font-medium"
+                                            />
                                             <div className="col-span-2 flex justify-end">
                                                 {declaredItems.length > 1 ? (
                                                     <button type="button" onClick={() => setDeclaredItems(declaredItems.filter((_, i) => i !== index))} className="min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50" aria-label="Remove item"><X className="h-4 w-4" /></button>
@@ -512,7 +525,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                 </div>
                                 <button
                                     type="button"
-                                    onClick={() => setDeclaredItems([...declaredItems, { description: '', quantity: '' }])}
+                                    onClick={() => setDeclaredItems([...declaredItems, { description: '', quantity: '', value: '' }])}
                                     className="mt-2 flex items-center gap-1.5 text-xs font-bold text-blue-600"
                                 >
                                     <Plus className="h-3.5 w-3.5" /> Add item

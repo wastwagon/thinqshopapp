@@ -16,7 +16,7 @@ export class InvoiceRateController {
 
     @Get()
     @UseGuards(AuthGuard)
-    async findAll(@Request() req: any, @Query() query: { unit?: string; is_active?: string }) {
+    async findAll(@Request() req: any, @Query() query: { unit?: string; is_active?: string; mode?: string }) {
         this.guardAdmin(req);
         return this.invoiceRateService.findAll(query);
     }

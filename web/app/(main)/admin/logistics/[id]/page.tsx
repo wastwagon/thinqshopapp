@@ -62,7 +62,7 @@ interface Shipment {
     tracking?: ShipmentTracking[];
     pickup_address?: Address | null;
     delivery_address?: Address | null;
-    items_declaration?: Array<{ description?: string; quantity?: number }> | null;
+    items_declaration?: Array<{ description?: string; quantity?: number; value?: string }> | null;
     declaration_image_urls?: string[] | null;
 }
 
@@ -229,7 +229,7 @@ export default function AdminShipmentDetailPage() {
                                                 <p className="text-xs font-medium text-gray-500 mb-2">Declared items</p>
                                                 <ul className="space-y-1 text-sm text-gray-800">
                                                     {(shipment.items_declaration as any[]).map((item: any, i: number) => (
-                                                        <li key={i}>{item.description || '—'} × {Number(item.quantity) || 1}</li>
+                                                        <li key={i}>{item.description || '—'} × {Number(item.quantity) || 1}{item.value ? ` (Value: ${item.value})` : ''}</li>
                                                     ))}
                                                 </ul>
                                             </div>
