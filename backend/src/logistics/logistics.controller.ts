@@ -1,6 +1,11 @@
-import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseGuards, Request, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseGuards, Request, ForbiddenException, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { LogisticsService } from './logistics.service';
 import { AuthGuard } from '../auth/auth.guard';
+
+const MAX_DECLARATION_FILE = 5 * 1024 * 1024;
+const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 @Controller('logistics')
 export class LogisticsController {
@@ -10,6 +15,23 @@ export class LogisticsController {
     @UseGuards(AuthGuard)
     async bookShipment(@Request() req, @Body() body: any) {
         return this.logisticsService.bookShipment(req.user.sub, body);
+    }
+
+    @Post('upload-declaration-image')
+    @UseGuards(AuthGuard)
+    @UseInterceptors(
+        FileInterceptor('file', {
+            storage: memoryStorage(),
+            limits: { fileSize: MAX_DECLARATION_FILE },
+            fileFilter: (_req, file, cb) => {
+                if (file.mimetype && ALLOWED_MIMES.includes(file.mimetype)) cb(null, true);
+                else cb(new Error('Invalid type. Use JPEG, PNG, GIF or WebP'), false);
+            },
+        }),
+    )
+    async uploadDeclarationImage(@Request() req: any, @UploadedFile() file: Express.Multer.File) {
+        if (!file) throw new BadRequestException('No file uploaded');
+        return this.logisticsService.uploadDeclarationImage(file);
     }
 
     @Get('history')

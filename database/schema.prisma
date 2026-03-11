@@ -559,7 +559,8 @@ model Shipment {
   shipping_rate_id         String?      @db.VarChar(50) // e.g. air_express, sea_standard
   is_cod                   Boolean      @default(false)
   items_declaration        Json?        // Array of declared items
-  
+  declaration_image_urls  Json?        // Array of image URLs uploaded by user for admin
+
   notes              String?
   created_at         DateTime       @default(now())
   updated_at         DateTime       @updatedAt
@@ -901,6 +902,75 @@ model HomepageSection {
   updated_at  DateTime @updatedAt
 
   @@map("homepage_sections")
+}
+
+// --- INVOICE TABLES (Admin) ---
+
+enum InvoiceStatus {
+  draft
+  sent
+  paid
+  overdue
+}
+
+model Invoice {
+  id                 Int          @id @default(autoincrement())
+  invoice_number     String       @unique @db.VarChar(50)
+  status             InvoiceStatus @default(draft)
+  issue_date         DateTime     @db.Date
+  due_date           DateTime     @db.Date
+  customer_name      String       @db.VarChar(255)
+  customer_email     String       @db.VarChar(255)
+  customer_phone     String?      @db.VarChar(50)
+  customer_address   String?      @db.VarChar(500)
+  subtotal           Decimal     @db.Decimal(12, 2)
+  discount_amount    Decimal     @default(0) @db.Decimal(12, 2)
+  discount_percent   Decimal?    @db.Decimal(5, 2)
+  tax_rate           Decimal?   @db.Decimal(5, 2)
+  tax_amount         Decimal    @default(0) @db.Decimal(12, 2)
+  total              Decimal    @db.Decimal(12, 2)
+  currency           String    @default("GHS") @db.VarChar(10)
+  notes              String?   @db.VarChar(1000)
+  created_by         Int?     // admin user_id
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  items              InvoiceLineItem[]
+
+  @@index([status])
+  @@index([issue_date])
+  @@map("invoices")
+}
+
+model InvoiceLineItem {
+  id          Int     @id @default(autoincrement())
+  invoice_id  Int
+  description String @db.VarChar(500)
+  quantity    Decimal @db.Decimal(12, 3)
+  unit        String  @db.VarChar(20)  // pcs, kg, CBM, hour
+  unit_price  Decimal @db.Decimal(12, 2)
+  line_total  Decimal @db.Decimal(12, 2)
+  sort_order  Int     @default(0)
+
+  invoice     Invoice @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+
+  @@map("invoice_line_items")
+}
+
+model InvoiceRate {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(255)
+  unit          String   @db.VarChar(20)   // kg, CBM, pcs, hour
+  rate_per_unit Decimal  @db.Decimal(12, 2)
+  mode          String?  @db.VarChar(20)   // sea, air, standard
+  sort_order    Int      @default(0)
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@index([unit])
+  @@index([is_active])
+  @@map("invoice_rates")
 }
 
 // --- NOTIFICATION TABLES ---

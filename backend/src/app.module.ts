@@ -22,6 +22,7 @@ import { DatabaseModule } from './database/database.module';
 import { TrackModule } from './track/track.module';
 import { VariationModule } from './variation/variation.module';
 import { SmsModule } from './sms/sms.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
     imports: [
@@ -48,6 +49,7 @@ import { SmsModule } from './sms/sms.module';
         TrackModule,
         VariationModule,
         SmsModule,
+        InvoiceModule,
     ],
     controllers: [AppController],
     providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

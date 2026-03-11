@@ -62,6 +62,8 @@ interface Shipment {
     tracking?: ShipmentTracking[];
     pickup_address?: Address | null;
     delivery_address?: Address | null;
+    items_declaration?: Array<{ description?: string; quantity?: number }> | null;
+    declaration_image_urls?: string[] | null;
 }
 
 function formatAddress(addr: Address | null | undefined): string {
@@ -212,6 +214,42 @@ export default function AdminShipmentDetailPage() {
                                             </li>
                                         ))}
                                     </ul>
+                                </div>
+                            )}
+
+                            {/* Items declaration + images */}
+                            {((shipment.items_declaration && (shipment.items_declaration as any[]).length > 0) || (shipment.declaration_image_urls && (shipment.declaration_image_urls as string[]).length > 0)) && (
+                                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                                    <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
+                                        <h3 className="text-sm font-semibold text-gray-900">Items declaration</h3>
+                                    </div>
+                                    <div className="px-4 py-4 space-y-4">
+                                        {shipment.items_declaration && (shipment.items_declaration as any[]).length > 0 && (
+                                            <div>
+                                                <p className="text-xs font-medium text-gray-500 mb-2">Declared items</p>
+                                                <ul className="space-y-1 text-sm text-gray-800">
+                                                    {(shipment.items_declaration as any[]).map((item: any, i: number) => (
+                                                        <li key={i}>{item.description || '—'} × {Number(item.quantity) || 1}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        {shipment.declaration_image_urls && (shipment.declaration_image_urls as string[]).length > 0 && (
+                                            <div>
+                                                <p className="text-xs font-medium text-gray-500 mb-2">Package / item images</p>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {(shipment.declaration_image_urls as string[]).map((url, i) => {
+                                                        const fullUrl = url.startsWith('http') ? url : `${process.env.NEXT_PUBLIC_API_URL || ''}${url}`;
+                                                        return (
+                                                            <a key={i} href={fullUrl} target="_blank" rel="noopener noreferrer" className="block">
+                                                                <img src={fullUrl} alt="" className="w-24 h-24 object-cover rounded-lg border border-gray-200 hover:border-blue-400" />
+                                                            </a>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 

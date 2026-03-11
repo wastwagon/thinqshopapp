@@ -167,23 +167,42 @@ export class ProductService {
     }
 
     async getReviewsAdmin(query: { page?: number; limit?: number; product_id?: number; is_approved?: string }) {
-        const { page = 1, limit = 50, product_id, is_approved } = query;
-        const skip = (page - 1) * limit;
+        const pageNum = Math.max(1, Number(query.page) || 1);
+        const limitNum = Math.min(100, Math.max(1, Number(query.limit) || 50));
+        const skip = (pageNum - 1) * limitNum;
         const where: any = {};
-        if (product_id != null) where.product_id = Number(product_id);
-        if (is_approved === 'true') where.is_approved = true;
-        if (is_approved === 'false') where.is_approved = false;
+        if (query.product_id != null) where.product_id = Number(query.product_id);
+        if (query.is_approved === 'true') where.is_approved = true;
+        if (query.is_approved === 'false') where.is_approved = false;
         const [reviews, total] = await Promise.all([
             this.prisma.productReview.findMany({
                 where,
                 include: { product: { select: { id: true, name: true, slug: true } }, user: { select: { id: true, email: true, profile: { select: { first_name: true, last_name: true } } } } },
                 orderBy: { created_at: 'desc' },
                 skip,
-                take: limit,
+                take: limitNum,
             }),
             this.prisma.productReview.count({ where }),
         ]);
-        return { data: reviews, meta: { total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / limit) } };
+        const totalPages = limitNum > 0 ? Math.ceil(total / limitNum) : 0;
+        return {
+            data: reviews.map((r) => ({
+                id: r.id,
+                product_id: r.product_id,
+                user_id: r.user_id,
+                order_id: r.order_id,
+                rating: r.rating,
+                review_text: r.review_text,
+                review_images: r.review_images,
+                display_name: r.display_name,
+                is_approved: r.is_approved,
+                created_at: r.created_at.toISOString ? r.created_at.toISOString() : r.created_at,
+                updated_at: r.updated_at.toISOString ? r.updated_at.toISOString() : r.updated_at,
+                product: r.product,
+                user: r.user,
+            })),
+            meta: { total, page: pageNum, limit: limitNum, totalPages },
+        };
     }
 
     async updateReviewAdmin(reviewId: number, dto: { is_approved?: boolean; rating?: number; review_text?: string }) {

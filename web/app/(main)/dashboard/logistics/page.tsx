@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
-import { Truck, CheckCircle, Plus, Copy, Camera, History as HistoryIcon, RefreshCw, Package } from 'lucide-react';
+import { Truck, CheckCircle, Plus, Copy, Camera, History as HistoryIcon, RefreshCw, Package, ChevronDown, ImagePlus, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -83,9 +83,11 @@ export default function LogisticsPage() {
     const [selectedDestinationWarehouseId, setSelectedDestinationWarehouseId] = useState<number | null>(null);
     const [carrierTracking, setCarrierTracking] = useState('');
     const [isCod, setIsCod] = useState(false);
-    const [declaredItems, setDeclaredItems] = useState([{ description: '', value: '', quantity: '' }]);
+    const [declaredItems, setDeclaredItems] = useState([{ description: '', quantity: '' }]);
+    const [declarationImages, setDeclarationImages] = useState<{ file: File; preview: string }[]>([]);
     const [freightRates, setFreightRates] = useState<FreightRate[]>([]);
     const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
+    const [rateDropdownOpen, setRateDropdownOpen] = useState(false);
     const [scannerOpen, setScannerOpen] = useState(false);
 
     // China warehouse: match by country or known code (CN-GZ-001)
@@ -219,6 +221,16 @@ export default function LogisticsPage() {
 
         setIsBooking(true);
         try {
+            const declaration_image_urls: string[] = [];
+            for (const { file } of declarationImages) {
+                const formData = new FormData();
+                formData.append('file', file);
+                const up = await api.post<{ url: string }>('/logistics/upload-declaration-image', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+                if (up.data?.url) declaration_image_urls.push(up.data.url);
+            }
+
             const payload = {
                 type: 'freight_forwarding',
                 origin_warehouse_id: originId,
@@ -230,17 +242,18 @@ export default function LogisticsPage() {
                 weight: weight,
                 items_declaration: declaredItems.map((i) => ({
                     description: i.description,
-                    value: i.value,
                     quantity: Number(i.quantity) || 1,
                 })),
+                declaration_image_urls: declaration_image_urls.length ? declaration_image_urls : undefined,
                 payment_method: 'wallet',
                 notes: notes
             };
 
             const { data } = await api.post('/logistics/book', payload);
-            // Reset fields
+            declarationImages.forEach(({ preview }) => URL.revokeObjectURL(preview));
+            setDeclarationImages([]);
             setCarrierTracking('');
-            setDeclaredItems([{ description: '', value: '', quantity: '' }]);
+            setDeclaredItems([{ description: '', quantity: '' }]);
             router.push(`/dashboard/logistics/success?id=${data.id}`);
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Booking failed");
@@ -347,22 +360,64 @@ Shipping Mark: (${customerId}) +${phone}`;
                                         ))}
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="text-xs font-bold text-gray-400  block mb-2">Select Rate</label>
-                                    <select
-                                        value={selectedRateId ?? ''}
-                                        onChange={(e) => setSelectedRateId(e.target.value || null)}
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                <div className="relative">
+                                    <label className="text-xs font-bold text-gray-400 block mb-2">Select Rate</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setRateDropdownOpen((o) => !o)}
+                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-left flex items-center justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                     >
-                                        <option value="">— Select Rate —</option>
-                                        {freightRates.map((r) => {
-                                            const price = Number(r.price);
-                                            const unit = r.type === 'KG' ? '/kg' : r.type === 'UNIT' ? '/unit' : '/CBM';
-                                            const sym = rateSymbol(r);
-                                            const label = r.duration ? `${r.name} (${r.duration}) - ${sym}${price.toFixed(0)}${unit}` : `${r.name} - ${sym}${price.toFixed(0)}${unit}`;
-                                            return <option key={r.id} value={r.rate_id}>{label}</option>;
-                                        })}
-                                    </select>
+                                        <span className="text-xs font-medium text-gray-700 truncate">
+                                            {selectedRateId
+                                                ? (() => {
+                                                    const r = freightRates.find((x) => x.rate_id === selectedRateId);
+                                                    if (!r) return '— Select Rate —';
+                                                    const price = Number(r.price);
+                                                    const unit = r.type === 'KG' ? '/kg' : r.type === 'UNIT' ? '/unit' : '/CBM';
+                                                    const sym = rateSymbol(r);
+                                                    return r.duration ? `${r.name} (${r.duration}) · ${sym}${price.toFixed(0)}${unit}` : `${r.name} · ${sym}${price.toFixed(0)}${unit}`;
+                                                })()
+                                                : '— Select Rate —'}
+                                        </span>
+                                        <ChevronDown className={`h-3.5 w-3.5 text-gray-400 shrink-0 transition-transform ${rateDropdownOpen ? 'rotate-180' : ''}`} />
+                                    </button>
+                                    {rateDropdownOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-10" aria-hidden onClick={() => setRateDropdownOpen(false)} />
+                                            <div className="absolute z-20 mt-1 w-full rounded-xl border border-gray-100 bg-white shadow-lg py-1 max-h-56 overflow-auto">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setSelectedRateId(null); setRateDropdownOpen(false); }}
+                                                    className={`w-full px-3 py-2 text-left flex items-center justify-between gap-2 ${!selectedRateId ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                                                >
+                                                    <span className="text-xs text-gray-500">— Select Rate —</span>
+                                                    {!selectedRateId && <CheckCircle className="h-3.5 w-3.5 text-blue-600 shrink-0" />}
+                                                </button>
+                                                {freightRates.map((r) => {
+                                                    const price = Number(r.price);
+                                                    const unit = r.type === 'KG' ? '/kg' : r.type === 'UNIT' ? '/unit' : '/CBM';
+                                                    const sym = rateSymbol(r);
+                                                    const isSelected = selectedRateId === r.rate_id;
+                                                    return (
+                                                        <button
+                                                            key={r.id}
+                                                            type="button"
+                                                            onClick={() => { setSelectedRateId(r.rate_id); setRateDropdownOpen(false); }}
+                                                            className={`w-full px-3 py-2 text-left flex items-center justify-between gap-2 transition-colors ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                                                        >
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="text-xs font-medium text-gray-900 truncate">{r.name}</p>
+                                                                <p className="text-[11px] text-gray-500 mt-0.5">
+                                                                    {r.duration ? `${r.duration} · ` : ''}{sym}{price.toFixed(0)}{unit}
+                                                                </p>
+                                                            </div>
+                                                            {isSelected && <CheckCircle className="h-3.5 w-3.5 text-blue-600 shrink-0" />}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </>
+                                    )}
                                     {ratesError && (
                                         <p className="text-xs text-amber-600 mt-1.5 font-medium">{ratesError}</p>
                                     )}
@@ -414,11 +469,11 @@ Shipping Mark: (${customerId}) +${phone}`;
 
                             {/* Items declaration */}
                             <section className="bg-gray-50/50 rounded-xl border border-gray-100 p-4">
-                                <h3 className="text-xs font-bold text-gray-500  mb-3">Items Declaration</h3>
-                                <div className="grid grid-cols-12 gap-2 mb-2 text-xs font-black text-gray-400 ">
-                                    <div className="col-span-6">Description</div>
+                                <h3 className="text-xs font-bold text-gray-500 mb-3">Items Declaration</h3>
+                                <div className="grid grid-cols-12 gap-2 mb-2 text-xs font-semibold text-gray-400">
+                                    <div className="col-span-8">Description</div>
                                     <div className="col-span-2">QTY</div>
-                                    <div className="col-span-3">Value (¥)</div>
+                                    <div className="col-span-2 text-right">Action</div>
                                 </div>
                                 <div className="space-y-2">
                                     {declaredItems.map((item, index) => (
@@ -432,7 +487,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                                     n[index].description = e.target.value;
                                                     setDeclaredItems(n);
                                                 }}
-                                                className="col-span-6 px-3 py-2.5 bg-white border border-gray-100 rounded-lg text-xs font-medium"
+                                                className="col-span-8 px-3 py-2.5 bg-white border border-gray-100 rounded-lg text-xs font-medium"
                                             />
                                             <input
                                                 type="number"
@@ -442,38 +497,72 @@ Shipping Mark: (${customerId}) +${phone}`;
                                                 value={item.quantity}
                                                 onChange={(e) => {
                                                     const n = [...declaredItems];
-                                                    const v = e.target.value;
-                                                    n[index].quantity = v;
+                                                    n[index].quantity = e.target.value;
                                                     setDeclaredItems(n);
                                                 }}
                                                 className="col-span-2 px-3 py-2.5 bg-white border border-gray-100 rounded-lg text-xs font-bold"
                                             />
-                                            <div className="col-span-3 flex gap-1">
-                                                <input
-                                                    type="text"
-                                                    placeholder="¥"
-                                                    value={item.value}
-                                                    onChange={(e) => {
-                                                        const n = [...declaredItems];
-                                                        n[index].value = e.target.value;
-                                                        setDeclaredItems(n);
-                                                    }}
-                                                    className="flex-1 px-3 py-2.5 bg-white border border-gray-100 rounded-lg text-xs font-bold"
-                                                />
-                                                {declaredItems.length > 1 && (
-                                                    <button type="button" onClick={() => setDeclaredItems(declaredItems.filter((_, i) => i !== index))} className="min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50" aria-label="Remove item">×</button>
-                                                )}
+                                            <div className="col-span-2 flex justify-end">
+                                                {declaredItems.length > 1 ? (
+                                                    <button type="button" onClick={() => setDeclaredItems(declaredItems.filter((_, i) => i !== index))} className="min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50" aria-label="Remove item"><X className="h-4 w-4" /></button>
+                                                ) : null}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                                 <button
                                     type="button"
-                                    onClick={() => setDeclaredItems([...declaredItems, { description: '', value: '', quantity: '' }])}
-                                    className="mt-2 flex items-center gap-1.5 text-xs font-bold text-blue-600 "
+                                    onClick={() => setDeclaredItems([...declaredItems, { description: '', quantity: '' }])}
+                                    className="mt-2 flex items-center gap-1.5 text-xs font-bold text-blue-600"
                                 >
                                     <Plus className="h-3.5 w-3.5" /> Add item
                                 </button>
+
+                                {/* Package / item images upload */}
+                                <div className="mt-4 pt-4 border-t border-gray-100">
+                                    <p className="text-xs font-bold text-gray-500 mb-2">Package / item images</p>
+                                    <p className="text-[11px] text-gray-400 mb-2">Upload photos of your items. These will be sent to admin with your shipment.</p>
+                                    <input
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/gif,image/webp"
+                                        multiple
+                                        className="hidden"
+                                        id="declaration-images-input"
+                                        onChange={(e) => {
+                                            const files = Array.from(e.target.files || []);
+                                            if (!files.length) return;
+                                            const newEntries = files.map((file) => ({ file, preview: URL.createObjectURL(file) }));
+                                            setDeclarationImages((prev) => [...prev, ...newEntries]);
+                                            e.target.value = '';
+                                        }}
+                                    />
+                                    <label
+                                        htmlFor="declaration-images-input"
+                                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
+                                    >
+                                        <ImagePlus className="h-4 w-4" /> Select images (multiple)
+                                    </label>
+                                    {declarationImages.length > 0 && (
+                                        <div className="mt-3 flex flex-wrap gap-2">
+                                            {declarationImages.map((entry, idx) => (
+                                                <div key={idx} className="relative group">
+                                                    <img src={entry.preview} alt="" className="w-20 h-20 object-cover rounded-lg border border-gray-200" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            URL.revokeObjectURL(entry.preview);
+                                                            setDeclarationImages((prev) => prev.filter((_, i) => i !== idx));
+                                                        }}
+                                                        className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center opacity-90 group-hover:opacity-100 shadow"
+                                                        aria-label="Remove image"
+                                                    >
+                                                        <X className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </section>
 
                             {/* Estimated cost summary */}

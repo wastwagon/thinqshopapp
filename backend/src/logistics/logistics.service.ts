@@ -4,6 +4,8 @@ import { WalletService } from '../finance/wallet.service';
 import { ShipmentStatus } from '@prisma/client';
 import { NotificationService } from '../notification/notification.service';
 import { SmsService } from '../sms/sms.service';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 @Injectable()
 export class LogisticsService implements OnModuleInit {
@@ -38,6 +40,19 @@ export class LogisticsService implements OnModuleInit {
         return this.prisma.warehouse.findMany({
             where: { is_active: true }
         });
+    }
+
+    /** Save declaration image for shipment; returns public URL. */
+    async uploadDeclarationImage(file: Express.Multer.File): Promise<{ url: string }> {
+        if (!file?.buffer) throw new BadRequestException('No file uploaded');
+        const dir = path.join(process.cwd(), 'uploads', 'shipment-declarations');
+        await fs.mkdir(dir, { recursive: true });
+        const ext = path.extname(file.originalname || '') || '.jpg';
+        const filename = `decl-${Date.now()}-${Math.random().toString(36).slice(2, 10)}${ext}`.toLowerCase();
+        const filePath = path.join(dir, filename);
+        await fs.writeFile(filePath, file.buffer);
+        const url = `/media/shipment-declarations/${filename}`;
+        return { url };
     }
 
     // ... (rest of the file)
@@ -234,6 +249,7 @@ export class LogisticsService implements OnModuleInit {
                 shipping_method: isFreightForwarding ? dto.shipping_method : null,
                 shipping_rate_id: isFreightForwarding ? (dto.shipping_rate_id || null) : null,
                 is_cod: dto.is_cod || false,
+                declaration_image_urls: Array.isArray(dto.declaration_image_urls) ? dto.declaration_image_urls : null,
             }
         });
     }
