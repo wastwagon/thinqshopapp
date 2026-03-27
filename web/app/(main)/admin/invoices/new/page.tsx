@@ -396,7 +396,7 @@ export default function ShippingCalculatorPage() {
                                             ))}
                                         </select>
                                         {ratesForMode.length === 0 && (
-                                            <p className="text-xs text-amber-600">No air rates. Add invoice rates with mode &quot;air&quot; in Invoice rates.</p>
+                                            <p className="text-xs text-orange-600">No air rates. Add invoice rates with mode &quot;air&quot; in Invoice rates.</p>
                                         )}
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
@@ -442,7 +442,7 @@ export default function ShippingCalculatorPage() {
                                             ))}
                                         </select>
                                         {ratesForMode.length === 0 && (
-                                            <p className="text-xs text-amber-600">No sea rates. Add invoice rates with mode &quot;sea&quot; and unit CBM in Invoice rates.</p>
+                                            <p className="text-xs text-orange-600">No sea rates. Add invoice rates with mode &quot;sea&quot; and unit CBM in Invoice rates.</p>
                                         )}
                                     </div>
                                     <div className="mt-4 pt-4 border-t border-gray-100">
@@ -531,7 +531,7 @@ export default function ShippingCalculatorPage() {
 
                             {/* Result */}
                             {(calculationText || calculatedTotal != null) && (
-                                <div className="mt-5 p-5 rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50/80 border border-orange-100 space-y-2">
+                                <div className="mt-5 p-5 rounded-2xl bg-gradient-to-br from-orange-50 to-orange-50/80 border border-orange-100 space-y-2">
                                     {calculationText && <p className="text-sm text-gray-700"><span className="font-semibold text-gray-900">Calculation:</span> {calculationText}</p>}
                                     {estDelivery && <p className="text-sm text-gray-600"><span className="font-semibold text-gray-800">Est. delivery:</span> {estDelivery}</p>}
                                     {calculatedTotal != null && (

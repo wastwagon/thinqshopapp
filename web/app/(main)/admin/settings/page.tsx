@@ -150,7 +150,7 @@ export default function AdminSettings() {
 
                     <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
                         <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2.5 mb-3">
-                            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center text-amber-500 border border-amber-100">
+                            <div className="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500 border border-orange-100">
                                 <Zap className="h-4 w-4" />
                             </div>
                             Safety & access

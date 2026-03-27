@@ -107,7 +107,7 @@ export default function AdminProcurementPage() {
 
     const StatusBadge = ({ status }: { status: string }) => {
         const colors: Record<string, string> = {
-            submitted: 'bg-amber-50 text-amber-700 border-amber-200',
+            submitted: 'bg-orange-50 text-orange-700 border-orange-200',
             quote_provided: 'bg-blue-50 text-blue-700 border-blue-200',
             accepted: 'bg-green-50 text-green-700 border-green-200',
             payment_received: 'bg-indigo-50 text-indigo-700 border-indigo-200',
@@ -124,7 +124,7 @@ export default function AdminProcurementPage() {
 
     const stats = [
         { label: 'Total', value: requests.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-        { label: 'Pending', value: pending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+        { label: 'Pending', value: pending, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'In progress', value: inProgress, icon: Package, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
         { label: 'Delivered', value: delivered, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' }
     ];

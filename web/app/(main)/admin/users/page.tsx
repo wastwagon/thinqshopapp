@@ -105,7 +105,7 @@ export default function AdminUsers() {
 
     const stats = [
         { label: 'Total', value: users.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-        { label: 'Admins', value: users.filter((u) => u.role === 'admin' || u.role === 'superadmin').length, icon: Shield, color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-100' },
+        { label: 'Admins', value: users.filter((u) => u.role === 'admin' || u.role === 'superadmin').length, icon: Shield, color: 'text-orange-500', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'Active', value: users.filter((u) => u.is_active !== false).length, icon: Activity, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
     ];
 

@@ -78,7 +78,7 @@ export default function AdminDashboard() {
 
     const statCards = [
         { label: 'Shipments', value: loading ? '—' : stats.totalShipments, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-        { label: 'Pending transfers', value: loading ? '—' : stats.pendingTransfers, icon: Send, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+        { label: 'Pending transfers', value: loading ? '—' : stats.pendingTransfers, icon: Send, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'Procurement requests', value: loading ? '—' : stats.pendingRequests, icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
         { label: 'Status', value: 'Operational', icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
     ];

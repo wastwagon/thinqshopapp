@@ -420,7 +420,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                         </>
                                     )}
                                     {ratesError && (
-                                        <p className="text-xs text-amber-600 mt-1.5 font-medium">{ratesError}</p>
+                                        <p className="text-xs text-orange-600 mt-1.5 font-medium">{ratesError}</p>
                                     )}
                                 </div>
                             </section>

@@ -19,7 +19,7 @@ export default function ErrorPage({
     const message = isProd ? 'An unexpected error occurred. Please try again or go back home.' : (error.message || 'An unexpected error occurred.');
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-amber-50/30 px-6 font-sans">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-orange-50/30 px-6 font-sans">
             <h1 className="text-4xl font-black bg-gradient-to-r from-slate-900 to-brand bg-clip-text text-transparent mb-4 tracking-tighter">Something went wrong</h1>
             <p className="text-slate-600 mb-8 max-w-md text-center">{message}</p>
             <div className="flex flex-col sm:flex-row gap-4">

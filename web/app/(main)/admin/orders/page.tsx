@@ -66,7 +66,7 @@ export default function AdminOrdersPage() {
 
     const stats = [
         { label: 'Total', value: orders.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-        { label: 'Pending', value: pendingCount, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+        { label: 'Pending', value: pendingCount, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'In progress', value: processingCount, icon: Truck, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
         { label: 'Delivered', value: deliveredCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
         { label: 'Cancelled', value: cancelledCount, icon: XCircle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100' },
@@ -74,7 +74,7 @@ export default function AdminOrdersPage() {
 
     const StatusBadge = ({ status }: { status: string }) => {
         const colors: Record<string, string> = {
-            pending: 'bg-amber-50 text-amber-700 border-amber-200',
+            pending: 'bg-orange-50 text-orange-700 border-orange-200',
             processing: 'bg-blue-50 text-blue-700 border-blue-200',
             packed: 'bg-indigo-50 text-indigo-700 border-indigo-200',
             shipped: 'bg-purple-50 text-purple-700 border-purple-200',

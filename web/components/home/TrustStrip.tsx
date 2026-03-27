@@ -34,7 +34,7 @@ export default function TrustStrip({ badges }: { badges: Badge[] }) {
                     {list.map((b) => {
                         const Icon = ICON_MAP[b.icon] ?? Star;
                         const content = (
-                            <span className="flex items-center gap-3 min-w-[200px] sm:min-w-[220px] md:min-w-0 flex-1 p-3 rounded-xl bg-gradient-to-br from-amber-50/90 to-slate-50 border border-gray-100/90 hover:border-brand/25 hover:shadow-sm transition-all whitespace-nowrap">
+                            <span className="flex items-center gap-3 min-w-[200px] sm:min-w-[220px] md:min-w-0 flex-1 p-3 rounded-xl bg-gradient-to-br from-orange-50/90 to-slate-50 border border-gray-100/90 hover:border-brand/25 hover:shadow-sm transition-all whitespace-nowrap">
                                 <span className="flex-shrink-0 w-10 h-10 rounded-lg bg-brand/12 ring-1 ring-brand/15 flex items-center justify-center text-brand">
                                     <Icon className="w-5 h-5" aria-hidden />
                                 </span>

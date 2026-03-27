@@ -158,7 +158,7 @@ export default function BarcodeScanner({ open, onClose, onScan }: BarcodeScanner
                     </>
                 ) : (
                     <div className="p-4 bg-gray-50 space-y-4 overflow-y-auto">
-                        <p className="text-sm text-amber-700">{error}</p>
+                        <p className="text-sm text-orange-700">{error}</p>
 
                         <div>
                             <label className="text-xs font-semibold text-gray-700 flex items-center gap-1.5 mb-2">

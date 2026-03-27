@@ -110,14 +110,14 @@ export default function AdminLogisticsPage() {
 
     const stats = [
         { label: 'Total', value: shipments.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-        { label: 'Booked', value: bookedCount, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+        { label: 'Booked', value: bookedCount, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'In transit', value: inTransitCount, icon: Truck, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
         { label: 'Delivered', value: deliveredCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
     ];
 
     const StatusBadge = ({ status }: { status: string }) => {
         const colors: Record<string, string> = {
-            booked: 'bg-amber-50 text-amber-700 border-amber-200',
+            booked: 'bg-orange-50 text-orange-700 border-orange-200',
             pickup_scheduled: 'bg-blue-50 text-blue-700 border-blue-200',
             picked_up: 'bg-indigo-50 text-indigo-700 border-indigo-200',
             in_transit: 'bg-purple-50 text-purple-700 border-purple-200',

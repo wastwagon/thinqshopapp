@@ -74,7 +74,7 @@ export default function RegisterPage() {
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(59,130,246,0.15),transparent)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_80%_50%,rgba(99,102,241,0.08),transparent)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_20%_80%,rgba(59,130,246,0.06),transparent)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_55%_at_60%_75%,rgba(245,158,11,0.12),transparent)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_55%_at_60%_75%,rgba(249,115,22,0.12),transparent)]" />
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
 
                 <motion.div

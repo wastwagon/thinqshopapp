@@ -183,7 +183,7 @@ export default function AdminProcurementDetailPage() {
                                     {request.request_type}
                                 </span>
                             )}
-                            <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 capitalize">
+                            <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-orange-50 text-orange-700 capitalize">
                                 {request.status.replace(/_/g, ' ')}
                             </span>
                             <select

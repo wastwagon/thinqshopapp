@@ -27,13 +27,14 @@
 
     /* Brand-specific colors */
     --blueblack: 222 47% 11%;
-    /* Bright accent: amber — warm contrast with blue-black; strong on CTAs & highlights */
-    --brand: 38 92% 50%;
-    --brand-foreground: 26 90% 9%;
-    --brand-muted: 38 60% 94%;
-    --brand-subtle: 45 80% 96%;
+    /* Bright accent: orange — warm contrast with blue-black; strong on CTAs & highlights */
+    --brand: 24 95% 53%;
+    --brand-foreground: 20 90% 9%;
+    --brand-muted: 24 55% 94%;
+    --brand-subtle: 24 70% 97%;
     --sale: 0 84.2% 60.2%;
-    --rating: 38 92% 50%;
+    /* Star / rating tint (distinct from brand orange) */
+    --rating: 43 96% 56%;
     --category: 215 25% 27%;
 
     /* Premium tokens */

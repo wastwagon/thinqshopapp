@@ -20,7 +20,7 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
     const list = testimonials?.length ? testimonials : FALLBACK_TESTIMONIALS;
     if (!list.length) return null;
     return (
-        <section className="py-8 sm:py-12 border-y border-gray-100/90 bg-gradient-to-b from-amber-50/60 via-white to-white" aria-label="Testimonials">
+        <section className="py-8 sm:py-12 border-y border-gray-100/90 bg-gradient-to-b from-orange-50/60 via-white to-white" aria-label="Testimonials">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 tracking-tight">What our customers say</h2>
                 <p className="text-xs text-gray-500 mb-6">Real feedback from creators and professionals</p>

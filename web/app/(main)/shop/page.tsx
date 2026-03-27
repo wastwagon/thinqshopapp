@@ -160,7 +160,7 @@ function ShopContent() {
                                     </Link>
                                 ))}
                             </div>
-                            <div className="mt-12 bg-gradient-to-br from-amber-50 to-slate-50 p-6 rounded-xl border border-brand/15 shadow-sm">
+                            <div className="mt-12 bg-gradient-to-br from-orange-50 to-slate-50 p-6 rounded-xl border border-brand/15 shadow-sm">
                                 <p className="text-xs font-bold tracking-widest text-brand uppercase mb-2">Shipping</p>
                                 <p className="text-xs font-bold text-gray-900 leading-tight">International delivery. Items ship from abroad with 7–14 day estimated delivery.</p>
                             </div>

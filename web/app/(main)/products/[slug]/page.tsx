@@ -147,7 +147,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                         <div className="mb-8">
                             {product.stock_quantity != null && (
                                 <div className="flex flex-wrap gap-2 mb-4">
-                                    <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${product.stock_quantity > (product.low_stock_threshold ?? 10) ? 'bg-green-50 text-green-700 border border-green-100' : product.stock_quantity > 0 ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                                    <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${product.stock_quantity > (product.low_stock_threshold ?? 10) ? 'bg-green-50 text-green-700 border border-green-100' : product.stock_quantity > 0 ? 'bg-orange-50 text-orange-700 border border-orange-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
                                         {product.stock_quantity === 0 ? 'Out of stock' : product.stock_quantity <= (product.low_stock_threshold ?? 10) ? `Only ${product.stock_quantity} left` : 'In stock'}
                                     </span>
                                 </div>
@@ -255,7 +255,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     </button>
                             </div>
                             {hasWholesale && (
-                                <div className={`text-sm font-medium px-4 py-3 rounded-xl ${qualifiesWholesale ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-amber-50 text-amber-800 border border-amber-200'}`}>
+                                <div className={`text-sm font-medium px-4 py-3 rounded-xl ${qualifiesWholesale ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-orange-50 text-orange-800 border border-orange-200'}`}>
                                     {qualifiesWholesale
                                         ? `You qualify for wholesale! Save ${discountPct}% on this order.`
                                         : `Add ${moreNeeded} more to get ${discountPct}% wholesale discount.`

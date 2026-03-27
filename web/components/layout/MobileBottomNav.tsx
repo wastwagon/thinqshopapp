@@ -40,7 +40,7 @@ export default function MobileBottomNav() {
                             <div className={`p-1 rounded-md transition-all duration-200 shrink-0 ${isActive ? 'bg-brand text-white shadow-md shadow-brand/25' : 'text-white'}`}>
                                 <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={isActive ? 2.5 : 2} aria-hidden />
                             </div>
-                            <span className={`text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide leading-tight text-center w-full break-words line-clamp-2 ${isActive ? 'text-amber-200' : 'text-white'}`}>
+                            <span className={`text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide leading-tight text-center w-full break-words line-clamp-2 ${isActive ? 'text-orange-200' : 'text-white'}`}>
                                 {item.name}
                             </span>
                         </Link>

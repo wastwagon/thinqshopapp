@@ -106,13 +106,13 @@ export default function AdminReviewsPage() {
                                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex flex-wrap items-center gap-2 mb-1">
-                                            <span className="flex items-center gap-1 text-amber-600">
+                                            <span className="flex items-center gap-1 text-orange-600">
                                                 {Array.from({ length: 5 }).map((_, i) => (
                                                     <Star key={i} className={`h-4 w-4 ${i < r.rating ? 'fill-current' : ''}`} />
                                                 ))}
                                             </span>
                                             <span className="text-xs text-gray-500">{displayName(r)}</span>
-                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${r.is_approved ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${r.is_approved ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
                                                 {r.is_approved ? 'Approved' : 'Pending'}
                                             </span>
                                         </div>

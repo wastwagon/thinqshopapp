@@ -49,7 +49,7 @@ interface TrackResult {
 function StatusBadge({ status }: { status: string }) {
     const statusLower = status?.toLowerCase() || '';
     const colors: Record<string, string> = {
-        pending: 'bg-amber-100 text-amber-800 border-amber-200',
+        pending: 'bg-orange-100 text-orange-800 border-orange-200',
         processing: 'bg-blue-100 text-blue-800 border-blue-200',
         packed: 'bg-indigo-100 text-indigo-800 border-indigo-200',
         shipped: 'bg-purple-100 text-purple-800 border-purple-200',
@@ -59,7 +59,7 @@ function StatusBadge({ status }: { status: string }) {
         payment_received: 'bg-emerald-100 text-emerald-800 border-emerald-200',
         sourcing: 'bg-blue-100 text-blue-800 border-blue-200',
         items_received: 'bg-indigo-100 text-indigo-800 border-indigo-200',
-        ready_for_delivery: 'bg-amber-100 text-amber-800 border-amber-200',
+        ready_for_delivery: 'bg-orange-100 text-orange-800 border-orange-200',
         submitted: 'bg-slate-100 text-slate-800 border-slate-200',
         accepted: 'bg-green-100 text-green-800 border-green-200',
     };

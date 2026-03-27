@@ -154,7 +154,7 @@ export default function AdminTransfersPage() {
 
     const StatusBadge = ({ status }: { status: string }) => {
         const colors: Record<string, string> = {
-            pending: 'bg-amber-50 text-amber-700 border-amber-200',
+            pending: 'bg-orange-50 text-orange-700 border-orange-200',
             payment_received: 'bg-blue-50 text-blue-700 border-blue-200',
             processing: 'bg-indigo-50 text-indigo-700 border-indigo-200',
             sent_to_partner: 'bg-purple-50 text-purple-700 border-purple-200',
@@ -171,7 +171,7 @@ export default function AdminTransfersPage() {
 
     const stats = [
         { label: 'Total', value: transfers.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-        { label: 'Pending', value: pendingCount, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+        { label: 'Pending', value: pendingCount, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'In progress', value: inProgressCount, icon: Package, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
         { label: 'Completed', value: completedCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' }
     ];

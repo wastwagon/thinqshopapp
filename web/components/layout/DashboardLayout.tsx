@@ -48,7 +48,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
     const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
     return (
-        <div className="app-shell flex h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-amber-50/30 overflow-hidden font-sans text-gray-900 relative">
+        <div className="app-shell flex h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-orange-50/30 overflow-hidden font-sans text-gray-900 relative">
             <Sidebar
                 isAdmin={isAdmin}
                 isOpen={isSidebarOpen}
@@ -58,7 +58,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative safe-area-inset-top">
                 {/* Subtle light background depth */}
                 <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(at_0%_0%,#f8fafc_0,transparent_50%),radial-gradient(at_100%_0%,#f1f5f9_0,transparent_50%),radial-gradient(at_50%_100%,rgb(245_158_11/0.08)_0,transparent_45%)]" />
+                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(at_0%_0%,#f8fafc_0,transparent_50%),radial-gradient(at_100%_0%,#f1f5f9_0,transparent_50%),radial-gradient(at_50%_100%,rgb(249_115_22/0.08)_0,transparent_45%)]" />
                 </div>
 
                 <Topbar onMenuPress={toggleSidebar} />

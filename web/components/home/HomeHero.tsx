@@ -151,7 +151,7 @@ function HeroSlideCard({
                         )}
                         <Link
                             href={ctaUrl}
-                            className="inline-flex items-center gap-2 min-h-[44px] sm:min-h-[48px] px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-white text-slate-900 text-sm font-semibold shadow-lg shadow-brand/20 ring-1 ring-white/90 hover:bg-amber-50 hover:ring-brand/40 transition-all w-fit focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                            className="inline-flex items-center gap-2 min-h-[44px] sm:min-h-[48px] px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-white text-slate-900 text-sm font-semibold shadow-lg shadow-brand/20 ring-1 ring-white/90 hover:bg-orange-50 hover:ring-brand/40 transition-all w-fit focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
                         >
                             {ctaText}
                             <ArrowRight className="w-5 h-5 shrink-0" aria-hidden />

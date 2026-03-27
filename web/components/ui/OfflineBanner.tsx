@@ -27,7 +27,7 @@ export default function OfflineBanner() {
 
     return (
         <div
-            className="fixed top-0 left-0 right-0 z-[200] bg-amber-500 text-amber-950 py-2 px-4 text-center text-sm font-medium safe-area-inset-top"
+            className="fixed top-0 left-0 right-0 z-[200] bg-orange-500 text-orange-950 py-2 px-4 text-center text-sm font-medium safe-area-inset-top"
             role="status"
             aria-live="polite"
             aria-label="You are offline"

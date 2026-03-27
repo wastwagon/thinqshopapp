@@ -23,7 +23,7 @@ const accentStyles = {
     blue: { bg: 'bg-blue-500', glow: 'shadow-blue-500/30', badge: 'bg-blue-50 text-blue-700 border-blue-100' },
     emerald: { bg: 'bg-emerald-500', glow: 'shadow-emerald-500/30', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
     violet: { bg: 'bg-violet-500', glow: 'shadow-violet-500/30', badge: 'bg-violet-50 text-violet-700 border-violet-100' },
-    amber: { bg: 'bg-amber-500', glow: 'shadow-amber-500/30', badge: 'bg-amber-50 text-amber-700 border-amber-100' },
+    amber: { bg: 'bg-orange-500', glow: 'shadow-orange-500/30', badge: 'bg-orange-50 text-orange-700 border-orange-100' },
 };
 
 export default function ThankYouCard({

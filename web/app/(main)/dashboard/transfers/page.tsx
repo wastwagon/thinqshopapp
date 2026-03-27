@@ -438,11 +438,11 @@ export default function TransferPage() {
                                 </div>
                             </div>
 
-                            <div className="p-3 bg-amber-50 rounded-lg border border-amber-100 flex items-start gap-2">
-                                <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                            <div className="p-3 bg-orange-50 rounded-lg border border-orange-100 flex items-start gap-2">
+                                <AlertCircle className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
                                 <div className="min-w-0">
-                                    <p className="text-xs font-semibold text-amber-800 mb-0.5">Please verify</p>
-                                    <p className="text-[11px] text-amber-700 leading-snug">
+                                    <p className="text-xs font-semibold text-orange-800 mb-0.5">Please verify</p>
+                                    <p className="text-[11px] text-orange-700 leading-snug">
                                         Cross-border transfers cannot be reversed. Double-check recipient name and details.
                                     </p>
                                 </div>
