@@ -172,6 +172,16 @@ export default function ProfilePage() {
                         <p className="text-xs text-gray-500 mb-2">
                             {avatarUploading ? 'Uploading…' : 'Tap the camera to upload a photo'}
                         </p>
+                        {user?.profile_image ? (
+                            <button
+                                type="button"
+                                disabled={avatarUploading}
+                                onClick={handleRemovePhoto}
+                                className="text-xs font-medium text-gray-400 hover:text-red-600 mb-2 disabled:opacity-50"
+                            >
+                                Remove photo
+                            </button>
+                        ) : null}
                         <h2 className="text-lg font-bold text-gray-900 mb-1">{formData.first_name || '—'} {formData.last_name || '—'}</h2>
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">{user?.role || 'User'}</p>
                         <div className="px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 inline-block">
@@ -257,32 +267,6 @@ export default function ProfilePage() {
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                         className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white"
                                     />
-                                </div>
-                                <div className="md:col-span-2">
-                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">
-                                        Profile photo <span className="text-gray-400 font-normal">(optional)</span>
-                                    </label>
-                                    <div className="flex flex-wrap items-center gap-3">
-                                        <button
-                                            type="button"
-                                            disabled={avatarUploading}
-                                            onClick={() => fileInputRef.current?.click()}
-                                            className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-blue-600 transition-colors disabled:opacity-50"
-                                        >
-                                            {avatarUploading ? 'Uploading…' : 'Choose image'}
-                                        </button>
-                                        {user?.profile_image ? (
-                                            <button
-                                                type="button"
-                                                disabled={avatarUploading}
-                                                onClick={handleRemovePhoto}
-                                                className="text-sm font-medium text-gray-500 hover:text-red-600 disabled:opacity-50"
-                                            >
-                                                Remove photo
-                                            </button>
-                                        ) : null}
-                                    </div>
-                                    <p className="text-xs text-gray-500 mt-2">JPEG, PNG, GIF, or WebP. Max 5MB.</p>
                                 </div>
                             </div>
 
