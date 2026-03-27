@@ -1,5 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+
+const PROFILE_UPLOAD_SUBDIR = 'profile-images';
+const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+const AVATAR_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 @Injectable()
 export class UserService {
@@ -42,7 +48,7 @@ export class UserService {
         profileFields.forEach((f) => {
             if (data[f] !== undefined) profileData[f] = data[f];
         });
-        const userFields = ['phone', 'ghana_card', 'voter_id'] as const;
+        const userFields = ['phone'] as const;
         const userData: Record<string, unknown> = {};
         userFields.forEach((f) => {
             if (data[f] !== undefined) userData[f] = data[f];
@@ -57,6 +63,30 @@ export class UserService {
                 ? this.prisma.user.update({ where: { id: userId }, data: userData })
                 : Promise.resolve(),
         ]);
+        return this.findOne(userId);
+    }
+
+    /** Save avatar image under uploads/profile-images and store public path on profile. */
+    async saveProfileAvatar(userId: number, file: Express.Multer.File) {
+        if (!file?.buffer?.length) throw new BadRequestException('No file uploaded');
+        if (!AVATAR_MIMES.includes(file.mimetype)) {
+            throw new BadRequestException('Invalid image type. Allowed: JPEG, PNG, GIF, WebP');
+        }
+        if (file.size > AVATAR_MAX_BYTES) throw new BadRequestException('Image must be 5MB or smaller');
+
+        const dir = path.join(process.cwd(), 'uploads', PROFILE_UPLOAD_SUBDIR);
+        await fs.mkdir(dir, { recursive: true });
+        const ext = path.extname(file.originalname || '') || (file.mimetype === 'image/png' ? '.png' : '.jpg');
+        const safeExt = ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext.toLowerCase()) ? ext.toLowerCase() : '.jpg';
+        const filename = `user-${userId}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}${safeExt}`;
+        await fs.writeFile(path.join(dir, filename), file.buffer);
+
+        const publicPath = `/media/${PROFILE_UPLOAD_SUBDIR}/${filename}`;
+        await this.prisma.userProfile.upsert({
+            where: { user_id: userId },
+            create: { user_id: userId, profile_image: publicPath },
+            update: { profile_image: publicPath },
+        });
         return this.findOne(userId);
     }
 

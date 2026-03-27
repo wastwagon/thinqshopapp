@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Link from 'next/link';
 import {
     User,
-    Phone,
     Shield,
     Save,
     Camera,
@@ -16,34 +15,89 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
+import { getMediaUrl } from '@/lib/media';
 
 export default function ProfilePage() {
     const { user, refreshUser } = useAuth();
     const [loading, setLoading] = useState(false);
+    const [avatarUploading, setAvatarUploading] = useState(false);
+    const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const [formData, setFormData] = useState({
         first_name: user?.first_name || '',
         last_name: user?.last_name || '',
         email: user?.email || '',
         phone: user?.phone || '',
-        ghana_card: (user as any)?.ghana_card || '',
-        voter_id: (user as any)?.voter_id || '',
-        profile_image: (user as any)?.profile_image || '',
     });
 
     useEffect(() => {
         if (user) {
-            setFormData(prev => ({
-                ...prev,
+            setFormData({
                 first_name: user.first_name || '',
                 last_name: user.last_name || '',
                 email: user.email || '',
                 phone: user.phone || '',
-                ghana_card: (user as any)?.ghana_card || '',
-                voter_id: (user as any)?.voter_id || '',
-                profile_image: (user as any)?.profile_image || '',
-            }));
+            });
         }
     }, [user]);
+
+    useEffect(() => {
+        return () => {
+            if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+        };
+    }, [pendingPreview]);
+
+    const avatarDisplaySrc = pendingPreview || getMediaUrl(user?.profile_image);
+    const showAvatarImage = Boolean(avatarDisplaySrc);
+
+    const handleAvatarFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please choose an image file');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Image must be 5MB or smaller');
+            return;
+        }
+        if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+        setPendingPreview(URL.createObjectURL(file));
+        setAvatarUploading(true);
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            await api.post('/users/profile/avatar', fd, { headers: { 'Content-Type': undefined } });
+            await refreshUser();
+            setPendingPreview((prev) => {
+                if (prev) URL.revokeObjectURL(prev);
+                return null;
+            });
+            toast.success('Profile photo updated');
+        } catch {
+            setPendingPreview(null);
+            toast.error('Photo upload failed');
+        } finally {
+            setAvatarUploading(false);
+        }
+    };
+
+    const handleRemovePhoto = async () => {
+        setAvatarUploading(true);
+        try {
+            await api.patch('/users/profile', { profile_image: null });
+            await refreshUser();
+            if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+            setPendingPreview(null);
+            toast.success('Profile photo removed');
+        } catch {
+            toast.error('Could not remove photo');
+        } finally {
+            setAvatarUploading(false);
+        }
+    };
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,13 +107,10 @@ export default function ProfilePage() {
                 first_name: formData.first_name,
                 last_name: formData.last_name,
                 phone: formData.phone,
-                ghana_card: formData.ghana_card,
-                voter_id: formData.voter_id,
-                profile_image: formData.profile_image?.trim() || null,
             });
             await refreshUser();
             toast.success('Profile updated');
-        } catch (error) {
+        } catch {
             toast.error('Update failed');
         } finally {
             setLoading(false);
@@ -85,24 +136,42 @@ export default function ProfilePage() {
                     <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
                         <div className="relative inline-block mb-4">
                             <div className="w-24 h-24 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden relative">
-                                {formData.profile_image ? (
+                                {showAvatarImage ? (
                                     <Image
-                                        src={formData.profile_image}
+                                        src={avatarDisplaySrc}
                                         alt=""
                                         fill
                                         className="object-cover"
                                         sizes="96px"
-                                        unoptimized={formData.profile_image.startsWith('http')}
+                                        unoptimized={
+                                            avatarDisplaySrc.startsWith('http') ||
+                                            avatarDisplaySrc.startsWith('blob:')
+                                        }
                                     />
                                 ) : (
                                     <User className="h-10 w-10 text-gray-400" />
                                 )}
                             </div>
-                            <span className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center border-2 border-white pointer-events-none">
+                            <button
+                                type="button"
+                                disabled={avatarUploading}
+                                onClick={() => fileInputRef.current?.click()}
+                                className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center border-2 border-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                aria-label="Upload profile photo"
+                            >
                                 <Camera className="h-3.5 w-3.5" />
-                            </span>
+                            </button>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/jpeg,image/png,image/gif,image/webp"
+                                className="hidden"
+                                onChange={handleAvatarFile}
+                            />
                         </div>
-                        <p className="text-xs text-gray-500 mb-2">Add a photo via URL below</p>
+                        <p className="text-xs text-gray-500 mb-2">
+                            {avatarUploading ? 'Uploading…' : 'Tap the camera to upload a photo'}
+                        </p>
                         <h2 className="text-lg font-bold text-gray-900 mb-1">{formData.first_name || '—'} {formData.last_name || '—'}</h2>
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">{user?.role || 'User'}</p>
                         <div className="px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 inline-block">
@@ -190,43 +259,30 @@ export default function ProfilePage() {
                                     />
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Profile image URL <span className="text-gray-400 font-normal">(optional)</span></label>
-                                    <input
-                                        type="url"
-                                        value={formData.profile_image}
-                                        onChange={(e) => setFormData({ ...formData, profile_image: e.target.value })}
-                                        placeholder="https://example.com/your-photo.jpg"
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="pt-5 border-t border-gray-50">
-                                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-4 flex items-center gap-2">
-                                    <Shield className="h-3.5 w-3.5 text-blue-600" />
-                                    ID (optional)
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Ghana Card</label>
-                                        <input
-                                            type="text"
-                                            value={formData.ghana_card || ''}
-                                            onChange={(e) => setFormData({ ...formData, ghana_card: e.target.value })}
-                                            placeholder="GHA-123456789-0"
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 focus:bg-white"
-                                        />
+                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">
+                                        Profile photo <span className="text-gray-400 font-normal">(optional)</span>
+                                    </label>
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <button
+                                            type="button"
+                                            disabled={avatarUploading}
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-blue-600 transition-colors disabled:opacity-50"
+                                        >
+                                            {avatarUploading ? 'Uploading…' : 'Choose image'}
+                                        </button>
+                                        {user?.profile_image ? (
+                                            <button
+                                                type="button"
+                                                disabled={avatarUploading}
+                                                onClick={handleRemovePhoto}
+                                                className="text-sm font-medium text-gray-500 hover:text-red-600 disabled:opacity-50"
+                                            >
+                                                Remove photo
+                                            </button>
+                                        ) : null}
                                     </div>
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Voter ID</label>
-                                        <input
-                                            type="text"
-                                            value={formData.voter_id || ''}
-                                            onChange={(e) => setFormData({ ...formData, voter_id: e.target.value })}
-                                            placeholder="Optional"
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 focus:bg-white"
-                                        />
-                                    </div>
+                                    <p className="text-xs text-gray-500 mt-2">JPEG, PNG, GIF, or WebP. Max 5MB.</p>
                                 </div>
                             </div>
 

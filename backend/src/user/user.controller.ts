@@ -1,6 +1,25 @@
-import { Controller, Get, Patch, Body, Param, UseGuards, Request, Query, ForbiddenException } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Patch,
+    Post,
+    Body,
+    Param,
+    UseGuards,
+    Request,
+    Query,
+    ForbiddenException,
+    UseInterceptors,
+    UploadedFile,
+    BadRequestException,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { UserService } from './user.service';
 import { AuthGuard } from '../auth/auth.guard';
+
+const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+const AVATAR_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 @Controller('users')
 export class UserController {
@@ -34,5 +53,25 @@ export class UserController {
     @UseGuards(AuthGuard)
     async updateProfile(@Request() req, @Body() body: any) {
         return this.userService.updateProfile(req.user.sub, body);
+    }
+
+    @Post('profile/avatar')
+    @UseGuards(AuthGuard)
+    @UseInterceptors(
+        FileInterceptor('file', {
+            storage: memoryStorage(),
+            limits: { fileSize: AVATAR_MAX_BYTES },
+            fileFilter: (_req, file, cb) => {
+                if (file.mimetype && AVATAR_MIMES.includes(file.mimetype)) {
+                    cb(null, true);
+                } else {
+                    cb(new Error('Invalid file type. Allowed: JPEG, PNG, GIF, WebP'), false);
+                }
+            },
+        }),
+    )
+    async uploadProfileAvatar(@Request() req: any, @UploadedFile() file: Express.Multer.File) {
+        if (!file) throw new BadRequestException('No file uploaded');
+        return this.userService.saveProfileAvatar(req.user.sub, file);
     }
 }
