@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 /**
  * When the site is loaded inside WebViewGold (Android app), tell the app to
@@ -17,6 +17,15 @@ function isWebViewGold(): boolean {
 
 export default function WebViewGoldBridge() {
     const done = useRef(false);
+    const marked = useRef(false);
+
+    /** Mark html/body before paint so scroll/overscroll CSS applies on first frame. */
+    useLayoutEffect(() => {
+        if (marked.current || !isWebViewGold()) return;
+        marked.current = true;
+        document.documentElement.classList.add('webview-gold');
+        document.body.classList.add('webview-gold');
+    }, []);
 
     useEffect(() => {
         if (done.current || !isWebViewGold()) return;

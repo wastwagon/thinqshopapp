@@ -66,7 +66,7 @@ export default function TopbarView(props: TopbarViewProps) {
     const unreadCount = notifications.filter(n => !n.is_read).length;
 
     return (
-        <div role="banner" className="min-h-14 bg-white/80 border-b border-gray-100 flex flex-col sticky top-0 z-30 backdrop-blur-xl">
+        <div role="banner" className="min-h-14 bg-white/90 border-b border-gray-100/90 flex flex-col sticky top-0 z-30 backdrop-blur-xl shadow-sm shadow-slate-900/[0.04]">
             <div className="h-14 flex items-center justify-between gap-3 px-3 md:px-6">
                 {onMenuPress && (
                     <button

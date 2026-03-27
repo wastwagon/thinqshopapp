@@ -155,7 +155,7 @@ export default function CheckoutClient() {
                                 <div className="mt-6 flex justify-end">
                                     <button
                                         onClick={() => setStep(2)}
-                                        className="bg-gray-900 text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-600 transition-all shadow-lg flex items-center gap-2"
+                                        className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-6 py-3 rounded-xl font-semibold text-sm hover:from-brand hover:to-brand/95 transition-all shadow-lg flex items-center gap-2"
                                     >
                                         Proceed to Payment
                                         <CheckCircle className="h-4 w-4" />
@@ -203,7 +203,7 @@ export default function CheckoutClient() {
                                     <button
                                         onClick={handlePlaceOrder}
                                         disabled={isProcessing}
-                                        className="w-full min-h-[44px] bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-4 shadow-lg touch-manipulation"
+                                        className="w-full min-h-[44px] bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold text-sm hover:from-brand hover:to-brand/95 transition-all disabled:opacity-50 flex items-center justify-center gap-4 shadow-lg touch-manipulation"
                                     >
                                         {isProcessing ? 'Processing…' : <>Pay <PriceDisplay amountGhs={cartTotal} forceGhs /></>}
                                     </button>

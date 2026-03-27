@@ -21,7 +21,7 @@ export default function CategoryBadges({ categories, currentSlug = '' }: Categor
             <div className="flex flex-nowrap gap-2 min-w-max items-stretch">
                 <Link
                     href="/shop"
-                    className={`shrink-0 min-h-[44px] flex items-center px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${isAll ? 'bg-gray-900 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'}`}
+                    className={`shrink-0 min-h-[44px] flex items-center px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${isAll ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-md shadow-slate-900/15' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'}`}
                     aria-current={isAll ? 'page' : undefined}
                 >
                     All Products
@@ -33,7 +33,7 @@ export default function CategoryBadges({ categories, currentSlug = '' }: Categor
                         <Link
                             key={cat.id ?? cat.slug ?? cat.name}
                             href={`/shop/${slug}`}
-                            className={`shrink-0 min-h-[44px] flex items-center px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${isActive ? 'bg-gray-900 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'}`}
+                            className={`shrink-0 min-h-[44px] flex items-center px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${isActive ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-md shadow-slate-900/15' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'}`}
                             aria-current={isActive ? 'page' : undefined}
                         >
                             {cat.name}

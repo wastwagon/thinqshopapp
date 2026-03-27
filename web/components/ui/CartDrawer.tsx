@@ -152,7 +152,7 @@ export default function CartDrawer() {
                                                 <button
                                                     onClick={handleCheckout}
                                                     disabled={cart.length === 0}
-                                                    className="w-full min-h-[44px] bg-gray-900 text-white h-12 rounded-xl font-semibold text-sm hover:bg-gray-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
+                                                    className="w-full min-h-[44px] bg-gradient-to-r from-slate-900 to-slate-800 text-white h-12 rounded-xl font-semibold text-sm hover:from-brand hover:to-brand/95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shadow-md"
                                                 >
                                                     Checkout
                                                 </button>

@@ -16,7 +16,7 @@ interface PageHeaderProps {
 
 export default function PageHeader({ title, subtitle, breadcrumbs = [] }: PageHeaderProps) {
     return (
-        <div className="w-screen relative left-1/2 -translate-x-1/2 bg-slate-900 border-b border-slate-700 mb-10 -mt-4 pt-5 pb-8">
+        <div className="w-screen relative left-1/2 -translate-x-1/2 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border-b border-slate-700/80 mb-10 -mt-4 pt-5 pb-8 ring-1 ring-inset ring-white/[0.06]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
             {breadcrumbs.length > 0 && (
                 <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs">

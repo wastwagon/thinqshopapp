@@ -28,19 +28,19 @@ export default function AboutPage() {
                     <h2 className="text-lg font-bold text-gray-900 mt-10 mb-4">What We Offer</h2>
                     <ul className="space-y-4 text-gray-600 mb-10">
                         <li className="flex items-start gap-3">
-                            <Zap className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                            <Zap className="h-5 w-5 text-brand shrink-0 mt-0.5" />
                             <span><strong className="text-gray-900">Shop</strong> — Electronics and tech, vetted and delivered. Items ship internationally with 7–14 day estimated delivery.</span>
                         </li>
                         <li className="flex items-start gap-3">
-                            <Truck className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                            <Truck className="h-5 w-5 text-brand shrink-0 mt-0.5" />
                             <span><strong className="text-gray-900">Digital Logistics</strong> — Ship and track packages and freight with transparency and reliability.</span>
                         </li>
                         <li className="flex items-start gap-3">
-                            <Globe className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                            <Globe className="h-5 w-5 text-brand shrink-0 mt-0.5" />
                             <span><strong className="text-gray-900">Money Transfer</strong> — Send to and receive from China and other corridors with secure, traceable transfers.</span>
                         </li>
                         <li className="flex items-start gap-3">
-                            <Target className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                            <Target className="h-5 w-5 text-brand shrink-0 mt-0.5" />
                             <span><strong className="text-gray-900">Tech Sourcing</strong> — Custom procurement and sourcing for businesses and professionals.</span>
                         </li>
                     </ul>
@@ -51,7 +51,7 @@ export default function AboutPage() {
                     </p>
 
                     <div className="flex flex-wrap gap-4 mt-12">
-                        <Link href="/shop" className="inline-flex items-center gap-2 px-5 py-3 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors">
+                        <Link href="/shop" className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl text-sm font-semibold hover:from-brand hover:to-brand/95 shadow-md transition-all">
                             Shop now
                         </Link>
                         <Link href="/contact" className="inline-flex items-center gap-2 px-5 py-3 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">

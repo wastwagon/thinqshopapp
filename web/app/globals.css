@@ -27,6 +27,11 @@
 
     /* Brand-specific colors */
     --blueblack: 222 47% 11%;
+    /* Bright accent: amber — warm contrast with blue-black; strong on CTAs & highlights */
+    --brand: 38 92% 50%;
+    --brand-foreground: 26 90% 9%;
+    --brand-muted: 38 60% 94%;
+    --brand-subtle: 45 80% 96%;
     --sale: 0 84.2% 60.2%;
     --rating: 38 92% 50%;
     --category: 215 25% 27%;
@@ -62,7 +67,7 @@
   /* After app shell is ready, switch to normal background (smooth transition from splash) */
   html.app-loaded,
   body.app-loaded {
-    background-color: #f8fafc;
+    background-color: hsl(210 40% 98%);
     transition: background-color 0.35s ease-out;
   }
 
@@ -120,12 +125,33 @@
     }
     #main-content {
       -webkit-overflow-scrolling: touch;
-      overscroll-behavior: none;
+      overscroll-behavior-x: none;
+      /* contain avoids scroll chaining; WebViewGold override below uses auto — fixes stuck upward scroll on some Android WebViews */
+      overscroll-behavior-y: contain;
       touch-action: pan-y;
       scroll-behavior: auto;
       scroll-padding-bottom: env(safe-area-inset-bottom, 0px);
       scrollbar-width: thin;
       scrollbar-color: hsl(var(--border)) rgba(0, 0, 0, 0.05);
+    }
+
+    /*
+     * WebView Gold / Android WebView: strict overscroll:none + nested overflow scroll
+     * can prevent upward drags from reaching #main-content. Relax vertical overscroll
+     * and stabilize height with dvh so the flex scroll region matches the visible viewport.
+     */
+    html.webview-gold,
+    html.webview-gold body {
+      overscroll-behavior-x: none;
+      overscroll-behavior-y: auto;
+    }
+    html.webview-gold #main-content {
+      overscroll-behavior-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    html.webview-gold .app-shell {
+      min-height: 100dvh;
+      height: 100dvh;
     }
     #main-content::-webkit-scrollbar {
       width: 6px;
@@ -145,6 +171,14 @@
 }
 
 @layer utilities {
+  /* App-wide soft background (shop + marketing) */
+  .bg-app {
+    background-color: hsl(210 40% 98%);
+    background-image:
+      radial-gradient(ellipse 120% 80% at 100% 0%, hsl(var(--brand) / 0.06) 0%, transparent 55%),
+      radial-gradient(ellipse 80% 60% at 0% 100%, hsl(221 83% 53% / 0.05) 0%, transparent 50%);
+  }
+
   .noise {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     opacity: 0.02;
@@ -245,14 +279,17 @@
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, hsl(var(--foreground)) 0%, #02274f 100%);
+  background: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--blueblack)) 50%, hsl(var(--brand)) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .mesh-gradient {
-  background: radial-gradient(circle at 50% 50%, #f1f5f9 0%, #f8fafc 100%);
+  background:
+    radial-gradient(circle at 20% 30%, hsl(var(--brand-muted)) 0%, transparent 45%),
+    radial-gradient(circle at 80% 70%, hsl(221 83% 53% / 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, #f1f5f9 0%, #f8fafc 100%);
 }
 
 /* E-commerce Utilities */
@@ -298,6 +335,7 @@
   width: 100%;
   animation: hero-progress-fill 5000ms linear forwards;
   transform: scaleX(0);
+  background: linear-gradient(90deg, hsl(var(--brand)) 0%, #fff 100%);
 }
 
 /* Hero: pagination dots – minimal, at bottom */
@@ -317,5 +355,6 @@
 .hero-swiper .hero-bullet-active {
   width: 20px;
   border-radius: 3px;
-  background: #fff;
+  background: linear-gradient(90deg, hsl(var(--brand)) 0%, #fff 100%);
+  box-shadow: 0 0 12px hsl(var(--brand) / 0.45);
 }

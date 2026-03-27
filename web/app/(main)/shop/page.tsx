@@ -113,7 +113,7 @@ function ShopContent() {
 
     return (
         <ShopLayout>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 min-h-[60vh]">
                 <PageHeader
                     title={search ? 'Search Results' : 'Our Collection'}
                     subtitle="Electronics and tech delivered to you"
@@ -122,11 +122,11 @@ function ShopContent() {
                 <div className="flex flex-col md:flex-row justify-end mb-8 -mt-4">
                     <form onSubmit={handleSearch} className="w-full md:w-80 relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+                            <Search className="h-4 w-4 text-gray-400 group-focus-within:text-brand transition-colors" />
                         </div>
                         <input
                             type="text"
-                            className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all font-medium"
+                            className="block w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/25 focus:border-brand/50 focus:bg-white transition-all font-medium shadow-sm"
                             placeholder="Search products..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -146,7 +146,7 @@ function ShopContent() {
                             <div className="space-y-1.5">
                                 <Link
                                     href="/shop"
-                                    className={`block w-full text-left px-5 py-3.5 rounded-2xl text-sm font-bold transition-all ${!category ? 'bg-gray-900 text-white shadow-lg shadow-gray-200' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                                    className={`block w-full text-left px-5 py-3.5 rounded-2xl text-sm font-bold transition-all ${!category ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg shadow-slate-900/20' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
                                 >
                                     All Products
                                 </Link>
@@ -154,14 +154,14 @@ function ShopContent() {
                                     <Link
                                         key={cat.id ?? cat.slug ?? cat.name}
                                         href={`/shop/${cat.slug ?? cat.name?.toLowerCase?.()?.replace(/\s+/g, '-')}`}
-                                        className={`block w-full text-left px-5 py-3.5 rounded-2xl text-sm font-bold transition-all ${category === (cat.slug ?? '') ? 'bg-gray-900 text-white shadow-lg shadow-gray-200' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                                        className={`block w-full text-left px-5 py-3.5 rounded-2xl text-sm font-bold transition-all ${category === (cat.slug ?? '') ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg shadow-slate-900/20' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
                                     >
                                         {cat.name}
                                     </Link>
                                 ))}
                             </div>
-                            <div className="mt-12 bg-blue-50 p-6 rounded-xl border border-blue-100">
-                                <p className="text-xs font-bold tracking-widest text-blue-600 uppercase mb-2">Shipping</p>
+                            <div className="mt-12 bg-gradient-to-br from-amber-50 to-slate-50 p-6 rounded-xl border border-brand/15 shadow-sm">
+                                <p className="text-xs font-bold tracking-widest text-brand uppercase mb-2">Shipping</p>
                                 <p className="text-xs font-bold text-gray-900 leading-tight">International delivery. Items ship from abroad with 7–14 day estimated delivery.</p>
                             </div>
                         </div>
@@ -174,7 +174,7 @@ function ShopContent() {
                                     type="button"
                                     onClick={loadMore}
                                     disabled={loadingMore}
-                                    className="inline-flex items-center justify-center gap-2 min-h-[44px] px-8 py-4 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 disabled:opacity-50 transition-all"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[44px] px-8 py-4 rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 text-white font-semibold text-sm hover:from-brand hover:to-brand/95 disabled:opacity-50 transition-all shadow-md"
                                 >
                                     {loadingMore ? (
                                         <>

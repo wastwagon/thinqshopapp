@@ -82,9 +82,10 @@ export default function Navbar() {
 
     return (
         <nav
-            className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-xl border-b border-gray-100 flex flex-col"
+            className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100/90 flex flex-col shadow-sm shadow-slate-900/[0.03]"
             aria-label="Main navigation"
         >
+            <div className="h-0.5 w-full bg-gradient-to-r from-blue-600 via-brand to-blue-600 opacity-90" aria-hidden />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 w-full flex items-center gap-4 sm:gap-8 lg:gap-4">
                 {/* Logo - left, sized to bar height */}
                 <Link
@@ -168,7 +169,7 @@ export default function Navbar() {
                                                 <Link
                                                     href="/shop?search=deal"
                                                     onClick={() => setShopMegaOpen(false)}
-                                                    className="text-xs font-bold text-blue-600 hover:text-blue-700"
+                                                    className="text-xs font-bold text-brand hover:text-brand/90"
                                                 >
                                                     Special offers
                                                 </Link>
@@ -182,7 +183,7 @@ export default function Navbar() {
                                 key={item.href}
                                 href={item.href}
                                 role="menuitem"
-                                className={`py-2 px-1 -mx-1 rounded-lg hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors ${item.highlight ? 'text-blue-600 font-extrabold' : ''}`}
+                                className={`py-2 px-1 -mx-1 rounded-lg hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors ${item.highlight ? 'text-brand font-extrabold' : ''}`}
                             >
                                 {item.label}
                             </Link>
@@ -230,7 +231,7 @@ export default function Navbar() {
                         <ShoppingCart className="h-4 w-4" aria-hidden />
                         {cartCount > 0 && (
                             <span
-                                className="absolute top-1 right-1 min-w-[1.25rem] h-5 px-1 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg"
+                                className="absolute top-1 right-1 min-w-[1.25rem] h-5 px-1 bg-brand text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg shadow-brand/30"
                                 aria-hidden
                             >
                                 {cartCount > 99 ? '99+' : cartCount}
@@ -246,7 +247,7 @@ export default function Navbar() {
                         <ShoppingCart className="h-4 w-4" aria-hidden />
                         {cartCount > 0 && (
                             <span
-                                className="absolute top-1 right-1 min-w-[1.25rem] h-5 px-1 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg"
+                                className="absolute top-1 right-1 min-w-[1.25rem] h-5 px-1 bg-brand text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg shadow-brand/30"
                                 aria-hidden
                             >
                                 {cartCount > 99 ? '99+' : cartCount}

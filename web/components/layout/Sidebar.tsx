@@ -125,7 +125,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
                                         : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                                         }`}
                                 >
-                                    <Icon className={`mr-3 h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${isActive ? 'text-blue-400' : 'text-gray-400 group-hover:text-blue-600'}`} />
+                                    <Icon className={`mr-3 h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${isActive ? 'text-brand' : 'text-gray-400 group-hover:text-blue-600'}`} />
                                     {link.name}
                                 </Link>
                             );

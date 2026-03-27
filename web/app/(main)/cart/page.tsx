@@ -34,7 +34,7 @@ export default function CartPage() {
                                 <p className="text-gray-400 text-xs mt-2">Add items to get started</p>
                                 <Link
                                     href="/shop"
-                                    className="inline-flex mt-6 min-h-[44px] px-6 items-center justify-center rounded-xl bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800"
+                                    className="inline-flex mt-6 min-h-[44px] px-6 items-center justify-center rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 text-white text-sm font-semibold hover:from-brand hover:to-brand/95 shadow-md transition-all"
                                 >
                                     Shop now
                                 </Link>
@@ -120,7 +120,7 @@ export default function CartPage() {
                             <button
                                 onClick={handleCheckout}
                                 disabled={cart.length === 0}
-                                className="w-full min-h-[44px] bg-gray-900 text-white h-12 rounded-xl font-semibold text-sm hover:bg-gray-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
+                                className="w-full min-h-[44px] bg-gradient-to-r from-slate-900 to-slate-800 text-white h-12 rounded-xl font-semibold text-sm hover:from-brand hover:to-brand/95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shadow-md"
                             >
                                 Checkout
                             </button>

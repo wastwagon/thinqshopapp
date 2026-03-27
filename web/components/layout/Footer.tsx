@@ -26,7 +26,7 @@ export default function Footer() {
     const ordersDelivered = settings.site_orders_delivered_text?.trim();
 
     return (
-        <footer className="py-16 sm:py-24 bg-gray-50 border-t border-gray-200">
+        <footer className="py-16 sm:py-24 bg-gradient-to-b from-slate-100/90 to-slate-50 border-t border-gray-200/90">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 sm:gap-16 mb-12 sm:mb-20">
                     <div className="md:col-span-2">
@@ -44,7 +44,7 @@ export default function Footer() {
                         )}
                         <div className="flex gap-4">
                             {[Instagram, Twitter, Facebook].map((Icon, idx) => (
-                                <Link key={idx} href="#" className="min-h-[44px] min-w-[44px] h-11 w-11 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all group" aria-label={`Follow us on ${idx === 0 ? 'Instagram' : idx === 1 ? 'Twitter' : 'Facebook'}`}>
+                                <Link key={idx} href="#" className="min-h-[44px] min-w-[44px] h-11 w-11 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand/50 transition-all group" aria-label={`Follow us on ${idx === 0 ? 'Instagram' : idx === 1 ? 'Twitter' : 'Facebook'}`}>
                                     <Icon className="h-4 w-4 group-hover:scale-110 transition-transform" />
                                 </Link>
                             ))}
@@ -54,32 +54,32 @@ export default function Footer() {
                     <div>
                         <h4 className="font-bold mb-8 text-xs uppercase tracking-widest text-gray-400">Services</h4>
                         <ul className="space-y-4 text-sm font-semibold text-gray-600">
-                            <li><Link href="/shop" className="hover:text-blue-600 transition-colors">Shop</Link></li>
-                            <li><Link href="/dashboard/logistics" className="hover:text-blue-600 transition-colors">Digital Logistics</Link></li>
-                            <li><Link href="/track" className="hover:text-blue-600 transition-colors">Order Tracking</Link></li>
-                            <li><Link href="/dashboard/procurement" className="hover:text-blue-600 transition-colors">Tech Sourcing</Link></li>
+                            <li><Link href="/shop" className="hover:text-brand transition-colors">Shop</Link></li>
+                            <li><Link href="/dashboard/logistics" className="hover:text-brand transition-colors">Digital Logistics</Link></li>
+                            <li><Link href="/track" className="hover:text-brand transition-colors">Order Tracking</Link></li>
+                            <li><Link href="/dashboard/procurement" className="hover:text-brand transition-colors">Tech Sourcing</Link></li>
                         </ul>
                     </div>
 
                     <div>
                         <h4 className="font-bold mb-8 text-xs uppercase tracking-widest text-gray-400">Company</h4>
                         <ul className="space-y-4 text-sm font-semibold text-gray-600">
-                            <li><Link href="/about" className="hover:text-blue-600 transition-colors">About Us</Link></li>
-                            <li><Link href="/terms" className="hover:text-blue-600 transition-colors">Terms & Conditions</Link></li>
-                            <li><Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</Link></li>
-                            <li><Link href="/contact" className="hover:text-blue-600 transition-colors">Contact Support</Link></li>
+                            <li><Link href="/about" className="hover:text-brand transition-colors">About Us</Link></li>
+                            <li><Link href="/terms" className="hover:text-brand transition-colors">Terms & Conditions</Link></li>
+                            <li><Link href="/privacy" className="hover:text-brand transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="/contact" className="hover:text-brand transition-colors">Contact Support</Link></li>
                         </ul>
                         <div className="mt-4 text-xs text-gray-600 space-y-1">
-                            <p><a href={`tel:${supportPhone.replace(/\s/g, '')}`} className="hover:text-blue-600">{supportPhone}</a></p>
-                            <p><a href={`mailto:${supportEmail}`} className="hover:text-blue-600">{supportEmail}</a></p>
+                            <p><a href={`tel:${supportPhone.replace(/\s/g, '')}`} className="hover:text-brand">{supportPhone}</a></p>
+                            <p><a href={`mailto:${supportEmail}`} className="hover:text-brand">{supportEmail}</a></p>
                         </div>
                     </div>
                 </div>
 
                 <div className="pt-8 sm:pt-12 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8">
                     <p className="text-xs font-medium text-gray-400 text-center md:text-left">© 2026 ThinQShop Global. All rights reserved.</p>
-                    <div className="flex items-center gap-3 py-2 px-5 bg-white border border-gray-100 rounded-full">
-                        <ShieldCheck className="h-4 w-4 text-green-500" />
+                    <div className="flex items-center gap-3 py-2 px-5 bg-white border border-brand/15 rounded-full shadow-sm">
+                        <ShieldCheck className="h-4 w-4 text-brand" />
                         <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Secure Shop Environment</span>
                     </div>
                 </div>

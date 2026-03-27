@@ -42,6 +42,12 @@ const config: Config = {
                     DEFAULT: "hsl(var(--card))",
                     foreground: "hsl(var(--card-foreground))",
                 },
+                brand: {
+                    DEFAULT: "hsl(var(--brand))",
+                    foreground: "hsl(var(--brand-foreground))",
+                    muted: "hsl(var(--brand-muted))",
+                    subtle: "hsl(var(--brand-subtle))",
+                },
                 blue: {
                     50: '#f0f5fa',
                     100: '#e1ebf5',

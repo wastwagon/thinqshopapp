@@ -111,7 +111,7 @@ export default function Home() {
 
     return (
         <ShopLayout>
-            <div className="min-h-screen bg-[#fafafa]">
+            <div className="min-h-screen bg-app">
                 {/* Hero (API or fallback) — mobile-first */}
                 <HomeHero slides={heroSlides} />
                 {/* Trust strip (API) */}
@@ -124,21 +124,21 @@ export default function Home() {
                 ) : (
                     <>
                 {/* Featured Deals */}
-                <section className="py-8 sm:py-12">
+                <section className="py-8 sm:py-12 relative">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
-                                <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-500/10">
-                                    <Zap className="w-5 h-5 text-amber-600" />
+                                <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/15 ring-1 ring-brand/20 shadow-sm">
+                                    <Zap className="w-5 h-5 text-brand" />
                                 </span>
                                 <div>
-                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Featured Deals</h2>
+                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">Featured Deals</h2>
                                     <p className="text-xs text-gray-500">Hand-picked offers</p>
                                 </div>
                             </div>
                             <Link
                                 href="/shop"
-                                className="text-xs font-semibold text-gray-500 hover:text-gray-900 flex items-center gap-1"
+                                className="text-xs font-semibold text-brand hover:text-brand/90 flex items-center gap-1 transition-colors"
                             >
                                 View all
                                 <ChevronRight className="w-4 h-4" />
@@ -160,21 +160,21 @@ export default function Home() {
                 </section>
 
                 {/* Featured Products */}
-                <section className="py-8 sm:py-12 bg-white border-y border-gray-100">
+                <section className="py-8 sm:py-12 bg-white/90 backdrop-blur-sm border-y border-gray-100/80 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6)]">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
-                                <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-500/10">
+                                <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600/10 ring-1 ring-blue-600/15">
                                     <Flame className="w-5 h-5 text-blue-600" />
                                 </span>
                                 <div>
-                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Featured</h2>
+                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">Featured</h2>
                                     <p className="text-xs text-gray-500">Hand-picked favorites</p>
                                 </div>
                             </div>
                             <Link
                                 href="/shop"
-                                className="text-xs font-semibold text-gray-500 hover:text-gray-900 flex items-center gap-1"
+                                className="text-xs font-semibold text-brand hover:text-brand/90 flex items-center gap-1 transition-colors"
                             >
                                 View all
                                 <ChevronRight className="w-4 h-4" />
@@ -199,7 +199,7 @@ export default function Home() {
                 <section className="py-8 sm:py-12">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6">
                         <div className="mb-6">
-                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">Shop by category</h2>
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 tracking-tight">Shop by category</h2>
                             <p className="text-xs text-gray-500">Browse our curated collection</p>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -209,13 +209,13 @@ export default function Home() {
                                     <Link
                                         key={cat.slug}
                                         href={`/shop/${cat.slug}`}
-                                        className="block p-6 rounded-2xl bg-white border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all group"
+                                        className="block p-6 rounded-2xl bg-white border border-gray-100/90 shadow-sm hover:border-brand/25 hover:shadow-md hover:shadow-brand/5 transition-all group"
                                     >
                                         <div className="flex items-center justify-between">
                                             <span className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{cat.name}</span>
-                                            <span className="text-xs text-gray-400">{count} products</span>
+                                            <span className="text-xs font-medium text-gray-400 tabular-nums">{count} products</span>
                                         </div>
-                                        <ChevronRight className="w-5 h-5 text-gray-300 mt-2 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                                        <ChevronRight className="w-5 h-5 text-gray-300 mt-2 group-hover:text-brand group-hover:translate-x-1 transition-all" />
                                     </Link>
                                 );
                             })}
@@ -223,7 +223,7 @@ export default function Home() {
                         <div className="flex justify-center">
                             <Link
                                 href="/shop"
-                                className="inline-flex items-center gap-2 min-h-[44px] px-6 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-colors touch-manipulation"
+                                className="inline-flex items-center gap-2 min-h-[44px] px-6 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white text-sm font-semibold rounded-xl hover:from-brand hover:to-brand/95 shadow-lg shadow-slate-900/20 transition-all touch-manipulation"
                             >
                                 Shop all products
                                 <ArrowRight className="w-4 h-4" />
@@ -236,10 +236,10 @@ export default function Home() {
                 <TestimonialsBlock testimonials={testimonials} />
 
                 {/* All Products - compact grid */}
-                <section className="py-8 sm:py-12 bg-white border-t border-gray-100">
+                <section className="py-8 sm:py-12 bg-white/90 backdrop-blur-sm border-t border-gray-100/80">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg sm:text-xl font-bold text-gray-900">All products</h2>
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">All products</h2>
                             <span className="text-xs text-gray-500 font-medium">{allProducts.length} items</span>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">

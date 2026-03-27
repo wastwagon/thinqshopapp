@@ -247,7 +247,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 </div>
                                 <button
                                     type="button"
-                                    className="w-full sm:flex-1 min-h-[44px] bg-gray-900 text-white rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-blue-600 transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-gray-200 py-2.5 px-3"
+                                    className="w-full sm:flex-1 min-h-[44px] bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wider hover:from-brand hover:to-brand/95 transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-slate-900/15 py-2.5 px-3"
                                         onClick={() => addToCart(Number(product.id), quantity)}
                                     >
                                         <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" aria-hidden />

@@ -27,15 +27,15 @@ export default function TrustStrip({ badges }: { badges: Badge[] }) {
     const list = badges?.length ? badges : FALLBACK_BADGES;
     if (!list.length) return null;
     return (
-        <section className="bg-white border-b border-gray-100 py-4 sm:py-5" aria-label="Trust badges">
+        <section className="bg-white/95 backdrop-blur-md border-b border-gray-100/90 py-4 sm:py-5 shadow-[0_1px_0_0_rgba(255,255,255,0.8)_inset]" aria-label="Trust badges">
             <div className="w-full px-3 sm:px-4">
                 {/* Full-width: single row so labels don't wrap. Mobile: horizontal scroll with wider cards */}
                 <div className="flex gap-3 overflow-x-auto pb-1 md:grid md:grid-cols-6 md:overflow-visible no-scrollbar">
                     {list.map((b) => {
                         const Icon = ICON_MAP[b.icon] ?? Star;
                         const content = (
-                            <span className="flex items-center gap-3 min-w-[200px] sm:min-w-[220px] md:min-w-0 flex-1 p-3 rounded-xl bg-gray-50/80 border border-gray-100 hover:border-gray-200 transition-colors whitespace-nowrap">
-                                <span className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600">
+                            <span className="flex items-center gap-3 min-w-[200px] sm:min-w-[220px] md:min-w-0 flex-1 p-3 rounded-xl bg-gradient-to-br from-amber-50/90 to-slate-50 border border-gray-100/90 hover:border-brand/25 hover:shadow-sm transition-all whitespace-nowrap">
+                                <span className="flex-shrink-0 w-10 h-10 rounded-lg bg-brand/12 ring-1 ring-brand/15 flex items-center justify-center text-brand">
                                     <Icon className="w-5 h-5" aria-hidden />
                                 </span>
                                 <span className="text-sm font-medium text-gray-900 truncate">{b.label}</span>

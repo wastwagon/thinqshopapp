@@ -42,7 +42,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     const descPreview = desc ? (desc.length > 80 ? desc.slice(0, 80).trim() + '…' : desc) : null;
 
     return (
-        <div className="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden relative flex flex-col h-full">
+        <div className="group bg-white rounded-xl border border-gray-100/90 shadow-sm hover:shadow-lg hover:shadow-brand/5 hover:border-brand/20 transition-all duration-300 overflow-hidden relative flex flex-col h-full">
             {/* Image Container */}
             <div className="aspect-square relative overflow-hidden bg-gray-50/80 flex items-center justify-center">
                 <ProductImage
@@ -94,7 +94,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             {/* Content */}
             <div className="p-4 flex flex-col flex-1">
                 <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider truncate">
+                    <span className="text-xs font-semibold text-brand uppercase tracking-wider truncate">
                         {typeof product.category === 'string' ? product.category : product.category?.name || 'Vetted Asset'}
                     </span>
                     <div className="flex items-center gap-0.5 shrink-0">
