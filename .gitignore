@@ -34,3 +34,7 @@ uploads/
 .vscode/
 *.swp
 *.swo
+
+# Playwright / Vitest artifacts (web)
+web/playwright-report/
+web/test-results/

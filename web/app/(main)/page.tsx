@@ -74,7 +74,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
     Home: HomeIconLucide,
 };
 
-/** Six distinct gradient themes (orange-led + complementary) for category tiles */
+/** Eight distinct gradient themes (orange-led + complementary) for category tiles */
 const CATEGORY_CARD_THEMES = [
     {
         gradient: 'bg-gradient-to-br from-orange-400 via-orange-500 to-amber-600',
@@ -106,26 +106,38 @@ const CATEGORY_CARD_THEMES = [
         ring: 'ring-sky-200/50 hover:ring-sky-300/70',
         orb: 'bg-blue-300/20',
     },
+    {
+        gradient: 'bg-gradient-to-br from-lime-400 via-green-500 to-emerald-800',
+        ring: 'ring-lime-200/50 hover:ring-lime-300/70',
+        orb: 'bg-lime-200/25',
+    },
+    {
+        gradient: 'bg-gradient-to-br from-violet-400 via-purple-500 to-indigo-900',
+        ring: 'ring-violet-200/50 hover:ring-violet-300/70',
+        orb: 'bg-violet-300/20',
+    },
 ] as const;
 
-function buildSixCategories(apiList: { name: string; slug: string }[]): { name: string; slug: string }[] {
+const CATEGORY_CARD_COUNT = 8;
+
+function buildEightCategories(apiList: { name: string; slug: string }[]): { name: string; slug: string }[] {
     const seen = new Set<string>();
     const out: { name: string; slug: string }[] = [];
     for (const c of apiList) {
-        if (out.length >= 6) break;
+        if (out.length >= CATEGORY_CARD_COUNT) break;
         const slug = (c.slug || '').trim() || c.name.toLowerCase().replace(/\s+/g, '-');
         if (seen.has(slug)) continue;
         out.push({ name: c.name, slug });
         seen.add(slug);
     }
     for (const def of CATEGORY_CATALOG) {
-        if (out.length >= 6) break;
+        if (out.length >= CATEGORY_CARD_COUNT) break;
         if (!seen.has(def.slug)) {
             out.push({ name: def.name, slug: def.slug });
             seen.add(def.slug);
         }
     }
-    return out.slice(0, 6);
+    return out.slice(0, CATEGORY_CARD_COUNT);
 }
 
 function categoryIconForSlug(slug: string): LucideIcon {
@@ -195,7 +207,7 @@ export default function Home() {
     const fallbackFlash = flashSales.length ? flashSales : productsWithIds.slice(0, 6);
     const allProducts = productsWithIds;
 
-    const categoryCards = useMemo(() => buildSixCategories(categories), [categories]);
+    const categoryCards = useMemo(() => buildEightCategories(categories), [categories]);
 
     if (!mounted) return null;
 
@@ -287,12 +299,12 @@ export default function Home() {
 
                 {/* Shop All Categories */}
                 <section className="py-8 sm:py-12">
-                    <div className="max-w-6xl mx-auto px-4 sm:px-6">
-                        <div className="mb-6">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                        <div className="mb-4 sm:mb-5">
                             <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 tracking-tight">Shop by category</h2>
                             <p className="text-xs text-gray-500">Browse our curated collection</p>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3 mb-8">
                             {categoryCards.map((cat, idx) => {
                                 const count = allProducts.filter(
                                     (p) => (typeof p.category === 'string' ? p.category : p.category?.name) === cat.name
@@ -303,33 +315,33 @@ export default function Home() {
                                     <Link
                                         key={`${cat.slug}-${idx}`}
                                         href={`/shop/${cat.slug}`}
-                                        className={`group relative block overflow-hidden rounded-2xl p-5 sm:p-6 shadow-lg ring-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl ${theme.gradient} ${theme.ring}`}
+                                        className={`group relative block overflow-hidden rounded-xl p-3.5 sm:p-4 shadow-md ring-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${theme.gradient} ${theme.ring}`}
                                     >
                                         <span
-                                            className={`pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full blur-2xl ${theme.orb}`}
+                                            className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full blur-xl ${theme.orb}`}
                                             aria-hidden
                                         />
                                         <span
                                             className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/25 to-transparent"
                                             aria-hidden
                                         />
-                                        <div className="relative flex items-start justify-between gap-3">
-                                            <div className="min-w-0 pr-2">
-                                                <h3 className="font-bold text-lg text-white drop-shadow-sm tracking-tight leading-snug">
+                                        <div className="relative flex items-start justify-between gap-2">
+                                            <div className="min-w-0 pr-1">
+                                                <h3 className="font-bold text-sm sm:text-[15px] text-white drop-shadow-sm tracking-tight leading-tight line-clamp-2">
                                                     {cat.name}
                                                 </h3>
-                                                <p className="mt-1.5 text-sm font-medium tabular-nums text-white/90">
+                                                <p className="mt-1 text-xs font-medium tabular-nums text-white/90">
                                                     {count} {count === 1 ? 'product' : 'products'}
                                                 </p>
                                             </div>
                                             <span
-                                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner backdrop-blur-sm ring-1 ring-white/30"
+                                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white shadow-inner backdrop-blur-sm ring-1 ring-white/30"
                                                 aria-hidden
                                             >
-                                                <Icon className="h-6 w-6" strokeWidth={2} />
+                                                <Icon className="h-4 w-4" strokeWidth={2} />
                                             </span>
                                         </div>
-                                        <ChevronRight className="relative mt-4 h-5 w-5 text-white/95 transition-transform duration-300 group-hover:translate-x-1.5" aria-hidden />
+                                        <ChevronRight className="relative mt-2 h-4 w-4 text-white/95 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
                                     </Link>
                                 );
                             })}

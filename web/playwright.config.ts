@@ -18,7 +18,8 @@ export default defineConfig({
     webServer: {
         command: 'npm run dev',
         url: baseURL,
-        reuseExistingServer: !process.env.CI,
+        // Prefer a fresh dev server so e2e always runs the latest UI (stale reuse can serve an old bundle).
+        reuseExistingServer: false,
         timeout: 60_000,
     },
 });
