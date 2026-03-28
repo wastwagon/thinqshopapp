@@ -138,7 +138,7 @@ export default function Footer() {
                             <div className="border-t border-gray-100 pt-6">
                                 <p className="text-sm font-semibold text-gray-900 mb-1">Stay in the loop</p>
                                 <p className="text-xs text-gray-500 mb-4 leading-relaxed">Product drops and offers — no spam.</p>
-                                <form onSubmit={handleSubscribe} className="space-y-3">
+                                <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
                                     <label htmlFor="footer-subscribe-email" className="sr-only">Email</label>
                                     <input
                                         id="footer-subscribe-email"
@@ -152,7 +152,7 @@ export default function Footer() {
                                     <button
                                         type="submit"
                                         disabled={submitting}
-                                        className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-slate-900/15 transition-all hover:from-brand hover:to-brand/95 disabled:opacity-60"
+                                        className="inline-flex min-h-[44px] w-auto shrink-0 items-center justify-center gap-1.5 self-start rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-slate-900/15 transition-all hover:from-brand hover:to-brand/95 disabled:opacity-60 sm:w-full sm:gap-2 sm:self-stretch sm:px-4"
                                     >
                                         {submitting ? '…' : 'Subscribe'}
                                         <ArrowRight className="h-4 w-4" aria-hidden />
