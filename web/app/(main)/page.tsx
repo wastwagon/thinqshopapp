@@ -1,9 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Zap, ArrowRight, ChevronRight, Flame } from 'lucide-react';
+import {
+    Zap,
+    ArrowRight,
+    ChevronRight,
+    Flame,
+    Camera,
+    Monitor,
+    Video,
+    Mic2,
+    Gamepad2,
+    Cpu,
+    Package,
+    Lightbulb,
+    Plane,
+    Home as HomeIconLucide,
+    type LucideIcon,
+} from 'lucide-react';
 import products from '@/lib/data/scraped_products.json';
 import api from '@/lib/axios';
 import ProductCard from '@/components/ui/ProductCard';
@@ -11,6 +27,7 @@ import ShopLayout from '@/components/layout/ShopLayout';
 import HomeHero from '@/components/home/HomeHero';
 import TrustStrip from '@/components/home/TrustStrip';
 import TestimonialsBlock from '@/components/home/TestimonialsBlock';
+import { STATIC_CATEGORIES as CATEGORY_CATALOG } from '@/lib/product-utils';
 
 type Product = {
     category: string | { name: string; slug: string };
@@ -44,7 +61,78 @@ function normalizeProduct(p: any, index: number): Product {
     };
 }
 
-const STATIC_CATEGORIES = ['Photography', 'Computers', 'Pro Video'];
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+    Camera,
+    Monitor,
+    Video,
+    Mic2,
+    Gamepad2,
+    Cpu,
+    Package,
+    Lightbulb,
+    Plane,
+    Home: HomeIconLucide,
+};
+
+/** Six distinct gradient themes (orange-led + complementary) for category tiles */
+const CATEGORY_CARD_THEMES = [
+    {
+        gradient: 'bg-gradient-to-br from-orange-400 via-orange-500 to-amber-600',
+        ring: 'ring-orange-200/60 hover:ring-orange-300/80',
+        orb: 'bg-amber-300/30',
+    },
+    {
+        gradient: 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700',
+        ring: 'ring-blue-200/50 hover:ring-blue-300/70',
+        orb: 'bg-sky-300/25',
+    },
+    {
+        gradient: 'bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-700',
+        ring: 'ring-emerald-200/50 hover:ring-emerald-300/70',
+        orb: 'bg-emerald-200/25',
+    },
+    {
+        gradient: 'bg-gradient-to-br from-rose-400 via-fuchsia-500 to-purple-700',
+        ring: 'ring-rose-200/50 hover:ring-rose-300/70',
+        orb: 'bg-pink-300/25',
+    },
+    {
+        gradient: 'bg-gradient-to-br from-amber-400 via-orange-500 to-red-600',
+        ring: 'ring-amber-200/60 hover:ring-amber-300/80',
+        orb: 'bg-orange-300/25',
+    },
+    {
+        gradient: 'bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-700',
+        ring: 'ring-sky-200/50 hover:ring-sky-300/70',
+        orb: 'bg-blue-300/20',
+    },
+] as const;
+
+function buildSixCategories(apiList: { name: string; slug: string }[]): { name: string; slug: string }[] {
+    const seen = new Set<string>();
+    const out: { name: string; slug: string }[] = [];
+    for (const c of apiList) {
+        if (out.length >= 6) break;
+        const slug = (c.slug || '').trim() || c.name.toLowerCase().replace(/\s+/g, '-');
+        if (seen.has(slug)) continue;
+        out.push({ name: c.name, slug });
+        seen.add(slug);
+    }
+    for (const def of CATEGORY_CATALOG) {
+        if (out.length >= 6) break;
+        if (!seen.has(def.slug)) {
+            out.push({ name: def.name, slug: def.slug });
+            seen.add(def.slug);
+        }
+    }
+    return out.slice(0, 6);
+}
+
+function categoryIconForSlug(slug: string): LucideIcon {
+    const def = CATEGORY_CATALOG.find((c) => c.slug === slug);
+    const key = def?.icon ?? 'Package';
+    return CATEGORY_ICONS[key] ?? Package;
+}
 
 type HeroSlide = { id: number; title: string; subtitle?: string | null; cta_text?: string | null; cta_url?: string | null; image_path?: string | null };
 type TrustBadge = { id: number; icon: string; label: string; optional_link?: string | null };
@@ -92,7 +180,7 @@ export default function Home() {
             }
             const staticProducts = (products as Product[]).map((p, i) => normalizeProduct({ ...p, id: p.id ?? i + 1 }, i));
             setProductsList(staticProducts);
-            setCategories(STATIC_CATEGORIES.map(name => ({ name, slug: name.toLowerCase().replace(/\s+/g, '-') })));
+            setCategories(CATEGORY_CATALOG.map((c) => ({ name: c.name, slug: c.slug })));
             setSource('static');
             setHeroSlides([]);
         };
@@ -106,6 +194,8 @@ export default function Home() {
     const flashSales = productsWithIds.filter(p => p.compare_price || Number(String(p.price).replace(/[^0-9.]/g, '')) < 1000).slice(0, 6);
     const fallbackFlash = flashSales.length ? flashSales : productsWithIds.slice(0, 6);
     const allProducts = productsWithIds;
+
+    const categoryCards = useMemo(() => buildSixCategories(categories), [categories]);
 
     if (!mounted) return null;
 
@@ -202,20 +292,44 @@ export default function Home() {
                             <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 tracking-tight">Shop by category</h2>
                             <p className="text-xs text-gray-500">Browse our curated collection</p>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                            {categories.map((cat) => {
-                                const count = allProducts.filter(p => (typeof p.category === 'string' ? p.category : p.category?.name) === cat.name).length;
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                            {categoryCards.map((cat, idx) => {
+                                const count = allProducts.filter(
+                                    (p) => (typeof p.category === 'string' ? p.category : p.category?.name) === cat.name
+                                ).length;
+                                const theme = CATEGORY_CARD_THEMES[idx % CATEGORY_CARD_THEMES.length];
+                                const Icon = categoryIconForSlug(cat.slug);
                                 return (
                                     <Link
-                                        key={cat.slug}
+                                        key={`${cat.slug}-${idx}`}
                                         href={`/shop/${cat.slug}`}
-                                        className="block p-6 rounded-2xl bg-white border border-gray-100/90 shadow-sm hover:border-brand/25 hover:shadow-md hover:shadow-brand/5 transition-all group"
+                                        className={`group relative block overflow-hidden rounded-2xl p-5 sm:p-6 shadow-lg ring-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl ${theme.gradient} ${theme.ring}`}
                                     >
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{cat.name}</span>
-                                            <span className="text-xs font-medium text-gray-400 tabular-nums">{count} products</span>
+                                        <span
+                                            className={`pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full blur-2xl ${theme.orb}`}
+                                            aria-hidden
+                                        />
+                                        <span
+                                            className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/25 to-transparent"
+                                            aria-hidden
+                                        />
+                                        <div className="relative flex items-start justify-between gap-3">
+                                            <div className="min-w-0 pr-2">
+                                                <h3 className="font-bold text-lg text-white drop-shadow-sm tracking-tight leading-snug">
+                                                    {cat.name}
+                                                </h3>
+                                                <p className="mt-1.5 text-sm font-medium tabular-nums text-white/90">
+                                                    {count} {count === 1 ? 'product' : 'products'}
+                                                </p>
+                                            </div>
+                                            <span
+                                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner backdrop-blur-sm ring-1 ring-white/30"
+                                                aria-hidden
+                                            >
+                                                <Icon className="h-6 w-6" strokeWidth={2} />
+                                            </span>
                                         </div>
-                                        <ChevronRight className="w-5 h-5 text-gray-300 mt-2 group-hover:text-brand group-hover:translate-x-1 transition-all" />
+                                        <ChevronRight className="relative mt-4 h-5 w-5 text-white/95 transition-transform duration-300 group-hover:translate-x-1.5" aria-hidden />
                                     </Link>
                                 );
                             })}

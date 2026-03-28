@@ -44,6 +44,7 @@ const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>
 };
 
 const mainNavItems = [
+    { href: '/', label: 'Home' },
     { href: '/shop', label: 'Shop', mega: true },
     { href: '/track', label: 'Track' },
     { href: '/dashboard/logistics', label: 'Logistics' },
@@ -113,7 +114,7 @@ export default function Navbar() {
                                 <Link
                                     href={item.href}
                                     role="menuitem"
-                                    className="py-2 px-1 -mx-1 rounded-lg hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors inline-flex items-center gap-1"
+                                    className={`py-2 px-1 -mx-1 rounded-lg hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors inline-flex items-center gap-1 ${pathname === '/shop' || pathname.startsWith('/shop/') ? 'text-blue-600' : ''}`}
                                 >
                                     {item.label}
                                     <ChevronDown className={`h-3.5 w-3.5 transition-transform ${shopMegaOpen ? 'rotate-180' : ''}`} />
@@ -183,7 +184,8 @@ export default function Navbar() {
                                 key={item.href}
                                 href={item.href}
                                 role="menuitem"
-                                className={`py-2 px-1 -mx-1 rounded-lg hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors ${item.highlight ? 'text-brand font-extrabold' : ''}`}
+                                aria-current={item.href === '/' && pathname === '/' ? 'page' : undefined}
+                                className={`py-2 px-1 -mx-1 rounded-lg hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors ${item.highlight ? 'text-brand font-extrabold' : ''} ${!item.highlight && pathname === item.href ? 'text-blue-600' : ''}`}
                             >
                                 {item.label}
                             </Link>
