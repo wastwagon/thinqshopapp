@@ -304,7 +304,7 @@ export default function Home() {
                             <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 tracking-tight">Shop by category</h2>
                             <p className="text-xs text-gray-500">Browse our curated collection</p>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3 mb-8">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-8">
                             {categoryCards.map((cat, idx) => {
                                 const count = allProducts.filter(
                                     (p) => (typeof p.category === 'string' ? p.category : p.category?.name) === cat.name
@@ -315,7 +315,7 @@ export default function Home() {
                                     <Link
                                         key={`${cat.slug}-${idx}`}
                                         href={`/shop/${cat.slug}`}
-                                        className={`group relative block overflow-hidden rounded-xl p-3.5 sm:p-4 shadow-md ring-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${theme.gradient} ${theme.ring}`}
+                                        className={`group relative flex min-h-[5.25rem] flex-col overflow-hidden rounded-xl p-3 sm:p-3.5 lg:p-4 shadow-md ring-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg lg:min-h-0 ${theme.gradient} ${theme.ring}`}
                                     >
                                         <span
                                             className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full blur-xl ${theme.orb}`}
@@ -341,7 +341,7 @@ export default function Home() {
                                                 <Icon className="h-4 w-4" strokeWidth={2} />
                                             </span>
                                         </div>
-                                        <ChevronRight className="relative mt-2 h-4 w-4 text-white/95 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+                                        <ChevronRight className="relative mt-auto pt-2 h-4 w-4 shrink-0 text-white/95 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
                                     </Link>
                                 );
                             })}
