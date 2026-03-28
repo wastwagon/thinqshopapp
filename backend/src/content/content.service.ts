@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 const FXR_API_BASE = 'https://dev.kwayisi.org/apis/forex';
@@ -64,6 +65,20 @@ export class ContentService {
             rows.forEach(r => { map[r.setting_key] = r.setting_value ?? ''; });
             return map;
         });
+    }
+
+    /** Store a newsletter signup; duplicate emails return ok without error (privacy). */
+    async subscribeNewsletter(email: string): Promise<{ ok: true }> {
+        const normalized = email.trim().toLowerCase();
+        try {
+            await this.prisma.newsletterSignup.create({ data: { email: normalized } });
+        } catch (e) {
+            if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+                return { ok: true };
+            }
+            throw e;
+        }
+        return { ok: true };
     }
 
     /** Shop display rates (GHS→USD, GHS→CNY). Fetches from FXR-API if stale; falls back to last stored. */

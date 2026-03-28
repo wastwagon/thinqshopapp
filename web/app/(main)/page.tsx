@@ -201,13 +201,32 @@ export default function Home() {
 
     const productsWithIds = productsList;
 
-    const featured = productsWithIds.filter((p: Product) => (source === 'api' && (p as any).is_featured) || source === 'static').slice(0, 8);
-    const fallbackFeatured = featured.length ? featured : productsWithIds.slice(0, 8);
-    const flashSales = productsWithIds.filter(p => p.compare_price || Number(String(p.price).replace(/[^0-9.]/g, '')) < 1000).slice(0, 6);
-    const fallbackFlash = flashSales.length ? flashSales : productsWithIds.slice(0, 6);
+    const { fallbackFeatured, fallbackFlash } = useMemo(() => {
+        const featured = productsWithIds
+            .filter((p: Product) => (source === 'api' && (p as Product & { is_featured?: boolean }).is_featured) || source === 'static')
+            .slice(0, 8);
+        const fallbackFeatured = featured.length ? featured : productsWithIds.slice(0, 8);
+        const flashSales = productsWithIds
+            .filter((p) => p.compare_price || Number(String(p.price).replace(/[^0-9.]/g, '')) < 1000)
+            .slice(0, 6);
+        const fallbackFlash = flashSales.length ? flashSales : productsWithIds.slice(0, 6);
+        return { fallbackFeatured, fallbackFlash };
+    }, [productsWithIds, source]);
+
     const allProducts = productsWithIds;
 
     const categoryCards = useMemo(() => buildEightCategories(categories), [categories]);
+
+    /** One pass over products — avoid O(categories × products) filters per tile */
+    const categoryProductCounts = useMemo(() => {
+        const m = new Map<string, number>();
+        for (const p of allProducts) {
+            const name = typeof p.category === 'string' ? p.category : p.category?.name;
+            if (!name) continue;
+            m.set(name, (m.get(name) ?? 0) + 1);
+        }
+        return m;
+    }, [allProducts]);
 
     if (!mounted) return null;
 
@@ -298,24 +317,25 @@ export default function Home() {
                 </section>
 
                 {/* Shop All Categories */}
-                <section className="py-8 sm:py-12">
+                <section className="py-8 sm:py-12" aria-labelledby="shop-by-category-heading">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6">
                         <div className="mb-4 sm:mb-5">
-                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 tracking-tight">Shop by category</h2>
+                            <h2 id="shop-by-category-heading" className="text-lg sm:text-xl font-bold text-gray-900 mb-1 tracking-tight">
+                                Shop by category
+                            </h2>
                             <p className="text-xs text-gray-500">Browse our curated collection</p>
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-8">
                             {categoryCards.map((cat, idx) => {
-                                const count = allProducts.filter(
-                                    (p) => (typeof p.category === 'string' ? p.category : p.category?.name) === cat.name
-                                ).length;
+                                const count = categoryProductCounts.get(cat.name) ?? 0;
                                 const theme = CATEGORY_CARD_THEMES[idx % CATEGORY_CARD_THEMES.length];
                                 const Icon = categoryIconForSlug(cat.slug);
                                 return (
                                     <Link
                                         key={`${cat.slug}-${idx}`}
                                         href={`/shop/${cat.slug}`}
-                                        className={`group relative flex min-h-[5.25rem] flex-col overflow-hidden rounded-xl p-3 sm:p-3.5 lg:p-4 shadow-md ring-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg lg:min-h-0 ${theme.gradient} ${theme.ring}`}
+                                        aria-label={`${cat.name}: ${count} ${count === 1 ? 'product' : 'products'}`}
+                                        className={`group relative flex min-h-[5.25rem] flex-col overflow-hidden rounded-xl p-3 sm:p-3.5 lg:p-4 shadow-md ring-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900/20 lg:min-h-0 ${theme.gradient} ${theme.ring}`}
                                     >
                                         <span
                                             className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full blur-xl ${theme.orb}`}
@@ -341,7 +361,10 @@ export default function Home() {
                                                 <Icon className="h-4 w-4" strokeWidth={2} />
                                             </span>
                                         </div>
-                                        <ChevronRight className="relative mt-auto pt-2 h-4 w-4 shrink-0 text-white/95 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+                                        <ChevronRight
+                                            className="relative mt-auto pt-2 h-4 w-4 shrink-0 text-white/95 transition-transform duration-300 group-hover:translate-x-1"
+                                            aria-hidden
+                                        />
                                     </Link>
                                 );
                             })}
@@ -349,7 +372,7 @@ export default function Home() {
                         <div className="flex justify-center">
                             <Link
                                 href="/shop"
-                                className="inline-flex items-center gap-2 min-h-[44px] px-6 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white text-sm font-semibold rounded-xl hover:from-brand hover:to-brand/95 shadow-lg shadow-slate-900/20 transition-all touch-manipulation"
+                                className="inline-flex items-center gap-2 min-h-[44px] px-6 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white text-sm font-semibold rounded-xl hover:from-brand hover:to-brand/95 shadow-lg shadow-slate-900/20 transition-all touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
                             >
                                 Shop all products
                                 <ArrowRight className="w-4 h-4" />

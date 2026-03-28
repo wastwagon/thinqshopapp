@@ -23,8 +23,9 @@ import {
     needsFxConversion,
     formatFxHint,
 } from '@/lib/shippingQuote';
+import type { AdminUserSearchRow } from '@/types/admin';
 
-function displayUserName(u: any) {
+function displayUserName(u: AdminUserSearchRow) {
     const p = u?.profile;
     if (p?.first_name || p?.last_name) return `${p.first_name || ''} ${p.last_name || ''}`.trim();
     return u?.email ?? '—';
@@ -39,7 +40,7 @@ export default function ShippingCalculatorPage() {
     const [categoryId, setCategoryId] = useState<string>('');
     const [submitting, setSubmitting] = useState(false);
     const [customerSearch, setCustomerSearch] = useState('');
-    const [customerSearchResults, setCustomerSearchResults] = useState<any[]>([]);
+    const [customerSearchResults, setCustomerSearchResults] = useState<AdminUserSearchRow[]>([]);
     const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
     const [customerSearching, setCustomerSearching] = useState(false);
     const customerSearchRef = useRef<HTMLDivElement>(null);
@@ -98,7 +99,7 @@ export default function ShippingCalculatorPage() {
             setCustomerSearching(true);
             api.get('/users/admin/list', { params: { search: customerSearch.trim(), limit: 20 } })
                 .then(({ data }) => {
-                    setCustomerSearchResults(data?.data ?? []);
+                    setCustomerSearchResults((data?.data ?? []) as AdminUserSearchRow[]);
                     setCustomerSearchOpen(true);
                 })
                 .catch(() => setCustomerSearchResults([]))
@@ -115,7 +116,7 @@ export default function ShippingCalculatorPage() {
         return () => document.removeEventListener('click', onDocClick);
     }, []);
 
-    const selectCustomer = (u: any) => {
+    const selectCustomer = (u: AdminUserSearchRow) => {
         const name = displayUserName(u);
         setForm((f) => ({
             ...f,

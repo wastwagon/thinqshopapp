@@ -8,7 +8,10 @@ export type DimensionUnit = 'cm' | 'm' | 'mm';
 
 export const DEFAULT_INVOICE_CURRENCY = 'GHS';
 
-/** Currencies allowed for invoice line / dropdown */
+/**
+ * Currencies allowed for invoice line items and the admin dropdown.
+ * **RMB** is the same monetary unit as storefront **CNY**; we use the RMB label on invoices for supplier-facing copy, while freight rows may expose `CNY`.
+ */
 export const INVOICE_CURRENCY_OPTIONS = ['GHS', 'USD', 'RMB', 'EUR'] as const;
 export type InvoiceCurrencyOption = (typeof INVOICE_CURRENCY_OPTIONS)[number];
 

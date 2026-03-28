@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -17,6 +17,7 @@ export default function AdminInvoiceRatesPage() {
     const [modeFilter, setModeFilter] = useState<string>('');
     const [activeFilter, setActiveFilter] = useState<string>('');
     const [modalOpen, setModalOpen] = useState(false);
+    const modalPanelRef = useRef<HTMLDivElement>(null);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [form, setForm] = useState({
@@ -67,10 +68,28 @@ export default function AdminInvoiceRatesPage() {
         setModalOpen(true);
     };
 
-    const closeModal = () => {
+    const closeModal = useCallback(() => {
         setModalOpen(false);
         setEditingId(null);
-    };
+    }, []);
+
+    useEffect(() => {
+        if (!modalOpen) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') closeModal();
+        };
+        document.addEventListener('keydown', onKey);
+        const t = window.setTimeout(() => {
+            const focusable = modalPanelRef.current?.querySelector<HTMLElement>(
+                'input:not([type="hidden"]), select, textarea, button:not([disabled])',
+            );
+            focusable?.focus();
+        }, 0);
+        return () => {
+            document.removeEventListener('keydown', onKey);
+            window.clearTimeout(t);
+        };
+    }, [modalOpen, closeModal]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -146,7 +165,17 @@ export default function AdminInvoiceRatesPage() {
                     </div>
                     <div className="text-sm text-gray-700 min-w-0">
                         <p className="font-semibold text-gray-900 mb-1">Shipping Calculator</p>
-                        <p className="mb-2">Rates here drive the <Link href="/admin/invoices/new" className="text-blue-600 hover:text-blue-700 hover:underline font-medium inline-flex items-center gap-1"><Calculator className="h-3.5 w-3.5" /> Shipping Calculator</Link>.</p>
+                        <p className="mb-2">
+                            Invoice rates here drive the{' '}
+                            <Link href="/admin/invoices/new" className="text-blue-600 hover:text-blue-700 hover:underline font-medium inline-flex items-center gap-1">
+                                <Calculator className="h-3.5 w-3.5" /> Shipping Calculator
+                            </Link>
+                            . Freight catalog rates from{' '}
+                            <Link href="/admin/shipping-rates" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">
+                                Shipping Rates
+                            </Link>{' '}
+                            are merged in the calculator as well.
+                        </p>
                         <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
                             <li><strong className="text-gray-800">Air:</strong> mode = air, unit = kg → weight × rate × quantity. Est. 3–10 days.</li>
                             <li><strong className="text-gray-800">Sea:</strong> mode = sea, unit = CBM → volume (L×W×H in cm/m/mm) × rate × quantity. Est. 35–40 days.</li>
@@ -254,9 +283,22 @@ export default function AdminInvoiceRatesPage() {
             </div>
 
             {modalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={closeModal}>
-                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">{editingId ? 'Edit rate' : 'Add rate'}</h2>
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                    role="presentation"
+                    onClick={closeModal}
+                >
+                    <div
+                        ref={modalPanelRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="invoice-rate-dialog-title"
+                        className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6 outline-none"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2 id="invoice-rate-dialog-title" className="text-lg font-bold text-gray-900 mb-4">
+                            {editingId ? 'Edit rate' : 'Add rate'}
+                        </h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Name *</label>

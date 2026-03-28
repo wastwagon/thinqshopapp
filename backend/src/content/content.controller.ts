@@ -10,6 +10,8 @@ import {
     Request,
     ParseIntPipe,
     Header,
+    HttpCode,
+    HttpStatus,
 } from '@nestjs/common';
 import { ContentService } from './content.service';
 import { AuthGuard } from '../auth/auth.guard';
@@ -29,6 +31,7 @@ import {
 import { UpdatePolicyDto } from './dto/policy.dto';
 import { UpdateHomepageSectionDto, ReorderSectionsDto } from './dto/homepage-section.dto';
 import { UpdateStorefrontSettingsDto } from './dto/settings.dto';
+import { NewsletterSignupDto } from './dto/newsletter-signup.dto';
 
 @Controller('content')
 export class ContentController {
@@ -76,6 +79,13 @@ export class ContentController {
     @Header('Cache-Control', 'public, max-age=60')
     getPublicSettings() {
         return this.content.getPublicSettings();
+    }
+
+    @Post('newsletter/signup')
+    @Public()
+    @HttpCode(HttpStatus.OK)
+    subscribeNewsletter(@Body() dto: NewsletterSignupDto) {
+        return this.content.subscribeNewsletter(dto.email);
     }
 
     @Get('currency-rates')

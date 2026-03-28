@@ -32,7 +32,7 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
                             className="p-4 sm:p-5 rounded-2xl bg-white border border-gray-100/90 shadow-sm hover:shadow-md hover:border-brand/15 transition-shadow min-h-[120px] flex flex-col"
                         >
                             <Quote className="w-8 h-8 text-brand/35 mb-2 flex-shrink-0" aria-hidden />
-                            <p className="text-sm sm:text-base text-gray-700 leading-relaxed flex-1">"{t.quote}"</p>
+                            <p className="text-sm sm:text-base text-gray-700 leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
                             <footer className="mt-3 text-xs font-semibold text-gray-900">
                                 — {t.author_name}
                                 {t.author_role && <span className="font-normal text-gray-500">, {t.author_role}</span>}

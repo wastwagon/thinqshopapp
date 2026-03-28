@@ -6,6 +6,7 @@ test.describe('Smoke', () => {
         await expect(page).toHaveTitle(/ThinQShop|ThinQShopping/i);
         const main = page.locator('#main-content').or(page.locator('main'));
         await expect(main.first()).toBeVisible({ timeout: 15_000 });
+        await expect(page.getByRole('link', { name: /shop all products/i })).toBeVisible({ timeout: 15_000 });
     });
 
     test('shop page loads', async ({ page }) => {

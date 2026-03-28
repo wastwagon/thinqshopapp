@@ -973,6 +973,16 @@ model InvoiceRate {
   @@map("invoice_rates")
 }
 
+// --- MARKETING ---
+
+model NewsletterSignup {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique @db.VarChar(255)
+  created_at DateTime @default(now())
+
+  @@map("newsletter_signups")
+}
+
 // --- NOTIFICATION TABLES ---
 
 model Notification {

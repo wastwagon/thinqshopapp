@@ -24,14 +24,19 @@ export default function Footer() {
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        api.get('/content/settings/public').then((res) => setSettings(res.data || {})).catch(() => {});
+        const ac = new AbortController();
+        api
+            .get('/content/settings/public', { signal: ac.signal })
+            .then((res) => setSettings(res.data || {}))
+            .catch(() => {});
+        return () => ac.abort();
     }, []);
 
     const supportPhone = settings.support_phone?.trim() || DEFAULT_SUPPORT_PHONE;
     const supportEmail = settings.support_email?.trim() || DEFAULT_SUPPORT_EMAIL;
     const ordersDelivered = settings.site_orders_delivered_text?.trim();
 
-    const handleSubscribe = (e: React.FormEvent) => {
+    const handleSubscribe = async (e: React.FormEvent) => {
         e.preventDefault();
         const trimmed = email.trim();
         if (!trimmed) {
@@ -43,12 +48,23 @@ export default function Footer() {
             return;
         }
         setSubmitting(true);
-        // No newsletter API yet — acknowledge and clear; wire backend later if needed
-        setTimeout(() => {
+        try {
+            await api.post('/content/newsletter/signup', { email: trimmed });
             toast.success('Thanks — you’re on the list.');
             setEmail('');
+        } catch (err: unknown) {
+            const ax = err as { response?: { data?: { message?: string | string[] } } };
+            const msg = ax.response?.data?.message;
+            if (Array.isArray(msg)) {
+                toast.error(String(msg[0] || 'Invalid email'));
+            } else if (typeof msg === 'string') {
+                toast.error(msg);
+            } else {
+                toast.error('Could not subscribe. Try again later.');
+            }
+        } finally {
             setSubmitting(false);
-        }, 400);
+        }
     };
 
     return (
@@ -135,11 +151,17 @@ export default function Footer() {
                                 </li>
                             </ul>
 
-                            <div className="border-t border-gray-100 pt-6">
-                                <p className="text-sm font-semibold text-gray-900 mb-1">Stay in the loop</p>
-                                <p className="text-xs text-gray-500 mb-4 leading-relaxed">Product drops and offers — no spam.</p>
-                                <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
-                                    <label htmlFor="footer-subscribe-email" className="sr-only">Email</label>
+                            <div className="border-t border-gray-100 pt-6" role="region" aria-labelledby="footer-newsletter-heading">
+                                <p id="footer-newsletter-heading" className="text-sm font-semibold text-gray-900 mb-1">
+                                    Stay in the loop
+                                </p>
+                                <p id="footer-newsletter-hint" className="text-xs text-gray-500 mb-4 leading-relaxed">
+                                    Product drops and offers — no spam.
+                                </p>
+                                <form onSubmit={handleSubscribe} className="flex flex-col gap-3" noValidate>
+                                    <label htmlFor="footer-subscribe-email" className="sr-only">
+                                        Email for newsletter
+                                    </label>
                                     <input
                                         id="footer-subscribe-email"
                                         type="email"
@@ -147,12 +169,15 @@ export default function Footer() {
                                         placeholder="you@example.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
+                                        aria-describedby="footer-newsletter-hint"
                                         className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 shadow-inner focus:border-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/20"
                                     />
                                     <button
                                         type="submit"
                                         disabled={submitting}
-                                        className="inline-flex min-h-[44px] w-auto shrink-0 items-center justify-center gap-1.5 self-start rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-slate-900/15 transition-all hover:from-brand hover:to-brand/95 disabled:opacity-60 sm:w-full sm:gap-2 sm:self-stretch sm:px-4"
+                                        aria-busy={submitting}
+                                        aria-label={submitting ? 'Subscribing, please wait' : 'Subscribe to product updates'}
+                                        className="inline-flex min-h-[44px] w-auto shrink-0 items-center justify-center gap-1.5 self-start rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-slate-900/15 transition-all hover:from-brand hover:to-brand/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:opacity-60 sm:w-full sm:gap-2 sm:self-stretch sm:px-4"
                                     >
                                         {submitting ? '…' : 'Subscribe'}
                                         <ArrowRight className="h-4 w-4" aria-hidden />

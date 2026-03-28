@@ -404,7 +404,7 @@ function TestimonialsSection({
         <div className="space-y-2 pt-3">
             {items.map((t) => (
                 <div key={t.id} className="p-3 rounded-xl bg-gray-50 border border-gray-100">
-                    <p className="text-sm text-gray-700 line-clamp-2">"{t.quote}"</p>
+                    <p className="text-sm text-gray-700 line-clamp-2">&ldquo;{t.quote}&rdquo;</p>
                     <p className="text-xs font-medium text-gray-900 mt-1">— {t.author_name}{t.author_role ? `, ${t.author_role}` : ''}</p>
                 </div>
             ))}
