@@ -7,6 +7,47 @@ const outfit = Outfit({ subsets: ["latin"] });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app';
 
+const webViewGoldForceBridge = process.env.NEXT_PUBLIC_WEBVIEWGOLD_FORCE_BRIDGE === '1';
+
+/** Runs before React: disable native PTR and add .webview-gold for scroll CSS (see web/lib/webviewGoldClient.ts). */
+const webViewGoldBootScript = `
+(function(){
+  var FORCE=${webViewGoldForceBridge ? 'true' : 'false'};
+  function isWG(){
+    try {
+      if (window.__WEBVIEWGOLD__===true) return true;
+      if (FORCE) return true;
+      return /WebViewGold/i.test(navigator.userAgent||'');
+    } catch(e){ return false; }
+  }
+  if (!isWG()) return;
+  function mark(){
+    try {
+      document.documentElement.classList.add('webview-gold');
+      if (document.body) document.body.classList.add('webview-gold');
+    } catch(e){}
+  }
+  function disable(){
+    try {
+      if (!document.body) return;
+      var f=document.createElement('iframe');
+      f.setAttribute('src','disablepulltorefresh://');
+      f.setAttribute('title','WebViewGold disable pull to refresh');
+      f.style.cssText='position:absolute;width:0;height:0;border:0;visibility:hidden;pointer-events:none';
+      document.body.appendChild(f);
+      setTimeout(function(){ if(f.parentNode)f.parentNode.removeChild(f);},400);
+    } catch(e){}
+  }
+  function schedule(){
+    disable();
+    [0,80,200,600,1500].forEach(function(ms){ setTimeout(disable,ms); });
+  }
+  mark();
+  schedule();
+  document.addEventListener('DOMContentLoaded',function(){ mark(); schedule(); });
+  window.addEventListener('pageshow',function(){ mark(); schedule(); });
+})();`;
+
 export const metadata: Metadata = {
     metadataBase: new URL(siteUrl),
     title: {
@@ -54,6 +95,11 @@ export default function RootLayout({
                 />
             </head>
             <body className={outfit.className}>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: webViewGoldBootScript,
+                    }}
+                />
                 <AppLoadedMarker />
                 <a href="#main-content" className="skip-link">Skip to main content</a>
                 <script
