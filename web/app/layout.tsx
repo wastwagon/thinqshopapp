@@ -10,17 +10,13 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app';
 const webViewGoldForceBridge = process.env.NEXT_PUBLIC_WEBVIEWGOLD_FORCE_BRIDGE === '1';
 
 /**
- * Before React: WebViewGold docs — call disablepulltorefresh:// from the website
- * (Android ENABLE_PULL_REFRESH / iOS pulltorefresh sections). Iframe + <a> mirror
- * web/lib/webviewGoldClient.ts. PTR_OFF_VIA_LOCATION matches Android doc style for scheme APIs.
+ * Before React: WebViewGold — iframe + synthetic <a> for disablepulltorefresh:// only.
+ * Do NOT set window.location here: it can unload the document / trap WebView and leave the
+ * slate splash (#0f172a) forever if React never hydrates.
  */
-const webViewGoldPtrOffViaLocation = process.env.NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_VIA_LOCATION === '1';
-
 const webViewGoldBootScript = `
 (function(){
   var FORCE=${webViewGoldForceBridge ? 'true' : 'false'};
-  var VIA_LOC=${webViewGoldPtrOffViaLocation ? 'true' : 'false'};
-  var LOC_SENT=false;
   var SCHEME='disablepulltorefresh://';
   function isWG(){
     try {
@@ -52,7 +48,6 @@ const webViewGoldBootScript = `
       document.body.appendChild(a);
       a.click();
       if(a.parentNode)a.parentNode.removeChild(a);
-      if(VIA_LOC&&!LOC_SENT){ LOC_SENT=true; try{ window.location.href=SCHEME; }catch(e2){} }
     } catch(e){}
   }
   function schedule(){
@@ -63,6 +58,20 @@ const webViewGoldBootScript = `
   schedule();
   document.addEventListener('DOMContentLoaded',function(){ mark(); schedule(); });
   window.addEventListener('pageshow',function(){ mark(); schedule(); });
+})();`;
+
+/** If React never adds .app-loaded (hydration error / broken navigation), exit slate splash after 5s. */
+const appLoadedFallbackScript = `
+(function(){
+  function ensure(){
+    if (!document.documentElement.classList.contains('app-loaded')) {
+      document.documentElement.classList.add('app-loaded');
+      if (document.body) document.body.classList.add('app-loaded');
+    }
+  }
+  function arm(){ setTimeout(ensure, 5000); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arm);
+  else arm();
 })();`;
 
 export const metadata: Metadata = {
@@ -115,6 +124,11 @@ export default function RootLayout({
                 <script
                     dangerouslySetInnerHTML={{
                         __html: webViewGoldBootScript,
+                    }}
+                />
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: appLoadedFallbackScript,
                     }}
                 />
                 <AppLoadedMarker />

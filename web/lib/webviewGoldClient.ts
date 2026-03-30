@@ -12,7 +12,8 @@
  * Android docs also use `window.location.href = "…://"` for other scheme APIs; we prefer
  * iframe + synthetic `<a click>` first so the SPA main frame does not navigate if a
  * scheme is not handled. Optional `NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_VIA_LOCATION=1` adds
- * a top-frame `location.href` attempt (set only if your build intercepts that reliably).
+ * a top-frame `location.href` attempt only when `window.__WEBVIEWGOLD__ === true` (inject in
+ * the native app). Never combined with FORCE_BRIDGE alone — that can break normal browsers.
  *
  * `NEXT_PUBLIC_WEBVIEWGOLD_FORCE_BRIDGE=1` — run when the app strips “WebViewGold” from
  * the user agent but still registers WebViewGold URL handlers.
@@ -83,7 +84,10 @@ export function disableWebViewGoldPullToRefresh(): void {
     fireIframeScheme(DISABLE_PTR_SCHEME);
     fireAnchorScheme(DISABLE_PTR_SCHEME);
     if (process.env.NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_VIA_LOCATION === '1') {
-        fireLocationSchemeOnce(DISABLE_PTR_SCHEME);
+        const w = window as unknown as { __WEBVIEWGOLD__?: boolean };
+        if (w.__WEBVIEWGOLD__ === true) {
+            fireLocationSchemeOnce(DISABLE_PTR_SCHEME);
+        }
     }
 }
 
