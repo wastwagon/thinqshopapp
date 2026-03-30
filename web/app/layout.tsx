@@ -9,10 +9,19 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app';
 
 const webViewGoldForceBridge = process.env.NEXT_PUBLIC_WEBVIEWGOLD_FORCE_BRIDGE === '1';
 
-/** Runs before React: disable native PTR and add .webview-gold for scroll CSS (see web/lib/webviewGoldClient.ts). */
+/**
+ * Before React: WebViewGold docs — call disablepulltorefresh:// from the website
+ * (Android ENABLE_PULL_REFRESH / iOS pulltorefresh sections). Iframe + <a> mirror
+ * web/lib/webviewGoldClient.ts. PTR_OFF_VIA_LOCATION matches Android doc style for scheme APIs.
+ */
+const webViewGoldPtrOffViaLocation = process.env.NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_VIA_LOCATION === '1';
+
 const webViewGoldBootScript = `
 (function(){
   var FORCE=${webViewGoldForceBridge ? 'true' : 'false'};
+  var VIA_LOC=${webViewGoldPtrOffViaLocation ? 'true' : 'false'};
+  var LOC_SENT=false;
+  var SCHEME='disablepulltorefresh://';
   function isWG(){
     try {
       if (window.__WEBVIEWGOLD__===true) return true;
@@ -31,11 +40,19 @@ const webViewGoldBootScript = `
     try {
       if (!document.body) return;
       var f=document.createElement('iframe');
-      f.setAttribute('src','disablepulltorefresh://');
+      f.setAttribute('src',SCHEME);
       f.setAttribute('title','WebViewGold disable pull to refresh');
       f.style.cssText='position:absolute;width:0;height:0;border:0;visibility:hidden;pointer-events:none';
       document.body.appendChild(f);
       setTimeout(function(){ if(f.parentNode)f.parentNode.removeChild(f);},400);
+      var a=document.createElement('a');
+      a.setAttribute('href',SCHEME);
+      a.setAttribute('aria-hidden','true');
+      a.style.cssText='position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0';
+      document.body.appendChild(a);
+      a.click();
+      if(a.parentNode)a.parentNode.removeChild(a);
+      if(VIA_LOC&&!LOC_SENT){ LOC_SENT=true; try{ window.location.href=SCHEME; }catch(e2){} }
     } catch(e){}
   }
   function schedule(){
