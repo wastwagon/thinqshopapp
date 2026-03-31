@@ -22,6 +22,13 @@ const displayName = (u: any) => {
     return u?.email ?? '—';
 };
 
+const formatCmsLabel = (value?: string | null): string =>
+    (value || '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, (c) => c.toUpperCase()) || '—';
+
 export default function AdminUsers() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -117,7 +124,7 @@ export default function AdminUsers() {
                     <Users className="h-7 w-7 text-blue-600" />
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Users</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">User directory</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Manage customer and team accounts</p>
                     </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -133,7 +140,7 @@ export default function AdminUsers() {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
                             <input
                                 type="text"
-                                placeholder="Search by email or phone..."
+                                placeholder="Search by name, email, or phone..."
                                 value={searchInput}
                                 onChange={(e) => setSearchInput(e.target.value)}
                                 className="w-full h-9 bg-white border border-gray-100 rounded-lg pl-9 pr-3 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
@@ -165,7 +172,7 @@ export default function AdminUsers() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                 <input
                     type="text"
-                    placeholder="Filter list..."
+                    placeholder="Quick filter within loaded users..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full h-9 bg-white border border-gray-100 rounded-lg pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
@@ -242,7 +249,7 @@ export default function AdminUsers() {
                                             <td className="px-4 py-3">
                                                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold ${isAdminRole ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
                                                     {verified && <Shield className="h-3 w-3" />}
-                                                    {(user.role ?? 'user').replace('_', ' ')}
+                                                    {formatCmsLabel(user.role ?? 'user')}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3 hidden lg:table-cell">

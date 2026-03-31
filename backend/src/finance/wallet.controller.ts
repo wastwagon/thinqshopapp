@@ -1,13 +1,17 @@
-import { Controller, Get, Post, Body, Query, UseGuards, Request, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards, Request, BadRequestException } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { PaymentService } from './payment.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { RequirePermission } from '../auth/require-permission.decorator';
+import { PERMISSION_MAP } from '../auth/permissions';
+import { AuditService } from '../audit/audit.service';
 
 @Controller('finance/wallet')
 export class WalletController {
     constructor(
         private walletService: WalletService,
-        private paymentService: PaymentService
+        private paymentService: PaymentService,
+        private auditService: AuditService,
     ) { }
 
     @Get()
@@ -75,25 +79,25 @@ export class WalletController {
 
     @Get('admin/list')
     @UseGuards(AuthGuard)
+    @RequirePermission(PERMISSION_MAP.WALLETS_MANAGE)
     async listAdmin(@Request() req: any, @Query() query: { page?: number; limit?: number; search?: string }) {
-        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
         return this.walletService.listAllForAdmin(query);
     }
 
     @Post('admin/adjust')
     @UseGuards(AuthGuard)
+    @RequirePermission(PERMISSION_MAP.WALLETS_MANAGE)
     async adminAdjust(@Request() req: any, @Body() body: { user_id: number; amount: number }) {
-        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
         const userId = Number(body.user_id);
         const amount = Number(body.amount);
         if (!userId || !Number.isFinite(userId)) {
             throw new BadRequestException('user_id is required');
         }
         const wallet = await this.walletService.adminAdjust(userId, amount);
+        await this.auditService.logAdminAction(req, 'wallet.adjust', {
+            tableName: 'user_wallet',
+            details: { user_id: userId, amount },
+        });
         return { balance_ghs: Number(wallet.balance_ghs) };
     }
 }

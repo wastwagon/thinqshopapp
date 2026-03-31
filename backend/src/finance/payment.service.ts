@@ -58,15 +58,17 @@ export class PaymentService {
 
     async verifyWebhook(reference: string, status: any, response: any) {
         const payment = await this.prisma.payment.findFirst({
-            where: { paystack_reference: reference },
+            where: { transaction_ref: reference },
         });
 
         if (!payment) return null;
+        if (payment.status === 'success') return payment;
 
         return this.prisma.payment.update({
             where: { id: payment.id },
             data: {
                 status: status === 'success' ? 'success' : 'failed',
+                paystack_reference: reference,
                 paystack_response: response,
             },
         });

@@ -313,7 +313,7 @@ export default function AdminProducts() {
                     <Package className="h-7 w-7 text-blue-600" />
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Products</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Catalog</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Manage your storefront catalog</p>
                     </div>
                 </div>
                 <div className="flex gap-2">
@@ -321,7 +321,7 @@ export default function AdminProducts() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search products..."
+                            placeholder="Search by product name or category..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full h-9 pl-9 pr-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
@@ -468,7 +468,7 @@ export default function AdminProducts() {
                                 <textarea
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    placeholder="Full description, features, or HTML. Shown on the product page."
+                                    placeholder="Full product description and key highlights shown on the product page."
                                     rows={4}
                                     className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y min-h-[80px]"
                                 />
@@ -634,7 +634,7 @@ export default function AdminProducts() {
                                     rows={4}
                                     className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y min-h-[80px]"
                                 />
-                                <p className="text-xs text-gray-400 mt-0.5">One per line as <strong>Label: Value</strong>. Or valid JSON object. Shown in a table on the product page.</p>
+                                <p className="text-xs text-gray-400 mt-0.5">Add one item per line as <strong>Label: Value</strong>. These show in a clean specs table on the product page.</p>
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Featured image</label>

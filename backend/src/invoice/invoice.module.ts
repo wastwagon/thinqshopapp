@@ -6,9 +6,10 @@ import { InvoiceRateController } from './invoice-rate.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { SmsModule } from '../sms/sms.module';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
-    imports: [PrismaModule, AuthModule, SmsModule],
+    imports: [PrismaModule, AuthModule, SmsModule, AuditModule],
     controllers: [InvoiceController, InvoiceRateController],
     providers: [InvoiceService, InvoiceRateService],
     exports: [InvoiceService, InvoiceRateService],

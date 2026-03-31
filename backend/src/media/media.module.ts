@@ -3,9 +3,10 @@ import { MediaController } from './media.controller';
 import { MediaService } from './media.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
-    imports: [PrismaModule, AuthModule],
+    imports: [PrismaModule, AuthModule, AuditModule],
     controllers: [MediaController],
     providers: [MediaService],
     exports: [MediaService],

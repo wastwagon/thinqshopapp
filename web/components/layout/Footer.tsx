@@ -17,6 +17,11 @@ import api from '@/lib/axios';
 
 const DEFAULT_SUPPORT_PHONE = '+86 183 2070 9024';
 const DEFAULT_SUPPORT_EMAIL = 'info@thinqshopping.app';
+const SOCIAL_LINKS = [
+    { label: 'Instagram', href: process.env.NEXT_PUBLIC_INSTAGRAM_URL, Icon: Instagram },
+    { label: 'Twitter', href: process.env.NEXT_PUBLIC_TWITTER_URL, Icon: Twitter },
+    { label: 'Facebook', href: process.env.NEXT_PUBLIC_FACEBOOK_URL, Icon: Facebook },
+].filter((item) => !!item.href);
 
 export default function Footer() {
     const [settings, setSettings] = useState<Record<string, string>>({});
@@ -86,18 +91,22 @@ export default function Footer() {
                         {ordersDelivered && (
                             <p className="text-xs font-semibold tracking-wide text-gray-500 mb-6">{ordersDelivered}</p>
                         )}
-                        <div className="flex gap-3">
-                            {[Instagram, Twitter, Facebook].map((Icon, idx) => (
-                                <Link
-                                    key={idx}
-                                    href="#"
-                                    className="min-h-[44px] min-w-[44px] h-11 w-11 rounded-full border border-gray-200/90 bg-white/90 shadow-sm flex items-center justify-center text-gray-500 hover:text-brand hover:border-brand/40 hover:shadow-md transition-all"
-                                    aria-label={`Follow us on ${idx === 0 ? 'Instagram' : idx === 1 ? 'Twitter' : 'Facebook'}`}
-                                >
-                                    <Icon className="h-4 w-4" />
-                                </Link>
-                            ))}
-                        </div>
+                        {SOCIAL_LINKS.length > 0 && (
+                            <div className="flex gap-3">
+                                {SOCIAL_LINKS.map(({ label, href, Icon }) => (
+                                    <a
+                                        key={label}
+                                        href={href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="min-h-[44px] min-w-[44px] h-11 w-11 rounded-full border border-gray-200/90 bg-white/90 shadow-sm flex items-center justify-center text-gray-500 hover:text-brand hover:border-brand/40 hover:shadow-md transition-all"
+                                        aria-label={`Follow us on ${label}`}
+                                    >
+                                        <Icon className="h-4 w-4" />
+                                    </a>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Column 2 — Services */}

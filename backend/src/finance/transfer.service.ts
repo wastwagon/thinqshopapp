@@ -3,7 +3,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { WalletService } from './wallet.service';
 import { PaymentService } from './payment.service';
 import { SmsService } from '../sms/sms.service';
-import { TransferDirection, RecipientType, PaymentMethod, PaymentStatus } from '@prisma/client';
+import { TransferDirection, RecipientType, PaymentMethod, PaymentStatus, Prisma } from '@prisma/client';
+import { CreateTransferDto } from './dto/transfer.dto';
 
 @Injectable()
 export class TransferService {
@@ -52,8 +53,13 @@ export class TransferService {
         return { rate_ghs_to_cny: rate };
     }
 
-    async createTransfer(userId: number, dto: any) {
+    async createTransfer(userId: number, dto: CreateTransferDto) {
         const { amount_ghs, transfer_direction, recipient_type, recipient_details, purpose, payment_method, qr_codes: rawQrCodes } = dto;
+        const recipientName = String((recipient_details as any)?.name || '').trim();
+        const recipientPhone = String((recipient_details as any)?.phone || '').trim();
+        if (!recipientName) {
+            throw new BadRequestException('recipient_details.name is required');
+        }
 
         // Normalize and validate QR codes (array of { image, amount_cny, recipient_name? })
         const rate = await this.getExchangeRate();
@@ -114,14 +120,14 @@ export class TransferService {
                 exchange_rate: rate,
                 transfer_fee,
                 total_amount,
-                status: isWallet ? 'payment_received' : 'payment_received',
+                status: isWallet ? 'payment_received' : 'processing',
                 sender_name: senderName,
                 sender_phone: user.phone,
                 sender_email: user.email,
-                recipient_name: recipient_details.name,
-                recipient_phone: recipient_details.phone || '',
+                recipient_name: recipientName,
+                recipient_phone: recipientPhone,
                 recipient_type: recipient_type as RecipientType,
-                recipient_details: recipient_details,
+                recipient_details: recipient_details as Prisma.InputJsonValue,
                 payment_method: payment_method as PaymentMethod,
                 payment_status: isWallet ? 'success' : 'pending',
                 paystack_reference: paystackRef,
@@ -280,7 +286,8 @@ export class TransferService {
             where: { id: transferId },
             data: {
                 paystack_reference: paystackReference,
-                payment_status: 'success'
+                payment_status: 'success',
+                status: 'payment_received'
             }
         });
 

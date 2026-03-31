@@ -10,6 +10,11 @@ export class UpdateStorefrontSettingsDto {
     @ApiPropertyOptional()
     @IsOptional()
     @IsString()
+    standard_shipping_fee_ghs?: string;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsString()
     site_orders_delivered_text?: string;
 
     @ApiPropertyOptional()

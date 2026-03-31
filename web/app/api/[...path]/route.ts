@@ -58,10 +58,25 @@ async function proxy(request: NextRequest, pathSegments: string[]) {
         const contentType = res.headers.get('content-type') || 'application/json';
         const isBinary = contentType.startsWith('image/') || contentType === 'application/octet-stream' || contentType.includes('font/');
         const body = isBinary ? await res.arrayBuffer() : await res.text();
+        const responseHeaders = new Headers();
+        res.headers.forEach((value, key) => {
+            const lower = key.toLowerCase();
+            if (lower === 'connection' || lower === 'transfer-encoding' || lower === 'keep-alive' || lower === 'set-cookie') return;
+            responseHeaders.set(key, value);
+        });
+        const setCookies = typeof (res.headers as any).getSetCookie === 'function'
+            ? (res.headers as any).getSetCookie() as string[]
+            : [];
+        for (const cookie of setCookies) {
+            responseHeaders.append('set-cookie', cookie);
+        }
+        if (!responseHeaders.has('content-type')) {
+            responseHeaders.set('Content-Type', contentType);
+        }
 
         return new NextResponse(body, {
             status: res.status,
-            headers: { 'Content-Type': contentType },
+            headers: responseHeaders,
         });
     } catch (err) {
         console.error('[API proxy]', targetUrl, err);

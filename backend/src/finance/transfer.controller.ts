@@ -3,11 +3,25 @@ import { Controller, Get, Post, Patch, Body, Param, UseGuards, Request, Forbidde
 import { TransferService } from './transfer.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Public } from '../auth/public.decorator';
+import { PermissionGuard } from '../auth/permission.guard';
+import { RequirePermission } from '../auth/require-permission.decorator';
+import { PERMISSION_MAP } from '../auth/permissions';
+import { AuditService } from '../audit/audit.service';
+import {
+    AddTransferReplyImageDto,
+    ConfirmTransferPaymentDto,
+    CreateTransferDto,
+    UpdateTransferFulfillmentDto,
+    UpdateTransferStatusDto,
+} from './dto/transfer.dto';
 
 @Controller('finance/transfers')
 @UseGuards(AuthGuard)
 export class TransferController {
-    constructor(private transferService: TransferService) { }
+    constructor(
+        private transferService: TransferService,
+        private auditService: AuditService,
+    ) { }
 
     @Public()
     @Get('rate')
@@ -25,7 +39,7 @@ export class TransferController {
     }
 
     @Post()
-    async createTransfer(@Request() req, @Body() body: any) {
+    async createTransfer(@Request() req, @Body() body: CreateTransferDto) {
         return this.transferService.createTransfer(req.user.sub, body);
     }
 
@@ -35,22 +49,25 @@ export class TransferController {
     }
 
     @Get('admin/all')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.TRANSFERS_READ_ALL)
     async getAllTransfers(@Request() req) {
-        if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
         return this.transferService.getAllTransfers();
     }
 
     @Patch('admin/rate')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.TRANSFERS_RATE_MANAGE)
     async setExchangeRate(@Request() req, @Body() body: { rate_ghs_to_cny: number }) {
-        if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
         if (body?.rate_ghs_to_cny == null || typeof body.rate_ghs_to_cny !== 'number') {
             throw new BadRequestException('rate_ghs_to_cny (number) is required');
         }
-        return this.transferService.setExchangeRate(body.rate_ghs_to_cny);
+        const updated = await this.transferService.setExchangeRate(body.rate_ghs_to_cny);
+        await this.auditService.logAdminAction(req, 'transfer.exchange_rate.update', {
+            tableName: 'exchange_rates',
+            details: { rate_ghs_to_cny: body.rate_ghs_to_cny },
+        });
+        return updated;
     }
 
     @Get(':id')
@@ -64,15 +81,20 @@ export class TransferController {
     }
 
     @Patch('admin/:id/status')
-    async updateTransferStatus(@Request() req, @Param('id') id: string, @Body() body: any) {
-        if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
-        return this.transferService.updateTransferStatus(Number(id), body.status, body.admin_notes);
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.TRANSFERS_MANAGE)
+    async updateTransferStatus(@Request() req, @Param('id') id: string, @Body() body: UpdateTransferStatusDto) {
+        const updated = await this.transferService.updateTransferStatus(Number(id), body.status, body.admin_notes);
+        await this.auditService.logAdminAction(req, 'transfer.status.update', {
+            tableName: 'money_transfers',
+            recordId: Number(id),
+            details: { status: body.status },
+        });
+        return updated;
     }
 
     @Post(':id/confirm-payment')
-    async confirmPayment(@Request() req, @Param('id') id: string, @Body() body: { paystack_reference: string }) {
+    async confirmPayment(@Request() req, @Param('id') id: string, @Body() body: ConfirmTransferPaymentDto) {
         if (!body?.paystack_reference?.trim()) {
             throw new BadRequestException('paystack_reference is required');
         }
@@ -80,30 +102,39 @@ export class TransferController {
     }
 
     @Post('admin/:id/reply-image')
-    async addReplyImage(@Request() req, @Param('id') id: string, @Body() body: { imageUrl: string }) {
-        if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.TRANSFERS_MANAGE)
+    async addReplyImage(@Request() req, @Param('id') id: string, @Body() body: AddTransferReplyImageDto) {
         if (!body?.imageUrl?.trim()) {
             throw new BadRequestException('imageUrl is required');
         }
-        return this.transferService.addAdminReplyImage(Number(id), body.imageUrl.trim());
+        const updated = await this.transferService.addAdminReplyImage(Number(id), body.imageUrl.trim());
+        await this.auditService.logAdminAction(req, 'transfer.reply_image.add', {
+            tableName: 'money_transfers',
+            recordId: Number(id),
+        });
+        return updated;
     }
 
     @Patch('admin/:id/fulfillment/:qrIndex')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.TRANSFERS_MANAGE)
     async updateQrFulfillment(
         @Request() req,
         @Param('id') id: string,
         @Param('qrIndex') qrIndex: string,
-        @Body() body: { confirmation_image: string; admin_notes?: string }
+        @Body() body: UpdateTransferFulfillmentDto
     ) {
-        if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
         const index = parseInt(qrIndex, 10);
         if (Number.isNaN(index) || index < 0) {
             throw new BadRequestException('Invalid qrIndex');
         }
-        return this.transferService.updateQrFulfillment(Number(id), index, body);
+        const updated = await this.transferService.updateQrFulfillment(Number(id), index, body);
+        await this.auditService.logAdminAction(req, 'transfer.fulfillment.update', {
+            tableName: 'money_transfers',
+            recordId: Number(id),
+            details: { qrIndex: index },
+        });
+        return updated;
     }
 }

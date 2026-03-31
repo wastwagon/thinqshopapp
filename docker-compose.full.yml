@@ -34,6 +34,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      ENABLE_RUNTIME_DB_ADMIN: ${ENABLE_RUNTIME_DB_ADMIN:-false}
     env_file:
       - .env
     depends_on:

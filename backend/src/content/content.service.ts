@@ -54,6 +54,7 @@ export class ContentService {
     getPublicSettings() {
         const keys = [
             'free_shipping_threshold_ghs',
+            'standard_shipping_fee_ghs',
             'site_orders_delivered_text',
             'support_phone',
             'support_email',
@@ -258,6 +259,7 @@ export class ContentService {
     async getStorefrontSettingsAdmin() {
         const keys = [
             'free_shipping_threshold_ghs',
+            'standard_shipping_fee_ghs',
             'site_orders_delivered_text',
             'support_phone',
             'support_email',
@@ -279,6 +281,15 @@ export class ContentService {
                     where: { setting_key: 'free_shipping_threshold_ghs' },
                     update: { setting_value: dto.free_shipping_threshold_ghs, updated_at: new Date() },
                     create: { setting_key: 'free_shipping_threshold_ghs', setting_value: dto.free_shipping_threshold_ghs, updated_at: new Date() },
+                }),
+            );
+        }
+        if (dto.standard_shipping_fee_ghs !== undefined) {
+            updates.push(
+                this.prisma.setting.upsert({
+                    where: { setting_key: 'standard_shipping_fee_ghs' },
+                    update: { setting_value: dto.standard_shipping_fee_ghs, updated_at: new Date() },
+                    create: { setting_key: 'standard_shipping_fee_ghs', setting_value: dto.standard_shipping_fee_ghs, updated_at: new Date() },
                 }),
             );
         }

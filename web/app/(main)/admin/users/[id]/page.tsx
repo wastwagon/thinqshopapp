@@ -43,6 +43,13 @@ interface UserDetail {
     _count?: { orders: number; addresses: number };
 }
 
+const formatCmsLabel = (value?: string | null): string =>
+    (value || '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, (c) => c.toUpperCase()) || '—';
+
 export default function AdminUserDetailPage() {
     const params = useParams();
     const router = useRouter();
@@ -108,7 +115,7 @@ export default function AdminUserDetailPage() {
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                             <span className={`px-2.5 py-1 rounded-lg text-xs font-medium capitalize ${user.role === 'admin' || user.role === 'superadmin' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}>
-                                {user.role}
+                                {formatCmsLabel(user.role)}
                             </span>
                             <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${user.is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
                                 {user.is_active ? 'Active' : 'Inactive'}

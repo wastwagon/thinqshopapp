@@ -8,6 +8,12 @@ import Link from 'next/link';
 import { FileText, Search, Plus, Eye, Edit3 } from 'lucide-react';
 
 const STATUSES = ['draft', 'sent', 'paid', 'overdue'];
+const formatCmsLabel = (value?: string | null): string =>
+    (value || '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, (c) => c.toUpperCase()) || '—';
 
 export default function AdminInvoicesPage() {
     const [invoices, setInvoices] = useState<any[]>([]);
@@ -57,7 +63,7 @@ export default function AdminInvoicesPage() {
                         <FileText className="h-7 w-7 text-blue-600" />
                         <div>
                             <h1 className="text-xl font-bold text-gray-900 tracking-tight">Invoices</h1>
-                            <p className="text-xs text-gray-500 mt-0.5">Prepare and manage invoices</p>
+                            <p className="text-xs text-gray-500 mt-0.5">Create, send, and track customer invoices</p>
                         </div>
                     </div>
                     <Link
@@ -73,7 +79,7 @@ export default function AdminInvoicesPage() {
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search by number or customer..."
+                            placeholder="Search by invoice number, customer name, or email..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full h-9 pl-8 pr-2.5 border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
@@ -86,7 +92,7 @@ export default function AdminInvoicesPage() {
                     >
                         <option value="">All statuses</option>
                         {STATUSES.map((s) => (
-                            <option key={s} value={s}>{s}</option>
+                            <option key={s} value={s}>{formatCmsLabel(s)}</option>
                         ))}
                     </select>
                 </div>
@@ -135,7 +141,7 @@ export default function AdminInvoicesPage() {
                                             </td>
                                             <td className="px-3 py-2.5">
                                                 <span className={`px-2 py-0.5 text-xs font-semibold rounded-lg border ${statusColor[inv.status] || 'bg-gray-50 text-gray-700'}`}>
-                                                    {inv.status}
+                                                    {formatCmsLabel(inv.status)}
                                                 </span>
                                             </td>
                                             <td className="px-3 py-2.5 text-right">

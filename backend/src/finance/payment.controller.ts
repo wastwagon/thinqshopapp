@@ -1,4 +1,5 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Headers, UnauthorizedException } from '@nestjs/common';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { PaymentService } from './payment.service';
 import { AuthGuard } from '../auth/auth.guard';
 
@@ -18,9 +19,31 @@ export class PaymentController {
     }
 
     @Post('webhook')
-    async handleWebhook(@Body() body: any) {
+    async handleWebhook(
+        @Request() req: any,
+        @Body() body: any,
+        @Headers('x-paystack-signature') signature?: string,
+    ) {
+        const secret = process.env.PAYSTACK_SECRET_KEY;
+        if (!secret || secret === 'your_paystack_secret') {
+            throw new UnauthorizedException('Webhook secret not configured');
+        }
+        if (!signature) {
+            throw new UnauthorizedException('Missing webhook signature');
+        }
+        const payload = req.rawBody || JSON.stringify(body ?? {});
+        const digest = createHmac('sha512', secret).update(payload).digest('hex');
+        const sigBuf = Buffer.from(signature);
+        const digestBuf = Buffer.from(digest);
+        if (sigBuf.length !== digestBuf.length || !timingSafeEqual(sigBuf, digestBuf)) {
+            throw new UnauthorizedException('Invalid webhook signature');
+        }
         // Basic Paystack webhook structure: data.reference, data.status
-        const { reference, status } = body.data;
+        const reference = body?.data?.reference;
+        const status = body?.data?.status;
+        if (!reference || !status) {
+            throw new UnauthorizedException('Invalid webhook payload');
+        }
         return this.paymentService.verifyWebhook(reference, status, body);
     }
 }

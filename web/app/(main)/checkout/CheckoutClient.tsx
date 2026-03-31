@@ -29,8 +29,10 @@ export default function CheckoutClient() {
     const [paymentMethod, setPaymentMethod] = useState('wallet');
     const [isProcessing, setIsProcessing] = useState(false);
     const [walletBalance, setWalletBalance] = useState<number | null>(null);
-    const [paystackOrder, setPaystackOrder] = useState<{ orderId: number; reference: string; amount_pesewas: number } | null>(null);
+    const [paystackOrder, setPaystackOrder] = useState<{ orderId: number; reference: string; amount_pesewas: number; total_ghs: number } | null>(null);
     const [publicSettings, setPublicSettings] = useState<Record<string, string>>({});
+    const [checkoutQuote, setCheckoutQuote] = useState<{ subtotal: number; shipping_fee: number; total: number } | null>(null);
+    const [quoteLoading, setQuoteLoading] = useState(false);
 
     useEffect(() => {
         if (cart.length > 0) trackBeginCheckout(cartTotal, cart.length);
@@ -45,6 +47,26 @@ export default function CheckoutClient() {
         api.get('/finance/wallet').then((res) => setWalletBalance(Number(res.data.balance_ghs ?? 0))).catch(() => {});
     }, [user]);
 
+    useEffect(() => {
+        if (!selectedAddressId || cart.length === 0) {
+            setCheckoutQuote(null);
+            return;
+        }
+        setQuoteLoading(true);
+        api.get('/orders/quote/checkout', { params: { shipping_address_id: selectedAddressId } })
+            .then((res) => {
+                setCheckoutQuote({
+                    subtotal: Number(res.data?.subtotal ?? cartTotal),
+                    shipping_fee: Number(res.data?.shipping_fee ?? 0),
+                    total: Number(res.data?.total ?? cartTotal),
+                });
+            })
+            .catch(() => {
+                setCheckoutQuote({ subtotal: cartTotal, shipping_fee: 0, total: cartTotal });
+            })
+            .finally(() => setQuoteLoading(false));
+    }, [selectedAddressId, cart.length, cartTotal]);
+
     const handleAddressSelect = (address: any) => {
         setSelectedAddressId(address.id);
     };
@@ -54,7 +76,8 @@ export default function CheckoutClient() {
             toast.error("Please select a shipping address");
             return;
         }
-        if (paymentMethod === 'wallet' && walletBalance !== null && walletBalance < cartTotal) {
+        const payableTotal = checkoutQuote?.total ?? cartTotal;
+        if (paymentMethod === 'wallet' && walletBalance !== null && walletBalance < payableTotal) {
             toast.error("Insufficient wallet balance. Top up or use another payment method.");
             return;
         }
@@ -62,7 +85,7 @@ export default function CheckoutClient() {
         setIsProcessing(true);
         try {
             const { data } = await api.post('/orders', {
-                total: cartTotal,
+                total: payableTotal,
                 payment_method: paymentMethod === 'paystack' ? 'card' : paymentMethod,
                 shipping_address_id: selectedAddressId,
             });
@@ -73,13 +96,14 @@ export default function CheckoutClient() {
                         orderId: data.id,
                         reference: data.paystack_reference,
                         amount_pesewas: data.amount_pesewas,
+                        total_ghs: Number(data.total ?? payableTotal),
                     });
                 } else {
                     toast.error("Payment setup failed. Try again.");
                 }
             } else {
                 const orderId = data?.id ?? data?.order_number;
-                trackPurchase(String(orderId), cartTotal, 'GHS');
+                trackPurchase(String(orderId), payableTotal, 'GHS');
                 toast.success("Order placed successfully!");
                 clearCart();
                 router.push(`/checkout/success?order=${orderId}`);
@@ -97,7 +121,7 @@ export default function CheckoutClient() {
             await api.post(`/orders/${paystackOrder.orderId}/confirm-payment`, {
                 paystack_reference: ref.reference,
             });
-            trackPurchase(String(paystackOrder.orderId), cartTotal, 'GHS');
+            trackPurchase(String(paystackOrder.orderId), paystackOrder.total_ghs, 'GHS');
             toast.success("Order placed successfully!");
             clearCart();
             router.push(`/checkout/success?order=${paystackOrder.orderId}`);
@@ -202,10 +226,10 @@ export default function CheckoutClient() {
                                 <>
                                     <button
                                         onClick={handlePlaceOrder}
-                                        disabled={isProcessing}
+                                        disabled={isProcessing || quoteLoading}
                                         className="w-full min-h-[44px] bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold text-sm hover:from-brand hover:to-brand/95 transition-all disabled:opacity-50 flex items-center justify-center gap-4 shadow-lg touch-manipulation"
                                     >
-                                        {isProcessing ? 'Processing…' : <>Pay <PriceDisplay amountGhs={cartTotal} forceGhs /></>}
+                                        {isProcessing ? 'Processing…' : quoteLoading ? 'Calculating...' : <>Pay <PriceDisplay amountGhs={checkoutQuote?.total ?? cartTotal} forceGhs /></>}
                                     </button>
                                     <p className="mt-2 text-center text-xs text-gray-500">
                                         {publicSettings.free_shipping_threshold_ghs && Number(publicSettings.free_shipping_threshold_ghs) > 0 ? (
@@ -254,16 +278,18 @@ export default function CheckoutClient() {
                                 <div className="space-y-3 border-t border-gray-100 pt-6">
                                     <div className="flex items-center justify-between">
                                         <dt className="text-sm text-gray-600">Subtotal</dt>
-                                        <dd className="text-sm font-semibold text-gray-900"><PriceDisplay amountGhs={cartTotal} forceGhs /></dd>
+                                        <dd className="text-sm font-semibold text-gray-900"><PriceDisplay amountGhs={checkoutQuote?.subtotal ?? cartTotal} forceGhs /></dd>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <dt className="text-sm text-gray-600">Shipping</dt>
-                                        <dd className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">Calculated next</dd>
+                                        <dd className="text-sm font-semibold text-gray-900">
+                                            <PriceDisplay amountGhs={checkoutQuote?.shipping_fee ?? 0} forceGhs />
+                                        </dd>
                                     </div>
                                     <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-2">
                                         <dt className="text-sm font-semibold text-gray-900">Total</dt>
                                         <dd className="text-right">
-                                            <span className="text-xl font-bold text-gray-900"><PriceDisplay amountGhs={cartTotal} forceGhs /></span>
+                                            <span className="text-xl font-bold text-gray-900"><PriceDisplay amountGhs={checkoutQuote?.total ?? cartTotal} forceGhs /></span>
                                             <p className="text-xs text-gray-500 mt-0.5 font-medium">Amount charged in GHS</p>
                                         </dd>
                                     </div>

@@ -23,6 +23,9 @@ import { TrackModule } from './track/track.module';
 import { VariationModule } from './variation/variation.module';
 import { SmsModule } from './sms/sms.module';
 import { InvoiceModule } from './invoice/invoice.module';
+import { AuditModule } from './audit/audit.module';
+import { PermissionGuard } from './auth/permission.guard';
+import { SupportModule } from './support/support.module';
 
 @Module({
     imports: [
@@ -50,8 +53,14 @@ import { InvoiceModule } from './invoice/invoice.module';
         VariationModule,
         SmsModule,
         InvoiceModule,
+        AuditModule,
+        SupportModule,
     ],
     controllers: [AppController],
-    providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
+    providers: [
+        AppService,
+        { provide: APP_GUARD, useClass: ThrottlerGuard },
+        { provide: APP_GUARD, useClass: PermissionGuard },
+    ],
 })
 export class AppModule { }

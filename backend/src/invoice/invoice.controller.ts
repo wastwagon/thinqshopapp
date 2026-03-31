@@ -1,28 +1,30 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards, Request, ParseIntPipe, Query, ForbiddenException, StreamableFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Request, ParseIntPipe, Query, StreamableFile } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
+import { RequirePermission } from '../auth/require-permission.decorator';
+import { PERMISSION_MAP } from '../auth/permissions';
+import { AuditService } from '../audit/audit.service';
 
 @Controller('invoices')
 export class InvoiceController {
-    constructor(private readonly invoiceService: InvoiceService) {}
+    constructor(
+        private readonly invoiceService: InvoiceService,
+        private readonly auditService: AuditService,
+    ) {}
 
     @Get()
     @UseGuards(AuthGuard)
+    @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async findAll(@Request() req: any, @Query() query: { page?: number; limit?: number; status?: string }) {
-        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
         return this.invoiceService.findAll(query);
     }
 
     @Get(':id/pdf')
     @UseGuards(AuthGuard)
+    @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async getPdf(@Request() req: any, @Param('id', ParseIntPipe) id: number) {
-        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
         const invoice = await this.invoiceService.findOne(id);
         const buffer = await this.invoiceService.generatePdf(id, invoice);
         const filename = `invoice-${(invoice as any).invoice_number}.pdf`;
@@ -34,46 +36,57 @@ export class InvoiceController {
 
     @Get(':id')
     @UseGuards(AuthGuard)
+    @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async findOne(@Request() req: any, @Param('id', ParseIntPipe) id: number) {
-        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
         return this.invoiceService.findOne(id);
     }
 
     @Post()
     @UseGuards(AuthGuard)
+    @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async create(@Request() req: any, @Body() dto: CreateInvoiceDto) {
-        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
-        return this.invoiceService.create(dto, req.user.sub);
+        const created = await this.invoiceService.create(dto, req.user.sub);
+        await this.auditService.logAdminAction(req, 'invoice.create', {
+            tableName: 'invoices',
+            recordId: created.id,
+        });
+        return created;
     }
 
     @Patch(':id')
     @UseGuards(AuthGuard)
+    @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async update(@Request() req: any, @Param('id', ParseIntPipe) id: number, @Body() dto: UpdateInvoiceDto) {
-        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
-        return this.invoiceService.update(id, dto);
+        const updated = await this.invoiceService.update(id, dto);
+        await this.auditService.logAdminAction(req, 'invoice.update', {
+            tableName: 'invoices',
+            recordId: id,
+        });
+        return updated;
     }
 
     @Patch(':id/status')
     @UseGuards(AuthGuard)
+    @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async updateStatus(@Request() req: any, @Param('id', ParseIntPipe) id: number, @Body() body: { status: string }) {
-        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
-        return this.invoiceService.updateStatus(id, body.status);
+        const updated = await this.invoiceService.updateStatus(id, body.status);
+        await this.auditService.logAdminAction(req, 'invoice.status.update', {
+            tableName: 'invoices',
+            recordId: id,
+            details: { status: body.status },
+        });
+        return updated;
     }
 
     @Post(':id/send-sms')
     @UseGuards(AuthGuard)
+    @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async sendInvoiceSms(@Request() req: any, @Param('id', ParseIntPipe) id: number) {
-        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
-        return this.invoiceService.sendInvoiceSummarySms(id);
+        const sent = await this.invoiceService.sendInvoiceSummarySms(id);
+        await this.auditService.logAdminAction(req, 'invoice.sms.send', {
+            tableName: 'invoices',
+            recordId: id,
+        });
+        return sent;
     }
 }

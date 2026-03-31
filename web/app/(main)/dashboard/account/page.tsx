@@ -16,7 +16,7 @@ import {
 const accountLinks = [
     { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet, description: 'Balance, deposit & history' },
     { name: 'Order history', href: '/dashboard/orders', icon: ClipboardList, description: 'Track and manage orders' },
-    { name: 'Wishlist', href: '/dashboard/wishlist', icon: Heart, description: 'Saved items' },
+    { name: 'Wishlist', href: '/wishlist', icon: Heart, description: 'Saved items' },
     { name: 'Profile', href: '/dashboard/profile', icon: User, description: 'Personal details & security' },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings, description: 'Preferences & notifications' },
 ];

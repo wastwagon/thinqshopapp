@@ -5,13 +5,20 @@ import { join } from 'path';
 import { AuthGuard } from '../auth/auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { runSeed } from '../../../database/seed-runner';
+import { PermissionGuard } from '../auth/permission.guard';
+import { RequirePermission } from '../auth/require-permission.decorator';
+import { PERMISSION_MAP } from '../auth/permissions';
+import { AuditService } from '../audit/audit.service';
 
 @Controller('admin/database')
 @UseGuards(AuthGuard)
 export class DatabaseController {
     private readonly projectRoot: string;
 
-    constructor(private readonly prisma: PrismaService) {
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly auditService: AuditService,
+    ) {
         this.projectRoot = this.resolveProjectRoot();
     }
 
@@ -33,9 +40,15 @@ export class DatabaseController {
         if (role !== 'admin' && role !== 'superadmin') {
             throw new HttpException('Forbidden: admin or superadmin role required', HttpStatus.FORBIDDEN);
         }
+        const runtimeDbAdminEnabled = process.env.ENABLE_RUNTIME_DB_ADMIN === 'true';
+        if (!runtimeDbAdminEnabled) {
+            throw new HttpException('Runtime database admin endpoints are disabled', HttpStatus.FORBIDDEN);
+        }
     }
 
     @Post('migrate')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.DATABASE_MANAGE)
     async migrate(@Req() req: any) {
         this.ensureAdmin(req);
         try {
@@ -50,6 +63,7 @@ export class DatabaseController {
                 stdio: 'pipe',
                 env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
             });
+            await this.auditService.logAdminAction(req, 'database.migrate', { tableName: 'database' });
             return { success: true, message: 'Migrations applied successfully' };
         } catch (err: any) {
             const output = err.stdout?.toString() || err.stderr?.toString() || err.message;
@@ -58,10 +72,13 @@ export class DatabaseController {
     }
 
     @Post('seed')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.DATABASE_MANAGE)
     async seed(@Req() req: any) {
         this.ensureAdmin(req);
         try {
             await runSeed(this.prisma);
+            await this.auditService.logAdminAction(req, 'database.seed', { tableName: 'database' });
             return { success: true, message: 'Database seeded successfully' };
         } catch (err: any) {
             throw new HttpException(`Seed failed: ${err?.message || err}`, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -69,6 +86,8 @@ export class DatabaseController {
     }
 
     @Post('migrate-seed')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.DATABASE_MANAGE)
     async migrateAndSeed(@Req() req: any) {
         this.ensureAdmin(req);
         try {
@@ -84,6 +103,7 @@ export class DatabaseController {
                 env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
             });
             await runSeed(this.prisma);
+            await this.auditService.logAdminAction(req, 'database.migrate_seed', { tableName: 'database' });
             return { success: true, message: 'Migration and seeding complete' };
         } catch (err: any) {
             const output = err?.stdout?.toString() || err?.stderr?.toString() || err?.message || err;

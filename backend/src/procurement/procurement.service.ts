@@ -1,7 +1,8 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WalletService } from '../finance/wallet.service';
-import { ProcurementStatus, QuoteStatus } from '@prisma/client';
+import { ProcurementStatus, QuoteStatus, Prisma } from '@prisma/client';
+import { CreateProcurementRequestDto } from './dto/procurement.dto';
 
 @Injectable()
 export class ProcurementService {
@@ -10,12 +11,18 @@ export class ProcurementService {
         private walletService: WalletService
     ) { }
 
-    async createRequest(userId: number, data: any) {
+    async createRequest(userId: number, data: CreateProcurementRequestDto) {
         const request_number = `PRQ-${Date.now()}`;
         return this.prisma.procurementRequest.create({
             data: {
                 user_id: userId,
-                ...data,
+                request_type: data.request_type,
+                description: data.description,
+                specifications: data.specifications,
+                quantity: data.quantity ?? 1,
+                budget_range: data.budget_range,
+                reference_link: data.reference_link,
+                reference_images: (data.reference_images || []) as Prisma.InputJsonValue,
                 request_number,
                 status: 'submitted',
             },

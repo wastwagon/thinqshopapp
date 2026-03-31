@@ -66,6 +66,13 @@ interface Shipment {
     declaration_image_urls?: string[] | null;
 }
 
+const formatCmsLabel = (value?: string | null): string =>
+    (value || '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, (c) => c.toUpperCase()) || '—';
+
 function formatAddress(addr: Address | null | undefined): string {
     if (!addr) return '—';
     const parts = [
@@ -90,7 +97,7 @@ function StatusBadge({ status }: { status: string }) {
     };
     return (
         <span className={`px-2.5 py-1 text-xs font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
-            {status.replace(/_/g, ' ')}
+            {formatCmsLabel(status)}
         </span>
     );
 }
@@ -120,7 +127,7 @@ export default function AdminShipmentDetailPage() {
 
     const handleStatusUpdate = async (newStatus: string) => {
         if (!shipment) return;
-        if (!confirm(`Update status to ${newStatus.replace(/_/g, ' ')}?`)) return;
+        if (!confirm(`Update status to ${formatCmsLabel(newStatus)}?`)) return;
         setUpdating(true);
         try {
             await api.patch(`/logistics/admin/shipments/${shipment.id}/status`, { status: newStatus });
@@ -169,7 +176,7 @@ export default function AdminShipmentDetailPage() {
                             <div>
                                 <h1 className="text-xl font-bold text-gray-900">{shipment.tracking_number}</h1>
                                 <p className="text-xs text-gray-500 mt-0.5">
-                                    {new Date(shipment.created_at).toLocaleString()} · {shipment.service_type}
+                                    {new Date(shipment.created_at).toLocaleString()} · {formatCmsLabel(shipment.service_type)}
                                 </p>
                                 {shipment.carrier_tracking_number && (
                                     <p className="text-xs text-gray-600 mt-1">Carrier: {shipment.carrier_tracking_number}</p>
@@ -184,7 +191,7 @@ export default function AdminShipmentDetailPage() {
                                     className="text-xs font-semibold border border-gray-200 rounded-lg pl-3 pr-8 py-2 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                 >
                                     {SHIPMENT_STATUSES.map((s) => (
-                                        <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
+                                        <option key={s} value={s}>{formatCmsLabel(s)}</option>
                                     ))}
                                 </select>
                             </div>
@@ -206,7 +213,7 @@ export default function AdminShipmentDetailPage() {
                                                     <Package className="h-4 w-4 text-blue-600" />
                                                 </div>
                                                 <div className="min-w-0 flex-1">
-                                                    <p className="text-sm font-medium text-gray-900">{t.status.replace(/_/g, ' ')}</p>
+                                                    <p className="text-sm font-medium text-gray-900">{formatCmsLabel(t.status)}</p>
                                                     {t.location && <p className="text-xs text-gray-500">{t.location}</p>}
                                                     {t.notes && <p className="text-xs text-gray-600 mt-0.5">{t.notes}</p>}
                                                     <p className="text-xs text-gray-400 mt-1">{new Date(t.created_at).toLocaleString()}</p>
@@ -324,6 +331,14 @@ export default function AdminShipmentDetailPage() {
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">Weight</span>
                                         <span className="font-medium text-gray-900">{shipment.weight} kg</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">Payment method</span>
+                                        <span className="font-medium text-gray-900">{formatCmsLabel(shipment.payment_method)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">Payment status</span>
+                                        <span className="font-medium text-gray-900">{formatCmsLabel(shipment.payment_status)}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">Total</span>

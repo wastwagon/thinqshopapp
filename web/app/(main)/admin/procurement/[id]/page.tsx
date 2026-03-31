@@ -51,6 +51,13 @@ interface ProcurementRequest {
     orders: any[];
 }
 
+const formatCmsLabel = (value?: string | null): string =>
+    (value || '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, (c) => c.toUpperCase()) || '—';
+
 export default function AdminProcurementDetailPage() {
     const params = useParams();
     const router = useRouter();
@@ -180,11 +187,11 @@ export default function AdminProcurementDetailPage() {
                         <div className="flex flex-wrap items-center gap-2">
                             {request.request_type && (
                                 <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 capitalize">
-                                    {request.request_type}
+                                    {formatCmsLabel(request.request_type)}
                                 </span>
                             )}
                             <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-orange-50 text-orange-700 capitalize">
-                                {request.status.replace(/_/g, ' ')}
+                                {formatCmsLabel(request.status)}
                             </span>
                             <select
                                 value={request.status}
@@ -193,7 +200,7 @@ export default function AdminProcurementDetailPage() {
                                 className="text-xs font-semibold border border-gray-200 rounded-lg pl-3 pr-8 py-2 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                             >
                                 {STATUS_OPTIONS.map((s) => (
-                                    <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
+                                    <option key={s} value={s}>{formatCmsLabel(s)}</option>
                                 ))}
                             </select>
                         </div>
@@ -212,9 +219,9 @@ export default function AdminProcurementDetailPage() {
                             </div>
                             <div className="px-4 py-4 space-y-4">
                                 <div className="flex flex-wrap gap-4 text-sm">
-                                    <span><strong className="text-gray-600">Qty:</strong> {request.quantity ?? '—'}</span>
+                                    <span><strong className="text-gray-600">Quantity:</strong> {request.quantity ?? '—'}</span>
                                     {request.budget_range && (
-                                        <span><strong className="text-gray-600">Budget:</strong> ₵{request.budget_range}</span>
+                                        <span><strong className="text-gray-600">Budget range:</strong> ₵{request.budget_range}</span>
                                     )}
                                 </div>
                                 {request.specifications && (

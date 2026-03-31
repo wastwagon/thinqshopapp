@@ -8,6 +8,7 @@ import api from '@/lib/axios';
 
 const FIELDS = [
     { key: 'free_shipping_threshold_ghs', label: 'Free shipping threshold (₵)', placeholder: '500', type: 'text' },
+    { key: 'standard_shipping_fee_ghs', label: 'Standard shipping fee (₵)', placeholder: '0', type: 'text' },
     { key: 'site_orders_delivered_text', label: 'Orders delivered text', placeholder: '10,000+ orders delivered', type: 'text' },
     { key: 'support_phone', label: 'Support phone', placeholder: '+86 183 2070 9024', type: 'text' },
     { key: 'support_email', label: 'Support email', placeholder: 'info@thinqshopping.app', type: 'email' },
@@ -51,7 +52,7 @@ export default function AdminStorefront() {
                     <Type className="h-7 w-7 text-blue-600" />
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Storefront</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Site copy and social proof (mobile-first)</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Manage storefront copy, shipping values, and support contacts</p>
                     </div>
                 </div>
                 <button

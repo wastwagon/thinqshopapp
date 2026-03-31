@@ -17,6 +17,13 @@ import toast from 'react-hot-toast';
 
 const ORDER_STATUSES = ['pending', 'processing', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'];
 
+const formatCmsLabel = (value?: string | null): string =>
+    (value || '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, (c) => c.toUpperCase()) || '—';
+
 interface OrderItem {
     id: number;
     product_name: string;
@@ -33,6 +40,9 @@ interface Order {
     order_number: string;
     total: number;
     subtotal: number;
+    shipping_fee?: number;
+    tax?: number;
+    discount?: number;
     status: string;
     payment_method: string;
     payment_status?: string;
@@ -47,6 +57,7 @@ interface Order {
         region?: string;
         landmark?: string;
     };
+    tracking?: Array<{ id: number; status: string; notes?: string | null; created_at: string }>;
 }
 
 export default function AdminOrderDetailPage() {
@@ -56,6 +67,7 @@ export default function AdminOrderDetailPage() {
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
+    const [resolvingReturn, setResolvingReturn] = useState(false);
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -86,6 +98,29 @@ export default function AdminOrderDetailPage() {
         }
     };
 
+    const resolveReturn = async (action: 'approve' | 'reject' | 'refund') => {
+        if (!order) return;
+        const notes = window.prompt('Optional admin note');
+        setResolvingReturn(true);
+        try {
+            const { data } = await api.patch(`/orders/admin/${order.id}/return`, {
+                action,
+                notes: notes?.trim() || undefined,
+            });
+            setOrder(data);
+            const labels: Record<'approve' | 'reject' | 'refund', string> = {
+                approve: 'approved',
+                reject: 'rejected',
+                refund: 'refunded',
+            };
+            toast.success(`Return ${labels[action]}`);
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Failed to resolve return request');
+        } finally {
+            setResolvingReturn(false);
+        }
+    };
+
     const userName = order?.user?.profile
         ? `${order.user.profile.first_name || ''} ${order.user.profile.last_name || ''}`.trim() || order.user.email
         : order?.user?.email ?? '—';
@@ -102,6 +137,9 @@ export default function AdminOrderDetailPage() {
     }
 
     if (!order) return null;
+
+    const hasReturnRequested = (order.tracking || []).some((e) => e.status === 'return_requested');
+    const hasReturnResolved = (order.tracking || []).some((e) => ['return_approved', 'return_rejected', 'refunded'].includes(e.status));
 
     const address = order.shipping_address;
     const addressLines = [
@@ -136,7 +174,10 @@ export default function AdminOrderDetailPage() {
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                             <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 capitalize">
-                                {order.payment_method?.replace(/_/g, ' ')}
+                                {formatCmsLabel(order.payment_method)}
+                            </span>
+                            <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 capitalize">
+                                Payment: {formatCmsLabel(order.payment_status)}
                             </span>
                             <select
                                 value={order.status}
@@ -145,16 +186,73 @@ export default function AdminOrderDetailPage() {
                                 className="text-xs font-semibold border border-gray-200 rounded-lg pl-3 pr-8 py-2 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                             >
                                 {ORDER_STATUSES.map((s) => (
-                                    <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
+                                    <option key={s} value={s}>{formatCmsLabel(s)}</option>
                                 ))}
                             </select>
                         </div>
                     </div>
                 </div>
 
+                    {hasReturnRequested && !hasReturnResolved && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p className="text-sm font-semibold text-amber-900">Return request pending review</p>
+                                <p className="text-xs text-amber-700">Resolve this customer return request.</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    disabled={resolvingReturn}
+                                    onClick={() => resolveReturn('approve')}
+                                    className="min-h-[44px] px-3 py-2 rounded-lg text-xs font-semibold bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
+                                >
+                                    Approve
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={resolvingReturn}
+                                    onClick={() => resolveReturn('reject')}
+                                    className="min-h-[44px] px-3 py-2 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+                                >
+                                    Reject
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={resolvingReturn}
+                                    onClick={() => resolveReturn('refund')}
+                                    className="min-h-[44px] px-3 py-2 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                                >
+                                    Refund
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                 <div className="grid lg:grid-cols-3 gap-6">
                     {/* Main content */}
                     <div className="lg:col-span-2 space-y-6">
+                        {/* Timeline */}
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                            <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
+                                <h3 className="text-sm font-semibold text-gray-900">Order timeline</h3>
+                            </div>
+                            <div className="px-4 py-4 space-y-3">
+                                {(order.tracking || []).length === 0 ? (
+                                    <p className="text-xs text-gray-500">No tracking events yet.</p>
+                                ) : (
+                                    (order.tracking || []).map((event) => (
+                                        <div key={event.id} className="p-3 rounded-xl border border-gray-100 bg-gray-50/60">
+                                            <div className="flex items-center justify-between gap-3">
+                                                <p className="text-xs font-semibold text-gray-900 tracking-wide">{formatCmsLabel(event.status)}</p>
+                                                <p className="text-xs text-gray-500">{new Date(event.created_at).toLocaleString()}</p>
+                                            </div>
+                                            {event.notes && <p className="text-xs text-gray-600 mt-1">{event.notes}</p>}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+
                         {/* Items */}
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                             <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
@@ -182,7 +280,7 @@ export default function AdminOrderDetailPage() {
                                                 </p>
                                             )}
                                             <p className="text-xs text-gray-500 mt-0.5">
-                                                Qty {item.quantity} × ₵{Number(item.price).toFixed(2)}
+                                                Quantity {item.quantity} × ₵{Number(item.price).toFixed(2)}
                                             </p>
                                         </div>
                                         <p className="text-sm font-semibold text-gray-900 shrink-0">
@@ -196,6 +294,10 @@ export default function AdminOrderDetailPage() {
                                     <span className="text-gray-600">Subtotal</span>
                                     <span className="font-medium text-gray-900">₵{Number(order.subtotal || order.total).toFixed(2)}</span>
                                 </div>
+                            <div className="flex justify-between text-sm mt-2">
+                                <span className="text-gray-600">Shipping</span>
+                                <span className="font-medium text-gray-900">₵{Number(order.shipping_fee || 0).toFixed(2)}</span>
+                            </div>
                                 <div className="flex justify-between text-sm mt-2 pt-2 border-t border-gray-100">
                                     <span className="font-semibold text-gray-900">Total</span>
                                     <span className="font-bold text-gray-900">₵{Number(order.total).toFixed(2)}</span>

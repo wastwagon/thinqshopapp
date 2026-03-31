@@ -18,6 +18,7 @@ import {
     Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 export default function AdminSettings() {
     const [settings, setSettings] = useState({
@@ -93,7 +94,7 @@ export default function AdminSettings() {
                     <Settings className="h-7 w-7 text-blue-600" />
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Settings</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">System configuration</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Manage operational controls and platform defaults</p>
                     </div>
                 </div>
                 <button type="button" onClick={handleSave} disabled={savingRate || rateLoading} className="h-9 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900 transition-all flex items-center gap-2 disabled:opacity-50">
@@ -130,7 +131,7 @@ export default function AdminSettings() {
                                         {rateLoading ? <RefreshCw className="h-3.5 w-3.5 text-blue-600 animate-spin" /> : <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">Live</span>}
                                     </div>
                                 </div>
-                                <p className="text-xs text-gray-400">Used for transfers.</p>
+                                <p className="text-xs text-gray-400">Used to convert customer transfer amounts.</p>
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-gray-500">Procurement fee (%)</label>
@@ -144,6 +145,7 @@ export default function AdminSettings() {
                                     />
                                     <Percent className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                 </div>
+                                <p className="text-xs text-gray-400">Applied to procurement request pricing.</p>
                             </div>
                         </div>
                     </div>
@@ -248,6 +250,9 @@ export default function AdminSettings() {
                             <h4 className="text-sm font-bold">Audit log</h4>
                         </div>
                         <p className="text-xs text-gray-400 leading-relaxed">Changes to settings are logged for security and compliance.</p>
+                        <Link href="/admin/audit-logs" className="inline-flex mt-3 text-xs font-semibold text-blue-300 hover:text-blue-200">
+                            View audit logs {'->'}
+                        </Link>
                     </section>
                 </div>
             </div>

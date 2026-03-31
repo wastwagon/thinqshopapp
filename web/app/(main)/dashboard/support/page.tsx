@@ -16,11 +16,14 @@ import {
     Clock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '@/lib/axios';
 
 export default function SupportPage() {
     const [isCreatingTicket, setIsCreatingTicket] = useState(false);
     const [ticketCategory, setTicketCategory] = useState('logistics');
     const [ticketMessage, setTicketMessage] = useState('');
+    const [ticketReference, setTicketReference] = useState('');
+    const [submittingTicket, setSubmittingTicket] = useState(false);
 
     const containerVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -36,12 +39,25 @@ export default function SupportPage() {
         visible: { opacity: 1, y: 0 }
     };
 
-    const handleSubmitTicket = (e: React.FormEvent) => {
+    const handleSubmitTicket = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!ticketMessage.trim()) return;
-        toast.success('Ticket submitted. We\'ll respond shortly.');
-        setTicketMessage('');
-        setIsCreatingTicket(false);
+        setSubmittingTicket(true);
+        try {
+            await api.post('/support/tickets', {
+                category: ticketCategory,
+                message: ticketMessage.trim(),
+                reference: ticketReference.trim() || undefined,
+            });
+            toast.success('Ticket submitted. We\'ll respond shortly.');
+            setTicketMessage('');
+            setTicketReference('');
+            setIsCreatingTicket(false);
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || 'Could not submit ticket');
+        } finally {
+            setSubmittingTicket(false);
+        }
     };
 
     return (
@@ -140,11 +156,22 @@ export default function SupportPage() {
                                         required
                                     />
                                 </div>
+                                <div>
+                                    <label className="text-xs font-medium text-gray-400 uppercase tracking-wider ml-1 mb-1.5 block">Reference (optional)</label>
+                                    <input
+                                        value={ticketReference}
+                                        onChange={(e) => setTicketReference(e.target.value)}
+                                        placeholder="Order or tracking ID (e.g. ORD-..., SHP-...)"
+                                        className="w-full h-10 px-4 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-white placeholder:text-gray-500 focus:bg-white/10 focus:border-blue-500 transition-all outline-none"
+                                    />
+                                </div>
                                 <button
                                     type="submit"
-                                    className="w-full min-h-[44px] h-10 flex items-center justify-center gap-2 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-white hover:text-gray-900 transition-all"
+                                    disabled={submittingTicket}
+                                    className="w-full min-h-[44px] h-10 flex items-center justify-center gap-2 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-white hover:text-gray-900 transition-all disabled:opacity-60"
                                 >
-                                    Submit <Send className="h-3.5 w-3.5" />
+                                    {submittingTicket ? 'Submitting...' : 'Submit'}
+                                    {!submittingTicket && <Send className="h-3.5 w-3.5" />}
                                 </button>
                             </form>
                         </div>

@@ -34,6 +34,7 @@ services:
       SEED_ON_STARTUP: ${SEED_ON_STARTUP:-false}
       PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY}
       FRONTEND_URL: ${FRONTEND_URL}
+      ENABLE_RUNTIME_DB_ADMIN: ${ENABLE_RUNTIME_DB_ADMIN:-false}
     depends_on:
       db:
         condition: service_healthy

@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 const PROFILE_UPLOAD_SUBDIR = 'profile-images';
 const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
@@ -42,7 +43,7 @@ export class UserService {
         };
     }
 
-    async updateProfile(userId: number, data: any) {
+    async updateProfile(userId: number, data: UpdateProfileDto) {
         const profileFields = ['first_name', 'last_name', 'profile_image', 'date_of_birth', 'gender'] as const;
         const profileData: Record<string, unknown> = {};
         profileFields.forEach((f) => {

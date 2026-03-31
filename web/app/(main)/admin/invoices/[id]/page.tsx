@@ -10,6 +10,12 @@ import { FileText, ArrowLeft, Edit3, Trash2, Download, MessageSquare } from 'luc
 
 const UNITS = ['pcs', 'kg', 'CBM', 'hour', 'box', 'set'];
 const STATUSES = ['draft', 'sent', 'paid', 'overdue'];
+const formatCmsLabel = (value?: string | null): string =>
+    (value || '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, (c) => c.toUpperCase()) || '—';
 
 export default function InvoiceDetailPage() {
     const params = useParams();
@@ -203,7 +209,7 @@ export default function InvoiceDetailPage() {
                     </div>
                     <div className="flex items-center gap-2">
                         <span className={`px-3 py-1 rounded-lg text-xs font-semibold border ${invoice.status === 'draft' ? 'bg-gray-100 text-gray-700 border-gray-200' : invoice.status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
-                            {invoice.status}
+                            {formatCmsLabel(invoice.status)}
                         </span>
                         {isDraft && !editing && (
                             <button type="button" onClick={() => setEditing(true)} className="min-h-[44px] px-4 rounded-lg border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 flex items-center gap-1.5">
@@ -233,7 +239,7 @@ export default function InvoiceDetailPage() {
                             className="h-9 px-3 border border-gray-200 rounded-lg text-sm font-medium bg-white"
                         >
                             {STATUSES.map((s) => (
-                                <option key={s} value={s}>{s}</option>
+                                <option key={s} value={s}>{formatCmsLabel(s)}</option>
                             ))}
                         </select>
                     </div>
@@ -269,8 +275,8 @@ export default function InvoiceDetailPage() {
                                 </div>
                             </div>
                             <div className="flex justify-between items-center">
-                                <h3 className="text-sm font-bold text-gray-700">Line items</h3>
-                                <button type="button" onClick={addLine} className="text-sm text-blue-600 font-medium">+ Add line</button>
+                                <h3 className="text-sm font-bold text-gray-700">Invoice items</h3>
+                                <button type="button" onClick={addLine} className="text-sm text-blue-600 font-medium">+ Add item</button>
                             </div>
                             {form.items.map((item: any, idx: number) => (
                                 <div key={idx} className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg">
@@ -279,9 +285,9 @@ export default function InvoiceDetailPage() {
                                             className="w-full sm:w-40 h-9 px-2 border border-gray-200 rounded-lg text-sm bg-white"
                                             value=""
                                             onChange={(e) => { const v = e.target.value; if (v) applyRateToLine(idx, v); e.target.value = ''; }}
-                                            title="Use saved rate"
+                                            title="Use saved pricing rate"
                                         >
-                                            <option value="">Use rate…</option>
+                                            <option value="">Apply saved rate...</option>
                                             {rates.map((r) => (
                                                 <option key={r.id} value={r.id}>{r.name} — {r.unit} @ GHS {Number(r.rate_per_unit).toFixed(2)}</option>
                                             ))}
@@ -332,7 +338,7 @@ export default function InvoiceDetailPage() {
                             <thead>
                                 <tr className="bg-gray-50 border-b border-gray-100">
                                     <th className="px-4 py-2 text-xs font-semibold text-gray-500">Description</th>
-                                    <th className="px-4 py-2 text-xs font-semibold text-gray-500">Qty</th>
+                                <th className="px-4 py-2 text-xs font-semibold text-gray-500">Quantity</th>
                                     <th className="px-4 py-2 text-xs font-semibold text-gray-500">Unit</th>
                                     <th className="px-4 py-2 text-xs font-semibold text-gray-500 text-right">Unit price</th>
                                     <th className="px-4 py-2 text-xs font-semibold text-gray-500 text-right">Total</th>

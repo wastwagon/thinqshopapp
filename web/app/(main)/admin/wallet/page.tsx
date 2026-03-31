@@ -94,14 +94,14 @@ export default function AdminWalletPage() {
                     <Wallet className="h-7 w-7 text-blue-600" />
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Wallet management</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Credit and debit user wallets</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Adjust customer wallet balances and review wallet activity</p>
                     </div>
                 </div>
                 <div className="relative min-w-0 sm:w-44">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Search users..."
+                            placeholder="Search by customer name, email, or phone..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full h-9 pl-8 pr-2.5 border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
@@ -212,6 +212,11 @@ export default function AdminWalletPage() {
                                     onChange={(e) => setAdjustAmount(e.target.value)}
                                 />
                             </div>
+                            <p className="text-xs text-gray-500">
+                                {adjustType === 'credit'
+                                    ? 'This amount will be added to the customer wallet.'
+                                    : 'This amount will be removed from the customer wallet.'}
+                            </p>
                             <div className="flex gap-2 pt-2">
                                 <button
                                     type="submit"

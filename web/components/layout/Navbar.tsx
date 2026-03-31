@@ -53,6 +53,12 @@ const mainNavItems = [
     { href: '/shop?search=deal', label: 'Offers', highlight: true },
 ];
 
+const socialLinks = [
+    { label: 'Instagram', href: process.env.NEXT_PUBLIC_INSTAGRAM_URL, Icon: Instagram },
+    { label: 'Twitter', href: process.env.NEXT_PUBLIC_TWITTER_URL, Icon: Twitter },
+    { label: 'Facebook', href: process.env.NEXT_PUBLIC_FACEBOOK_URL, Icon: Facebook },
+].filter((item) => !!item.href);
+
 export default function Navbar() {
     const pathname = usePathname();
     const { cart, toggleCart } = useCart();
@@ -201,13 +207,25 @@ export default function Navbar() {
                 <div className="h-5 w-px bg-gray-200 hidden xl:block flex-shrink-0" aria-hidden />
 
                 {/* Social links - desktop */}
-                <div className="hidden xl:flex items-center gap-1" role="group" aria-label="Social media">
-                    <a href="#" className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" aria-label="Instagram"><Instagram className="h-3.5 w-3.5" /></a>
-                    <a href="#" className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" aria-label="Twitter"><Twitter className="h-3.5 w-3.5" /></a>
-                    <a href="#" className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" aria-label="Facebook"><Facebook className="h-3.5 w-3.5" /></a>
-                </div>
-
-                <div className="h-5 w-px bg-gray-200 hidden xl:block flex-shrink-0" aria-hidden />
+                {socialLinks.length > 0 && (
+                    <>
+                        <div className="hidden xl:flex items-center gap-1" role="group" aria-label="Social media">
+                            {socialLinks.map(({ label, href, Icon }) => (
+                                <a
+                                    key={label}
+                                    href={href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                    aria-label={label}
+                                >
+                                    <Icon className="h-3.5 w-3.5" />
+                                </a>
+                            ))}
+                        </div>
+                        <div className="h-5 w-px bg-gray-200 hidden xl:block flex-shrink-0" aria-hidden />
+                    </>
+                )}
 
                 {/* Action icons */}
                 <div className="flex items-center gap-1 sm:gap-2 lg:gap-1 shrink-0" role="group" aria-label="Account and cart actions">

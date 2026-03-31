@@ -1,11 +1,12 @@
 import { Injectable, BadRequestException, NotFoundException, Inject, forwardRef, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WalletService } from '../finance/wallet.service';
-import { ShipmentStatus } from '@prisma/client';
+import { ShipmentStatus, ServiceType, PaymentMethod, Prisma } from '@prisma/client';
 import { NotificationService } from '../notification/notification.service';
 import { SmsService } from '../sms/sms.service';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { BookShipmentDto } from './dto/logistics.dto';
 
 @Injectable()
 export class LogisticsService implements OnModuleInit {
@@ -177,7 +178,7 @@ export class LogisticsService implements OnModuleInit {
         };
     }
 
-    async bookShipment(userId: number, dto: any) {
+    async bookShipment(userId: number, dto: BookShipmentDto) {
         const {
             pickup_address_id,
             delivery_address_id,
@@ -193,6 +194,8 @@ export class LogisticsService implements OnModuleInit {
         } = dto;
 
         const isFreightForwarding = dto.type === 'freight_forwarding';
+        const serviceTypeValue = (isFreightForwarding ? 'standard' : dto.service_type) as ServiceType;
+        const paymentMethodValue = (dto.payment_method || 'wallet') as PaymentMethod;
 
         let priceDetails = { base: 0, weightInfo: 0, service: 0, total: 0 };
 
@@ -231,9 +234,9 @@ export class LogisticsService implements OnModuleInit {
                 delivery_address_id: isFreightForwarding ? null : delivery_address_id,
                 weight: weight || 0,
                 dimensions: dimensions || '',
-                service_type: isFreightForwarding ? 'standard' : service_type,
+                service_type: serviceTypeValue,
                 status: 'booked',
-                payment_method: payment_method || 'wallet',
+                payment_method: paymentMethodValue,
                 payment_status: isFreightForwarding ? 'pending' : (payment_method === 'wallet' ? 'success' : 'pending'),
                 base_price: priceDetails.base,
                 weight_price: priceDetails.weightInfo,
@@ -244,10 +247,10 @@ export class LogisticsService implements OnModuleInit {
                 notes: `${notes || ''} [Contents: ${contents_description || 'N/A'}]`,
                 origin_warehouse_id: dto.origin_warehouse_id ? Number(dto.origin_warehouse_id) : null,
                 destination_warehouse_id: dto.destination_warehouse_id ? Number(dto.destination_warehouse_id) : null,
-                items_declaration: dto.items_declaration || [],
+                items_declaration: (dto.items_declaration || []) as Prisma.InputJsonValue,
                 carrier_tracking_number: dto.carrier_tracking_number,
                 shipping_method: isFreightForwarding ? dto.shipping_method : null,
-                shipping_rate_id: isFreightForwarding ? (dto.shipping_rate_id || null) : null,
+                shipping_rate_id: isFreightForwarding && dto.shipping_rate_id != null ? String(dto.shipping_rate_id) : null,
                 is_cod: dto.is_cod || false,
                 declaration_image_urls: Array.isArray(dto.declaration_image_urls) ? dto.declaration_image_urls : null,
             }

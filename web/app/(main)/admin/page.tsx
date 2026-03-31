@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import Link from 'next/link';
 import {
     Package,
     Send,
@@ -61,7 +62,7 @@ export default function AdminDashboard() {
                 setShipments(shipList);
                 setStats({
                     totalShipments: shipList.length,
-                    pendingTransfers: (transRes.data ?? []).filter((t: any) => t.status === 'pending').length,
+                    pendingTransfers: (transRes.data ?? []).filter((t: any) => t.payment_status === 'pending').length,
                     pendingRequests: (procRes.data ?? []).filter((p: any) => p.status === 'submitted').length
                 });
             } catch {
@@ -175,24 +176,24 @@ export default function AdminDashboard() {
                             <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
                         </div>
                         <div className="space-y-2">
-                            <a href="/admin/transfers" className="block p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors group/item">
+                            <Link href="/admin/transfers" className="block p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors group/item">
                                 <div className="flex justify-between items-start">
                                     <p className="text-2xl font-bold tracking-tight">{loading ? '—' : stats.pendingTransfers}</p>
                                     <ArrowUpRight className="h-3.5 w-3.5 text-white/30 group-hover/item:text-blue-400 transition-colors" />
                                 </div>
                                 <p className="text-xs font-semibold text-blue-300 mt-1">Pending transfers</p>
-                            </a>
-                            <a href="/admin/procurement" className="block p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors group/item">
+                            </Link>
+                            <Link href="/admin/procurement" className="block p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors group/item">
                                 <div className="flex justify-between items-start">
                                     <p className="text-2xl font-bold tracking-tight">{loading ? '—' : stats.pendingRequests}</p>
                                     <ArrowUpRight className="h-3.5 w-3.5 text-white/30 group-hover/item:text-blue-400 transition-colors" />
                                 </div>
                                 <p className="text-xs font-semibold text-indigo-300 mt-1">Procurement requests</p>
-                            </a>
+                            </Link>
                         </div>
-                        <a href="/admin/transfers" className="mt-3 block w-full min-h-[44px] h-9 bg-white text-gray-900 rounded-lg font-semibold text-xs hover:bg-blue-50 transition-colors flex items-center justify-center">
+                        <Link href="/admin/transfers" className="mt-3 block w-full min-h-[44px] h-9 bg-white text-gray-900 rounded-lg font-semibold text-xs hover:bg-blue-50 transition-colors flex items-center justify-center">
                             View all ({loading ? 0 : stats.pendingTransfers + stats.pendingRequests})
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>

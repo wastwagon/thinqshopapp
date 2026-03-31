@@ -73,7 +73,7 @@ export default function AdminReviewsPage() {
                     <Eye className="h-7 w-7 text-blue-600" />
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Reviews</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Approve or reject product reviews (mobile-first)</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Moderate customer reviews before they appear publicly</p>
                     </div>
                 </div>
                 <div className="flex gap-2">
@@ -141,7 +141,7 @@ export default function AdminReviewsPage() {
                                                 onClick={() => handleApprove(r.id, false)}
                                                 disabled={updatingId === r.id}
                                                 className="min-h-[44px] min-w-[44px] rounded-xl bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 touch-manipulation disabled:opacity-50"
-                                                title="Reject"
+                                                title="Decline"
                                             >
                                                 <XCircle className="h-5 w-5" />
                                             </button>

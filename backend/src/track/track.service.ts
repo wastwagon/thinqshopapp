@@ -83,11 +83,17 @@ export class TrackService {
         const order = await this.orderService.findOneByOrderNumber(ref);
         if (!order) return null as any;
 
-        const timeline = [];
-        timeline.push({
-            date: toIso(order.created_at as any),
-            status: order.status?.replace(/_/g, ' ') || 'Placed',
-        });
+        const history = Array.isArray((order as any).tracking) ? (order as any).tracking : [];
+        const timeline = history.length > 0
+            ? history.map((e: any) => ({
+                date: toIso(e.created_at),
+                status: e.status?.replace(/_/g, ' ') || e.status,
+                notes: e.notes,
+            }))
+            : [{
+                date: toIso(order.created_at as any),
+                status: order.status?.replace(/_/g, ' ') || 'Placed',
+            }];
 
         return {
             type: 'order',

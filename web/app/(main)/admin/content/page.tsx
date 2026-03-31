@@ -25,6 +25,13 @@ type Testimonial = { id: number; quote: string; author_name: string; author_role
 type Policy = { id: number; type: string; short_text?: string | null; full_text?: string | null };
 type HomepageSection = { id: number; section_key: string; sort_order: number; is_enabled: boolean };
 
+const formatCmsLabel = (value?: string | null): string =>
+    (value || '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, (c) => c.toUpperCase()) || '—';
+
 export default function AdminContent() {
     const [loading, setLoading] = useState(true);
     const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
@@ -110,7 +117,7 @@ export default function AdminContent() {
                     <Layout className="h-7 w-7 text-blue-600" />
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Content</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Hero, trust badges, testimonials, policies (mobile-first)</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Manage homepage sections, testimonials, and policy text</p>
                     </div>
                 </div>
             </div>
@@ -429,11 +436,11 @@ function PoliciesSection({
         <div className="space-y-3 pt-3">
             {policies.map((p) => (
                 <div key={p.id} className="p-3 rounded-xl bg-gray-50 border border-gray-100">
-                    <p className="font-medium text-gray-900 capitalize">{p.type}</p>
+                    <p className="font-medium text-gray-900">{formatCmsLabel(p.type)}</p>
                     {editing?.id === p.id ? (
                         <div className="mt-2 space-y-2">
-                            <textarea className="w-full min-h-[80px] px-3 py-2 rounded-lg border text-sm" placeholder="Short text (PDP)" value={short} onChange={(e) => setShort(e.target.value)} />
-                            <textarea className="w-full min-h-[120px] px-3 py-2 rounded-lg border text-sm" placeholder="Full text" value={full} onChange={(e) => setFull(e.target.value)} />
+                            <textarea className="w-full min-h-[80px] px-3 py-2 rounded-lg border text-sm" placeholder="Short customer-facing summary" value={short} onChange={(e) => setShort(e.target.value)} />
+                            <textarea className="w-full min-h-[120px] px-3 py-2 rounded-lg border text-sm" placeholder="Full policy text for policy pages" value={full} onChange={(e) => setFull(e.target.value)} />
                             <div className="flex gap-2">
                                 <button type="button" className="min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-medium" onClick={() => onUpdate(p.type, { short_text: short, full_text: full }).then(() => setEditing(null))} disabled={!!saving}>
                                     Save
@@ -465,7 +472,7 @@ function SectionsList({
         <div className="space-y-2 pt-3">
             {sections.map((s) => (
                 <div key={s.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
-                    <span className="font-medium text-gray-900">{s.section_key.replace(/_/g, ' ')}</span>
+                    <span className="font-medium text-gray-900">{formatCmsLabel(s.section_key)}</span>
                     <label className="flex items-center gap-2">
                         <span className="text-sm text-gray-500">{s.is_enabled ? 'On' : 'Off'}</span>
                         <button

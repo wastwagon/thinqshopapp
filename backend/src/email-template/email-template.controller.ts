@@ -1,29 +1,36 @@
-import { Controller, Get, Patch, Body, Param, UseGuards, Request, ForbiddenException, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Patch, Body, Param, UseGuards, Request, ParseIntPipe } from '@nestjs/common';
 import { EmailTemplateService } from './email-template.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { RequirePermission } from '../auth/require-permission.decorator';
+import { PERMISSION_MAP } from '../auth/permissions';
+import { AuditService } from '../audit/audit.service';
 
 @Controller('admin/email-templates')
 @UseGuards(AuthGuard)
 export class EmailTemplateController {
-    constructor(private emailTemplateService: EmailTemplateService) { }
+    constructor(
+        private emailTemplateService: EmailTemplateService,
+        private auditService: AuditService,
+    ) { }
 
     @Get()
+    @RequirePermission(PERMISSION_MAP.EMAIL_TEMPLATES_MANAGE)
     async findAll(@Request() req: any) {
-        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
         return this.emailTemplateService.findAll();
     }
 
     @Patch(':id')
+    @RequirePermission(PERMISSION_MAP.EMAIL_TEMPLATES_MANAGE)
     async update(
         @Request() req: any,
         @Param('id', ParseIntPipe) id: number,
         @Body() body: { name?: string; subject?: string; body?: string; is_enabled?: boolean },
     ) {
-        if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
-            throw new ForbiddenException('Admin access required');
-        }
-        return this.emailTemplateService.update(id, body);
+        const updated = await this.emailTemplateService.update(id, body);
+        await this.auditService.logAdminAction(req, 'email_template.update', {
+            tableName: 'email_templates',
+            recordId: id,
+        });
+        return updated;
     }
 }

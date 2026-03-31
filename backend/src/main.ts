@@ -18,8 +18,11 @@ async function bootstrap() {
     }
 
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    const rawBodySaver = (req: any, _res: any, buf: Buffer) => {
+        if (buf?.length) req.rawBody = buf.toString('utf8');
+    };
     // Increase body limit for transfer QR code uploads (base64 images)
-    app.useBodyParser('json', { limit: '10mb' });
+    app.useBodyParser('json', { limit: '10mb', verify: rawBodySaver });
     app.useBodyParser('urlencoded', { limit: '10mb', extended: true });
     app.use(helmet({ contentSecurityPolicy: false }));
 

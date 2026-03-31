@@ -33,6 +33,7 @@ import {
     Layers,
     FileText,
     Calculator,
+    Shield,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -44,6 +45,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps) {
     const pathname = usePathname();
+    const isActiveRoute = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
     const userLinks = [
         { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
@@ -78,6 +80,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
         { name: 'Users', href: '/admin/users', icon: User },
         { name: 'Wallet management', href: '/admin/wallet', icon: Wallet },
         { name: 'Email templates', href: '/admin/email-templates', icon: Edit3 },
+        { name: 'Audit logs', href: '/admin/audit-logs', icon: Shield },
         { name: 'Settings', href: '/admin/settings', icon: Settings },
     ];
 
@@ -114,7 +117,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
                         <p className="px-3 text-xs font-semibold text-gray-400 mb-3">Navigation</p>
                         {links.map((link) => {
                             const Icon = link.icon;
-                            const isActive = pathname === link.href;
+                            const isActive = isActiveRoute(link.href);
                             return (
                                 <Link
                                     key={link.name}
