@@ -41,9 +41,11 @@ async function proxy(request: NextRequest, pathSegments: string[]) {
         const headers: HeadersInit = {};
         request.headers.forEach((value, key) => {
             const lower = key.toLowerCase();
-            if (lower === 'host' || lower === 'connection') return;
+            if (lower === 'host' || lower === 'connection' || lower === 'content-length' || lower === 'accept-encoding') return;
             headers[key] = value;
         });
+        // Avoid upstream compression/header mismatches in proxy responses.
+        headers['accept-encoding'] = 'identity';
 
         const init: RequestInit = {
             method: request.method,
@@ -61,7 +63,14 @@ async function proxy(request: NextRequest, pathSegments: string[]) {
         const responseHeaders = new Headers();
         res.headers.forEach((value, key) => {
             const lower = key.toLowerCase();
-            if (lower === 'connection' || lower === 'transfer-encoding' || lower === 'keep-alive' || lower === 'set-cookie') return;
+            if (
+                lower === 'connection'
+                || lower === 'transfer-encoding'
+                || lower === 'keep-alive'
+                || lower === 'set-cookie'
+                || lower === 'content-encoding'
+                || lower === 'content-length'
+            ) return;
             responseHeaders.set(key, value);
         });
         const setCookies = typeof (res.headers as any).getSetCookie === 'function'
