@@ -12,7 +12,6 @@ import {
     Truck,
     ShoppingBag,
     Trash2,
-    ChevronRight,
 } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -34,7 +33,7 @@ export default function SettingsPage() {
                             <p className="text-xs text-gray-500 mt-1">These links open live pages where your changes are applied.</p>
                         </div>
 
-                        <div className="p-3">
+                        <div className="p-3 grid grid-cols-2 md:grid-cols-3 gap-3">
                             <SettingsLink
                                 href="/dashboard/profile"
                                 icon={User}
@@ -62,7 +61,7 @@ export default function SettingsPage() {
                             <p className="text-xs text-gray-500 mt-1">Common areas users usually manage from settings.</p>
                         </div>
 
-                        <div className="p-3">
+                        <div className="p-3 grid grid-cols-2 md:grid-cols-3 gap-3">
                             <SettingsLink
                                 href="/dashboard/wallet"
                                 icon={Wallet}
@@ -115,17 +114,12 @@ type SettingsLinkProps = {
 
 function SettingsLink({ href, icon: Icon, title, description }: SettingsLinkProps) {
     return (
-        <Link href={href} className="flex items-center justify-between gap-3 rounded-xl border border-transparent px-3 py-3 hover:bg-gray-50 hover:border-gray-100 transition-colors">
-            <div className="flex items-start gap-3 min-w-0">
-                <div className="mt-0.5 w-8 h-8 rounded-lg bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
-                    <Icon className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900">{title}</p>
-                    <p className="text-xs text-gray-500">{description}</p>
-                </div>
+        <Link href={href} className="rounded-xl border border-gray-100 px-3 py-3 hover:bg-gray-50 hover:border-gray-200 transition-colors min-h-[122px]">
+            <div className="w-8 h-8 rounded-lg bg-gray-100 text-gray-700 flex items-center justify-center mb-2">
+                <Icon className="h-4 w-4" />
             </div>
-            <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" />
+            <p className="text-sm font-semibold text-gray-900 leading-tight">{title}</p>
+            <p className="text-xs text-gray-500 mt-1 leading-snug line-clamp-3">{description}</p>
         </Link>
     );
 }
