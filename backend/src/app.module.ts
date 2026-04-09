@@ -24,15 +24,18 @@ import { VariationModule } from './variation/variation.module';
 import { SmsModule } from './sms/sms.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { AuditModule } from './audit/audit.module';
+import { AuthGuard } from './auth/auth.guard';
 import { PermissionGuard } from './auth/permission.guard';
+import { AuthBeforePermissionGlobalGuard } from './auth/auth-before-permission-global.guard';
 import { SupportModule } from './support/support.module';
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
         ThrottlerModule.forRoot([
-            { name: 'short', ttl: 15000, limit: 10 },
-            { name: 'long', ttl: 60000, limit: 100 },
+            // Admin SPA fires many parallel requests on load; 10/15s caused frequent 429s.
+            { name: 'short', ttl: 15000, limit: 60 },
+            { name: 'long', ttl: 60000, limit: 200 },
         ]),
         PrismaModule,
         UserModule,
@@ -59,8 +62,11 @@ import { SupportModule } from './support/support.module';
     controllers: [AppController],
     providers: [
         AppService,
+        AuthGuard,
+        PermissionGuard,
+        AuthBeforePermissionGlobalGuard,
         { provide: APP_GUARD, useClass: ThrottlerGuard },
-        { provide: APP_GUARD, useClass: PermissionGuard },
+        { provide: APP_GUARD, useClass: AuthBeforePermissionGlobalGuard },
     ],
 })
 export class AppModule { }

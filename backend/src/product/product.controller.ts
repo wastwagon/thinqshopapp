@@ -16,12 +16,14 @@ export class ProductController {
         private readonly auditService: AuditService,
     ) { }
 
+    @Public()
     @Get()
     @Header('Cache-Control', 'public, max-age=60')
     findAll(@Query() query: { category?: string; search?: string; page?: number; limit?: number }) {
         return this.productService.findAll(query);
     }
 
+    @Public()
     @Get('categories')
     @Header('Cache-Control', 'public, max-age=60')
     getCategories() {
@@ -122,6 +124,7 @@ export class ProductController {
         return this.productService.createReview(id, req.user.sub, dto);
     }
 
+    @Public()
     @Get(':slug')
     findOne(@Param('slug') slug: string) {
         return this.productService.findOne(slug);

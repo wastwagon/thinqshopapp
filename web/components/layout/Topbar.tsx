@@ -30,21 +30,40 @@ export default function Topbar(props: TopbarProps) {
         }
     }, [accountMenuOpen]);
 
+    const pollMsRef = useRef(30000);
+
     const fetchNotifications = async () => {
         try {
             if (user) {
                 const { data } = await api.get('/notifications');
                 setNotifications(data);
+                pollMsRef.current = 30000;
             }
-        } catch (error) {
-            console.error('Failed to fetch notifications', error);
+        } catch (error: unknown) {
+            const status = (error as { response?: { status?: number } })?.response?.status;
+            if (status === 429) {
+                pollMsRef.current = Math.min(pollMsRef.current * 2, 300000);
+                return;
+            }
+            if (status !== 502) {
+                console.error('Failed to fetch notifications', error);
+            }
         }
     };
 
     useEffect(() => {
+        if (!user) return;
+        pollMsRef.current = 30000;
         fetchNotifications();
-        const interval = setInterval(fetchNotifications, 30000);
-        return () => clearInterval(interval);
+        let timer: ReturnType<typeof setTimeout>;
+        const schedule = () => {
+            timer = setTimeout(async () => {
+                await fetchNotifications();
+                schedule();
+            }, pollMsRef.current);
+        };
+        schedule();
+        return () => clearTimeout(timer);
     }, [user]);
 
     const handleMarkAsRead = async (id: number) => {

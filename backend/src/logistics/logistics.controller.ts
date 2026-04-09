@@ -7,6 +7,7 @@ import { PermissionGuard } from '../auth/permission.guard';
 import { RequirePermission } from '../auth/require-permission.decorator';
 import { PERMISSION_MAP } from '../auth/permissions';
 import { AuditService } from '../audit/audit.service';
+import { Public } from '../auth/public.decorator';
 import {
     BookShipmentDto,
     CalculatePriceDto,
@@ -54,6 +55,7 @@ export class LogisticsController {
         return this.logisticsService.getUserShipments(req.user.sub);
     }
 
+    @Public()
     @Post('calculate-price')
     async calculatePrice(@Body() body: CalculatePriceDto) {
         // Return full breakdown
@@ -70,21 +72,25 @@ export class LogisticsController {
         return this.logisticsService.getShipmentById(req.user.sub, Number(id));
     }
 
+    @Public()
     @Get('track/:trackingNumber')
     async trackShipment(@Param('trackingNumber') trackingNumber: string) {
         return this.logisticsService.trackShipment(trackingNumber);
     }
 
+    @Public()
     @Get('zones')
     async getZones() {
         return this.logisticsService.getZones();
     }
 
+    @Public()
     @Get('warehouses')
     async getWarehouses() {
         return this.logisticsService.getWarehouses();
     }
 
+    @Public()
     @Get('freight-rates')
     async getFreightRates(@Query('method') method?: string) {
         const m = method === 'sea_freight' ? 'sea_freight' : method === 'air_freight' ? 'air_freight' : undefined;

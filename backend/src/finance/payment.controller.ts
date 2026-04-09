@@ -2,6 +2,7 @@ import { Controller, Post, Body, UseGuards, Request, Headers, UnauthorizedExcept
 import { createHmac, timingSafeEqual } from 'crypto';
 import { PaymentService } from './payment.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { Public } from '../auth/public.decorator';
 
 @Controller('payments')
 export class PaymentController {
@@ -18,6 +19,7 @@ export class PaymentController {
         );
     }
 
+    @Public()
     @Post('webhook')
     async handleWebhook(
         @Request() req: any,

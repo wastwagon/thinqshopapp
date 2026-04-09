@@ -3,6 +3,7 @@ import { VariationService } from './variation.service';
 import { CreateVariationOptionDto, UpdateVariationOptionDto } from './dto/variation-option.dto';
 import { CreateVariationValueDto, UpdateVariationValueDto } from './dto/variation-value.dto';
 import { AuthGuard } from '../auth/auth.guard';
+import { Public } from '../auth/public.decorator';
 import { RequirePermission } from '../auth/require-permission.decorator';
 import { PERMISSION_MAP } from '../auth/permissions';
 import { AuditService } from '../audit/audit.service';
@@ -14,6 +15,7 @@ export class VariationController {
         private auditService: AuditService,
     ) {}
 
+    @Public()
     @Get('options')
     async getOptions() {
         return this.variationService.getOptionsPublic();

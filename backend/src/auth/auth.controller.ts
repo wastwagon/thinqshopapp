@@ -6,6 +6,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { PermissionGuard } from './permission.guard';
+import { Public } from './public.decorator';
 import { RequirePermission } from './require-permission.decorator';
 import { PERMISSION_MAP } from './permissions';
 
@@ -13,6 +14,7 @@ import { PERMISSION_MAP } from './permissions';
 export class AuthController {
     constructor(private authService: AuthService) { }
 
+    @Public()
     @Post('login')
     @HttpCode(HttpStatus.OK)
     async login(@Body() dto: LoginDto) {
@@ -23,6 +25,7 @@ export class AuthController {
         return this.authService.login(user);
     }
 
+    @Public()
     @Post('register')
     async register(@Body() dto: RegisterDto) {
         return this.authService.register(dto);
@@ -35,6 +38,7 @@ export class AuthController {
         return this.authService.register(dto);
     }
 
+    @Public()
     @Post('forgot-password')
     @HttpCode(HttpStatus.OK)
     async forgotPassword(@Body() dto: ForgotPasswordDto) {
