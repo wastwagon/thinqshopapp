@@ -4,6 +4,7 @@ import { CreateVariationOptionDto, UpdateVariationOptionDto } from './dto/variat
 import { CreateVariationValueDto, UpdateVariationValueDto } from './dto/variation-value.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { Public } from '../auth/public.decorator';
+import { PermissionGuard } from '../auth/permission.guard';
 import { RequirePermission } from '../auth/require-permission.decorator';
 import { PERMISSION_MAP } from '../auth/permissions';
 import { AuditService } from '../audit/audit.service';
@@ -22,14 +23,14 @@ export class VariationController {
     }
 
     @Get('admin/options')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.VARIATIONS_MANAGE)
     async getOptionsAdmin(@Request() req: any) {
         return this.variationService.getOptions();
     }
 
     @Post('admin/options')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.VARIATIONS_MANAGE)
     async createOption(@Request() req: any, @Body() dto: CreateVariationOptionDto) {
         const created = await this.variationService.createOption(dto);
@@ -41,7 +42,7 @@ export class VariationController {
     }
 
     @Patch('admin/options/:id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.VARIATIONS_MANAGE)
     async updateOption(@Request() req: any, @Param('id') id: string, @Body() dto: UpdateVariationOptionDto) {
         const updated = await this.variationService.updateOption(Number(id), dto);
@@ -53,7 +54,7 @@ export class VariationController {
     }
 
     @Delete('admin/options/:id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.VARIATIONS_MANAGE)
     async deleteOption(@Request() req: any, @Param('id') id: string) {
         const deleted = await this.variationService.deleteOption(Number(id));
@@ -65,7 +66,7 @@ export class VariationController {
     }
 
     @Post('admin/values')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.VARIATIONS_MANAGE)
     async createValue(@Request() req: any, @Body() dto: CreateVariationValueDto) {
         const created = await this.variationService.createValue(dto);
@@ -77,7 +78,7 @@ export class VariationController {
     }
 
     @Patch('admin/values/:id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.VARIATIONS_MANAGE)
     async updateValue(@Request() req: any, @Param('id') id: string, @Body() dto: UpdateVariationValueDto) {
         const updated = await this.variationService.updateValue(Number(id), dto);
@@ -89,7 +90,7 @@ export class VariationController {
     }
 
     @Delete('admin/values/:id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.VARIATIONS_MANAGE)
     async deleteValue(@Request() req: any, @Param('id') id: string) {
         const deleted = await this.variationService.deleteValue(Number(id));

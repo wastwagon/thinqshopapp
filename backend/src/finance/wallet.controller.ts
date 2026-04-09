@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Query, UseGuards, Request, BadRequestExcep
 import { WalletService } from './wallet.service';
 import { PaymentService } from './payment.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 import { RequirePermission } from '../auth/require-permission.decorator';
 import { PERMISSION_MAP } from '../auth/permissions';
 import { AuditService } from '../audit/audit.service';
@@ -78,14 +79,14 @@ export class WalletController {
     }
 
     @Get('admin/list')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.WALLETS_MANAGE)
     async listAdmin(@Request() req: any, @Query() query: { page?: number; limit?: number; search?: string }) {
         return this.walletService.listAllForAdmin(query);
     }
 
     @Post('admin/adjust')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.WALLETS_MANAGE)
     async adminAdjust(@Request() req: any, @Body() body: { user_id: number; amount: number }) {
         const userId = Number(body.user_id);

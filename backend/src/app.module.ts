@@ -32,10 +32,9 @@ import { SupportModule } from './support/support.module';
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        // Admin dashboards fire many parallel API calls; generous per-minute cap avoids 429 storms.
         ThrottlerModule.forRoot([
-            // Admin SPA fires many parallel requests on load; 10/15s caused frequent 429s.
-            { name: 'short', ttl: 15000, limit: 60 },
-            { name: 'long', ttl: 60000, limit: 200 },
+            { ttl: 60000, limit: 400 },
         ]),
         PrismaModule,
         UserModule,

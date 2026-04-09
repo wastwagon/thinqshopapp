@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, UseGuards, Request, ParseIntPipe, Query, StreamableFile } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
@@ -15,14 +16,14 @@ export class InvoiceController {
     ) {}
 
     @Get()
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async findAll(@Request() req: any, @Query() query: { page?: number; limit?: number; status?: string }) {
         return this.invoiceService.findAll(query);
     }
 
     @Get(':id/pdf')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async getPdf(@Request() req: any, @Param('id', ParseIntPipe) id: number) {
         const invoice = await this.invoiceService.findOne(id);
@@ -35,14 +36,14 @@ export class InvoiceController {
     }
 
     @Get(':id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async findOne(@Request() req: any, @Param('id', ParseIntPipe) id: number) {
         return this.invoiceService.findOne(id);
     }
 
     @Post()
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async create(@Request() req: any, @Body() dto: CreateInvoiceDto) {
         const created = await this.invoiceService.create(dto, req.user.sub);
@@ -54,7 +55,7 @@ export class InvoiceController {
     }
 
     @Patch(':id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async update(@Request() req: any, @Param('id', ParseIntPipe) id: number, @Body() dto: UpdateInvoiceDto) {
         const updated = await this.invoiceService.update(id, dto);
@@ -66,7 +67,7 @@ export class InvoiceController {
     }
 
     @Patch(':id/status')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async updateStatus(@Request() req: any, @Param('id', ParseIntPipe) id: number, @Body() body: { status: string }) {
         const updated = await this.invoiceService.updateStatus(id, body.status);
@@ -79,7 +80,7 @@ export class InvoiceController {
     }
 
     @Post(':id/send-sms')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.INVOICES_MANAGE)
     async sendInvoiceSms(@Request() req: any, @Param('id', ParseIntPipe) id: number) {
         const sent = await this.invoiceService.sendInvoiceSummarySms(id);

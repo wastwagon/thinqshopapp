@@ -1,12 +1,13 @@
 import { Controller, Get, Header, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 import { RequirePermission } from '../auth/require-permission.decorator';
 import { PERMISSION_MAP } from '../auth/permissions';
 import { AuditService } from './audit.service';
 import { Response } from 'express';
 
 @Controller('admin/audit-logs')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, PermissionGuard)
 export class AuditController {
     constructor(private readonly auditService: AuditService) {}
 
