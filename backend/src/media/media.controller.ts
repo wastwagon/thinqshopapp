@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '../auth/auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 import { MediaService } from './media.service';
 import { memoryStorage } from 'multer';
 import { RequirePermission } from '../auth/require-permission.decorator';
@@ -30,7 +31,7 @@ export class MediaController {
     ) {}
 
     @Post('upload')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.MEDIA_MANAGE)
     @UseInterceptors(
         FileInterceptor('file', {
@@ -58,7 +59,7 @@ export class MediaController {
     }
 
     @Get()
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.MEDIA_MANAGE)
     async list(
         @Request() req: any,
@@ -74,14 +75,14 @@ export class MediaController {
     }
 
     @Get(':id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.MEDIA_MANAGE)
     async getOne(@Request() req: any, @Param('id', ParseIntPipe) id: number) {
         return this.mediaService.findOne(id);
     }
 
     @Delete(':id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.MEDIA_MANAGE)
     async remove(@Request() req: any, @Param('id', ParseIntPipe) id: number) {
         await this.mediaService.remove(id);

@@ -24,15 +24,14 @@ import { VariationModule } from './variation/variation.module';
 import { SmsModule } from './sms/sms.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { AuditModule } from './audit/audit.module';
-import { PermissionGuard } from './auth/permission.guard';
 import { SupportModule } from './support/support.module';
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        // Single window: admin dashboards fire many parallel API calls; the previous 10/15s cap caused 429s.
         ThrottlerModule.forRoot([
-            { name: 'short', ttl: 15000, limit: 10 },
-            { name: 'long', ttl: 60000, limit: 100 },
+            { ttl: 60000, limit: 400 },
         ]),
         PrismaModule,
         UserModule,
@@ -60,7 +59,6 @@ import { SupportModule } from './support/support.module';
     providers: [
         AppService,
         { provide: APP_GUARD, useClass: ThrottlerGuard },
-        { provide: APP_GUARD, useClass: PermissionGuard },
     ],
 })
 export class AppModule { }

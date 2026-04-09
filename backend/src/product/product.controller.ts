@@ -4,6 +4,7 @@ import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { CreateReviewDto, UpdateReviewAdminDto } from './dto/review.dto';
 import { AuthGuard } from '../auth/auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 import { Public } from '../auth/public.decorator';
 import { RequirePermission } from '../auth/require-permission.decorator';
 import { PERMISSION_MAP } from '../auth/permissions';
@@ -29,14 +30,14 @@ export class ProductController {
     }
 
     @Get('categories/admin')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.PRODUCTS_READ)
     async getCategoriesAdmin(@Request() req: any) {
         return this.productService.getCategoriesForAdmin();
     }
 
     @Post('categories')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.CATEGORIES_MANAGE)
     async createCategory(@Request() req: any, @Body() dto: CreateCategoryDto) {
         const created = await this.productService.createCategory(dto);
@@ -48,7 +49,7 @@ export class ProductController {
     }
 
     @Patch('categories/:id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.CATEGORIES_MANAGE)
     async updateCategory(@Request() req: any, @Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCategoryDto) {
         const updated = await this.productService.updateCategory(id, dto);
@@ -60,7 +61,7 @@ export class ProductController {
     }
 
     @Delete('categories/:id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.CATEGORIES_MANAGE)
     async removeCategory(@Request() req: any, @Param('id', ParseIntPipe) id: number) {
         const deleted = await this.productService.removeCategory(id);
@@ -72,14 +73,14 @@ export class ProductController {
     }
 
     @Get('admin/list')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.PRODUCTS_READ)
     async findAllAdmin(@Request() req: any, @Query() query: { page?: number; limit?: number; search?: string }) {
         return this.productService.findAllForAdmin(query);
     }
 
     @Post()
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.PRODUCTS_MANAGE)
     async create(@Request() req: any, @Body() createProductDto: CreateProductDto) {
         const created = await this.productService.create(createProductDto);
@@ -91,14 +92,14 @@ export class ProductController {
     }
 
     @Get('admin/reviews')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.REVIEWS_MANAGE)
     async getReviewsAdmin(@Request() req: any, @Query() query: { page?: number; limit?: number; product_id?: number; is_approved?: string }) {
         return this.productService.getReviewsAdmin(query);
     }
 
     @Patch('admin/reviews/:id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.REVIEWS_MANAGE)
     async updateReviewAdmin(@Request() req: any, @Param('id', ParseIntPipe) id: number, @Body() dto: UpdateReviewAdminDto) {
         const updated = await this.productService.updateReviewAdmin(id, dto);
@@ -128,7 +129,7 @@ export class ProductController {
     }
 
     @Patch(':id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.PRODUCTS_MANAGE)
     async update(@Request() req: any, @Param('id', ParseIntPipe) id: number, @Body() updateProductDto: UpdateProductDto) {
         const updated = await this.productService.update(id, updateProductDto);
@@ -140,7 +141,7 @@ export class ProductController {
     }
 
     @Delete(':id')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.PRODUCTS_MANAGE)
     async remove(@Request() req: any, @Param('id', ParseIntPipe) id: number) {
         const deleted = await this.productService.remove(id);
