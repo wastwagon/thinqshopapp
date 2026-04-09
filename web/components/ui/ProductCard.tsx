@@ -89,7 +89,25 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {/* Quick Actions - always visible on mobile; hover reveal on desktop */}
                 <div className="absolute bottom-3 right-3 flex flex-col gap-1 translate-x-0 md:translate-x-10 md:group-hover:translate-x-0 transition-transform duration-300 z-20">
                     <button
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist({ id: Number(productId), name: product.name, price: fromPrice, slug: productSlug, images: imagesList.length ? imagesList : product.images, gallery_images: product.gallery_images, category: product.category }); }}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const wishImages =
+                                imagesList.length > 0
+                                    ? imagesList
+                                    : product.image
+                                      ? [String(product.image)]
+                                      : product.gallery_images?.filter(Boolean).map(String);
+                            toggleWishlist({
+                                id: Number(productId),
+                                name: product.name,
+                                price: fromPrice,
+                                slug: productSlug,
+                                images: wishImages,
+                                gallery_images: product.gallery_images,
+                                category: product.category,
+                            });
+                        }}
                         className={`min-w-[44px] min-h-[44px] w-11 h-11 bg-white/95 shadow border rounded-full flex items-center justify-center transition-all ${
                             isInWishlist(Number(productId)) ? 'border-red-200 text-red-500' : 'border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white hover:border-blue-600'
                         }`}
