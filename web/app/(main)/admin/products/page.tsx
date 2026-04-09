@@ -35,6 +35,7 @@ export default function AdminProducts() {
     const [formData, setFormData] = useState({
         name: '',
         category_id: '',
+        product_kind: 'simple' as 'simple' | 'variable',
         price: '',
         compare_price: '',
         stock_quantity: '',
@@ -106,6 +107,7 @@ export default function AdminProducts() {
             setFormData({
                 name: product.name ?? '',
                 category_id: String(catId),
+                product_kind: variants.length > 0 ? 'variable' : 'simple',
                 price: String(Number(product.price ?? 0)),
                 compare_price: product.compare_price != null ? String(Number(product.compare_price)) : '',
                 stock_quantity: String(Number(product.stock_quantity ?? product.stock ?? 10)),
@@ -130,6 +132,7 @@ export default function AdminProducts() {
             setFormData({
                 name: '',
                 category_id: '',
+                product_kind: 'simple',
                 price: '',
                 compare_price: '',
                 stock_quantity: '',
@@ -204,16 +207,30 @@ export default function AdminProducts() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const categoryId = parseInt(formData.category_id, 10);
-        if (!categoryId || !formData.name || !formData.price) {
-            toast.error("Name, category, and price are required");
+        if (!categoryId || !formData.name) {
+            toast.error('Name and category are required');
             return;
+        }
+        const isVariable = formData.product_kind === 'variable';
+        if (!isVariable && !formData.price) {
+            toast.error('Simple products require a base price');
+            return;
+        }
+        if (isVariable) {
+            const ok = formData.variants.some((v) => v.variant_type && v.variant_value);
+            if (!ok) {
+                toast.error('Variable products need at least one variant with option and value');
+                return;
+            }
         }
         try {
             const images = [formData.featuredImage, ...formData.gallery].filter(Boolean);
             const payload: Record<string, unknown> = {
                 name: formData.name,
                 category_id: categoryId,
-                price: parseFloat(formData.price),
+                price: isVariable
+                    ? (formData.price === '' || formData.price === undefined ? 0 : parseFloat(String(formData.price)))
+                    : parseFloat(formData.price),
                 stock_quantity: parseInt(formData.stock_quantity || '0', 10) || 0,
                 is_featured: formData.is_featured,
                 images
@@ -246,13 +263,19 @@ export default function AdminProducts() {
                 }
             }
             payload.specifications = specsObj && typeof specsObj === 'object' ? specsObj : {};
-            payload.variants = (formData.variants || []).map((v) => ({
-                variant_type: v.variant_type,
-                variant_value: v.variant_value,
-                sku: v.sku || undefined,
-                price_adjust: v.price_adjust ?? 0,
-                stock_quantity: v.stock_quantity ?? 0,
-            }));
+            if (isVariable) {
+                payload.variants = (formData.variants || [])
+                    .filter((v) => v.variant_type && v.variant_value)
+                    .map((v) => ({
+                        variant_type: v.variant_type,
+                        variant_value: v.variant_value,
+                        sku: v.sku || undefined,
+                        price_adjust: v.price_adjust ?? 0,
+                        stock_quantity: v.stock_quantity ?? 0,
+                    }));
+            } else {
+                payload.variants = [];
+            }
             if (editingProduct) {
                 await api.patch(`/products/${editingProduct.id}`, payload);
                 toast.success("Product updated");
@@ -454,6 +477,26 @@ export default function AdminProducts() {
                                 </select>
                             </div>
                             <div>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Product type</label>
+                                <div className="flex rounded-lg border border-gray-100 p-0.5 bg-gray-50 gap-0.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData((f) => ({ ...f, product_kind: 'simple', variants: [] }))}
+                                        className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'simple' ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
+                                    >
+                                        Simple
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData((f) => ({ ...f, product_kind: 'variable' }))}
+                                        className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'variable' ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
+                                    >
+                                        Variable
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-400 mt-1">Variable: set per-option prices below; base price can be 0 if each option price is the full amount.</p>
+                            </div>
+                            <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Short description</label>
                                 <input
                                     type="text"
@@ -475,13 +518,16 @@ export default function AdminProducts() {
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Price (GHS)</label>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                        {formData.product_kind === 'variable' ? 'Base price (GHS) — optional' : 'Price (GHS)'}
+                                    </label>
                                     <input
                                         type="number"
                                         step="0.01"
-                                        required
+                                        required={formData.product_kind === 'simple'}
                                         value={formData.price}
                                         onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                        placeholder={formData.product_kind === 'variable' ? '0 if using full price per variant' : ''}
                                         className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                     />
                                 </div>
@@ -519,11 +565,12 @@ export default function AdminProducts() {
                                 />
                                 <label htmlFor="is_featured" className="text-sm font-medium text-gray-700">Show in Featured section on homepage</label>
                             </div>
+                            {formData.product_kind === 'variable' && (
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1.5">
-                                    <Layers className="h-3.5 w-3.5" /> Variants (optional)
+                                    <Layers className="h-3.5 w-3.5" /> Variants
                                 </label>
-                                <p className="text-xs text-gray-400 mb-2">Add options from Variations (e.g. Size, Color). Define SKU, price adjustment and stock per variant.</p>
+                                <p className="text-xs text-gray-400 mb-2">Add options from Variations (e.g. Size, Color). Price = base + amount below (use base 0 and enter full GHS price per row if you prefer).</p>
                                 <div className="space-y-2">
                                     {formData.variants.map((v, idx) => (
                                         <div key={idx} className="flex flex-wrap items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-100">
@@ -566,7 +613,7 @@ export default function AdminProducts() {
                                             <input
                                                 type="number"
                                                 step="0.01"
-                                                placeholder="Price ±"
+                                                placeholder="Price +"
                                                 value={v.price_adjust ?? ''}
                                                 onChange={(e) => setFormData((f) => ({
                                                     ...f,
@@ -599,6 +646,7 @@ export default function AdminProducts() {
                                     </button>
                                 </div>
                             </div>
+                            )}
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 mb-1">Minimum quantity for wholesale</label>

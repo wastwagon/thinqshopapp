@@ -5,6 +5,7 @@ import api from '@/lib/axios';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
 import { trackAddToCart } from '@/lib/analytics';
+import { cartItemUnitGhs } from '@/lib/product-utils';
 
 interface Product {
     id: number;
@@ -20,7 +21,7 @@ interface CartItem {
     quantity: number;
     variant_id?: number | null;
     product: Product;
-    variant?: { variant_type: string; variant_value: string; price_adjust?: number } | null;
+    variant?: { variant_type: string; variant_value: string; price_adjust?: number | string } | null;
 }
 
 interface CartContextType {
@@ -28,7 +29,7 @@ interface CartContextType {
     itemCount: number;
     cartTotal: number;
     loading: boolean;
-    addToCart: (productId: number, quantity: number) => Promise<void>;
+    addToCart: (productId: number, quantity: number, variantId?: number) => Promise<void>;
     updateQuantity: (itemId: number, quantity: number) => Promise<void>;
     removeFromCart: (itemId: number) => Promise<void>;
     clearCart: () => Promise<void>;
@@ -64,13 +65,13 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         fetchCart();
     }, [user]);
 
-    const addToCart = async (productId: number, quantity: number) => {
+    const addToCart = async (productId: number, quantity: number, variantId?: number) => {
         if (!user) {
             toast.error("Please login to add items to cart");
             return;
         }
         try {
-            await api.post('/cart', { productId, quantity });
+            await api.post('/cart', { productId, quantity, ...(variantId != null ? { variantId } : {}) });
             trackAddToCart(String(productId), quantity);
             toast.success('Added to cart');
             fetchCart();
@@ -109,13 +110,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
     const toggleCart = () => setIsCartOpen(!isCartOpen);
 
-    const parsePrice = (p: any) => {
-        if (typeof p === 'number' && !isNaN(p)) return p;
-        const n = parseFloat(String(p).replace(/[^0-9.]/g, ''));
-        return isNaN(n) ? 0 : n;
-    };
     const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
-    const cartTotal = cart.reduce((total, item) => total + (item.quantity * parsePrice(item.product?.price)), 0);
+    const cartTotal = cart.reduce((total, item) => total + item.quantity * cartItemUnitGhs(item), 0);
 
     return (
         <CartContext.Provider value={{

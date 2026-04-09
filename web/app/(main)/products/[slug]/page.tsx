@@ -16,6 +16,21 @@ import { toSlug, parsePrice } from '@/lib/product-utils';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { trackViewItem } from '@/lib/analytics';
+import { getMediaUrl } from '@/lib/media';
+
+function normalizeProductImages(product: any): string[] {
+    let raw = product?.images ?? product?.gallery_images;
+    if (typeof raw === 'string') {
+        try {
+            raw = JSON.parse(raw);
+        } catch {
+            raw = [];
+        }
+    }
+    if (!Array.isArray(raw)) raw = [];
+    const urls = raw.filter(Boolean).map((x: unknown) => getMediaUrl(String(x)));
+    return urls.length ? urls : ['/placeholder.svg'];
+}
 
 type ReviewRow = { id: number; rating: number; review_text: string | null; review_images?: string[]; display_name: string; created_at: string };
 type PolicyRow = { type: string; short_text: string | null; full_text: string | null };
@@ -30,6 +45,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const [quantity, setQuantity] = useState(1);
     const [reviews, setReviews] = useState<{ data: ReviewRow[]; meta: { total: number; totalPages: number } }>({ data: [], meta: { total: 0, totalPages: 0 } });
     const [policies, setPolicies] = useState<PolicyRow[]>([]);
+    const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -37,6 +53,8 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                 const { data } = await api.get(`/products/${slug}`);
                 if (data) {
                     setProduct(data);
+                    const v = Array.isArray(data.variants) ? data.variants : [];
+                    setSelectedVariantId(v.length && v[0]?.id != null ? Number(v[0].id) : null);
                     setLoading(false);
                     return;
                 }
@@ -45,6 +63,9 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
             if (found) {
                 const id = typeof found.id === 'number' ? found.id : (localProducts as any[]).indexOf(found) + 1;
                 setProduct({ ...found, id, slug, images: found.gallery_images ?? found.images ?? [] });
+                setSelectedVariantId(null);
+            } else {
+                setSelectedVariantId(null);
             }
             setLoading(false);
         };
@@ -91,7 +112,11 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
         </ShopLayout>
     );
 
-    const images = (product.images?.length ? product.images : product.gallery_images) || ['/placeholder.svg'];
+    const images = normalizeProductImages(product);
+    const variants = Array.isArray(product.variants) ? product.variants : [];
+    const selectedVariant =
+        variants.find((v: { id: number }) => Number(v.id) === selectedVariantId) ?? (variants[0] as { id?: number } | undefined) ?? null;
+    const imgUnoptimized = (src: string) => src.startsWith('/api') || src.startsWith('http');
 
     const catName = typeof product.category === 'object' ? product.category?.name : product.category;
     const catSlug = typeof product.category === 'object' ? product.category?.slug : (product.category?.toString?.() || '').toLowerCase().replace(/\s+/g, '-');
@@ -106,7 +131,13 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const hasWholesale = minQty > 0 && discountPct > 0;
     const qualifiesWholesale = hasWholesale && quantity >= minQty;
     const basePrice = parsePrice(product.price);
-    const unitPrice = qualifiesWholesale ? basePrice * (1 - discountPct / 100) : basePrice;
+    const variantAdjust = selectedVariant != null ? Number((selectedVariant as { price_adjust?: number }).price_adjust ?? 0) : 0;
+    const listUnitBeforeWholesale = basePrice + variantAdjust;
+    const unitPrice = qualifiesWholesale ? listUnitBeforeWholesale * (1 - discountPct / 100) : listUnitBeforeWholesale;
+    const stockToShow =
+        selectedVariant != null && (selectedVariant as { stock_quantity?: number }).stock_quantity != null
+            ? Number((selectedVariant as { stock_quantity: number }).stock_quantity)
+            : Number(product.stock_quantity ?? 0);
     const moreNeeded = hasWholesale && quantity < minQty ? minQty - quantity : 0;
 
     return (
@@ -121,10 +152,11 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 {images.map((img: string, idx: number) => (
                                     <button
                                         key={idx}
+                                        type="button"
                                         className={`relative h-24 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden border transition-all ${selectedImage === idx ? 'border-blue-600 ring-2 ring-blue-600/10' : 'border-gray-100 hover:border-gray-200'}`}
                                         onClick={() => setSelectedImage(idx)}
                                     >
-                                        <Image src={img.startsWith('http') ? img : `/${img}`} alt="" fill className="object-contain p-2" sizes="96px" unoptimized={img.startsWith('http')} />
+                                        <Image src={img} alt="" fill className="object-contain p-2" sizes="96px" unoptimized={imgUnoptimized(img)} />
                                     </button>
                                 ))}
                             </div>
@@ -132,12 +164,12 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
 
                         <div className="w-full aspect-square relative rounded-[2.5rem] overflow-hidden bg-gray-50 border border-gray-100">
                             <Image
-                                src={images[selectedImage].startsWith('http') ? images[selectedImage] : `/${images[selectedImage]}`}
+                                src={images[selectedImage] || '/placeholder.svg'}
                                 alt={product.name}
                                 fill
                                 className="object-contain p-8 transition-transform duration-700"
                                 sizes="(max-width: 1024px) 100vw, 50vw"
-                                unoptimized={images[selectedImage].startsWith('http')}
+                                unoptimized={imgUnoptimized(images[selectedImage] || '')}
                             />
                         </div>
                     </div>
@@ -145,13 +177,11 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                     {/* Product Info */}
                     <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
                         <div className="mb-8">
-                            {product.stock_quantity != null && (
-                                <div className="flex flex-wrap gap-2 mb-4">
-                                    <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${product.stock_quantity > (product.low_stock_threshold ?? 10) ? 'bg-green-50 text-green-700 border border-green-100' : product.stock_quantity > 0 ? 'bg-orange-50 text-orange-700 border border-orange-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
-                                        {product.stock_quantity === 0 ? 'Out of stock' : product.stock_quantity <= (product.low_stock_threshold ?? 10) ? `Only ${product.stock_quantity} left` : 'In stock'}
-                                    </span>
-                                </div>
-                            )}
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${stockToShow > (product.low_stock_threshold ?? 10) ? 'bg-green-50 text-green-700 border border-green-100' : stockToShow > 0 ? 'bg-orange-50 text-orange-700 border border-orange-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                                    {stockToShow === 0 ? 'Out of stock' : stockToShow <= (product.low_stock_threshold ?? 10) ? `Only ${stockToShow} left` : 'In stock'}
+                                </span>
+                            </div>
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-xs font-bold tracking-wider text-blue-600 uppercase mb-4">
                                 Ships from abroad · 7–14 day delivery
                             </div>
@@ -168,7 +198,38 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             {product.compare_price != null && Number(product.compare_price) > unitPrice && (
                                 <p className="text-sm sm:text-base font-bold text-gray-400 line-through">₵{Number(product.compare_price).toFixed(2)}</p>
                             )}
+                            {variants.length > 0 && (
+                                <p className="text-xs text-gray-500 w-full">Price updates when you select an option below.</p>
+                            )}
                         </div>
+
+                        {variants.length > 0 && (
+                            <div className="mb-8 rounded-2xl border border-gray-100 bg-gray-50/80 p-4">
+                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Options</p>
+                                <div className="flex flex-col gap-2">
+                                    {variants.map((v: { id: number; variant_type: string; variant_value: string; price_adjust?: number; stock_quantity?: number }) => {
+                                        const vid = Number(v.id);
+                                        const vUnit = basePrice + Number(v.price_adjust ?? 0);
+                                        const sel = selectedVariantId === vid;
+                                        const oos = Number(v.stock_quantity ?? 0) <= 0;
+                                        return (
+                                            <button
+                                                key={vid}
+                                                type="button"
+                                                disabled={oos}
+                                                onClick={() => setSelectedVariantId(vid)}
+                                                className={`flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-all ${sel ? 'border-blue-600 bg-white ring-2 ring-blue-600/15' : 'border-gray-200 bg-white hover:border-gray-300'} ${oos ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            >
+                                                <span className="font-semibold text-gray-900 capitalize">
+                                                    {String(v.variant_type).replace(/_/g, ' ')}: <span className="text-gray-600">{v.variant_value}</span>
+                                                </span>
+                                                <span className="font-bold text-gray-900 tabular-nums">₵{vUnit.toFixed(2)}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="space-y-6 mb-10">
                             <div className="flex items-center gap-4">
@@ -235,7 +296,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={() => toggleWishlist({ id: Number(product.id), name: product.name, price: product.price, slug: product.slug ?? slug, images: product.images, gallery_images: product.gallery_images, category: product.category })}
+                                        onClick={() => toggleWishlist({ id: Number(product.id), name: product.name, price: listUnitBeforeWholesale, slug: product.slug ?? slug, images: product.images, gallery_images: product.gallery_images, category: product.category })}
                                     className={`min-w-[44px] min-h-[44px] w-10 h-10 sm:w-12 sm:h-12 border rounded-lg sm:rounded-xl flex items-center justify-center transition-all shrink-0 ${
                                         isInWishlist(Number(product.id))
                                             ? 'bg-red-50 border-red-200 text-red-500'
@@ -248,7 +309,14 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 <button
                                     type="button"
                                     className="w-full sm:flex-1 min-h-[44px] bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wider hover:from-brand hover:to-brand/95 transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-slate-900/15 py-2.5 px-3"
-                                        onClick={() => addToCart(Number(product.id), quantity)}
+                                        onClick={() => {
+                                            if (variants.length > 0 && selectedVariantId == null) {
+                                                toast.error('Please select an option');
+                                                return;
+                                            }
+                                            addToCart(Number(product.id), quantity, selectedVariantId ?? undefined);
+                                        }}
+                                        disabled={variants.length > 0 && stockToShow <= 0}
                                     >
                                         <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" aria-hidden />
                                         <span className="whitespace-nowrap">Add to Cart</span>

@@ -8,6 +8,8 @@ import PriceDisplay from '@/components/ui/PriceDisplay';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { cartItemUnitGhs } from '@/lib/product-utils';
+import { getMediaUrl } from '@/lib/media';
 
 export default function CartDrawer() {
     const { cart, isCartOpen, toggleCart, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -76,7 +78,8 @@ export default function CartDrawer() {
                                                             </li>
                                                         )}
                                                         {cart.map((item) => {
-                                                            const mainImage = item.product.gallery_images?.[0] || (Array.isArray(item.product.images) ? item.product.images[0] : item.product.images) || '/placeholder.svg';
+                                                            const rawImg = item.product.gallery_images?.[0] || (Array.isArray(item.product.images) ? item.product.images[0] : item.product.images) || '';
+                                                            const mainImage = rawImg ? getMediaUrl(String(rawImg)) : '/placeholder.svg';
                                                             return (
                                                                 <li key={item.id} className="flex py-6 gap-4 group">
                                                                     <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-gray-50 border border-gray-100 relative">
@@ -94,11 +97,16 @@ export default function CartDrawer() {
                                                                                     <Link href={`/products/${(item.product as { slug?: string }).slug || item.product.id}`} onClick={toggleCart} className="hover:text-blue-600 transition-colors">{item.product.name}</Link>
                                                                                 </h3>
                                                                                 <p className="text-sm font-bold text-gray-900 whitespace-nowrap">
-                                                                                    <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity} />
+                                                                                    <PriceDisplay amountGhs={cartItemUnitGhs(item) * item.quantity} />
                                                                                 </p>
                                                                             </div>
+                                                                            {(item as { variant?: { variant_type: string; variant_value: string } }).variant && (
+                                                                                <p className="text-xs text-gray-600 mt-0.5 capitalize">
+                                                                                    {(item as { variant: { variant_type: string; variant_value: string } }).variant.variant_type.replace(/_/g, ' ')}: {(item as { variant: { variant_value: string } }).variant.variant_value}
+                                                                                </p>
+                                                                            )}
                                                                             <p className="text-xs text-gray-400 mt-1">
-                                                                                <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, ''))} /> each
+                                                                                <PriceDisplay amountGhs={cartItemUnitGhs(item)} /> each
                                                                             </p>
                                                                         </div>
                                                                         <div className="flex flex-1 items-end justify-between mt-3">

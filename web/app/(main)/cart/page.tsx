@@ -6,6 +6,8 @@ import { Trash2, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import ShopLayout from '@/components/layout/ShopLayout';
+import { cartItemUnitGhs } from '@/lib/product-utils';
+import { getMediaUrl } from '@/lib/media';
 
 export default function CartPage() {
     const { cart, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -41,7 +43,8 @@ export default function CartPage() {
                             </li>
                         )}
                         {cart.map((item) => {
-                            const mainImage = item.product.gallery_images?.[0] || (Array.isArray(item.product.images) ? item.product.images[0] : item.product.images) || '/placeholder.svg';
+                            const rawImg = item.product.gallery_images?.[0] || (Array.isArray(item.product.images) ? item.product.images[0] : item.product.images) || '';
+                            const mainImage = rawImg ? getMediaUrl(String(rawImg)) : '/placeholder.svg';
                             const productSlug = (item.product as { slug?: string }).slug || item.product.id;
                             return (
                                 <li key={item.id} className="flex py-6 gap-4 px-4 sm:px-6 group">
@@ -60,7 +63,7 @@ export default function CartPage() {
                                                 </Link>
                                             </h2>
                                             <p className="text-sm font-bold text-gray-900 whitespace-nowrap">
-                                                <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity} />
+                                                <PriceDisplay amountGhs={cartItemUnitGhs(item) * item.quantity} />
                                             </p>
                                         </div>
                                         {(item as { variant?: { variant_type: string; variant_value: string } }).variant && (
@@ -69,8 +72,8 @@ export default function CartPage() {
                                             </p>
                                         )}
                                         <p className="text-xs text-gray-400 mt-1">
-                                            <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity} /> total
-                                            <span className="text-gray-400"> · <PriceDisplay amountGhs={parseFloat(String(item.product.price).replace(/[^0-9.]/g, ''))} /> each</span>
+                                            <PriceDisplay amountGhs={cartItemUnitGhs(item) * item.quantity} /> total
+                                            <span className="text-gray-400"> · <PriceDisplay amountGhs={cartItemUnitGhs(item)} /> each</span>
                                         </p>
                                         <div className="flex flex-1 items-end justify-between mt-3 flex-wrap gap-2">
                                             <div className="flex items-center gap-0 p-1 bg-gray-50 border border-gray-200 rounded-lg">

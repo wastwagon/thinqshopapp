@@ -13,6 +13,7 @@ import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import { trackBeginCheckout, trackPurchase } from '@/lib/analytics';
+import { cartItemUnitGhs } from '@/lib/product-utils';
 
 const CheckoutPaystackTrigger = dynamic(
     () => import('@/components/checkout/CheckoutPaystackTrigger').then((m) => m.default),
@@ -267,7 +268,7 @@ export default function CheckoutClient() {
                                                     )}
                                                     <div className="flex items-center justify-between mt-1">
                                                         <p className="text-xs text-gray-500">Qty {item.quantity}</p>
-                                                        <p className="text-sm font-bold text-gray-900"><PriceDisplay amountGhs={Number(item.product.price) * item.quantity} forceGhs /></p>
+                                                        <p className="text-sm font-bold text-gray-900"><PriceDisplay amountGhs={cartItemUnitGhs(item) * item.quantity} forceGhs /></p>
                                                     </div>
                                                 </div>
                                             </li>

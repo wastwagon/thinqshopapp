@@ -3,9 +3,17 @@ export function normalizeProduct(p: any, index: number = 0) {
     const categoryName = typeof p.category === 'object' ? p.category?.name : p.category;
     const price = typeof p.price === 'string' ? p.price : String(p.price ?? 0);
     let imgArr: string[] = [];
+    let rawImages = p.images;
+    if (typeof rawImages === 'string') {
+        try {
+            rawImages = JSON.parse(rawImages);
+        } catch {
+            rawImages = [];
+        }
+    }
     if (Array.isArray(p.gallery_images) && p.gallery_images.length) imgArr = p.gallery_images.filter(Boolean);
-    else if (Array.isArray(p.images) && p.images.length) imgArr = p.images.filter(Boolean);
-    else if (p.images && typeof p.images === 'string') imgArr = [p.images];
+    else if (Array.isArray(rawImages) && rawImages.length) imgArr = rawImages.filter(Boolean);
+    else if (rawImages && typeof rawImages === 'string') imgArr = [rawImages];
     else if (p.image) imgArr = [p.image];
     const slug = p.slug ?? (typeof p.name === 'string' ? toSlug(p.name) : String(index));
     return {
@@ -28,6 +36,19 @@ export function toSlug(name: string): string {
 export function productMatchesSlug(product: any, slug: string): boolean {
     const pSlug = product.slug ?? toSlug(product.name);
     return pSlug === slug;
+}
+
+/** Unit price in GHS for a cart line (base product price + variant adjustment). */
+export function cartItemUnitGhs(item: {
+    product?: { price?: unknown };
+    variant?: { price_adjust?: unknown } | null;
+}): number {
+    const base = parsePrice(item.product?.price);
+    const adj =
+        item.variant != null && item.variant.price_adjust != null
+            ? Number(item.variant.price_adjust)
+            : 0;
+    return base + (Number.isFinite(adj) ? adj : 0);
 }
 
 /** Parse price from API or static format ($1,234.56 or 1234.56) */

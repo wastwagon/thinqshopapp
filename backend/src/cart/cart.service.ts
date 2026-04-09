@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddToCartDto, UpdateCartItemDto } from './dto/cart.dto';
 
@@ -15,15 +15,24 @@ export class CartService {
 
     async addToCart(userId: number, dto: AddToCartDto) {
         const product = await this.prisma.product.findUnique({
-            where: { id: dto.productId }
+            where: { id: dto.productId },
+            include: { variants: true },
         });
 
         if (!product) throw new NotFoundException('Product not found');
+
+        let variantId: number | null = null;
+        if (dto.variantId != null) {
+            const v = product.variants.find((x) => x.id === dto.variantId);
+            if (!v) throw new BadRequestException('Variant does not belong to this product');
+            variantId = v.id;
+        }
 
         const existingItem = await this.prisma.cartItem.findFirst({
             where: {
                 user_id: userId,
                 product_id: dto.productId,
+                variant_id: variantId,
             },
         });
 
@@ -38,6 +47,7 @@ export class CartService {
             data: {
                 user_id: userId,
                 product_id: dto.productId,
+                variant_id: variantId,
                 quantity: dto.quantity,
             },
         });

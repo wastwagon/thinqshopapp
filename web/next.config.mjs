@@ -38,6 +38,7 @@ const nextConfig = {
             },
             { protocol: 'https', hostname: 'thinqshopping.app', port: '', pathname: '/**' },
             { protocol: 'http', hostname: 'thinqshopping.app', port: '', pathname: '/**' },
+            { protocol: 'https', hostname: 'api.thinqshopping.app', port: '', pathname: '/**' },
             { protocol: 'http', hostname: 'localhost', port: '', pathname: '/**' },
         ],
     },

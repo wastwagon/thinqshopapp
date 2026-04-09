@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { ImageIcon } from 'lucide-react';
+import { getMediaUrl } from '@/lib/media';
 
 interface ProductImageProps {
     src: string;
@@ -20,15 +21,14 @@ function isExternalUrl(url: string): boolean {
 function resolveImageUrl(url: string): string {
     if (!url || typeof url !== 'string') return '';
     if (isExternalUrl(url)) return url;
-    const base = process.env.NEXT_PUBLIC_API_URL || '';
-    const path = url.startsWith('/') ? url : `/${url}`;
-    return base ? `${base.replace(/\/$/, '')}${path}` : path;
+    // Same-origin /api proxy avoids Cross-Origin-Resource-Policy issues with direct API host URLs.
+    return getMediaUrl(url);
 }
 
 export default function ProductImage({ src, alt, width = 400, height = 400, className = '', fill }: ProductImageProps) {
     const [error, setError] = useState(false);
     const resolvedSrc = resolveImageUrl(src);
-    const unoptimized = isExternalUrl(resolvedSrc);
+    const unoptimized = isExternalUrl(resolvedSrc) || resolvedSrc.startsWith('/api/');
 
     if (error || !resolvedSrc) {
         return (

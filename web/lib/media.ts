@@ -1,7 +1,6 @@
-/** Base URL for media served from backend (use /api so proxy serves them). */
+/** Base URL for media — always same-origin `/api` so the Next proxy serves files (fixes CORP / cross-origin image blocks). */
 export function getMediaBaseUrl(): string {
-    if (typeof window !== 'undefined') return '/api';
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000';
+    return '/api';
 }
 
 /** Full URL for a media path stored in DB (e.g. /media/files/xxx.jpg). Handles bare filenames. */

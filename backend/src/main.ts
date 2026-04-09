@@ -24,7 +24,13 @@ async function bootstrap() {
     // Increase body limit for transfer QR code uploads (base64 images)
     app.useBodyParser('json', { limit: '10mb', verify: rawBodySaver });
     app.useBodyParser('urlencoded', { limit: '10mb', extended: true });
-    app.use(helmet({ contentSecurityPolicy: false }));
+    // Allow media on this API host to load in <img>/next/image on the storefront (different origin).
+    app.use(
+        helmet({
+            contentSecurityPolicy: false,
+            crossOriginResourcePolicy: { policy: 'cross-origin' },
+        }),
+    );
 
     app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
         const start = Date.now();
