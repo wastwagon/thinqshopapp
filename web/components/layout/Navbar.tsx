@@ -92,7 +92,6 @@ export default function Navbar() {
             className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100/90 flex flex-col shadow-sm shadow-slate-900/[0.03]"
             aria-label="Main navigation"
         >
-            <div className="h-0.5 w-full bg-gradient-to-r from-blue-600 via-brand to-blue-600 opacity-90" aria-hidden />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 w-full flex items-center gap-4 sm:gap-8 lg:gap-4">
                 {/* Logo - left, sized to bar height */}
                 <Link
