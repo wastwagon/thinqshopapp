@@ -40,7 +40,7 @@ export function useCurrencyRates(): CurrencyRates | null {
             setRates(cached);
             return;
         }
-        api.get<CurrencyRates>('/content/currency-rates')
+        api.get<CurrencyRates>('/content/currency-rates', { timeout: 8_000 })
             .then((res) => {
                 const d = res.data;
                 if (d && (d.ghs_to_usd != null || d.ghs_to_cny != null)) {

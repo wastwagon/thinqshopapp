@@ -99,6 +99,8 @@ Coolify exposes these via its reverse proxy based on your domain configuration.
 | CORS errors | Set `FRONTEND_URL` to your exact frontend domain (no trailing slash) |
 | 502 Bad Gateway | Check backend logs in Coolify → Terminal (backend container). Backend may need 30–60s for migrations on first start |
 | Migrations not applied | Backend runs them on startup; check backend logs for Prisma errors |
+| Product images **404** (`GET /media/files/... 404`) | Ensure `docker-compose.yaml` mounts `backend_uploads:/app/uploads` on the **backend** service (included in repo). Redeploy once so the volume exists. Files uploaded **before** the volume was added are gone — re-upload in **Admin → Media** and update affected products. |
+| `GET /content/currency-rates` very slow (~10s) | Usually a slow external FX API on first request; the API now returns cached DB rates immediately and refreshes in the background. |
 
 ---
 

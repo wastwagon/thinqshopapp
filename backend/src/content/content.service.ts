@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 const FXR_API_BASE = 'https://dev.kwayisi.org/apis/forex';
 const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
+const FXR_FETCH_TIMEOUT_MS = 5_000;
 import { CreateHeroSlideDto, UpdateHeroSlideDto } from './dto/hero-slide.dto';
 import { CreateTrustBadgeDto, UpdateTrustBadgeDto } from './dto/trust-badge.dto';
 import { CreateTestimonialDto, UpdateTestimonialDto } from './dto/testimonial.dto';
@@ -82,32 +83,39 @@ export class ContentService {
         return { ok: true };
     }
 
-    /** Shop display rates (GHS→USD, GHS→CNY). Fetches from FXR-API if stale; falls back to last stored. */
+    /** Shop display rates (GHS→USD, GHS→CNY). Serves DB cache immediately when stale; refreshes FX in background. */
     async getCurrencyRates(): Promise<{ ghs_to_usd: number; ghs_to_cny: number } | null> {
         const latest = await this.prisma.shopCurrencyRate.findFirst({
             orderBy: { fetched_at: 'desc' },
         });
+        const cached = latest
+            ? { ghs_to_usd: Number(latest.rate_ghs_to_usd), ghs_to_cny: Number(latest.rate_ghs_to_cny) }
+            : null;
         const now = Date.now();
-        const isStale = !latest || (now - latest.fetched_at.getTime()) > CACHE_MAX_AGE_MS;
+        const isStale = !latest || now - latest.fetched_at.getTime() > CACHE_MAX_AGE_MS;
+
         if (isStale) {
-            const fetched = await this.fetchAndStoreRatesFromFxr();
-            if (fetched) return fetched;
+            if (cached) {
+                void this.fetchAndStoreRatesFromFxr();
+                return cached;
+            }
+            return this.fetchAndStoreRatesFromFxr();
         }
-        if (latest) {
-            return {
-                ghs_to_usd: Number(latest.rate_ghs_to_usd),
-                ghs_to_cny: Number(latest.rate_ghs_to_cny),
-            };
-        }
-        return null;
+        return cached;
+    }
+
+    private fetchFxr(url: string): Promise<Response> {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), FXR_FETCH_TIMEOUT_MS);
+        return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
     }
 
     /** Fetch USD/GHS and USD/CNY from FXR-API, derive GHS rates, store. Returns null on failure. */
     private async fetchAndStoreRatesFromFxr(): Promise<{ ghs_to_usd: number; ghs_to_cny: number } | null> {
         try {
             const [usdGhsRes, usdCnyRes] = await Promise.all([
-                fetch(`${FXR_API_BASE}/usd/ghs`),
-                fetch(`${FXR_API_BASE}/usd/cny`),
+                this.fetchFxr(`${FXR_API_BASE}/usd/ghs`),
+                this.fetchFxr(`${FXR_API_BASE}/usd/cny`),
             ]);
             if (!usdGhsRes.ok || !usdCnyRes.ok) return null;
             const usdGhs = (await usdGhsRes.json()) as { pair: string; rate: number };

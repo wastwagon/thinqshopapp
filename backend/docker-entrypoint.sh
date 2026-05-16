@@ -37,5 +37,7 @@ if [ "$SEED_ON_STARTUP" = "true" ]; then
   fi
 fi
 
+mkdir -p /app/uploads/files /app/uploads/profile-images /app/uploads/shipment-declarations
+
 echo "Starting application..."
 exec node dist/backend/src/main.js

@@ -26,6 +26,8 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     restart: unless-stopped
+    volumes:
+      - backend_uploads:/app/uploads
     environment:
       NODE_ENV: production
       PORT: 7000
@@ -59,3 +61,4 @@ services:
 
 volumes:
   postgres_data:
+  backend_uploads:
