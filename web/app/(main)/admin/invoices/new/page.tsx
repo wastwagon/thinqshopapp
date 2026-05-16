@@ -399,7 +399,7 @@ export default function ShippingCalculatorPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Customer section */}
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="admin-table-wrap">
                         <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-gray-50 bg-gray-50/30">
                             <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Customer</h2>
                         </div>
@@ -502,7 +502,7 @@ export default function ShippingCalculatorPage() {
                     </div>
 
                     {/* Shipping Fee Estimator */}
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="admin-table-wrap">
                         <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-gray-50 bg-gray-50/30">
                             <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Package details & quote</h2>
                         </div>

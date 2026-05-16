@@ -198,6 +198,35 @@
     box-shadow: none;
   }
 
+  /* Admin dashboard — same flat surfaces as storefront, no drop shadows */
+  .admin-card {
+    @apply flat-card;
+  }
+
+  .admin-stat-card {
+    @apply flat-card p-4;
+  }
+
+  .admin-stat-card-interactive {
+    @apply flat-card-interactive p-4 block;
+  }
+
+  .admin-table-wrap {
+    @apply flat-card overflow-hidden;
+  }
+
+  .admin-input {
+    @apply h-10 px-3 bg-white border border-gray-200/90 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand;
+  }
+
+  .admin-page-title {
+    @apply text-xl font-bold text-gray-900 tracking-tight;
+  }
+
+  .admin-page-subtitle {
+    @apply text-xs text-gray-500 mt-0.5;
+  }
+
   .page-title {
     @apply text-xl sm:text-2xl font-semibold text-gray-900 tracking-tight;
   }

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { clearSessionCookies } from '@/lib/session-cookies';
 
 // In browser use /api so Next.js rewrites proxy to the backend (avoids CORS and wrong port)
 const api = axios.create({
@@ -39,7 +40,7 @@ api.interceptors.response.use(
             const isAuthRequest = error.config?.url?.includes('/auth/');
             if (!isAuthRequest) {
                 localStorage.removeItem('token');
-                document.cookie = 'thinq_session=; path=/; max-age=0';
+                clearSessionCookies();
                 window.location.href = '/login?session=expired';
             }
         }

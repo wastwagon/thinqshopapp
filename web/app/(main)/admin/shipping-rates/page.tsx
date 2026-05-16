@@ -156,7 +156,7 @@ export default function AdminShippingRatesPage() {
     const Table = ({ list, title }: { list: ShippingRate[]; title: string }) => (
         <div className="mb-4">
             <h3 className="text-xs font-bold text-gray-600 mb-2">{title}</h3>
-            <div className="overflow-x-auto rounded-xl border border-gray-100 bg-white shadow-sm">
+            <div className="admin-table-wrap overflow-x-auto">
                 <table className="w-full text-left">
                     <thead>
                         <tr className="bg-gray-50/50 border-b border-gray-50">
@@ -237,7 +237,7 @@ export default function AdminShippingRatesPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {stats.map((s, i) => (
-                    <div key={i} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                    <div key={i} className="admin-stat-card">
                         <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
                             <s.icon className="h-4 w-4" />
                         </div>

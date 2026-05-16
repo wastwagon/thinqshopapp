@@ -158,7 +158,7 @@ export default function AdminUsers() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                 {stats.map((stat, i) => (
-                    <div key={i} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                    <div key={i} className="admin-stat-card">
                         <div className={`w-9 h-9 rounded-lg ${stat.bg} ${stat.border} border flex items-center justify-center ${stat.color} mb-2`}>
                             <stat.icon className="h-4 w-4" />
                         </div>
@@ -179,7 +179,7 @@ export default function AdminUsers() {
                 />
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="admin-table-wrap">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>

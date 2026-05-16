@@ -97,12 +97,12 @@ export default function AdminReviewsPage() {
             ) : (
                 <div className="space-y-3">
                     {reviews.length === 0 ? (
-                        <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-500 text-sm">
+                        <div className="admin-card p-8 text-center text-gray-500 text-sm">
                             No reviews {filter !== 'all' ? `(${filter})` : ''}.
                         </div>
                     ) : (
                         reviews.map((r) => (
-                            <div key={r.id} className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5">
+                            <div key={r.id} className="admin-card p-4 sm:p-5">
                                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex flex-wrap items-center gap-2 mb-1">

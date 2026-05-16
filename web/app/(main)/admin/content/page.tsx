@@ -124,7 +124,7 @@ export default function AdminContent() {
 
             <div className="space-y-3">
                 {sectionCards.map(({ id, title, count }) => (
-                    <div key={id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div key={id} className="admin-table-wrap">
                         <button
                             type="button"
                             onClick={() => setOpenSection(openSection === id ? null : id)}

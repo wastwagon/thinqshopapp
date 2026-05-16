@@ -14,6 +14,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import { trackBeginCheckout, trackPurchase } from '@/lib/analytics';
 import { cartItemUnitGhs } from '@/lib/product-utils';
+import LiveRegion from '@/components/ui/LiveRegion';
 
 const CheckoutPaystackTrigger = dynamic(
     () => import('@/components/checkout/CheckoutPaystackTrigger').then((m) => m.default),
@@ -21,8 +22,8 @@ const CheckoutPaystackTrigger = dynamic(
 );
 
 export default function CheckoutClient() {
-    const { cart, cartTotal, clearCart } = useCart();
-    const { user } = useAuth();
+    const { cart, cartTotal, clearCart, loading: cartLoading } = useCart();
+    const { user, loading: authLoading } = useAuth();
     const router = useRouter();
 
     const [step, setStep] = useState(1);
@@ -38,6 +39,17 @@ export default function CheckoutClient() {
     useEffect(() => {
         if (cart.length > 0) trackBeginCheckout(cartTotal, cart.length);
     }, []);
+
+    useEffect(() => {
+        if (authLoading || cartLoading) return;
+        if (!user) {
+            router.replace('/login?from=/checkout');
+            return;
+        }
+        if (cart.length === 0) {
+            router.replace('/cart');
+        }
+    }, [authLoading, cartLoading, user, cart.length, router]);
 
     useEffect(() => {
         api.get('/content/settings/public').then((res) => setPublicSettings(res.data || {})).catch(() => {});
@@ -140,6 +152,24 @@ export default function CheckoutClient() {
         toast.error("Payment cancelled.");
     };
 
+    const payableTotal = checkoutQuote?.total ?? cartTotal;
+    const liveTotalMessage =
+        quoteLoading
+            ? 'Calculating shipping and total.'
+            : checkoutQuote
+              ? `Order total updated. ${payableTotal.toFixed(2)} Ghana cedis.`
+              : '';
+
+    if (authLoading || cartLoading || !user || cart.length === 0) {
+        return (
+            <ShopLayout>
+                <div className="max-w-7xl mx-auto px-4 py-16 text-center text-sm text-gray-500" role="status">
+                    Loading checkout…
+                </div>
+            </ShopLayout>
+        );
+    }
+
     return (
         <ShopLayout>
             {paystackOrder && (
@@ -156,14 +186,23 @@ export default function CheckoutClient() {
                     subtitle="Complete your purchase"
                     breadcrumbs={[{ label: 'Cart', href: '/cart' }, { label: 'Checkout' }]}
                 />
+                <LiveRegion message={liveTotalMessage} />
+
+                <ol className="sr-only" aria-label="Checkout steps">
+                    <li aria-current={step === 1 ? 'step' : undefined}>Shipping address</li>
+                    <li aria-current={step === 2 ? 'step' : undefined}>Payment</li>
+                </ol>
 
                 <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
                     {/* Left Column: Flow */}
                     <div className="lg:col-span-7 space-y-6">
                         {/* Step 1: Shipping Address */}
-                        <section className={`flat-card p-6 transition-colors ${step === 1 ? 'border-brand/40 ring-1 ring-brand/10' : 'opacity-70'}`}>
+                        <section
+                            className={`flat-card p-6 transition-colors ${step === 1 ? 'border-brand/40 ring-1 ring-brand/10' : 'opacity-70'}`}
+                            aria-labelledby="checkout-shipping-heading"
+                        >
                             <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-sm font-semibold text-gray-700 flex items-center">
+                                <h2 id="checkout-shipping-heading" className="text-sm font-semibold text-gray-700 flex items-center" aria-current={step === 1 ? 'step' : undefined}>
                                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center mr-3 ${step === 1 ? 'bg-brand text-white' : 'bg-gray-100 text-gray-400'}`}>
                                         <Truck className="h-3.5 w-3.5" />
                                     </div>
@@ -190,30 +229,33 @@ export default function CheckoutClient() {
                         </section>
 
                         {/* Step 2: Payment Method */}
-                        <section className={`flat-card p-6 transition-colors ${step === 2 ? 'border-brand/40 ring-1 ring-brand/10' : ''} ${step < 2 ? 'opacity-40 pointer-events-none' : ''}`}>
-                            <h2 className="text-sm font-semibold text-gray-700 flex items-center mb-6">
+                        <section
+                            className={`flat-card p-6 transition-colors ${step === 2 ? 'border-brand/40 ring-1 ring-brand/10' : ''} ${step < 2 ? 'opacity-40 pointer-events-none' : ''}`}
+                            aria-labelledby="checkout-payment-heading"
+                        >
+                            <h2 id="checkout-payment-heading" className="text-sm font-semibold text-gray-700 flex items-center mb-6" aria-current={step === 2 ? 'step' : undefined}>
                                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center mr-3 ${step === 2 ? 'bg-brand text-white' : 'bg-gray-100 text-gray-400'}`}>
                                     <CreditCard className="h-3.5 w-3.5" />
                                 </div>
                                 Payment Method
                             </h2>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6" role="radiogroup" aria-label="Payment method">
                                 {[
                                     { id: 'wallet', label: walletBalance !== null ? `Wallet Balance (₵${walletBalance.toFixed(2)})` : 'Wallet Balance', icon: '💰' },
                                     { id: 'paystack', label: 'Secure payment on Paystack', icon: '🔒' }
                                 ].map((method) => (
-                                    <label key={method.id} className={`flex items-center justify-between p-4 rounded-xl border-2 transition-colors cursor-pointer group ${paymentMethod === method.id ? 'bg-brand/5 border-brand' : 'bg-gray-50 border-gray-200/90 hover:border-gray-300'}`}>
+                                    <label key={method.id} htmlFor={`payment-${method.id}`} className={`flex items-center justify-between p-4 rounded-xl border-2 transition-colors cursor-pointer group min-h-[44px] touch-manipulation ${paymentMethod === method.id ? 'bg-brand/5 border-brand' : 'bg-gray-50 border-gray-200/90 hover:border-gray-300'}`}>
                                         <div className="flex items-center gap-3">
                                             <input
-                                                id={method.id}
+                                                id={`payment-${method.id}`}
                                                 name="payment_method"
                                                 type="radio"
                                                 checked={paymentMethod === method.id}
                                                 onChange={() => setPaymentMethod(method.id)}
-                                                className="hidden"
+                                                className="sr-only"
                                             />
-                                            <span className="text-lg">{method.icon}</span>
+                                            <span className="text-lg" aria-hidden>{method.icon}</span>
                                             <span className={`text-sm font-medium ${paymentMethod === method.id ? 'text-brand' : 'text-gray-600 group-hover:text-gray-900'}`}>{method.label}</span>
                                         </div>
                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${paymentMethod === method.id ? 'border-brand bg-brand' : 'border-gray-300'}`}>
@@ -245,8 +287,8 @@ export default function CheckoutClient() {
                     {/* Right Column: Order Summary */}
                     <div className="mt-8 lg:mt-0 lg:col-span-5">
                         <div className="sticky top-24">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-4">Order Summary</h3>
-                            <div className="flat-card p-6">
+                            <h3 id="order-summary-heading" className="text-sm font-semibold text-gray-700 mb-4">Order Summary</h3>
+                            <div className="flat-card p-6" aria-labelledby="order-summary-heading">
                                 <ul role="list" className="divide-y divide-gray-50 mb-6">
                                     {cart.map((item) => {
                                         const mainImage = item.product.gallery_images?.[0] || (Array.isArray(item.product.images) ? item.product.images[0] : item.product.images) || '/placeholder.svg';

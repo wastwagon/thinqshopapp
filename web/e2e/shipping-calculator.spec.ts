@@ -60,6 +60,7 @@ test.describe('Shipping calculator (admin)', () => {
     test.beforeEach(async ({ page, context }) => {
         await context.addCookies([
             { name: 'thinq_session', value: 'e2e', domain: 'localhost', path: '/' },
+            { name: 'thinq_role', value: 'admin', domain: 'localhost', path: '/' },
         ]);
         await page.addInitScript(() => {
             localStorage.setItem('token', 'e2e-mock-jwt');

@@ -171,7 +171,7 @@ export default function AdminShipmentDetailPage() {
 
                 <div className="space-y-6">
                     {/* Header */}
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="admin-table-wrap">
                         <div className="px-4 py-4 sm:px-6 border-b border-gray-50 flex flex-wrap justify-between items-start gap-4 bg-gray-50/50">
                             <div>
                                 <h1 className="text-xl font-bold text-gray-900">{shipment.tracking_number}</h1>
@@ -202,7 +202,7 @@ export default function AdminShipmentDetailPage() {
                         <div className="lg:col-span-2 space-y-6">
                             {/* Tracking timeline */}
                             {shipment.tracking && shipment.tracking.length > 0 && (
-                                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                                <div className="admin-table-wrap">
                                     <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                         <h3 className="text-sm font-semibold text-gray-900">Tracking history</h3>
                                     </div>
@@ -226,7 +226,7 @@ export default function AdminShipmentDetailPage() {
 
                             {/* Items declaration + images */}
                             {((shipment.items_declaration && (shipment.items_declaration as any[]).length > 0) || (shipment.declaration_image_urls && (shipment.declaration_image_urls as string[]).length > 0)) && (
-                                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                                <div className="admin-table-wrap">
                                     <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                         <h3 className="text-sm font-semibold text-gray-900">Items declaration</h3>
                                     </div>
@@ -262,7 +262,7 @@ export default function AdminShipmentDetailPage() {
 
                             {/* Warehouses */}
                             {(shipment.origin_warehouse || shipment.destination_warehouse) && (
-                                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                                <div className="admin-table-wrap">
                                     <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                         <h3 className="text-sm font-semibold text-gray-900">Route</h3>
                                     </div>
@@ -287,7 +287,7 @@ export default function AdminShipmentDetailPage() {
 
                         <div className="space-y-6">
                             {/* Customer */}
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                            <div className="admin-table-wrap">
                                 <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                     <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                         <User className="h-4 w-4" /> Customer
@@ -310,7 +310,7 @@ export default function AdminShipmentDetailPage() {
 
                             {/* Delivery address */}
                             {shipment.delivery_address && (
-                                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                                <div className="admin-table-wrap">
                                     <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                         <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                             <MapPin className="h-4 w-4" /> Delivery address
@@ -323,7 +323,7 @@ export default function AdminShipmentDetailPage() {
                             )}
 
                             {/* Pricing */}
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                            <div className="admin-table-wrap">
                                 <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                     <h3 className="text-sm font-semibold text-gray-900">Summary</h3>
                                 </div>

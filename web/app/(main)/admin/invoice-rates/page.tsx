@@ -215,7 +215,7 @@ export default function AdminInvoiceRatesPage() {
                     </select>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="admin-table-wrap">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>

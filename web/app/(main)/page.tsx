@@ -146,7 +146,10 @@ export default function Home() {
                 const contentHeroSlides = Array.isArray(heroRes.data) ? heroRes.data : [];
                 setTrustBadges(Array.isArray(trustRes.data) ? trustRes.data : []);
                 setTestimonials(Array.isArray(testimonialRes.data) ? testimonialRes.data : []);
-                const apiSectionKeys = (Array.isArray(sectionsRes.data) ? sectionsRes.data : [])
+                const apiSections = Array.isArray(sectionsRes.data) ? sectionsRes.data : [];
+                const apiSectionKeys = apiSections
+                    .slice()
+                    .sort((a: { sort_order?: number }, b: { sort_order?: number }) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
                     .map((s: { section_key?: string }) => s.section_key)
                     .filter((k: string | undefined): k is string => !!k && DEFAULT_HOME_SECTIONS.includes(k));
                 if (apiSectionKeys.length > 0) setSectionOrder(apiSectionKeys);

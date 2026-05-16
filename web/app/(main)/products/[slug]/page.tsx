@@ -12,7 +12,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import ProductCard from '@/components/ui/ProductCard';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import localProducts from '@/lib/data/scraped_products.json';
-import { toSlug, parsePrice } from '@/lib/product-utils';
+import { toSlug, parsePrice, normalizeProduct } from '@/lib/product-utils';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { trackViewItem } from '@/lib/analytics';
@@ -47,6 +47,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const [reviews, setReviews] = useState<{ data: ReviewRow[]; meta: { total: number; totalPages: number } }>({ data: [], meta: { total: 0, totalPages: 0 } });
     const [policies, setPolicies] = useState<PolicyRow[]>([]);
     const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
+    const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -86,6 +87,48 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
             .then((res) => setPolicies(Array.isArray(res.data) ? res.data : []))
             .catch(() => {});
     }, []);
+
+    useEffect(() => {
+        if (!product) {
+            setRelatedProducts([]);
+            return;
+        }
+        const categorySlug =
+            product.category?.slug ??
+            (typeof product.category === 'string'
+                ? product.category.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
+                : null);
+        const catName = typeof product.category === 'string' ? product.category : product.category?.name;
+
+        const loadRelated = async () => {
+            if (categorySlug) {
+                try {
+                    const { data } = await api.get('/products', { params: { category: categorySlug, limit: 8 } });
+                    const list = (data?.data ?? [])
+                        .map((p: any, i: number) => normalizeProduct(p, i))
+                        .filter((p: any) => (p.slug ?? toSlug(p.name)) !== slug && p.id !== product.id)
+                        .slice(0, 4);
+                    if (list.length > 0) {
+                        setRelatedProducts(list);
+                        return;
+                    }
+                } catch (_) {
+                    /* fallback below */
+                }
+            }
+            const fallback = (localProducts as any[])
+                .filter(
+                    (p: any) =>
+                        (typeof p.category === 'string' ? p.category : p.category?.name) === catName &&
+                        toSlug(p.name) !== slug
+                )
+                .slice(0, 4)
+                .map((p, i) => normalizeProduct({ ...p, id: p.id ?? i + 1 }, i));
+            setRelatedProducts(fallback);
+        };
+
+        loadRelated();
+    }, [product, slug]);
 
     useEffect(() => {
         if (product) {
@@ -416,20 +459,17 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                     </div>
                 </section>
 
-                {/* Related Products Section */}
-                {product && (
+                {/* Related products */}
+                {product && relatedProducts.length > 0 && (
                     <div className="mt-12 sm:mt-16 md:mt-24 border-t border-gray-100 pt-8 sm:pt-12 md:pt-16">
                         <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
-                            <h2 className="text-lg sm:text-xl md:text-2xl font-bold sm:font-extrabold text-gray-900 tracking-tight">Related Products</h2>
+                            <h2 className="text-lg sm:text-xl md:text-2xl font-bold sm:font-extrabold text-gray-900 tracking-tight">Related products</h2>
                             {catName && <span className="text-xs font-medium text-gray-500">{catName}</span>}
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
-                            {localProducts
-                                .filter((p: any) => (typeof p.category === 'string' ? p.category : p.category?.name) === catName && p.name !== product.name)
-                                .slice(0, 4)
-                                .map((relatedProduct, idx) => (
-                                    <ProductCard key={idx} product={relatedProduct as any} />
-                                ))}
+                            {relatedProducts.map((relatedProduct, idx) => (
+                                <ProductCard key={relatedProduct.slug ?? relatedProduct.id ?? idx} product={relatedProduct as any} />
+                            ))}
                         </div>
                     </div>
                 )}

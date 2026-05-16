@@ -176,7 +176,7 @@ export default function AdminProcurementDetailPage() {
 
             <div className="space-y-6">
                 {/* Header card */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="admin-table-wrap">
                     <div className="px-4 py-4 sm:px-6 border-b border-gray-50 flex flex-wrap justify-between items-start gap-4 bg-gray-50/50">
                         <div>
                             <h1 className="text-xl font-bold text-gray-900">{request.description}</h1>
@@ -211,7 +211,7 @@ export default function AdminProcurementDetailPage() {
                     {/* Main content */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Request details */}
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="admin-table-wrap">
                             <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                 <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                     <FileText className="h-4 w-4" /> Request details
@@ -245,7 +245,7 @@ export default function AdminProcurementDetailPage() {
 
                         {/* Attached images */}
                         {images.length > 0 && (
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                            <div className="admin-table-wrap">
                                 <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                     <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                         <ImageIcon className="h-4 w-4" /> Attached images ({images.length})
@@ -297,7 +297,7 @@ export default function AdminProcurementDetailPage() {
                     {/* Sidebar */}
                     <div className="space-y-6">
                         {/* Customer */}
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="admin-table-wrap">
                             <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                 <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                     <User className="h-4 w-4" /> Customer
@@ -320,7 +320,7 @@ export default function AdminProcurementDetailPage() {
 
                         {/* Add quote */}
                         {request.status === 'submitted' && (
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                            <div className="admin-table-wrap">
                                 <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                     <h3 className="text-sm font-semibold text-gray-900">Add quote</h3>
                                 </div>

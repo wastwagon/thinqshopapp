@@ -69,7 +69,7 @@ export default function AdminStorefront() {
             {loading ? (
                 <div className="min-h-[200px] flex items-center justify-center text-gray-500 text-sm">Loading…</div>
             ) : (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 space-y-5">
+                <div className="admin-card p-4 sm:p-6 space-y-5">
                     {FIELDS.map(({ key, label, placeholder, type }) => (
                         <div key={key}>
                             <label htmlFor={key} className="block text-sm font-semibold text-gray-700 mb-1.5">

@@ -179,7 +179,7 @@ export default function AdminLogisticsPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {stats.map((s, i) => (
-                    <div key={i} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                    <div key={i} className="admin-stat-card">
                         <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
                             <s.icon className="h-4 w-4" />
                         </div>
@@ -189,7 +189,7 @@ export default function AdminLogisticsPage() {
                 ))}
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="admin-table-wrap">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>

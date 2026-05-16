@@ -106,7 +106,7 @@ export default function AdminSettings() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
                 {/* Exchange & fees */}
                 <div className="lg:col-span-2 space-y-4 min-w-0">
-                    <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                    <div className="admin-card p-5">
                         <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2.5 mb-4">
                             <div className="w-9 h-9 rounded-lg bg-brand/5 flex items-center justify-center text-brand border border-brand/20">
                                 <Globe className="h-4 w-4" />
@@ -150,7 +150,7 @@ export default function AdminSettings() {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                    <div className="admin-card p-5">
                         <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2.5 mb-3">
                             <div className="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500 border border-orange-100">
                                 <Zap className="h-4 w-4" />
@@ -184,7 +184,7 @@ export default function AdminSettings() {
 
                 {/* Status & audit – right column: stack cards with clear separation */}
                 <div className="lg:sticky lg:top-6 flex flex-col gap-5 min-w-0">
-                    <section className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm" aria-label="System status">
+                    <section className="admin-card p-5" aria-label="System status">
                         <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-4">
                             <span className="w-1.5 h-1.5 bg-brand/50 rounded-full animate-pulse" aria-hidden />
                             System status

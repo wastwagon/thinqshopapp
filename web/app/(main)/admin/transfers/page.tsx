@@ -208,7 +208,7 @@ export default function AdminTransfersPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {stats.map((s, i) => (
-                    <div key={i} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                    <div key={i} className="admin-stat-card">
                         <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
                             <s.icon className="h-4 w-4" />
                         </div>
@@ -218,7 +218,7 @@ export default function AdminTransfersPage() {
                 ))}
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+            <div className="admin-table-wrap mb-4">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
@@ -381,7 +381,7 @@ export default function AdminTransfersPage() {
                     <p className="text-xl font-bold tracking-tight">₵{inProgressAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     <p className="text-white/90/80 text-xs mt-2 pt-2 border-t border-white/10">Total GHS not yet completed</p>
                 </div>
-                <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                <div className="admin-stat-card">
                     <h4 className="text-xs font-semibold text-gray-500 mb-2">Completion rate</h4>
                     <div className="flex items-center gap-3">
                         <div className="relative w-14 h-14 shrink-0">

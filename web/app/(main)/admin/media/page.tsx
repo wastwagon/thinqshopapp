@@ -128,7 +128,7 @@ export default function AdminMediaPage() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="admin-table-wrap">
                 {loading ? (
                     <div className="py-20 flex justify-center">
                         <Loader2 className="h-10 w-10 text-brand animate-spin" />

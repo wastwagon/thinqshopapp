@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { isAdminRole, ROLE_COOKIE, SESSION_COOKIE } from '@/lib/session-cookies';
 
-const SESSION_COOKIE = 'thinq_session';
 const LOGIN_PATH = '/login';
 
 function isProtectedPath(pathname: string): boolean {
     return pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
+}
+
+function isAdminPath(pathname: string): boolean {
+    return pathname.startsWith('/admin');
 }
 
 function applySecurityHeaders(response: NextResponse): NextResponse {
@@ -27,6 +31,24 @@ export function middleware(request: NextRequest) {
             url.pathname = LOGIN_PATH;
             url.searchParams.set('from', request.nextUrl.pathname);
             response = NextResponse.redirect(url);
+        } else if (isAdminPath(request.nextUrl.pathname)) {
+            const roleRaw = request.cookies.get(ROLE_COOKIE)?.value;
+            let role: string | null = null;
+            if (roleRaw) {
+                try {
+                    role = decodeURIComponent(roleRaw);
+                } catch {
+                    role = roleRaw;
+                }
+            }
+            if (!isAdminRole(role)) {
+                const url = request.nextUrl.clone();
+                url.pathname = '/dashboard';
+                url.searchParams.set('error', 'admin_required');
+                response = NextResponse.redirect(url);
+            } else {
+                response = NextResponse.next();
+            }
         } else {
             response = NextResponse.next();
         }

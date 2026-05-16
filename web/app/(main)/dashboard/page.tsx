@@ -7,10 +7,19 @@ import api from '@/lib/axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import toast from 'react-hot-toast';
 
 export default function DashboardPage() {
     const { isAuthenticated, user, loading: authLoading } = useAuth();
     const router = useRouter();
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('error') !== 'admin_required') return;
+        toast.error('You need an admin account to access that area.');
+        router.replace('/dashboard');
+    }, [router]);
 
     const [stats, setStats] = useState({
         walletBalance: '0.00',

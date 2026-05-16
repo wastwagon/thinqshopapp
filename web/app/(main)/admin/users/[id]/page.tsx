@@ -105,7 +105,7 @@ export default function AdminUserDetailPage() {
 
             <div className="space-y-6">
                 {/* Header card */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="admin-table-wrap">
                     <div className="px-4 py-4 sm:px-6 border-b border-gray-50 flex flex-wrap justify-between items-start gap-4 bg-gray-50/50">
                         <div>
                             <h1 className="text-xl font-bold text-gray-900">{displayName}</h1>
@@ -133,7 +133,7 @@ export default function AdminUserDetailPage() {
                     {/* Main content */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Contact info */}
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="admin-table-wrap">
                             <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                 <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                     <User className="h-4 w-4" /> Contact details
@@ -178,7 +178,7 @@ export default function AdminUserDetailPage() {
                     {/* Sidebar */}
                     <div className="space-y-6">
                         {/* Stats */}
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="admin-table-wrap">
                             <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                 <h3 className="text-sm font-semibold text-gray-900">Account</h3>
                             </div>

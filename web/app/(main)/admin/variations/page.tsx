@@ -164,7 +164,7 @@ export default function AdminVariationsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
-                    <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                    <div className="admin-stat-card">
                         <div className="w-9 h-9 rounded-lg bg-brand/5 border border-brand/20 flex items-center justify-center text-brand mb-2">
                             <FileText className="h-4 w-4" />
                         </div>
@@ -173,7 +173,7 @@ export default function AdminVariationsPage() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="admin-table-wrap">
                     {loading ? (
                         <div className="py-12 flex justify-center">
                             <Loader2 className="h-8 w-8 animate-spin text-brand" />

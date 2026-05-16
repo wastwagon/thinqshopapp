@@ -8,6 +8,7 @@ import PriceDisplay from '@/components/ui/PriceDisplay';
 import ShopLayout from '@/components/layout/ShopLayout';
 import { cartItemUnitGhs } from '@/lib/product-utils';
 import { getMediaUrl } from '@/lib/media';
+import LiveRegion from '@/components/ui/LiveRegion';
 
 export default function CartPage() {
     const { cart, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -19,11 +20,14 @@ export default function CartPage() {
 
     return (
         <ShopLayout>
-            <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 pb-24">
+            <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 pb-36 md:pb-8">
                 <header className="mb-6">
                     <h1 className="page-title">Shopping bag</h1>
                     <p className="page-subtitle">Review items before checkout</p>
                 </header>
+                <LiveRegion
+                    message={cart.length > 0 ? `Bag: ${cart.length} item${cart.length === 1 ? '' : 's'}.` : ''}
+                />
 
                 <div className="flat-card overflow-hidden">
                     <ul role="list" className="divide-y divide-gray-100">
@@ -121,7 +125,7 @@ export default function CartPage() {
                 </div>
 
                 {cart.length > 0 && (
-                    <div className="mt-5 flat-card p-5">
+                    <div className="mt-5 flat-card p-5 hidden md:block">
                         <div className="flex justify-between items-center mb-1">
                             <p className="text-sm font-medium text-gray-600">Subtotal</p>
                             <p className="text-xl font-semibold text-gray-900">
@@ -144,6 +148,28 @@ export default function CartPage() {
                                 Continue shopping
                             </Link>
                         </div>
+                    </div>
+                )}
+
+                {cart.length > 0 && (
+                    <div
+                        className="fixed left-0 right-0 z-[90] md:hidden border-t border-gray-200/90 bg-white/95 backdrop-blur-md px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] bottom-[calc(3.25rem+env(safe-area-inset-bottom,0px))]"
+                        role="region"
+                        aria-label="Checkout actions"
+                    >
+                        <div className="flex items-center justify-between gap-3 mb-2.5">
+                            <p className="text-xs text-gray-500">Subtotal</p>
+                            <p className="text-lg font-semibold text-gray-900">
+                                <PriceDisplay amountGhs={cartTotal} />
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleCheckout}
+                            className="w-full min-h-[48px] bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 transition-colors touch-manipulation"
+                        >
+                            Checkout
+                        </button>
                     </div>
                 )}
             </div>

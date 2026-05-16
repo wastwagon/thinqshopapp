@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminStatGrid from '@/components/admin/AdminStatGrid';
 import Link from 'next/link';
 import { Package, Search, ChevronRight, FileText, Clock, Truck, CheckCircle, XCircle, Eye } from 'lucide-react';
 
@@ -92,30 +94,29 @@ export default function AdminOrdersPage() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Package className="h-7 w-7 text-brand" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Orders</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Customer orders</p>
-                    </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
+            <AdminPageHeader
+                icon={Package}
+                title="Orders"
+                subtitle="Customer orders"
+                actions={
+                    <>
                     <div className="relative min-w-0 sm:w-44">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" aria-hidden />
                         <input
-                            type="text"
+                            type="search"
                             placeholder="Search orders..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full h-9 pl-8 pr-2.5 border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                            className="admin-input w-full sm:w-44 pl-8"
+                            aria-label="Search orders"
                         />
                     </div>
                     <div className="relative">
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-brand/20 focus:border-brand appearance-none bg-white"
+                            className="admin-input pl-3 pr-8 appearance-none font-medium"
+                            aria-label="Filter by status"
                         >
                             <option value="">All statuses</option>
                             {ORDER_STATUSES.map((s) => (
@@ -124,22 +125,13 @@ export default function AdminOrdersPage() {
                         </select>
                         <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none rotate-90" aria-hidden />
                     </div>
-                </div>
-            </div>
+                    </>
+                }
+            />
 
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
-                {stats.map((s, i) => (
-                    <div key={i} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-                        <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
-                            <s.icon className="h-4 w-4" />
-                        </div>
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
-                        <p className="text-xl font-bold text-gray-900">{s.value}</p>
-                    </div>
-                ))}
-            </div>
+            <AdminStatGrid items={stats} columns={5} />
 
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="admin-table-wrap">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>

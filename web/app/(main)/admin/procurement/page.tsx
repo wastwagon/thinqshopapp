@@ -154,7 +154,7 @@ export default function AdminProcurementPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {stats.map((stat, i) => (
-                    <div key={i} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                    <div key={i} className="admin-stat-card">
                         <div className={`w-9 h-9 rounded-lg ${stat.bg} ${stat.border} border flex items-center justify-center ${stat.color} mb-2`}>
                             <stat.icon className="h-4 w-4" />
                         </div>
@@ -166,7 +166,7 @@ export default function AdminProcurementPage() {
 
             <div className="space-y-3">
                 {loading ? (
-                    <div className="py-10 text-center bg-white rounded-xl border border-gray-100 shadow-sm">
+                    <div className="py-10 text-center admin-card">
                         <div className="animate-spin h-7 w-7 border-2 border-brand border-t-transparent rounded-full mx-auto mb-2" />
                         <p className="text-sm text-gray-500">Loading...</p>
                     </div>
@@ -177,7 +177,7 @@ export default function AdminProcurementPage() {
                     </div>
                 ) : (
                     filteredRequests.map((req) => (
-                        <div key={req.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-all">
+                        <div key={req.id} className="admin-table-wrap hover:shadow-md transition-all">
                             <div className="p-4 lg:p-5">
                                 <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                                     <div className="flex-1 min-w-0 space-y-3">

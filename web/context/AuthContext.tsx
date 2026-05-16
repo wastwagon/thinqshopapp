@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '@/lib/axios';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
+import { clearSessionCookies, setSessionCookies } from '@/lib/session-cookies';
 
 interface User {
     id: number;
@@ -46,11 +47,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 try {
                     const { data } = await api.get('/users/profile');
                     setUser(data);
-                    document.cookie = 'thinq_session=1; path=/; max-age=604800; SameSite=Lax';
+                    setSessionCookies(data.role);
                 } catch (error) {
                     console.error("Auth check failed", error);
                     localStorage.removeItem('token');
-                    document.cookie = 'thinq_session=; path=/; max-age=0';
+                    clearSessionCookies();
                     setUser(null);
                 }
             }
@@ -64,6 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const { data } = await api.get('/users/profile');
             setUser(data);
+            setSessionCookies(data.role);
         } catch (e) {
             console.error('Refresh profile failed', e);
         }
@@ -71,11 +73,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const login = (token: string, redirectPath?: string) => {
         localStorage.setItem('token', token);
-        document.cookie = 'thinq_session=1; path=/; max-age=604800; SameSite=Lax';
         const decoded: any = jwtDecode(token);
         const userRole = decoded.role || 'user';
+        setSessionCookies(userRole);
         setUser({ id: decoded.sub, email: decoded.email, role: userRole });
-        api.get('/users/profile').then(({ data }) => setUser(data)).catch(console.error);
+        api.get('/users/profile').then(({ data }) => {
+            setUser(data);
+            setSessionCookies(data.role);
+        }).catch(console.error);
         // Safe redirect: only /dashboard or /admin (and subpaths)
         const safe = redirectPath && /^\/(dashboard|admin)(\/|$)/.test(redirectPath) ? redirectPath : null;
         const target = userRole === 'admin' || userRole === 'superadmin'
@@ -87,7 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const logout = () => {
         localStorage.removeItem('token');
-        document.cookie = 'thinq_session=; path=/; max-age=0';
+        clearSessionCookies();
         setUser(null);
         router.push('/login');
     };

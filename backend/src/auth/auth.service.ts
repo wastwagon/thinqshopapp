@@ -101,6 +101,50 @@ export class AuthService {
         return raw.split(',')[0]?.trim() || 'http://localhost:3000';
     }
 
+    private replacePlaceholders(str: string, data: Record<string, string>): string {
+        let out = str;
+        for (const [key, value] of Object.entries(data)) {
+            out = out.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value ?? '');
+        }
+        return out;
+    }
+
+    private async queuePasswordResetEmail(recipient: string, resetUrl: string, userName: string): Promise<void> {
+        const template = await this.prisma.emailTemplate.findUnique({
+            where: { trigger_key: 'password_reset' },
+        });
+        const data = { reset_url: resetUrl, user_name: userName };
+        if (template?.is_enabled) {
+            await this.prisma.emailQueue.create({
+                data: {
+                    recipient,
+                    subject: this.replacePlaceholders(template.subject, data),
+                    body: this.replacePlaceholders(template.body, data),
+                    status: 'pending',
+                },
+            });
+            return;
+        }
+        await this.prisma.emailQueue.create({
+            data: {
+                recipient,
+                subject: 'Reset your ThinQShop password',
+                body: [
+                    `Hi ${userName},`,
+                    '',
+                    'We received a request to reset your password. Open this link within 1 hour:',
+                    '',
+                    resetUrl,
+                    '',
+                    'If you did not request this, you can ignore this email.',
+                    '',
+                    'ThinQShop',
+                ].join('\n'),
+                status: 'pending',
+            },
+        });
+    }
+
     async forgotPassword(email: string): Promise<void> {
         const normalized = (email || '').trim();
         if (!normalized || !normalized.includes('@')) return;
@@ -118,24 +162,12 @@ export class AuthService {
         });
 
         const resetUrl = `${this.getFrontendBaseUrl()}/reset-password?token=${encodeURIComponent(rawToken)}`;
-        await this.prisma.emailQueue.create({
-            data: {
-                recipient: user.email,
-                subject: 'Reset your ThinQShop password',
-                body: [
-                    'Hi,',
-                    '',
-                    'We received a request to reset your password. Open this link within 1 hour:',
-                    '',
-                    resetUrl,
-                    '',
-                    'If you did not request this, you can ignore this email.',
-                    '',
-                    'ThinQShop',
-                ].join('\n'),
-                status: 'pending',
-            },
-        });
+        const profile = await this.prisma.userProfile.findUnique({ where: { user_id: user.id } });
+        const userName =
+            [profile?.first_name, profile?.last_name].filter(Boolean).join(' ').trim() ||
+            user.email.split('@')[0] ||
+            'there';
+        await this.queuePasswordResetEmail(user.email, resetUrl, userName);
     }
 
     async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {

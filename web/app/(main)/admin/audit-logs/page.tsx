@@ -213,7 +213,7 @@ export default function AdminAuditLogsPage() {
                     </button>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="admin-table-wrap">
                     <div className="p-4 border-b border-gray-100 space-y-3">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                             <div className="relative">
