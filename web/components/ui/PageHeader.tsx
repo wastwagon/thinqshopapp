@@ -14,40 +14,31 @@ interface PageHeaderProps {
     breadcrumbs?: BreadcrumbItem[];
 }
 
+/** Light flat page header — breadcrumbs + title (no dark hero strip). */
 export default function PageHeader({ title, subtitle, breadcrumbs = [] }: PageHeaderProps) {
     return (
-        <div className="w-screen relative left-1/2 -translate-x-1/2 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border-b border-slate-700/80 mb-10 -mt-4 pt-5 pb-8 ring-1 ring-inset ring-white/[0.06]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
+        <header className="mb-6 md:mb-8">
             {breadcrumbs.length > 0 && (
-                <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs">
-                    <Link href="/" className="text-slate-400 hover:text-white transition-colors font-medium">
+                <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1 text-xs text-gray-500 mb-3">
+                    <Link href="/" className="hover:text-gray-700 transition-colors">
                         Home
                     </Link>
                     {breadcrumbs.map((item, i) => (
-                        <span key={i} className="flex items-center gap-1.5">
-                            <ChevronRight className="h-4 w-4 text-slate-600 shrink-0" />
+                        <span key={i} className="flex items-center gap-1">
+                            <ChevronRight className="h-3.5 w-3.5 text-gray-300 shrink-0" aria-hidden />
                             {item.href ? (
-                                <Link href={item.href} className="text-slate-400 hover:text-white transition-colors font-medium">
+                                <Link href={item.href} className="hover:text-gray-700 transition-colors">
                                     {item.label}
                                 </Link>
                             ) : (
-                                <span className="text-white font-semibold">{item.label}</span>
+                                <span className="text-gray-700 font-medium">{item.label}</span>
                             )}
                         </span>
                     ))}
                 </nav>
             )}
-            {title != null && title !== '' && (
-                <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight leading-tight mt-4">
-                    {title}
-                </h1>
-            )}
-            {subtitle && (
-                <p className="mt-1.5 text-sm text-slate-400">
-                    {subtitle}
-                </p>
-            )}
-            </div>
-        </div>
+            {title != null && title !== '' && <h1 className="page-title">{title}</h1>}
+            {subtitle ? <p className="page-subtitle">{subtitle}</p> : null}
+        </header>
     );
 }

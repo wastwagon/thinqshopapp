@@ -32,28 +32,29 @@ export default function CartDrawer() {
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+                    <div className="fixed inset-0 bg-black/25 transition-opacity" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 overflow-hidden">
                     <div className="absolute inset-0 overflow-hidden">
-                        <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+                        <div className="pointer-events-none fixed inset-0 flex items-end justify-center md:items-stretch md:justify-end md:pl-10">
                             <Transition.Child
                                 as={Fragment}
-                                enter="transform transition ease-in-out duration-500 sm:duration-700"
-                                enterFrom="translate-x-full"
-                                enterTo="translate-x-0"
-                                leave="transform transition ease-in-out duration-500 sm:duration-700"
-                                leaveFrom="translate-x-0"
-                                leaveTo="translate-x-full"
+                                enter="transform transition ease-out duration-300 md:duration-500"
+                                enterFrom="translate-y-full md:translate-y-0 md:translate-x-full"
+                                enterTo="translate-y-0 md:translate-x-0"
+                                leave="transform transition ease-in duration-250 md:duration-500"
+                                leaveFrom="translate-y-0 md:translate-x-0"
+                                leaveTo="translate-y-full md:translate-x-full"
                             >
-                                <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
-                                    <div className="flex h-full flex-col overflow-y-scroll overscroll-y-contain scrollbar-thin bg-white shadow-2xl border-l border-gray-100 relative">
-                                        <div className="flex-1 overflow-y-auto overscroll-y-contain scrollbar-thin px-6 py-8 relative z-10">
+                                <Dialog.Panel className="pointer-events-auto w-full max-w-md md:h-full max-h-[min(92vh,720px)] md:max-h-none rounded-t-2xl md:rounded-none overflow-hidden">
+                                    <div className="flex h-full max-h-[inherit] flex-col overflow-hidden bg-white border-t border-gray-200/90 md:border-t-0 md:border-l relative">
+                                        <div className="mx-auto mt-2 mb-1 h-1 w-10 shrink-0 rounded-full bg-gray-300 md:hidden" aria-hidden />
+                                        <div className="flex-1 overflow-y-auto overscroll-y-contain scrollbar-thin px-6 py-6 md:py-8 relative z-10 min-h-0">
                                             <div className="flex items-start justify-between mb-8">
                                                 <div>
                                                     <Dialog.Title className="text-xl font-bold text-gray-900 tracking-tight">Shopping Bag</Dialog.Title>
-                                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">Your selection</p>
+                                                    <p className="text-sm text-gray-500 mt-0.5">Your selection</p>
                                                 </div>
                                                 <button
                                                     type="button"
@@ -132,7 +133,7 @@ export default function CartDrawer() {
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => removeFromCart(item.id)}
-                                                                                className="min-h-[44px] flex items-center text-xs font-semibold text-gray-400 hover:text-red-500 uppercase tracking-wider transition-all gap-2 px-2"
+                                                                                className="min-h-[44px] flex items-center text-xs font-medium text-gray-400 hover:text-red-500 transition-colors gap-2 px-2"
                                                                                 aria-label={`Remove ${item.product.name} from cart`}
                                                                             >
                                                                                 <Trash2 className="h-3 w-3" aria-hidden /> Remove
@@ -160,7 +161,7 @@ export default function CartDrawer() {
                                                 <button
                                                     onClick={handleCheckout}
                                                     disabled={cart.length === 0}
-                                                    className="w-full min-h-[44px] bg-gradient-to-r from-slate-900 to-slate-800 text-white h-12 rounded-xl font-semibold text-sm hover:from-brand hover:to-brand/95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shadow-md"
+                                                    className="w-full min-h-[44px] bg-brand text-white h-12 rounded-xl font-semibold text-sm hover:bg-brand/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
                                                 >
                                                     Checkout
                                                 </button>

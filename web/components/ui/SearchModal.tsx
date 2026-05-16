@@ -42,12 +42,12 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
         >
             <div
                 ref={panelRef}
-                className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl shadow-gray-900/20 border border-gray-100 overflow-visible"
+                className="w-full max-w-2xl bg-white rounded-2xl border border-gray-200/90 shadow-xl overflow-visible"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center gap-4 px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50/80 to-white">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gray-900 text-white shrink-0">
+                <div className="flex items-center gap-4 px-6 py-5 border-b border-gray-100 bg-gray-50/80">
+                    <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-brand text-white shrink-0">
                         <Search className="h-6 w-6" />
                     </div>
                     <div className="flex-1 min-w-0">

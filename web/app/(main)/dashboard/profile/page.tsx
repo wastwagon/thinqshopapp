@@ -120,20 +120,14 @@ export default function ProfilePage() {
     return (
         <DashboardLayout>
             <div className="pb-6 md:pb-8">
-            <div className="mb-6 flex items-center gap-3">
-                <User className="h-8 w-8 text-blue-600" />
-                <div>
-                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight leading-tight">Profile</h1>
-                    <p className="text-xs text-blue-600 flex items-center gap-1.5 mt-0.5">
-                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-                        Active
-                    </p>
-                </div>
-            </div>
+            <header className="mb-5 px-1">
+                <h1 className="page-title">Profile</h1>
+                <p className="page-subtitle">Personal details and security</p>
+            </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-4">
-                    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
+                    <div className="flat-card p-6 text-center">
                         <div className="relative inline-block mb-4">
                             <div className="w-24 h-24 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden relative">
                                 {showAvatarImage ? (
@@ -183,7 +177,7 @@ export default function ProfilePage() {
                             </button>
                         ) : null}
                         <h2 className="text-lg font-bold text-gray-900 mb-1">{formData.first_name || '—'} {formData.last_name || '—'}</h2>
-                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">{user?.role || 'User'}</p>
+                        <p className="text-xs font-medium text-gray-500 mb-2 capitalize">{user?.role || 'User'}</p>
                         <div className="px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 inline-block">
                             <p className="text-xs font-semibold text-gray-600">ID: {user?.user_identifier || '—'}</p>
                         </div>
@@ -195,19 +189,19 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    <div className="mt-4 bg-gray-900 rounded-2xl p-5 text-white">
-                        <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-300 mb-3 flex items-center gap-2">
-                            <Shield className="h-3 w-3" /> Security
+                    <div className="mt-4 flat-card border-l-4 border-l-blue-600 p-5">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-blue-600" /> Security
                         </h3>
-                        <p className="text-xs text-white/70 leading-relaxed mb-4">Your data is encrypted and secure.</p>
-                        <button type="button" className="text-xs font-semibold text-white flex items-center gap-2 hover:text-blue-300 transition-colors">
-                            <Lock className="h-3 w-3" /> Change password
+                        <p className="text-xs text-gray-500 leading-relaxed mb-4">Your data is encrypted and secure.</p>
+                        <button type="button" className="text-sm font-medium text-blue-600 flex items-center gap-2 hover:text-blue-700 transition-colors">
+                            <Lock className="h-3.5 w-3.5" /> Change password
                         </button>
                     </div>
 
-                    <div className="mt-4 bg-white rounded-2xl p-5 border border-red-100">
-                        <h3 className="text-xs font-semibold uppercase tracking-wider text-red-600 mb-3 flex items-center gap-2">
-                            <Trash2 className="h-3 w-3" /> Account
+                    <div className="mt-4 flat-card border-l-4 border-l-red-500 p-5">
+                        <h3 className="text-sm font-semibold text-red-600 mb-2 flex items-center gap-2">
+                            <Trash2 className="h-4 w-4" /> Delete account
                         </h3>
                         <p className="text-xs text-gray-600 leading-relaxed mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
                         <Link
@@ -221,16 +215,16 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="lg:col-span-8">
-                    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                    <div className="flat-card p-6">
                         <div className="mb-6">
-                            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Details</h3>
-                            <p className="text-base font-bold text-gray-900">Personal information</p>
+                            <h3 className="text-sm font-semibold text-gray-900">Personal information</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Update your profile details</p>
                         </div>
 
                         <form onSubmit={handleUpdate} className="space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">First name</label>
+                                    <label className="text-sm font-medium text-gray-600 mb-1.5 block">First name</label>
                                     <input
                                         type="text"
                                         value={formData.first_name}
@@ -239,7 +233,7 @@ export default function ProfilePage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Last name</label>
+                                    <label className="text-sm font-medium text-gray-600 mb-1.5 block">Last name</label>
                                     <input
                                         type="text"
                                         value={formData.last_name}
@@ -248,7 +242,7 @@ export default function ProfilePage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">Email</label>
+                                    <label className="text-sm font-medium text-gray-600 mb-1.5 block">Email</label>
                                     <div className="relative">
                                         <input
                                             type="email"
@@ -260,7 +254,7 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">WhatsApp / Phone</label>
+                                    <label className="text-sm font-medium text-gray-600 mb-1.5 block">WhatsApp / Phone</label>
                                     <input
                                         type="text"
                                         value={formData.phone}
@@ -274,7 +268,7 @@ export default function ProfilePage() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="h-10 px-6 bg-gray-900 text-white rounded-xl font-semibold text-sm hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                                    className="h-10 px-6 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 transition-colors flex items-center gap-2 disabled:opacity-50"
                                 >
                                     {loading ? 'Saving...' : 'Save changes'}
                                     <Save className="h-3.5 w-3.5" />

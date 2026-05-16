@@ -131,7 +131,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     );
 
     return (
-        <div className="group bg-white rounded-xl border border-gray-100/90 shadow-sm hover:shadow-lg hover:shadow-brand/5 hover:border-brand/20 transition-all duration-300 overflow-hidden relative flex flex-col h-full">
+        <div className="group flat-card-interactive overflow-hidden relative flex flex-col h-full">
             <div className="flex md:hidden items-center justify-end gap-1 px-2 pt-2 pb-1 shrink-0">
                 {quickActions(true)}
             </div>
@@ -162,7 +162,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             {/* Content */}
             <div className="p-4 flex flex-col flex-1">
                 <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-xs font-semibold text-brand uppercase tracking-wider truncate">
+                    <span className="text-xs font-medium text-brand truncate">
                         {typeof product.category === 'string' ? product.category : product.category?.name || 'Vetted Asset'}
                     </span>
                     <div className="flex items-center gap-0.5 shrink-0">
@@ -178,7 +178,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </Link>
 
                 {descPreview && (
-                    <p className="text-[11px] text-gray-500 line-clamp-2 mt-1 leading-relaxed">
+                    <p className="hidden sm:block text-[11px] text-gray-500 line-clamp-2 mt-1 leading-relaxed">
                         {descPreview}
                     </p>
                 )}
@@ -192,14 +192,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                         )}
                         <div className="flex flex-col items-start gap-0">
                             {hasVariants && (
-                                <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">From</span>
+                                <span className="text-[10px] font-medium text-gray-500">From</span>
                             )}
                             <PriceDisplay amountGhs={fromPrice} className="text-base font-semibold text-gray-900" />
                         </div>
                     </div>
                     <Link
                         href={`/products/${productSlug}`}
-                        className="w-9 h-9 min-w-[36px] min-h-[36px] p-1.5 bg-gray-100 text-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-200 hover:text-blue-600 transition-all group/btn"
+                        className="w-9 h-9 min-w-[36px] min-h-[36px] p-1.5 bg-gray-50 border border-gray-200/80 text-gray-700 rounded-lg flex items-center justify-center hover:bg-brand/10 hover:text-brand hover:border-brand/30 transition-colors group/btn"
                         aria-label="View product"
                     >
                         <ArrowRight className="h-4 w-4 shrink-0 group-hover/btn:scale-110 transition-transform" aria-hidden />

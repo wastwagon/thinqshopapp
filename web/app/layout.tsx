@@ -3,7 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import AppLoadedMarker from "@/components/AppLoadedMarker";
 
-const outfit = Outfit({ subsets: ["latin"] });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app';
 
@@ -109,7 +109,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" className={outfit.variable}>
             <head>
                 {/* Single viewport meta: viewport-fit=cover enables safe-area insets on notched iOS / WebView apps */}
                 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -120,7 +120,7 @@ export default function RootLayout({
                     }}
                 />
             </head>
-            <body className={outfit.className}>
+            <body className={`${outfit.className} font-brand antialiased`}>
                 <script
                     dangerouslySetInnerHTML={{
                         __html: webViewGoldBootScript,

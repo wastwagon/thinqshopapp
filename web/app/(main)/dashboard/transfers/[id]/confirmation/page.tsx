@@ -83,7 +83,7 @@ export default function TransferConfirmationPage() {
                 <div className="max-w-3xl mx-auto py-12 flex flex-col items-center justify-center min-h-[40vh] print:hidden">
                     {loading && (
                         <>
-                            <div className="animate-spin h-10 w-10 border-2 border-blue-600 border-t-transparent rounded-full mb-4" />
+                            <div className="animate-spin h-10 w-10 border-2 border-brand border-t-transparent rounded-full mb-4" />
                             <p className="text-sm text-gray-500">Loading confirmation…</p>
                         </>
                     )}
@@ -119,7 +119,7 @@ export default function TransferConfirmationPage() {
                         <button
                             type="button"
                             onClick={handlePrint}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-blue-600 transition-colors"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand/90 transition-colors"
                         >
                             <Printer className="h-4 w-4" /> Print / Save as PDF
                         </button>
@@ -130,7 +130,7 @@ export default function TransferConfirmationPage() {
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden print:shadow-none print:border print:rounded-lg">
                     <div className="p-6 border-b border-gray-100 bg-gray-50/50">
                         <div className="flex items-center gap-3 mb-1">
-                            <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-brand flex items-center justify-center">
                                 <Send className="h-5 w-5 text-white" />
                             </div>
                             <div>

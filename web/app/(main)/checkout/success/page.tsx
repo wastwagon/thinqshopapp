@@ -43,7 +43,7 @@ export default function OrderSuccessPage() {
 
     return (
         <ShopLayout>
-            <div className="min-h-[80vh] flex items-center justify-center px-4 py-6 sm:py-10 safe-area-inset-bottom bg-gradient-to-b from-gray-50 to-white">
+            <div className="min-h-[80vh] flex items-center justify-center px-4 py-6 sm:py-10 safe-area-inset-bottom bg-app">
                 <ThankYouCard
                     title="Thank you for your order"
                     subtitle="Your payment was successful. We have received your order and will prepare it for shipping."

@@ -131,7 +131,7 @@ function CategoryShopContent() {
                             <div className="space-y-1.5">
                                 <Link
                                     href="/shop"
-                                    className="block w-full text-left px-5 py-3.5 rounded-2xl text-sm font-bold transition-all text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                    className="block w-full text-left px-5 py-3.5 rounded-xl text-sm font-medium transition-all text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                                 >
                                     All Products
                                 </Link>
@@ -139,7 +139,7 @@ function CategoryShopContent() {
                                     <Link
                                         key={cat.id ?? cat.slug ?? cat.name}
                                         href={`/shop/${cat.slug ?? cat.name?.toLowerCase?.()?.replace(/\s+/g, '-')}`}
-                                        className={`block w-full text-left px-5 py-3.5 rounded-2xl text-sm font-bold transition-all ${categorySlug === (cat.slug ?? '') ? 'bg-gray-900 text-white shadow-lg shadow-gray-200' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                                        className={`block w-full text-left px-5 py-3.5 rounded-xl text-sm font-medium transition-all ${categorySlug === (cat.slug ?? '') ? 'bg-brand text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
                                     >
                                         {cat.name}
                                     </Link>
@@ -159,7 +159,7 @@ function CategoryShopContent() {
                                     type="button"
                                     onClick={loadMore}
                                     disabled={loadingMore}
-                                    className="inline-flex items-center justify-center gap-2 min-h-[44px] px-8 py-4 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 disabled:opacity-50 transition-all"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[44px] px-8 py-4 rounded-xl bg-brand text-white font-semibold text-sm hover:bg-brand/90 disabled:opacity-50 transition-all"
                                 >
                                     {loadingMore ? (
                                         <>

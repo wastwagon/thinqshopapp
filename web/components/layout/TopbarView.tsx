@@ -66,13 +66,13 @@ export default function TopbarView(props: TopbarViewProps) {
     const unreadCount = notifications.filter(n => !n.is_read).length;
 
     return (
-        <div role="banner" className="min-h-14 bg-white/90 border-b border-gray-100/90 flex flex-col sticky top-0 z-30 backdrop-blur-xl shadow-sm shadow-slate-900/[0.04]">
+        <div role="banner" className="min-h-14 bg-white/92 border-b border-gray-200/80 flex flex-col sticky top-0 z-30 backdrop-blur-xl">
             <div className="h-14 flex items-center justify-between gap-3 px-3 md:px-6">
                 {onMenuPress && (
                     <button
                         type="button"
                         onClick={onMenuPress}
-                        className="md:hidden touch-target min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                        className="md:hidden touch-target min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
                         aria-label="Open menu"
                     >
                         <Menu className="h-6 w-6" aria-hidden />
@@ -83,7 +83,7 @@ export default function TopbarView(props: TopbarViewProps) {
                         id="topbar-search-desktop"
                         listboxId="topbar-search-desktop-suggestions"
                         className="w-full"
-                        inputClassName="h-10 pl-9 pr-3 rounded-xl text-sm border-gray-100 bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                        inputClassName="h-10 pl-9 pr-3 rounded-xl text-sm border-gray-100 bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand"
                         placeholder="Search products..."
                     />
                 </div>
@@ -92,7 +92,7 @@ export default function TopbarView(props: TopbarViewProps) {
                     <button
                         type="button"
                         onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-                        className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                        className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
                         aria-label={mobileSearchOpen ? 'Close search' : 'Open search'}
                     >
                         {mobileSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
@@ -100,24 +100,24 @@ export default function TopbarView(props: TopbarViewProps) {
                     <div className="relative">
                         <button
                             onClick={() => { setShowNotifications(!showNotifications); setAccountMenuOpen(false); }}
-                            className="min-w-[44px] min-h-[44px] w-10 h-10 md:w-10 md:h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-200 transition-all relative shadow-sm"
+                            className="min-w-[44px] min-h-[44px] w-10 h-10 md:w-10 md:h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand/30 transition-all relative shadow-sm"
                             aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
                             aria-expanded={showNotifications}
                         >
                             <Bell className="h-4 w-4" />
                             {unreadCount > 0 && (
-                                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-blue-600 text-white text-xs font-bold rounded-full border-2 border-white">
+                                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-brand text-white text-xs font-bold rounded-full border-2 border-white">
                                     {unreadCount > 9 ? '9+' : unreadCount}
                                 </span>
                             )}
                         </button>
 
                         {showNotifications && (
-                            <div className="absolute right-0 mt-4 w-80 lg:w-96 bg-white border border-gray-100 rounded-3xl shadow-2xl overflow-hidden z-50 flex flex-col max-h-[500px] animate-in slide-in-from-top-4 fade-in duration-200">
+                            <div className="absolute right-0 mt-4 w-80 lg:w-96 bg-white border border-gray-200/90 rounded-2xl shadow-xl overflow-hidden z-50 flex flex-col max-h-[500px] animate-in slide-in-from-top-4 fade-in duration-200">
                                 <div className="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                                     <h3 className="text-xs font-semibold text-gray-900">Notifications</h3>
                                     {unreadCount > 0 && (
-                                        <button onClick={handleMarkAllAsRead} className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -m-2">
+                                        <button onClick={handleMarkAllAsRead} className="text-xs font-medium text-brand hover:text-brand/80 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -m-2">
                                             Mark all read
                                         </button>
                                     )}
@@ -127,18 +127,18 @@ export default function TopbarView(props: TopbarViewProps) {
                                         notifications.map(notification => (
                                             <div
                                                 key={notification.id}
-                                                className={`p-4 rounded-2xl transition-all border ${notification.is_read ? 'bg-white border-transparent' : 'bg-blue-50/50 border-blue-100'}`}
+                                                className={`p-4 rounded-2xl transition-all border ${notification.is_read ? 'bg-white border-transparent' : 'bg-brand/5 border-brand/20'}`}
                                             >
                                                 <div className="flex justify-between items-start mb-2">
-                                                    <h4 className="text-xs font-black uppercase tracking-widest text-gray-900">{notification.title}</h4>
+                                                    <h4 className="text-sm font-semibold text-gray-900">{notification.title}</h4>
                                                     {!notification.is_read && (
                                                         <button type="button" onClick={() => handleMarkAsRead(notification.id)} className="min-w-[44px] min-h-[44px] flex items-center justify-center -m-2">
-                                                            <CheckCircle className="h-4 w-4 text-blue-600 hover:text-blue-800 transition-colors" aria-hidden />
+                                                            <CheckCircle className="h-4 w-4 text-brand hover:text-brand/80 transition-colors" aria-hidden />
                                                         </button>
                                                     )}
                                                 </div>
-                                                <p className="text-xs font-bold text-gray-500 leading-relaxed">{notification.message}</p>
-                                                <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-gray-400 pt-3 border-t border-gray-100/50">
+                                                <p className="text-xs text-gray-500 leading-relaxed">{notification.message}</p>
+                                                <p className="mt-3 text-xs text-gray-400 pt-3 border-t border-gray-100/50">
                                                     {new Date(notification.created_at).toLocaleString()}
                                                 </p>
                                             </div>
@@ -160,7 +160,7 @@ export default function TopbarView(props: TopbarViewProps) {
                         <button
                             type="button"
                             onClick={() => { setAccountMenuOpen((v) => !v); setShowNotifications(false); }}
-                            className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-gray-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 md:p-1.5"
+                            className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-gray-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 md:p-1.5"
                             aria-label="Account menu"
                             aria-expanded={accountMenuOpen}
                         >
@@ -192,10 +192,10 @@ export default function TopbarView(props: TopbarViewProps) {
                                 <p className="text-xs text-gray-500 mt-0.5 capitalize">{user?.role || 'user'}</p>
                             </div>
                             <div className="p-2 space-y-0.5">
-                                <Link href="/dashboard/profile" onClick={() => setAccountMenuOpen(false)} className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50/50 rounded-xl transition-colors min-h-[44px]">
+                                <Link href="/dashboard/profile" onClick={() => setAccountMenuOpen(false)} className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-600 hover:text-brand hover:bg-brand/5 rounded-xl transition-colors min-h-[44px]">
                                     <UserIcon className="mr-3 h-4 w-4 text-gray-400" /> Profile
                                 </Link>
-                                <Link href="/dashboard/settings" onClick={() => setAccountMenuOpen(false)} className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50/50 rounded-xl transition-colors min-h-[44px]">
+                                <Link href="/dashboard/settings" onClick={() => setAccountMenuOpen(false)} className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-600 hover:text-brand hover:bg-brand/5 rounded-xl transition-colors min-h-[44px]">
                                     <Settings className="mr-3 h-4 w-4 text-gray-400" /> Settings
                                 </Link>
                                 <div className="h-px bg-gray-100 my-1 mx-2" />

@@ -68,7 +68,7 @@ export default function ProcurementResponsePage() {
                 <div className="max-w-3xl mx-auto py-12 flex flex-col items-center justify-center min-h-[40vh] print:hidden">
                     {loading && (
                         <>
-                            <div className="animate-spin h-10 w-10 border-2 border-blue-600 border-t-transparent rounded-full mb-4" />
+                            <div className="animate-spin h-10 w-10 border-2 border-brand border-t-transparent rounded-full mb-4" />
                             <p className="text-sm text-gray-500">Loading response…</p>
                         </>
                     )}
@@ -94,14 +94,14 @@ export default function ProcurementResponsePage() {
                     <button
                         type="button"
                         onClick={handlePrint}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand/90 transition-colors"
                     >
                         <Printer className="h-4 w-4" /> Print / Save as PDF
                     </button>
                 </div>
 
                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden print:shadow-none print:border print:rounded-lg">
-                    <div className="p-8 md:p-10 border-b border-gray-100 bg-gradient-to-b from-gray-50 to-white">
+                    <div className="p-8 md:p-10 border-b border-gray-100 bg-gray-50/50">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
                                 <ShoppingBag className="h-6 w-6 text-white" />
@@ -118,17 +118,17 @@ export default function ProcurementResponsePage() {
 
                     <div className="p-8 md:p-10 space-y-8">
                         <section>
-                            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <h2 className="text-xs font-bold text-gray-400 capitalize mb-4 flex items-center gap-2">
                                 <FileText className="h-3.5 w-3.5" /> Request details
                             </h2>
                             <div className="space-y-3">
                                 <div>
-                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Description</p>
+                                    <p className="text-xs font-semibold text-gray-400 capitalize">Description</p>
                                     <p className="text-gray-900 font-medium">{request.description}</p>
                                 </div>
                                 {request.specifications && (
                                     <div>
-                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Specifications</p>
+                                        <p className="text-xs font-semibold text-gray-400 capitalize">Specifications</p>
                                         <p className="text-sm text-gray-700 whitespace-pre-wrap">{request.specifications}</p>
                                     </div>
                                 )}
@@ -159,7 +159,7 @@ export default function ProcurementResponsePage() {
 
                         {quote && (
                             <section className="rounded-xl border border-gray-200 bg-gray-50/50 p-6">
-                                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                <h2 className="text-xs font-bold text-gray-400 capitalize mb-4 flex items-center gap-2">
                                     <DollarSign className="h-3.5 w-3.5" /> Admin quote
                                 </h2>
                                 <div className="flex flex-wrap items-start justify-between gap-4">
@@ -167,13 +167,13 @@ export default function ProcurementResponsePage() {
                                         <p className="text-2xl font-bold text-gray-900">₵{Number(quote.quote_amount).toFixed(2)}</p>
                                         <p className="text-xs text-gray-500 mt-1">Quote date: {new Date(quote.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
                                     </div>
-                                    <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                                    <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand/10 text-blue-700 border border-blue-100">
                                         {quote.status.toUpperCase()}
                                     </span>
                                 </div>
                                 {quote.quote_details && (
                                     <div className="mt-4 pt-4 border-t border-gray-200">
-                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Details</p>
+                                        <p className="text-xs font-semibold text-gray-400 capitalize mb-1">Details</p>
                                         <p className="text-sm text-gray-700 whitespace-pre-wrap">{quote.quote_details}</p>
                                     </div>
                                 )}
@@ -182,7 +182,7 @@ export default function ProcurementResponsePage() {
 
                         {order && (
                             <section className="rounded-xl border border-gray-200 bg-green-50/30 p-6">
-                                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                <h2 className="text-xs font-bold text-gray-400 capitalize mb-4 flex items-center gap-2">
                                     <Package className="h-3.5 w-3.5" /> Order
                                 </h2>
                                 <div className="flex flex-wrap items-center gap-4">

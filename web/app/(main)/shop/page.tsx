@@ -119,7 +119,7 @@ function ShopContent() {
                     subtitle="Electronics and tech delivered to you"
                     breadcrumbs={breadcrumbs}
                 />
-                <div className="flex flex-col md:flex-row justify-end mb-8 -mt-4">
+                <div className="flex flex-col md:flex-row justify-end mb-8">
                     <form onSubmit={handleSearch} className="w-full md:w-80 relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <Search className="h-4 w-4 text-gray-400 group-focus-within:text-brand transition-colors" />
@@ -135,33 +135,33 @@ function ShopContent() {
                 </div>
 
                 <div className="mb-6 lg:mb-0">
-                    <h3 className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-3 lg:hidden">Categories</h3>
+                    <h3 className="section-label mb-3 lg:hidden">Categories</h3>
                     <CategoryBadges categories={categories} currentSlug={category} />
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-12">
                     <aside className="hidden lg:block w-full lg:w-64 flex-shrink-0">
                         <div className="sticky top-24">
-                            <h3 className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-6">Categories</h3>
+                            <h3 className="section-label mb-6">Categories</h3>
                             <div className="space-y-1.5">
                                 <Link
                                     href="/shop"
-                                    className={`block w-full text-left px-5 py-3.5 rounded-2xl text-sm font-bold transition-all ${!category ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg shadow-slate-900/20' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                                    className={`block w-full text-left px-5 py-3.5 rounded-xl text-sm font-medium transition-all ${!category ? 'bg-brand text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
                                 >
-                                    All Products
+                                    All products
                                 </Link>
                                 {categories.map((cat) => (
                                     <Link
                                         key={cat.id ?? cat.slug ?? cat.name}
                                         href={`/shop/${cat.slug ?? cat.name?.toLowerCase?.()?.replace(/\s+/g, '-')}`}
-                                        className={`block w-full text-left px-5 py-3.5 rounded-2xl text-sm font-bold transition-all ${category === (cat.slug ?? '') ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg shadow-slate-900/20' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                                        className={`block w-full text-left px-5 py-3.5 rounded-xl text-sm font-medium transition-all ${category === (cat.slug ?? '') ? 'bg-brand text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
                                     >
                                         {cat.name}
                                     </Link>
                                 ))}
                             </div>
-                            <div className="mt-12 bg-gradient-to-br from-orange-50 to-slate-50 p-6 rounded-xl border border-brand/15 shadow-sm">
-                                <p className="text-xs font-bold tracking-widest text-brand uppercase mb-2">Shipping</p>
+                            <div className="mt-12 flat-card border-l-4 border-l-brand p-5">
+                                <p className="text-xs font-medium text-brand mb-2">Shipping</p>
                                 <p className="text-xs font-bold text-gray-900 leading-tight">International delivery. Items ship from abroad with 7–14 day estimated delivery.</p>
                             </div>
                         </div>
@@ -174,7 +174,7 @@ function ShopContent() {
                                     type="button"
                                     onClick={loadMore}
                                     disabled={loadingMore}
-                                    className="inline-flex items-center justify-center gap-2 min-h-[44px] px-8 py-4 rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 text-white font-semibold text-sm hover:from-brand hover:to-brand/95 disabled:opacity-50 transition-all shadow-md"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[44px] px-8 py-4 rounded-xl bg-brand text-white font-semibold text-sm hover:bg-brand/90 disabled:opacity-50 transition-colors"
                                 >
                                     {loadingMore ? (
                                         <>

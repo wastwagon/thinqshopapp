@@ -44,7 +44,7 @@ export default function ProcurementSuccessPage() {
             <DashboardLayout>
                 <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 px-4 py-6 pb-6 md:pb-8">
                     <p className="text-gray-500 text-sm">No request ID provided.</p>
-                    <Link href="/dashboard/procurement" className="text-blue-600 font-semibold text-sm hover:underline">
+                    <Link href="/dashboard/procurement" className="text-brand font-semibold text-sm hover:underline">
                         Back to Procurement
                     </Link>
                 </div>
@@ -56,7 +56,7 @@ export default function ProcurementSuccessPage() {
         return (
             <DashboardLayout>
                 <div className="min-h-[60vh] flex items-center justify-center pb-6 md:pb-8">
-                    <div className="animate-spin h-10 w-10 border-2 border-blue-600 border-t-transparent rounded-full" />
+                    <div className="animate-spin h-10 w-10 border-2 border-brand border-t-transparent rounded-full" />
                 </div>
             </DashboardLayout>
         );
@@ -67,7 +67,7 @@ export default function ProcurementSuccessPage() {
 
     return (
         <DashboardLayout>
-            <div className="min-h-[80vh] flex items-center justify-center px-4 py-6 sm:py-10 pb-6 md:pb-8 safe-area-inset-bottom bg-gradient-to-b from-gray-50 to-white">
+            <div className="min-h-[80vh] flex items-center justify-center px-4 py-6 sm:py-10 pb-6 md:pb-8 safe-area-inset-bottom bg-app">
                 <ThankYouCard
                     title="Request submitted successfully"
                     subtitle="Our team will review your request and send you a quote. You will be notified when a quote is ready."

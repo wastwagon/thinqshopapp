@@ -146,29 +146,26 @@ export default function ProcurementPage() {
     return (
         <DashboardLayout>
             <div className="pb-20 md:pb-10">
-            <div className="mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                <div className="flex items-center gap-2">
-                    <ShoppingBag className="h-8 w-8 text-blue-600" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900">Procurement</h1>
-                        <p className="text-xs text-blue-600 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-                            Sourcing &amp; print
-                        </p>
-                    </div>
+            <header className="mb-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <div>
+                    <h1 className="page-title">Procurement</h1>
+                    <p className="page-subtitle flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 bg-brand rounded-full" aria-hidden />
+                        Sourcing &amp; print
+                    </p>
                 </div>
                 <button
                     onClick={() => setIsCreating(!isCreating)}
-                    className={`h-9 px-4 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-blue-600 text-white hover:bg-gray-900'}`}
+                    className={`h-9 px-4 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-brand text-white hover:bg-brand/90'}`}
                 >
                     {isCreating ? 'Cancel' : <><Plus className="h-4 w-4" /> New request</>}
                 </button>
-            </div>
+            </header>
 
             {isCreating && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-5 mb-4 md:mb-6">
+                <div className="bg-white rounded-xl border border-gray-200/90 p-4 md:p-5 mb-4 md:mb-6">
                     <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                        <Plus className="h-4 w-4 text-blue-600" />
+                        <Plus className="h-4 w-4 text-brand" />
                         New request
                     </h3>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -184,9 +181,9 @@ export default function ProcurementPage() {
                                             key={t.id}
                                             type="button"
                                             onClick={() => setRequestType(t.id)}
-                                            className={`flex-1 p-3 rounded-lg text-left border-2 transition-all ${requestType === t.id ? 'border-blue-600 bg-blue-50' : 'border-gray-100 hover:border-gray-200'}`}
+                                            className={`flex-1 p-3 rounded-lg text-left border-2 transition-all ${requestType === t.id ? 'border-brand bg-brand/10' : 'border-gray-100 hover:border-gray-200'}`}
                                         >
-                                            <span className={`text-xs font-semibold block ${requestType === t.id ? 'text-blue-600' : 'text-gray-600'}`}>{t.label}</span>
+                                            <span className={`text-xs font-semibold block ${requestType === t.id ? 'text-brand' : 'text-gray-600'}`}>{t.label}</span>
                                             <span className="text-xs text-gray-500 mt-0.5 block">{t.desc}</span>
                                         </button>
                                     ))}
@@ -271,7 +268,7 @@ export default function ProcurementPage() {
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
                                     disabled={uploading}
-                                    className="w-full py-3 border-2 border-dashed border-gray-200 rounded-lg text-xs font-medium text-gray-500 hover:border-blue-300 hover:bg-blue-50/50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="w-full py-3 border-2 border-dashed border-gray-200 rounded-lg text-xs font-medium text-gray-500 hover:border-blue-300 hover:bg-brand/10/50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
                                     <Upload className="h-4 w-4" />
                                     {uploading ? 'Uploading…' : 'Upload images'}
@@ -325,7 +322,7 @@ export default function ProcurementPage() {
                                                 key={u}
                                                 type="button"
                                                 onClick={() => setUrgency(u)}
-                                                className={`py-2 px-3 rounded-lg text-xs font-semibold border-2 transition-all ${urgency === u ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-100 text-gray-500 hover:border-gray-200'}`}
+                                                className={`py-2 px-3 rounded-lg text-xs font-semibold border-2 transition-all ${urgency === u ? 'border-gray-900 bg-brand text-white' : 'border-gray-100 text-gray-500 hover:border-gray-200'}`}
                                             >
                                                 {u}
                                             </button>
@@ -334,7 +331,7 @@ export default function ProcurementPage() {
                                 </div>
                                 <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <Info className="h-4 w-4 text-blue-600" />
+                                        <Info className="h-4 w-4 text-brand" />
                                         <span className="text-xs font-semibold text-gray-700">How it works</span>
                                     </div>
                                     <ul className="space-y-1 text-xs text-gray-500">
@@ -351,7 +348,7 @@ export default function ProcurementPage() {
                             <button className="h-9 px-4 rounded-lg font-semibold text-sm text-gray-500 hover:bg-gray-50" type="button" onClick={() => setIsCreating(false)}>
                                 Cancel
                             </button>
-                            <button className="h-9 px-5 bg-gray-900 text-white rounded-lg font-semibold text-sm hover:bg-blue-600" type="submit">
+                            <button className="h-9 px-5 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90" type="submit">
                                 Submit request
                             </button>
                         </div>
@@ -363,7 +360,7 @@ export default function ProcurementPage() {
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xs font-semibold text-gray-600 flex items-center gap-2">
-                            <HistoryIcon className="h-4 w-4 text-blue-600" />
+                            <HistoryIcon className="h-4 w-4 text-brand" />
                             Requests
                         </h2>
                     </div>
@@ -382,17 +379,17 @@ export default function ProcurementPage() {
                             </div>
                         ) : (
                             requests.map((req) => (
-                                <div key={req.id} className="bg-white rounded-xl border border-gray-100 hover:shadow-md transition-all p-4 group">
+                                <div key={req.id} className="bg-white rounded-xl border border-gray-100 transition-colors p-4 group">
                                     <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
                                         <div className="space-y-2 flex-1">
                                             <div className="flex flex-wrap items-center gap-2">
-                                                <p className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{req.description}</p>
+                                                <p className="text-base font-bold text-gray-900 group-hover:text-brand transition-colors">{req.description}</p>
                                                 {req.request_type && (
                                                     <span className="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600">
                                                         {req.request_type === 'print' ? 'Print' : 'Sourcing'}
                                                     </span>
                                                 )}
-                                                <span className={`px-3 py-1 rounded-full text-xs font-black ${req.status === 'submitted' ? 'bg-blue-50 text-blue-600' : req.status === 'quote_provided' ? 'bg-orange-50 text-orange-600' : req.status === 'accepted' ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'}`}>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${req.status === 'submitted' ? 'bg-brand/10 text-brand' : req.status === 'quote_provided' ? 'bg-orange-50 text-orange-600' : req.status === 'accepted' ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'}`}>
                                                     {req.status.replace('_', ' ')}
                                                 </span>
                                             </div>
@@ -402,20 +399,20 @@ export default function ProcurementPage() {
                                                 {req.orders?.length > 0 && (
                                                     <span className="text-green-600 flex items-center gap-1"><CheckCircle className="h-3 w-3" /> {req.orders[0].order_number}</span>
                                                 )}
-                                                <Link href={`/dashboard/procurement/${req.id}/response`} className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                                                <Link href={`/dashboard/procurement/${req.id}/response`} className="text-brand hover:text-brand/90 flex items-center gap-1">
                                                     <FileDown className="h-3 w-3" /> Download response
                                                 </Link>
                                             </div>
                                         </div>
                                         {req.quotes?.length > 0 && req.status !== 'accepted' ? (
-                                            <div className="bg-gray-900 rounded-lg p-3 flex items-center gap-4">
+                                            <div className="flat-card border-l-4 border-l-brand p-3 flex items-center gap-4 shrink-0">
                                                 <div>
-                                                    <p className="text-xs text-blue-300">Quote</p>
-                                                    <p className="text-lg font-bold text-white">₵{Number(req.quotes[0].quote_amount).toFixed(2)}</p>
+                                                    <p className="text-xs text-gray-500">Quote</p>
+                                                    <p className="text-lg font-bold text-gray-900">₵{Number(req.quotes[0].quote_amount).toFixed(2)}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => handleAcceptQuote(req.quotes[0].id)}
-                                                    className="h-9 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-white hover:text-gray-900 flex items-center gap-1"
+                                                    className="h-9 px-4 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 flex items-center gap-1"
                                                 >
                                                     Pay <ChevronRight className="h-3.5 w-3.5" />
                                                 </button>

@@ -23,8 +23,8 @@ export default function MobileBottomNav() {
     const pathname = usePathname();
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[100] md:hidden bg-slate-950 border-t border-slate-700/80 shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
-            <div className="flex items-center justify-between px-0.5 sm:px-2 pt-1.5 pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))]">
+        <div className="fixed bottom-0 left-0 right-0 z-[100] md:hidden bg-white/92 backdrop-blur-xl border-t border-gray-200/90">
+            <div className="flex items-center justify-between px-0.5 sm:px-2 pt-1 pb-[calc(0.35rem+env(safe-area-inset-bottom,0px))]">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
                     const Icon = item.icon;
@@ -33,14 +33,20 @@ export default function MobileBottomNav() {
                         <Link
                             key={item.name}
                             href={item.href}
-                            className="relative flex flex-col items-center justify-center gap-0 min-w-0 flex-1 py-1 px-0.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 min-h-[44px]"
+                            className="relative flex flex-col items-center justify-center gap-0.5 min-w-0 flex-1 py-1 px-0.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 min-h-[44px]"
                             aria-label={item.name}
                             aria-current={isActive ? 'page' : undefined}
                         >
-                            <div className={`p-1 rounded-md transition-all duration-200 shrink-0 ${isActive ? 'bg-brand text-white shadow-md shadow-brand/25' : 'text-white'}`}>
-                                <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={isActive ? 2.5 : 2} aria-hidden />
-                            </div>
-                            <span className={`text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide leading-tight text-center w-full break-words line-clamp-2 ${isActive ? 'text-orange-200' : 'text-white'}`}>
+                            <Icon
+                                className={`h-[22px] w-[22px] shrink-0 transition-colors ${isActive ? 'text-brand' : 'text-gray-400'}`}
+                                strokeWidth={isActive ? 2.25 : 1.75}
+                                aria-hidden
+                            />
+                            <span
+                                className={`text-[10px] sm:text-[11px] font-medium leading-tight text-center w-full truncate ${
+                                    isActive ? 'text-brand' : 'text-gray-500'
+                                }`}
+                            >
                                 {item.name}
                             </span>
                         </Link>

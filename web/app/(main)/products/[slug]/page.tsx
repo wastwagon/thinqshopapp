@@ -142,7 +142,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
 
     return (
         <ShopLayout>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
                 <PageHeader breadcrumbs={breadcrumbs} />
                 <div className="lg:grid lg:grid-cols-2 lg:gap-x-16 lg:items-start">
                     {/* Image Gallery */}
@@ -153,7 +153,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     <button
                                         key={idx}
                                         type="button"
-                                        className={`relative h-24 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden border transition-all ${selectedImage === idx ? 'border-blue-600 ring-2 ring-blue-600/10' : 'border-gray-100 hover:border-gray-200'}`}
+                                        className={`relative h-24 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden border transition-all ${selectedImage === idx ? 'border-brand ring-1 ring-brand/15' : 'border-gray-100 hover:border-gray-200'}`}
                                         onClick={() => setSelectedImage(idx)}
                                     >
                                         <Image src={img} alt="" fill className="object-contain p-2" sizes="96px" unoptimized={imgUnoptimized(img)} />
@@ -162,7 +162,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             </div>
                         </div>
 
-                        <div className="w-full aspect-square relative rounded-[2.5rem] overflow-hidden bg-gray-50 border border-gray-100">
+                        <div className="w-full aspect-square relative rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
                             <Image
                                 src={images[selectedImage] || '/placeholder.svg'}
                                 alt={product.name}
@@ -182,10 +182,10 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     {stockToShow === 0 ? 'Out of stock' : stockToShow <= (product.low_stock_threshold ?? 10) ? `Only ${stockToShow} left` : 'In stock'}
                                 </span>
                             </div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-xs font-bold tracking-wider text-blue-600 uppercase mb-4">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 border border-brand/15 text-xs font-medium text-brand mb-4">
                                 Ships from abroad · 7–14 day delivery
                             </div>
-                            <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-gray-900 leading-[1.3]">{product.name}</h1>
+                            <h1 className="page-title text-base sm:text-lg md:text-xl leading-snug">{product.name}</h1>
                         </div>
 
                         <div className="flex flex-wrap items-baseline gap-2 sm:gap-4 mb-6 sm:mb-8">
@@ -218,7 +218,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                                 type="button"
                                                 disabled={oos}
                                                 onClick={() => setSelectedVariantId(vid)}
-                                                className={`flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-all ${sel ? 'border-blue-600 bg-white ring-2 ring-blue-600/15' : 'border-gray-200 bg-white hover:border-gray-300'} ${oos ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                className={`flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-all ${sel ? 'border-brand bg-white ring-1 ring-brand/15' : 'border-gray-200 bg-white hover:border-gray-300'} ${oos ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             >
                                                 <span className="font-semibold text-gray-900 capitalize">
                                                     {String(v.variant_type).replace(/_/g, ' ')}: <span className="text-gray-600">{v.variant_value}</span>
@@ -244,7 +244,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                         );
                                     })}
                                 </div>
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                <span className="text-xs font-medium text-gray-500">
                                     {product.rating_aggregate != null ? Number(product.rating_aggregate).toFixed(1) : '4.8'} / {product.review_count ?? reviews.meta.total ?? 0} Reviews
                                 </span>
                             </div>
@@ -308,7 +308,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 </div>
                                 <button
                                     type="button"
-                                    className="w-full sm:flex-1 min-h-[44px] bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wider hover:from-brand hover:to-brand/95 transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-slate-900/15 py-2.5 px-3"
+                                    className="w-full sm:flex-1 min-h-[44px] bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 transition-colors flex items-center justify-center gap-2 py-2.5 px-3"
                                         onClick={() => {
                                             if (variants.length > 0 && selectedVariantId == null) {
                                                 toast.error('Please select an option');
@@ -402,7 +402,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                     <div className="mt-12 sm:mt-16 md:mt-24 border-t border-gray-100 pt-8 sm:pt-12 md:pt-16">
                         <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
                             <h2 className="text-lg sm:text-xl md:text-2xl font-bold sm:font-extrabold text-gray-900 tracking-tight">Related Products</h2>
-                            {catName && <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{catName}</span>}
+                            {catName && <span className="text-xs font-medium text-gray-500">{catName}</span>}
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
                             {localProducts

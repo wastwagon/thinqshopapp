@@ -20,7 +20,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     <WebViewGoldBridge />
                     <OfflineBanner />
                     <AnalyticsProvider />
-                    <Toaster position="top-right" />
+                    <Toaster
+                        position="top-center"
+                        toastOptions={{
+                            className: '!bg-white !text-gray-900 !text-sm !font-medium !rounded-xl !border !border-gray-200/90 !shadow-none',
+                            duration: 3500,
+                        }}
+                    />
                     <CartDrawer />
                     {children}
                 </CartProvider>

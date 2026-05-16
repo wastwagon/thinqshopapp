@@ -11,15 +11,15 @@ const SUPPORT_PHONE_RAW = '+8618320709024';
 export default function ContactPage() {
     return (
         <ShopLayout>
-            <div className="max-w-4xl mx-auto px-6 py-12">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
                 <PageHeader
-                    title="Contact Support"
+                    title="Contact"
                     subtitle="Get in touch with our team"
                     breadcrumbs={[{ label: 'Contact' }]}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                    <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand/20 transition-shadow">
+                    <div className="flat-card p-5">
                         <div className="w-12 h-12 rounded-xl bg-brand/10 ring-1 ring-brand/15 flex items-center justify-center mb-4">
                             <Phone className="h-6 w-6 text-brand" />
                         </div>
@@ -30,7 +30,7 @@ export default function ContactPage() {
                             <a href={`https://wa.me/${SUPPORT_PHONE_RAW.replace(/\+/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-brand font-medium text-sm hover:text-brand/90">Chat on WhatsApp →</a>
                         </span>
                     </div>
-                    <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand/20 transition-shadow">
+                    <div className="flat-card p-5">
                         <div className="w-12 h-12 rounded-xl bg-brand/10 ring-1 ring-brand/15 flex items-center justify-center mb-4">
                             <Mail className="h-6 w-6 text-brand" />
                         </div>
@@ -38,7 +38,7 @@ export default function ContactPage() {
                         <p className="text-sm text-gray-600">For orders, logistics, and general support.</p>
                         <a href="mailto:info@thinqshopping.app" className="text-brand font-medium text-sm hover:text-brand/90 mt-2 inline-block">info@thinqshopping.app</a>
                     </div>
-                    <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand/20 transition-shadow">
+                    <div className="flat-card p-5">
                         <div className="w-12 h-12 rounded-xl bg-brand/10 ring-1 ring-brand/15 flex items-center justify-center mb-4">
                             <MessageSquare className="h-6 w-6 text-brand" />
                         </div>
@@ -46,7 +46,7 @@ export default function ContactPage() {
                         <p className="text-sm text-gray-600">Available in your dashboard when logged in.</p>
                         <Link href="/dashboard" className="text-brand font-medium text-sm hover:text-brand/90 mt-2 inline-block">Open Dashboard →</Link>
                     </div>
-                    <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand/20 transition-shadow">
+                    <div className="flat-card p-5">
                         <div className="w-12 h-12 rounded-xl bg-brand/10 ring-1 ring-brand/15 flex items-center justify-center mb-4">
                             <Headphones className="h-6 w-6 text-brand" />
                         </div>

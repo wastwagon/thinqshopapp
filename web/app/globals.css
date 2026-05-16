@@ -65,6 +65,16 @@
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  body.font-brand {
+    font-family: var(--font-outfit), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  @media (max-width: 767px) {
+    body.font-brand {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+  }
   /* After app shell is ready, switch to normal background (smooth transition from splash) */
   html.app-loaded,
   body.app-loaded {
@@ -172,12 +182,32 @@
 }
 
 @layer utilities {
-  /* App-wide soft background (shop + marketing) */
+  /* App-wide soft background (shop + marketing) — flat, minimal mesh */
   .bg-app {
-    background-color: hsl(210 40% 98%);
-    background-image:
-      radial-gradient(ellipse 120% 80% at 100% 0%, hsl(var(--brand) / 0.06) 0%, transparent 55%),
-      radial-gradient(ellipse 80% 60% at 0% 100%, hsl(221 83% 53% / 0.05) 0%, transparent 50%);
+    background-color: hsl(210 20% 96%);
+  }
+
+  /* Apple-style flat surfaces (light only) */
+  .flat-card {
+    @apply bg-white rounded-xl border border-gray-200/90;
+    box-shadow: none;
+  }
+
+  .flat-card-interactive {
+    @apply bg-white rounded-xl border border-gray-200/90 transition-colors hover:border-gray-300/90 active:bg-gray-50;
+    box-shadow: none;
+  }
+
+  .page-title {
+    @apply text-xl sm:text-2xl font-semibold text-gray-900 tracking-tight;
+  }
+
+  .page-subtitle {
+    @apply text-sm text-gray-500 mt-0.5;
+  }
+
+  .section-label {
+    @apply text-xs font-medium text-gray-500 px-1 mb-2;
   }
 
   .noise {

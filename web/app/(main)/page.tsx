@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import {
     Zap,
     ArrowRight,
@@ -73,50 +72,6 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
     Plane,
     Home: HomeIconLucide,
 };
-
-/** Eight distinct gradient themes (orange-led + complementary) for category tiles */
-const CATEGORY_CARD_THEMES = [
-    {
-        gradient: 'bg-gradient-to-br from-orange-400 via-orange-500 to-amber-600',
-        ring: 'ring-orange-200/60 hover:ring-orange-300/80',
-        orb: 'bg-amber-300/30',
-    },
-    {
-        gradient: 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700',
-        ring: 'ring-blue-200/50 hover:ring-blue-300/70',
-        orb: 'bg-sky-300/25',
-    },
-    {
-        gradient: 'bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-700',
-        ring: 'ring-emerald-200/50 hover:ring-emerald-300/70',
-        orb: 'bg-emerald-200/25',
-    },
-    {
-        gradient: 'bg-gradient-to-br from-rose-400 via-fuchsia-500 to-purple-700',
-        ring: 'ring-rose-200/50 hover:ring-rose-300/70',
-        orb: 'bg-pink-300/25',
-    },
-    {
-        gradient: 'bg-gradient-to-br from-amber-400 via-orange-500 to-red-600',
-        ring: 'ring-amber-200/60 hover:ring-amber-300/80',
-        orb: 'bg-orange-300/25',
-    },
-    {
-        gradient: 'bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-700',
-        ring: 'ring-sky-200/50 hover:ring-sky-300/70',
-        orb: 'bg-blue-300/20',
-    },
-    {
-        gradient: 'bg-gradient-to-br from-lime-400 via-green-500 to-emerald-800',
-        ring: 'ring-lime-200/50 hover:ring-lime-300/70',
-        orb: 'bg-lime-200/25',
-    },
-    {
-        gradient: 'bg-gradient-to-br from-violet-400 via-purple-500 to-indigo-900',
-        ring: 'ring-violet-200/50 hover:ring-violet-300/70',
-        orb: 'bg-violet-300/20',
-    },
-] as const;
 
 const CATEGORY_CARD_COUNT = 8;
 
@@ -249,11 +204,11 @@ export default function Home() {
                     <div className="max-w-6xl mx-auto px-4 sm:px-6">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
-                                <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/15 ring-1 ring-brand/20 shadow-sm">
+                                <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/10 border border-brand/15">
                                     <Zap className="w-5 h-5 text-brand" />
                                 </span>
                                 <div>
-                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">Featured Deals</h2>
+                                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">Featured deals</h2>
                                     <p className="text-xs text-gray-500">Hand-picked offers</p>
                                 </div>
                             </div>
@@ -267,21 +222,18 @@ export default function Home() {
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-6">
                             {fallbackFlash.map((product, idx) => (
-                                <motion.div
+                                <div
                                     key={product.slug || idx}
-                                    initial={{ opacity: 0, y: 12 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.05 }}
                                 >
                                     <ProductCard product={product as any} />
-                                </motion.div>
+                                </div>
                             ))}
                         </div>
                     </div>
                 </section>
 
                 {/* Featured Products */}
-                <section className="py-8 sm:py-12 bg-white/90 backdrop-blur-sm border-y border-gray-100/80 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6)]">
+                <section className="py-8 sm:py-12 border-y border-gray-200/80 bg-white/50">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
@@ -289,7 +241,7 @@ export default function Home() {
                                     <Flame className="w-5 h-5 text-blue-600" />
                                 </span>
                                 <div>
-                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">Featured</h2>
+                                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">Featured</h2>
                                     <p className="text-xs text-gray-500">Hand-picked favorites</p>
                                 </div>
                             </div>
@@ -303,14 +255,11 @@ export default function Home() {
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
                             {fallbackFeatured.map((product, idx) => (
-                                <motion.div
+                                <div
                                     key={product.slug || idx}
-                                    initial={{ opacity: 0, y: 12 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.05 }}
                                 >
                                     <ProductCard product={product as any} />
-                                </motion.div>
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -320,7 +269,7 @@ export default function Home() {
                 <section className="py-8 sm:py-12" aria-labelledby="shop-by-category-heading">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6">
                         <div className="mb-4 sm:mb-5">
-                            <h2 id="shop-by-category-heading" className="text-lg sm:text-xl font-bold text-gray-900 mb-1 tracking-tight">
+                            <h2 id="shop-by-category-heading" className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 tracking-tight">
                                 Shop by category
                             </h2>
                             <p className="text-xs text-gray-500">Browse our curated collection</p>
@@ -328,41 +277,34 @@ export default function Home() {
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-8">
                             {categoryCards.map((cat, idx) => {
                                 const count = categoryProductCounts.get(cat.name) ?? 0;
-                                const theme = CATEGORY_CARD_THEMES[idx % CATEGORY_CARD_THEMES.length];
                                 const Icon = categoryIconForSlug(cat.slug);
+                                const accentBorder = idx % 2 === 0 ? 'border-l-brand' : 'border-l-blue-600';
+                                const iconBg = idx % 2 === 0 ? 'bg-brand/10 text-brand' : 'bg-blue-50 text-blue-600';
                                 return (
                                     <Link
                                         key={`${cat.slug}-${idx}`}
                                         href={`/shop/${cat.slug}`}
                                         aria-label={`${cat.name}: ${count} ${count === 1 ? 'product' : 'products'}`}
-                                        className={`group relative flex min-h-[5.25rem] flex-col overflow-hidden rounded-xl p-3 sm:p-3.5 lg:p-4 shadow-md ring-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900/20 lg:min-h-0 ${theme.gradient} ${theme.ring}`}
+                                        className={`group relative flex min-h-[5.25rem] flex-col rounded-xl border border-gray-200/90 bg-white border-l-4 ${accentBorder} p-3 sm:p-3.5 lg:p-4 transition-colors hover:border-gray-300/90 hover:bg-gray-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 lg:min-h-0`}
                                     >
-                                        <span
-                                            className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full blur-xl ${theme.orb}`}
-                                            aria-hidden
-                                        />
-                                        <span
-                                            className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/25 to-transparent"
-                                            aria-hidden
-                                        />
-                                        <div className="relative flex items-start justify-between gap-2">
+                                        <div className="flex items-start justify-between gap-2">
                                             <div className="min-w-0 pr-1">
-                                                <h3 className="font-bold text-sm sm:text-[15px] text-white drop-shadow-sm tracking-tight leading-tight line-clamp-2">
+                                                <h3 className="font-semibold text-sm sm:text-[15px] text-gray-900 tracking-tight leading-tight line-clamp-2">
                                                     {cat.name}
                                                 </h3>
-                                                <p className="mt-1 text-xs font-medium tabular-nums text-white/90">
+                                                <p className="mt-1 text-xs font-medium tabular-nums text-gray-500">
                                                     {count} {count === 1 ? 'product' : 'products'}
                                                 </p>
                                             </div>
                                             <span
-                                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white shadow-inner backdrop-blur-sm ring-1 ring-white/30"
+                                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconBg}`}
                                                 aria-hidden
                                             >
                                                 <Icon className="h-4 w-4" strokeWidth={2} />
                                             </span>
                                         </div>
                                         <ChevronRight
-                                            className="relative mt-auto pt-2 h-4 w-4 shrink-0 text-white/95 transition-transform duration-300 group-hover:translate-x-1"
+                                            className="mt-auto pt-2 h-4 w-4 shrink-0 text-gray-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-brand"
                                             aria-hidden
                                         />
                                     </Link>
@@ -372,7 +314,7 @@ export default function Home() {
                         <div className="flex justify-center">
                             <Link
                                 href="/shop"
-                                className="inline-flex items-center gap-2 min-h-[44px] px-6 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white text-sm font-semibold rounded-xl hover:from-brand hover:to-brand/95 shadow-lg shadow-slate-900/20 transition-all touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+                                className="inline-flex items-center gap-2 min-h-[44px] px-6 py-3 bg-brand text-white text-sm font-semibold rounded-xl hover:bg-brand/90 transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
                             >
                                 Shop all products
                                 <ArrowRight className="w-4 h-4" />
@@ -385,22 +327,19 @@ export default function Home() {
                 <TestimonialsBlock testimonials={testimonials} />
 
                 {/* All Products - compact grid */}
-                <section className="py-8 sm:py-12 bg-white/90 backdrop-blur-sm border-t border-gray-100/80">
+                <section className="py-8 sm:py-12 border-t border-gray-200/80">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">All products</h2>
+                            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">All products</h2>
                             <span className="text-xs text-gray-500 font-medium">{allProducts.length} items</span>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
                             {allProducts.map((product, idx) => (
-                                <motion.div
+                                <div
                                     key={product.slug || idx}
-                                    initial={{ opacity: 0, y: 8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: Math.min(idx * 0.03, 0.3) }}
                                 >
                                     <ProductCard product={product as any} />
-                                </motion.div>
+                                </div>
                             ))}
                         </div>
                     </div>

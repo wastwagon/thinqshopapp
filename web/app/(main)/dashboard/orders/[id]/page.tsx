@@ -101,15 +101,15 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
         <DashboardLayout>
             <div className="pb-6 md:pb-8">
             <div className="mb-6 flex items-center gap-3">
-                <Link href="/dashboard/orders" className="text-blue-600 hover:text-gray-900 flex items-center text-sm font-medium transition-colors">
+                <Link href="/dashboard/orders" className="text-brand hover:text-gray-900 flex items-center text-sm font-medium transition-colors">
                     <ArrowLeft className="h-4 w-4 mr-1.5" /> Orders
                 </Link>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="px-4 py-4 sm:px-5 border-b border-gray-50 flex flex-wrap justify-between items-start gap-3 bg-gray-50/50">
+            <div className="flat-card overflow-hidden">
+                <div className="px-4 py-4 sm:px-5 border-b border-gray-100 flex flex-wrap justify-between items-start gap-3 bg-gray-50/50">
                     <div>
-                        <h1 className="text-xl font-bold text-gray-900">#{order.order_number}</h1>
+                        <h1 className="page-title text-lg">#{order.order_number}</h1>
                         <p className="text-xs text-gray-500 mt-0.5">{new Date(order.created_at).toLocaleDateString()}</p>
                     </div>
                     <div className="flex gap-2">
@@ -137,7 +137,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                             {order.payment_method.replace('_', ' ')}
                         </span>
                         <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize ${order.status === 'delivered' ? 'bg-green-50 text-green-700' :
-                            order.status === 'cancelled' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
+                            order.status === 'cancelled' ? 'bg-red-50 text-red-600' : 'bg-brand/10 text-brand'
                         }`}>
                             {order.status.replace('_', ' ')}
                         </span>
@@ -151,10 +151,10 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                             const isCompleted = statusSteps.indexOf(order.status) >= stepIdx;
                             return (
                                 <div key={step} className="relative flex flex-col items-center flex-1">
-                                    <div className={`flex h-7 w-7 items-center justify-center rounded-full border-2 bg-white z-10 ${isCompleted ? 'border-blue-600 text-blue-600' : 'border-gray-200'}`}>
+                                    <div className={`flex h-7 w-7 items-center justify-center rounded-full border-2 bg-white z-10 ${isCompleted ? 'border-brand text-brand' : 'border-gray-200'}`}>
                                         {isCompleted ? <CheckCircle className="h-4 w-4" /> : <span className="h-1.5 w-1.5 rounded-full bg-transparent" />}
                                     </div>
-                                    <p className={`text-xs font-medium mt-2 uppercase tracking-wider ${isCompleted ? 'text-blue-600' : 'text-gray-400'}`}>{step}</p>
+                                    <p className={`text-xs font-medium mt-2 capitalize ${isCompleted ? 'text-brand' : 'text-gray-400'}`}>{step}</p>
                                 </div>
                             );
                         })}
@@ -162,7 +162,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                 </div>
 
                 <div className="px-4 py-4 sm:px-5">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">Items</h3>
+                    <h3 className="text-xs font-semibold capitalize text-gray-500 mb-3">Items</h3>
                     <ul role="list" className="divide-y divide-gray-50">
                         {order.items.map((item) => (
                             <li key={item.id} className="py-3 flex gap-3">

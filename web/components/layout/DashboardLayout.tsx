@@ -28,7 +28,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
 
     if (loading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-gray-50 uppercase tracking-widest font-black text-gray-400">
+            <div className="flex h-screen items-center justify-center bg-app text-gray-500">
                 <div className="flex flex-col items-center gap-6">
                     <div className="w-16 h-16 bg-brand/10 border border-brand/20 rounded-2xl flex items-center justify-center animate-pulse">
                         <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center animate-spin">
@@ -48,7 +48,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
     const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
     return (
-        <div className="app-shell flex h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-orange-50/30 overflow-hidden font-sans text-gray-900 relative">
+        <div className="app-shell flex h-screen bg-app overflow-hidden font-sans text-gray-900 relative">
             <Sidebar
                 isAdmin={isAdmin}
                 isOpen={isSidebarOpen}
@@ -56,11 +56,6 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
             />
 
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative safe-area-inset-top">
-                {/* Subtle light background depth */}
-                <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(at_0%_0%,#f8fafc_0,transparent_50%),radial-gradient(at_100%_0%,#f1f5f9_0,transparent_50%),radial-gradient(at_50%_100%,rgb(249_115_22/0.08)_0,transparent_45%)]" />
-                </div>
-
                 <Topbar onMenuPress={toggleSidebar} />
 
                 <main id="main-content" className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin p-3 md:p-6 pb-[calc(10rem+env(safe-area-inset-bottom,0px))] md:pb-6 relative z-10 safe-area-inset-bottom min-w-0" tabIndex={-1} role="main">

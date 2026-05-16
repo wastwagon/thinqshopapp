@@ -6,7 +6,6 @@ import api from '@/lib/axios';
 import { Plus, ArrowUpRight, ArrowDownLeft, Wallet, RefreshCw, History as HistoryIcon, Activity, TrendingUp, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import {
     AreaChart,
@@ -117,15 +116,6 @@ export default function WalletPage() {
         toast.error("Payment cancelled.");
     };
 
-    const containerVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.6, staggerChildren: 0.1 }
-        }
-    };
-
     return (
         <DashboardLayout>
             <div className="pb-20 md:pb-10">
@@ -137,27 +127,18 @@ export default function WalletPage() {
                     onClose={handlePaystackTopUpClose}
                 />
             )}
-            <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={containerVariants}
+            <div
                 className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4"
             >
-                <div className="flex items-center gap-3">
-                    <Wallet className="h-8 w-8 text-blue-600" />
-                    <div>
-                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight leading-tight">Wallet</h1>
-                        <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
-                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                            Connected
-                        </p>
-                    </div>
+                <div>
+                    <h1 className="page-title">Wallet</h1>
+                    <p className="page-subtitle">Balance and transaction history</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
                         onClick={() => { setActiveTab('report'); toast('Wallet reports (e.g. export) coming soon.'); }}
-                        className={`h-9 px-4 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${activeTab === 'report' ? 'bg-gray-900 text-white' : 'border border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200'}`}
+                        className={`h-9 px-4 rounded-lg text-xs font-medium transition-colors flex items-center gap-2 ${activeTab === 'report' ? 'bg-brand text-white' : 'border border-gray-200/90 text-gray-600 hover:border-brand/30'}`}
                     >
                         <TrendingUp className="h-3.5 w-3.5" />
                         Report
@@ -165,29 +146,27 @@ export default function WalletPage() {
                     <button
                         type="button"
                         onClick={() => { setActiveTab('activity'); document.getElementById('wallet-transaction-history')?.scrollIntoView({ behavior: 'smooth' }); }}
-                        className={`h-9 px-4 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${activeTab === 'activity' ? 'bg-gray-900 text-white' : 'border border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200'}`}
+                        className={`h-9 px-4 rounded-lg text-xs font-medium transition-colors flex items-center gap-2 ${activeTab === 'activity' ? 'bg-brand text-white' : 'border border-gray-200/90 text-gray-600 hover:border-brand/30'}`}
                     >
                         <Activity className="h-3.5 w-3.5" />
                         Activity
                     </button>
                 </div>
-            </motion.div>
+            </div>
 
             <div className="grid grid-cols-1 gap-4 md:gap-6 mb-4 md:mb-6">
                 {/* Balance Hero */}
-                <motion.div
-                    variants={containerVariants}
-                    className="bg-gray-900 rounded-xl md:rounded-2xl p-4 md:p-6 lg:p-8 text-white relative overflow-hidden group shadow-lg border border-white/5"
+                <div
+                    className="flat-card border-l-4 border-l-brand p-4 md:p-6 lg:p-8"
                 >
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[80px]" />
-                    <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <p className="text-blue-200 text-xs font-semibold uppercase tracking-wider mb-4">Balance</p>
+                            <p className="text-brand text-xs font-medium mb-3">Balance</p>
                             <div className="flex items-baseline gap-1 mb-4">
-                                <span className="text-4xl font-bold tracking-tight text-white">
+                                <span className="text-4xl font-semibold tracking-tight text-gray-900">
                                     ₵{balance !== null ? balance.toFixed(2).split('.')[0] : '0'}
                                 </span>
-                                <span className="text-xl font-semibold text-white/80">
+                                <span className="text-xl font-medium text-gray-400">
                                     .{balance !== null ? balance.toFixed(2).split('.')[1] : '00'}
                                 </span>
                             </div>
@@ -195,33 +174,33 @@ export default function WalletPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowTopUpModal(true)}
-                                    className="h-10 px-5 bg-white text-gray-900 rounded-xl font-semibold text-xs hover:bg-blue-50 transition-all flex items-center gap-2"
+                                    className="h-10 px-5 bg-brand text-white rounded-xl font-semibold text-xs hover:bg-brand/90 transition-colors flex items-center gap-2"
                                 >
                                     <Plus className="h-4 w-4" />
                                     Top-up wallet
                                 </button>
-                                <button type="button" className="w-10 h-10 bg-white/10 border border-white/10 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition-all">
+                                <button type="button" className="w-10 h-10 bg-gray-50 border border-gray-200/80 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors">
                                     <ShieldCheck className="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
 
-                        <div className="h-[160px] md:h-full min-h-[180px]">
-                            <p className="text-blue-200 text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <div className="h-[160px] md:h-full min-h-[180px] hidden md:block">
+                            <p className="text-gray-500 text-xs font-medium mb-3 flex items-center gap-2">
                                 <Activity className="h-3 w-3" /> Forecast
                             </p>
                             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={100}>
                                 <AreaChart data={spendForecast}>
                                     <defs>
                                         <linearGradient id="balanceFlow" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#60a5fa" stopOpacity={0} />
+                                            <stop offset="5%" stopColor="hsl(24 95% 53%)" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="hsl(24 95% 53%)" stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
                                     <Area
                                         type="monotone"
                                         dataKey="value"
-                                        stroke="#60a5fa"
+                                        stroke="hsl(24 95% 53%)"
                                         strokeWidth={4}
                                         fillOpacity={1}
                                         fill="url(#balanceFlow)"
@@ -230,17 +209,17 @@ export default function WalletPage() {
                             </ResponsiveContainer>
                         </div>
                     </div>
-                </motion.div>
+                </div>
             </div>
 
             {/* Top-up modal */}
             {showTopUpModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowTopUpModal(false)}>
-                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="text-sm font-bold text-gray-900 mb-4">Top-up wallet</h3>
+                    <div className="flat-card p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-sm font-semibold text-gray-900 mb-4">Top-up wallet</h3>
                         <form onSubmit={handleTopUp} className="space-y-4">
                             <div>
-                                <label htmlFor="modal-amount" className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block">
+                                <label htmlFor="modal-amount" className="text-sm font-medium text-gray-600 ml-1 mb-1.5 block">
                                     Amount (GHS)
                                 </label>
                                 <div className="relative">
@@ -251,7 +230,7 @@ export default function WalletPage() {
                                         type="number"
                                         name="amount"
                                         id="modal-amount"
-                                        className="block w-full pl-9 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-base font-semibold text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                                        className="block w-full pl-9 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-base font-semibold text-gray-900 focus:bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all outline-none"
                                         placeholder="0.00"
                                         value={topUpAmount}
                                         onChange={(e) => setTopUpAmount(e.target.value)}
@@ -271,7 +250,7 @@ export default function WalletPage() {
                                 <button
                                     type="submit"
                                     disabled={isToppingUp}
-                                    className="flex-1 flex justify-center items-center py-3 px-4 rounded-xl font-semibold text-sm text-white bg-blue-600 hover:bg-gray-900 disabled:opacity-50 transition-all"
+                                    className="flex-1 flex justify-center items-center py-3 px-4 rounded-xl font-semibold text-sm text-white bg-brand hover:bg-brand/90 disabled:opacity-50 transition-all"
                                 >
                                     {isToppingUp ? <RefreshCw className="animate-spin h-4 w-4" /> : <><Plus className="mr-2 h-4 w-4" /> Deposit</>}
                                 </button>
@@ -282,13 +261,13 @@ export default function WalletPage() {
             )}
 
             {/* Transaction History */}
-            <div id="wallet-transaction-history" className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden scroll-mt-6">
-                <div className="px-5 py-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 flex items-center">
-                        <HistoryIcon className="h-4 w-4 mr-2 text-blue-600" />
+            <div id="wallet-transaction-history" className="flat-card overflow-hidden scroll-mt-6">
+                <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <h3 className="text-sm font-medium text-gray-700 flex items-center">
+                        <HistoryIcon className="h-4 w-4 mr-2 text-brand" />
                         Transaction history
                     </h3>
-                    <button onClick={fetchData} className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-colors">
+                    <button onClick={fetchData} className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-brand transition-colors">
                         <RefreshCw className="h-4 w-4" />
                     </button>
                 </div>
@@ -307,30 +286,28 @@ export default function WalletPage() {
                 ) : (
                     <ul role="list" className="divide-y divide-gray-50">
                         {transactions.map((tx) => (
-                            <li key={tx.id} className="px-8 py-6 hover:bg-gray-50 transition-all group">
+                            <li key={tx.id} className="px-4 sm:px-5 py-4 hover:bg-gray-50/80 transition-colors">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
-                                        <div className={`flex-shrink-0 h-14 w-14 rounded-2xl flex items-center justify-center transition-all ${tx.service_type === 'wallet_topup' ? 'bg-green-50 text-green-600 group-hover:bg-green-100' : 'bg-blue-50 text-blue-600 group-hover:bg-blue-100'
-                                            }`}>
-                                            {tx.service_type === 'wallet_topup' ? <ArrowDownLeft className="h-6 w-6" /> : <ArrowUpRight className="h-6 w-6" />}
+                                        <div className={`flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center ${tx.service_type === 'wallet_topup' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-brand'}`}>
+                                            {tx.service_type === 'wallet_topup' ? <ArrowDownLeft className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
                                         </div>
-                                        <div className="ml-6">
-                                            <p className="text-sm font-black text-gray-900 capitalize tracking-tight">
-                                                {tx.service_type.replace('_', ' ')}
+                                        <div className="ml-3 min-w-0">
+                                            <p className="text-sm font-medium text-gray-900 capitalize truncate">
+                                                {tx.service_type.replace(/_/g, ' ')}
                                             </p>
-                                            <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest font-mono">
+                                            <p className="text-xs text-gray-500 mt-0.5">
                                                 {new Date(tx.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end gap-2">
-                                        <p className={`text-lg font-black tracking-tighter ${tx.service_type === 'wallet_topup' ? 'text-green-600' : 'text-gray-900'
-                                            }`}>
+                                        <p className={`text-sm font-semibold tabular-nums ${tx.service_type === 'wallet_topup' ? 'text-green-600' : 'text-gray-900'}`}>
                                             {tx.service_type === 'wallet_topup' ? '+' : '-'} ₵{Number(tx.amount).toFixed(2)}
                                         </p>
-                                        <span className={`px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full ${tx.status === 'success' ? 'bg-green-100 text-green-700 shadow-sm shadow-green-100' :
-                                            tx.status === 'failed' ? 'bg-red-50 text-red-600 shadow-sm shadow-red-50' :
-                                                'bg-yellow-50 text-yellow-600 shadow-sm shadow-yellow-50'
+                                        <span className={`px-2 py-0.5 text-[10px] font-medium rounded-md capitalize ${tx.status === 'success' ? 'bg-green-50 text-green-700' :
+                                            tx.status === 'failed' ? 'bg-red-50 text-red-600' :
+                                                'bg-amber-50 text-amber-700'
                                             }`}>
                                             {tx.status}
                                         </span>

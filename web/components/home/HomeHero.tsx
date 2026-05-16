@@ -131,17 +131,17 @@ function HeroSlideCard({
                 aria-hidden
             />
             <div
-                className="absolute inset-0 bg-gradient-to-br from-brand/15 via-transparent to-blue-600/10 pointer-events-none"
+                className="absolute inset-0 bg-gradient-to-br from-brand/20 via-transparent to-transparent pointer-events-none"
                 aria-hidden
             />
             {/* Content */}
             <div className="absolute inset-0 flex flex-col justify-end">
                 <div className="px-5 sm:px-8 md:px-10 lg:px-14 pb-8 sm:pb-10 md:pb-12 lg:pb-14 pt-20">
                     <div className="max-w-xl">
-                        <p className="text-[11px] sm:text-xs font-semibold text-brand uppercase tracking-[0.2em] mb-2 drop-shadow-sm">
+                        <p className="text-xs font-medium text-brand/90 mb-2 drop-shadow-sm">
                             ThinQShop
                         </p>
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight mb-3">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-white tracking-tight leading-tight mb-3">
                             {slide.title}
                         </h2>
                         {slide.subtitle && (
@@ -151,7 +151,7 @@ function HeroSlideCard({
                         )}
                         <Link
                             href={ctaUrl}
-                            className="inline-flex items-center gap-2 min-h-[44px] sm:min-h-[48px] px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-white text-slate-900 text-sm font-semibold shadow-lg shadow-brand/20 ring-1 ring-white/90 hover:bg-orange-50 hover:ring-brand/40 transition-all w-fit focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                            className="inline-flex items-center gap-2 min-h-[44px] sm:min-h-[48px] px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand/90 transition-colors w-fit focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
                         >
                             {ctaText}
                             <ArrowRight className="w-5 h-5 shrink-0" aria-hidden />

@@ -51,7 +51,7 @@ export default function LogisticsSuccessPage() {
             <DashboardLayout>
                 <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 px-4 py-6 pb-6 md:pb-8">
                     <p className="text-gray-500 text-sm">No shipment ID provided.</p>
-                    <Link href="/dashboard/logistics" className="text-blue-600 font-semibold text-sm hover:underline">
+                    <Link href="/dashboard/logistics" className="text-brand font-semibold text-sm hover:underline">
                         Back to Logistics
                     </Link>
                 </div>
@@ -63,7 +63,7 @@ export default function LogisticsSuccessPage() {
         return (
             <DashboardLayout>
                 <div className="min-h-[60vh] flex items-center justify-center pb-6 md:pb-8">
-                    <div className="animate-spin h-10 w-10 border-2 border-blue-600 border-t-transparent rounded-full" />
+                    <div className="animate-spin h-10 w-10 border-2 border-brand border-t-transparent rounded-full" />
                 </div>
             </DashboardLayout>
         );
@@ -75,7 +75,7 @@ export default function LogisticsSuccessPage() {
 
     return (
         <DashboardLayout>
-            <div className="min-h-[80vh] flex items-center justify-center px-4 py-6 sm:py-10 pb-6 md:pb-8 safe-area-inset-bottom bg-gradient-to-b from-gray-50 to-white">
+            <div className="min-h-[80vh] flex items-center justify-center px-4 py-6 sm:py-10 pb-6 md:pb-8 safe-area-inset-bottom bg-app">
                 <ThankYouCard
                     title="Shipment booked successfully"
                     subtitle="Your freight has been registered. You can track its progress from your logistics dashboard."

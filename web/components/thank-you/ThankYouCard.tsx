@@ -20,7 +20,7 @@ interface ThankYouCardProps {
 }
 
 const accentStyles = {
-    blue: { bg: 'bg-blue-500', glow: 'shadow-blue-500/30', badge: 'bg-blue-50 text-blue-700 border-blue-100' },
+    blue: { bg: 'bg-brand', glow: 'shadow-blue-500/30', badge: 'bg-brand/10 text-blue-700 border-blue-100' },
     emerald: { bg: 'bg-emerald-500', glow: 'shadow-emerald-500/30', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
     violet: { bg: 'bg-violet-500', glow: 'shadow-violet-500/30', badge: 'bg-violet-50 text-violet-700 border-violet-100' },
     amber: { bg: 'bg-orange-500', glow: 'shadow-orange-500/30', badge: 'bg-orange-50 text-orange-700 border-orange-100' },
@@ -39,21 +39,21 @@ export default function ThankYouCard({
 
     return (
         <div className="w-full max-w-md mx-auto px-4 sm:px-6">
-            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-white border border-gray-100 shadow-lg shadow-gray-200/40 sm:shadow-xl sm:shadow-gray-200/50">
+            <div className="relative overflow-hidden rounded-2xl bg-white border border-gray-200/90">
                 {/* Top accent bar */}
                 <div className={`h-1 ${style.bg}`} />
 
                 <div className="p-5 sm:p-6">
                     {/* Success icon - compact on mobile */}
                     <div className="flex justify-center mb-5 sm:mb-6">
-                        <div className={`relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl ${style.bg} shadow-lg ${style.glow}`}>
+                        <div className={`relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl ${style.bg} ring-4 ring-white/80`}>
                             <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8 text-white" strokeWidth={2.5} />
                         </div>
                     </div>
 
                     {/* Title & subtitle - mobile-first typography */}
                     <div className="text-center mb-5 sm:mb-6">
-                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight mb-1.5 sm:mb-2">
+                        <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 tracking-tight mb-1.5 sm:mb-2">
                             {title}
                         </h1>
                         <p className="text-xs sm:text-sm text-gray-500 leading-snug max-w-[280px] sm:max-w-sm mx-auto">
@@ -68,7 +68,7 @@ export default function ThankYouCard({
                                 key={i}
                                 className="flex justify-between items-center gap-3 py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-gray-50/80 border border-gray-100"
                             >
-                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider shrink-0">
+                                <span className="text-xs font-semibold text-gray-500 capitalize shrink-0">
                                     {d.label}
                                 </span>
                                 <span className="text-xs sm:text-sm font-bold text-gray-900 text-right truncate min-w-0">
@@ -86,7 +86,7 @@ export default function ThankYouCard({
                                 className={`flex-1 flex items-center justify-center gap-2 min-h-[44px] sm:h-11 py-3 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm active:scale-[0.98] transition-all ${
                                     primaryVariant === 'outlined'
                                         ? 'border-2 border-gray-200 text-gray-700 hover:bg-gray-50'
-                                        : 'bg-gray-900 text-white hover:bg-gray-800 shadow-lg shadow-gray-900/10'
+                                        : 'bg-brand text-white hover:bg-brand/90'
                                 }`}
                             >
                                 {primaryAction.icon && <primaryAction.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />}
