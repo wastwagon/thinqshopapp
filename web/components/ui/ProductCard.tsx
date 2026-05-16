@@ -86,8 +86,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </div>
                 )}
 
-                {/* Quick Actions - always visible on mobile; hover reveal on desktop */}
-                <div className="absolute bottom-3 right-3 flex flex-col gap-1 translate-x-0 md:translate-x-10 md:group-hover:translate-x-0 transition-transform duration-300 z-20">
+                {/* Quick Actions - horizontal at top; always visible on mobile, hover reveal on desktop */}
+                <div className="absolute top-3 right-3 flex flex-row gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-20">
                     <button
                         onClick={(e) => {
                             e.preventDefault();
