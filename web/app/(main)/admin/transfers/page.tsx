@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Send, Search, History, ChevronRight, Calendar, ArrowRight, QrCode, Upload, ImagePlus, Download, CheckCircle, Loader2, FileText, Clock, Package } from 'lucide-react';
 
 type QrCodeEntry = { image: string; amount_ghs?: number; amount_cny?: number; recipient_name?: string };
@@ -186,25 +187,24 @@ export default function AdminTransfersPage() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Send className="h-7 w-7 text-brand" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Transfers</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Manage transfer requests and confirmations</p>
+            <AdminPageHeader
+                icon={Send}
+                title="Transfers"
+                subtitle="Manage transfer requests and confirmations"
+                actions={
+                    <div className="relative min-w-0 sm:w-56">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" aria-hidden />
+                        <input
+                            type="search"
+                            placeholder="Search by reference, customer, or recipient..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="admin-input w-full sm:w-56 pl-9"
+                            aria-label="Search transfers"
+                        />
                     </div>
-                </div>
-                <div className="relative min-w-0 sm:w-56">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search by reference, customer, or recipient..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full h-9 pl-9 pr-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-                    />
-                </div>
-            </div>
+                }
+            />
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {stats.map((s, i) => (
@@ -223,11 +223,11 @@ export default function AdminTransfersPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Reference</th>
+                                <th className="admin-th">Reference</th>
                                 <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-center">Amount</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Customer</th>
+                                <th className="admin-th">Customer</th>
                                 <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-center">Status</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Confirmation</th>
+                                <th className="admin-th">Confirmation</th>
                                 <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -403,7 +403,7 @@ export default function AdminTransfersPage() {
                 const entries = transfer ? normalizeQrCodes(transfer) : [];
                 return (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => { setQrModalTransferId(null); setFulfillmentDraft({}); }}>
-                        <div className="bg-white rounded-xl shadow-xl border border-gray-100 max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        <div className="admin-modal-panel max-w-2xl w-full flex flex-col" onClick={(e) => e.stopPropagation()}>
                             <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                                 <h3 className="text-sm font-bold text-gray-900">Fulfill transfer by QR · {transfer?.token}</h3>
                                 <button type="button" onClick={() => { setQrModalTransferId(null); setFulfillmentDraft({}); }} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close">×</button>
@@ -427,7 +427,7 @@ export default function AdminTransfersPage() {
                                                         <a
                                                             href={entry.image}
                                                             download={`${transfer?.token}-qr-${i + 1}.png`}
-                                                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-900 text-white text-xs font-semibold hover:bg-gray-800"
+                                                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lgbg-brand text-white text-xs font-semiboldhover:bg-brand/90"
                                                         >
                                                             <Download className="h-3 w-3" /> Download
                                                         </a>
@@ -486,7 +486,7 @@ export default function AdminTransfersPage() {
                                                                 type="button"
                                                                 disabled={fulfillingKey === key || !(draft.image.trim())}
                                                                 onClick={() => handleSaveFulfillment(transfer!.id, i, draft.image, draft.notes)}
-                                                                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-900 text-white text-xs font-semibold hover:bg-brand disabled:opacity-50 flex items-center justify-center gap-1.5"
+                                                                className="w-full sm:w-auto px-4 py-2 rounded-lgbg-brand text-white text-xs font-semibold hover:bg-brand disabled:opacity-50 flex items-center justify-center gap-1.5"
                                                             >
                                                                 {fulfillingKey === key ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
                                                                 {fulfillingKey === key ? 'Saving…' : 'Mark fulfilled'}

@@ -163,7 +163,7 @@ export default function ProcurementPage() {
             </header>
 
             {isCreating && (
-                <div className="bg-white rounded-xl border border-gray-200/90 p-4 md:p-5 mb-4 md:mb-6">
+                <div className="dashboard-card p-4 md:p-5 mb-4 md:mb-6">
                     <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
                         <Plus className="h-4 w-4 text-brand" />
                         New request
@@ -286,7 +286,7 @@ export default function ProcurementPage() {
                                                     <img
                                                         src={getMediaUrl(url)}
                                                         alt={`Upload ${i + 1}`}
-                                                        className="w-20 h-20 rounded-lg object-cover border-2 border-white shadow-sm"
+                                                        className="w-20 h-20 rounded-lg object-cover border-2 border-white"
                                                         onError={(e) => {
                                                             (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="%239ca3af" stroke-width="1.5"%3E%3Crect x="3" y="3" width="18" height="18" rx="2"/%3E%3Ccircle cx="8.5" cy="8.5" r="1.5"/%3E%3Cpath d="M21 15l-5-5L5 21"/%3E%3C/svg%3E';
                                                         }}
@@ -366,20 +366,20 @@ export default function ProcurementPage() {
                     </div>
                     <div className="grid grid-cols-1 gap-3">
                         {loading && requests.length === 0 ? (
-                            <div className="py-10 text-center bg-white rounded-xl border border-gray-100">
+                            <div className="py-10 text-center admin-card">
                                 <div className="animate-pulse flex flex-col items-center">
                                     <div className="w-8 h-8 bg-gray-100 rounded-full mb-2" />
                                     <p className="text-xs text-gray-400">Loading...</p>
                                 </div>
                             </div>
                         ) : requests.length === 0 ? (
-                            <div className="py-10 text-center bg-white rounded-xl border border-gray-100">
+                            <div className="py-10 text-center admin-card">
                                 <ShoppingBag className="h-10 w-10 text-gray-200 mx-auto mb-3" />
                                 <p className="text-xs text-gray-400">No requests yet</p>
                             </div>
                         ) : (
                             requests.map((req) => (
-                                <div key={req.id} className="bg-white rounded-xl border border-gray-100 transition-colors p-4 group">
+                                <div key={req.id} className="dashboard-card transition-colors p-4 group">
                                     <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
                                         <div className="space-y-2 flex-1">
                                             <div className="flex flex-wrap items-center gap-2">

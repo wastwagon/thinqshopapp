@@ -24,7 +24,8 @@
     "db:seed:content": "npx prisma generate --schema=database/schema.prisma && npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' database/seed-world-class-content.ts",
     "email:process": "node node_modules/ts-node/dist/bin.js --compiler-options '{\"module\":\"CommonJS\"}' backend/scripts/process-email-queue.ts",
     "deploy:check": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/check-production-env.ts",
-    "deploy:smoke": "bash scripts/deploy-smoke.sh"
+    "deploy:smoke": "bash scripts/deploy-smoke.sh",
+    "ui:polish": "bash scripts/polish-ui-tokens.sh"
   },
   "overrides": {
     "react": "18.3.1",

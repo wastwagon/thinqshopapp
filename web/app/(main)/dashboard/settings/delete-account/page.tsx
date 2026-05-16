@@ -39,7 +39,7 @@ export default function DeleteAccountPage() {
                         ← Back to Settings
                     </Link>
                 </div>
-                <div className="bg-white rounded-2xl p-8 border border-red-100 shadow-sm">
+                <div className="dashboard-card p-8 border-red-100">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center border border-red-100">
                             <AlertTriangle className="h-6 w-6 text-red-600" />

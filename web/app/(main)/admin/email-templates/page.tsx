@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import api from '@/lib/axios';
 import { Edit3, Save, RefreshCw, Mail, ToggleLeft, ToggleRight } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -77,26 +78,24 @@ export default function AdminEmailTemplatesPage() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                <div className="flex items-center gap-3">
-                    <Mail className="h-8 w-8 text-brand" />
-                    <div>
-                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Email templates</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Notification templates and triggers. Placeholders: &#123;&#123;order_number&#125;&#125;, &#123;&#123;total&#125;&#125;, &#123;&#123;user_name&#125;&#125;, &#123;&#123;amount&#125;&#125;, &#123;&#123;transfer_token&#125;&#125;</p>
-                    </div>
-                </div>
-                <button type="button" onClick={fetchTemplates} disabled={loading} className="min-h-[44px] h-9 px-4 border border-gray-200 rounded-lg font-medium text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50">
-                    <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                    Refresh
-                </button>
-            </div>
+            <AdminPageHeader
+                icon={Mail}
+                title="Email templates"
+                subtitle="Notification templates and triggers. Placeholders: {{order_number}}, {{total}}, {{user_name}}, {{amount}}, {{transfer_token}}"
+                actions={
+                    <button type="button" onClick={fetchTemplates} disabled={loading} className="admin-btn-secondary h-9 px-4 shrink-0 disabled:opacity-50">
+                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden />
+                        Refresh
+                    </button>
+                }
+            />
 
             {loading && templates.length === 0 ? (
-                <div className="bg-white rounded-xl border border-gray-100 p-12 text-center text-gray-500">Loading…</div>
+                <div className="admin-card p-12 text-center text-gray-500">Loading…</div>
             ) : (
                 <div className="space-y-6">
                     {templates.map((t) => (
-                        <div key={t.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                        <div key={t.id} className="admin-card overflow-hidden">
                             <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
                                 <div className="flex items-center gap-3">
                                     <span className="text-sm font-bold text-gray-900">{t.name}</span>

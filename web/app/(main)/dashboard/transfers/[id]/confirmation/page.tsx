@@ -127,7 +127,7 @@ export default function TransferConfirmationPage() {
                 </div>
 
                 {/* Printable content */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden print:shadow-none print:border print:rounded-lg">
+                <div className="dashboard-card overflow-hidden print:shadow-none print:border print:rounded-lg">
                     <div className="p-6 border-b border-gray-100 bg-gray-50/50">
                         <div className="flex items-center gap-3 mb-1">
                             <div className="w-10 h-10 rounded-xl bg-brand flex items-center justify-center">

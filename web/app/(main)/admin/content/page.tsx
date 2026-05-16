@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import {
     Layout,
     ChevronDown,
@@ -112,16 +113,11 @@ export default function AdminContent() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Layout className="h-7 w-7 text-brand" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Content</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Manage homepage sections, testimonials, and policy text</p>
-                    </div>
-                </div>
-            </div>
-
+            <AdminPageHeader
+                icon={Layout}
+                title="Content"
+                subtitle="Manage homepage sections, testimonials, and policy text"
+            />
             <div className="space-y-3">
                 {sectionCards.map(({ id, title, count }) => (
                     <div key={id} className="admin-table-wrap">

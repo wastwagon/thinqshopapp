@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import {
     Search,
     Plus,
@@ -331,35 +332,29 @@ export default function AdminProducts() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Package className="h-7 w-7 text-brand" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Products</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Manage your storefront catalog</p>
-                    </div>
-                </div>
-                <div className="flex gap-2">
-                    <div className="relative flex-1 min-w-0 sm:w-48">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search by product name or category..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full h-9 pl-9 pr-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-                        />
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => handleOpenModal()}
-                        className="min-h-[44px] h-9 px-4 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 transition-all flex items-center gap-1.5 shrink-0"
-                    >
-                        <Plus className="h-3.5 w-3.5" /> Add product
-                    </button>
-                </div>
-            </div>
-
+            <AdminPageHeader
+                icon={Package}
+                title="Products"
+                subtitle="Manage your storefront catalog"
+                actions={
+                    <>
+                        <div className="relative flex-1 min-w-0 sm:w-48">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" aria-hidden />
+                            <input
+                                type="search"
+                                placeholder="Search by product name or category..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="admin-input w-full sm:w-48 pl-9"
+                                aria-label="Search products"
+                            />
+                        </div>
+                        <button type="button" onClick={() => handleOpenModal()} className="admin-btn-primary h-9 px-4 shrink-0">
+                            <Plus className="h-3.5 w-3.5" aria-hidden /> Add product
+                        </button>
+                    </>
+                }
+            />
             <div className="grid grid-cols-3 gap-3 mb-4">
                 {stats.map((s, i) => (
                     <div key={i} className="admin-stat-card">
@@ -377,10 +372,10 @@ export default function AdminProducts() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Product</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Category</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Price</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Status</th>
+                                <th className="admin-th">Product</th>
+                                <th className="admin-th">Category</th>
+                                <th className="admin-th">Price</th>
+                                <th className="admin-th">Status</th>
                                 <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -447,7 +442,7 @@ export default function AdminProducts() {
             {/* Create/Edit Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setIsModalOpen(false)}>
-                    <div className="bg-white rounded-xl border border-gray-100 shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto overscroll-y-contain scrollbar-thin p-5" onClick={(e) => e.stopPropagation()}>
+                    <div className="admin-modal-panel max-w-lg w-full max-h-[90vh] overflow-y-auto overscroll-y-contain scrollbar-thin p-5" onClick={(e) => e.stopPropagation()}>
                         <h2 className="text-lg font-bold text-gray-900 mb-4">
                             {editingProduct ? 'Edit product' : 'New product'}
                         </h2>
@@ -482,14 +477,14 @@ export default function AdminProducts() {
                                     <button
                                         type="button"
                                         onClick={() => setFormData((f) => ({ ...f, product_kind: 'simple', variants: [] }))}
-                                        className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'simple' ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
+                                        className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'simple' ? 'bg-white text-gray-900border border-gray-200/90' : 'text-gray-500 hover:text-gray-700'}`}
                                     >
                                         Simple
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setFormData((f) => ({ ...f, product_kind: 'variable' }))}
-                                        className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'variable' ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
+                                        className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'variable' ? 'bg-white text-gray-900border border-gray-200/90' : 'text-gray-500 hover:text-gray-700'}`}
                                     >
                                         Variable
                                     </button>

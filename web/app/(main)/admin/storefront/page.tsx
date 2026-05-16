@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Type, Save, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
@@ -47,15 +48,13 @@ export default function AdminStorefront() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Type className="h-7 w-7 text-brand" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Storefront</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Manage storefront copy, shipping values, and support contacts</p>
-                    </div>
-                </div>
-                <button
+            <AdminPageHeader
+                icon={Type}
+                title="Storefront"
+                subtitle="Manage storefront copy, shipping values, and support contacts"
+                actions={
+                    <>
+                        <button
                     type="button"
                     onClick={handleSave}
                     disabled={saving || loading}
@@ -64,7 +63,9 @@ export default function AdminStorefront() {
                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     Save
                 </button>
-            </div>
+                    </>
+                }
+            />
 
             {loading ? (
                 <div className="min-h-[200px] flex items-center justify-center text-gray-500 text-sm">Loading…</div>

@@ -136,12 +136,12 @@ export default function AdminOrdersPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Order</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Customer</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Items</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Total</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Status</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Date</th>
+                                <th className="admin-th">Order</th>
+                                <th className="admin-th">Customer</th>
+                                <th className="admin-th">Items</th>
+                                <th className="admin-th">Total</th>
+                                <th className="admin-th">Status</th>
+                                <th className="admin-th">Date</th>
                                 <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
                             </tr>
                         </thead>

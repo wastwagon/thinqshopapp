@@ -70,7 +70,7 @@ export default function ShipmentDetailPage() {
                 </Link>
 
                 <div className="max-w-2xl space-y-6">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="dashboard-card overflow-hidden">
                         <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
                             <div className="flex flex-wrap justify-between items-start gap-4">
                                 <div>

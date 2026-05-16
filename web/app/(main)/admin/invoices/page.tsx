@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import Link from 'next/link';
 import { FileText, Search, Plus, Eye, Edit3 } from 'lucide-react';
 
@@ -58,21 +59,21 @@ export default function AdminInvoicesPage() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-                <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                        <FileText className="h-7 w-7 text-brand" />
-                        <div>
-                            <h1 className="text-xl font-bold text-gray-900 tracking-tight">Invoices</h1>
-                            <p className="text-xs text-gray-500 mt-0.5">Create, send, and track customer invoices</p>
-                        </div>
-                    </div>
-                    <Link
+                <AdminPageHeader
+                icon={FileText}
+                title="Invoices"
+                subtitle="Create, send, and track customer invoices"
+                actions={
+                    <>
+                        <Link
                         href="/admin/invoices/new"
                         className="min-h-[44px] h-9 px-4 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 transition-all flex items-center justify-center gap-1.5 shrink-0"
                     >
                         <Plus className="h-4 w-4" /> New invoice
                     </Link>
-                </div>
+                    </>
+                }
+            />
 
                 <div className="flex flex-wrap gap-2 mb-4">
                     <div className="relative min-w-0 flex-1 sm:max-w-[200px]">
@@ -102,11 +103,11 @@ export default function AdminInvoicesPage() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-gray-50/50 border-b border-gray-50">
-                                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Number</th>
-                                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Customer</th>
-                                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Issue date</th>
-                                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Total</th>
-                                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Status</th>
+                                    <th className="admin-th">Number</th>
+                                    <th className="admin-th">Customer</th>
+                                    <th className="admin-th">Issue date</th>
+                                    <th className="admin-th">Total</th>
+                                    <th className="admin-th">Status</th>
                                     <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
                                 </tr>
                             </thead>

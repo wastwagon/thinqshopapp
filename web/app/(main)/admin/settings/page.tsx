@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import api from '@/lib/axios';
 import {
     Settings,
@@ -89,20 +90,17 @@ export default function AdminSettings() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
-                <div className="flex items-center gap-3">
-                    <Settings className="h-7 w-7 text-brand" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Settings</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Manage operational controls and platform defaults</p>
-                    </div>
-                </div>
-                <button type="button" onClick={handleSave} disabled={savingRate || rateLoading} className="h-9 px-4 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 transition-all flex items-center gap-2 disabled:opacity-50">
-                    <Save className="h-3.5 w-3.5" />
-                    {savingRate ? 'Saving…' : 'Save'}
-                </button>
-            </div>
-
+            <AdminPageHeader
+                icon={Settings}
+                title="Settings"
+                subtitle="Manage operational controls and platform defaults"
+                actions={
+                    <button type="button" onClick={handleSave} disabled={savingRate || rateLoading} className="admin-btn-primary h-9 px-4 shrink-0 disabled:opacity-50">
+                        <Save className="h-3.5 w-3.5" aria-hidden />
+                        {savingRate ? 'Saving…' : 'Save'}
+                    </button>
+                }
+            />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
                 {/* Exchange & fees */}
                 <div className="lg:col-span-2 space-y-4 min-w-0">

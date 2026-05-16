@@ -15,6 +15,7 @@ import PriceDisplay from '@/components/ui/PriceDisplay';
 import { trackBeginCheckout, trackPurchase } from '@/lib/analytics';
 import { cartItemUnitGhs } from '@/lib/product-utils';
 import LiveRegion from '@/components/ui/LiveRegion';
+import { roundGhs } from '@/lib/money';
 
 const CheckoutPaystackTrigger = dynamic(
     () => import('@/components/checkout/CheckoutPaystackTrigger').then((m) => m.default),
@@ -157,7 +158,7 @@ export default function CheckoutClient() {
         quoteLoading
             ? 'Calculating shipping and total.'
             : checkoutQuote
-              ? `Order total updated. ${payableTotal.toFixed(2)} Ghana cedis.`
+              ? `Order total updated. ${roundGhs(payableTotal).toFixed(2)} Ghana cedis.`
               : '';
 
     if (authLoading || cartLoading || !user || cart.length === 0) {

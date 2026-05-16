@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import Link from 'next/link';
 import { DollarSign, Plus, Edit3, Trash2, Calculator, Info } from 'lucide-react';
 
@@ -142,24 +143,24 @@ export default function AdminInvoiceRatesPage() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-                <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                        <DollarSign className="h-7 w-7 text-brand" />
-                        <div>
-                            <h1 className="text-xl font-bold text-gray-900 tracking-tight">Invoice rates</h1>
-                            <p className="text-xs text-gray-500 mt-0.5">Pricing per unit for invoice line items</p>
-                        </div>
-                    </div>
-                    <button
+                <AdminPageHeader
+                icon={DollarSign}
+                title="Invoice rates"
+                subtitle="Pricing per unit for invoice line items"
+                actions={
+                    <>
+                        <button
                         type="button"
                         onClick={openCreate}
                         className="min-h-[44px] h-9 px-4 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 transition-all flex items-center justify-center gap-1.5 shrink-0"
                     >
                         <Plus className="h-4 w-4" /> Add rate
                     </button>
-                </div>
+                    </>
+                }
+            />
 
-                <div className="mb-5 p-4 rounded-2xl bg-gradient-to-br from-brand/5 to-gray-50/80 border border-brand/20 flex gap-3 shadow-sm">
+                <div className="mb-5 p-4 rounded-2xl bg-gradient-to-br from-brand/5 to-gray-50/80 border border-brand/20 flex gap-3">
                     <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/10 text-brand shrink-0">
                         <Info className="h-5 w-5" />
                     </div>
@@ -293,7 +294,7 @@ export default function AdminInvoiceRatesPage() {
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="invoice-rate-dialog-title"
-                        className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6 outline-none"
+                        className="admin-modal-panel max-w-md w-full p-6 outline-none"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <h2 id="invoice-rate-dialog-title" className="text-lg font-bold text-gray-900 mb-4">

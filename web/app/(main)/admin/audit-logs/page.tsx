@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import api from '@/lib/axios';
 import { Shield, Search, RefreshCw, Download, X } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -195,15 +196,13 @@ export default function AdminAuditLogsPage() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-                <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                        <Shield className="h-7 w-7 text-brand" />
-                        <div>
-                            <h1 className="text-xl font-bold text-gray-900 tracking-tight">Audit logs</h1>
-                            <p className="text-xs text-gray-500 mt-0.5">Security and admin action history</p>
-                        </div>
-                    </div>
-                    <button
+                <AdminPageHeader
+                icon={Shield}
+                title="Audit logs"
+                subtitle="Security and admin action history"
+                actions={
+                    <>
+                        <button
                         type="button"
                         onClick={fetchLogs}
                         className="min-h-[44px] px-4 py-2.5 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/50 transition-all flex items-center justify-center gap-2"
@@ -211,7 +210,9 @@ export default function AdminAuditLogsPage() {
                         <RefreshCw className="h-4 w-4" />
                         Refresh
                     </button>
-                </div>
+                    </>
+                }
+            />
 
                 <div className="admin-table-wrap">
                     <div className="p-4 border-b border-gray-100 space-y-3">
@@ -267,7 +268,7 @@ export default function AdminAuditLogsPage() {
                                 type="button"
                                 onClick={exportCsv}
                                 disabled={exporting}
-                                className="min-h-[44px] px-4 py-2.5 bg-gray-900 text-white rounded-xl font-semibold text-sm hover:bg-black transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                className="min-h-[44px] px-4 py-2.5bg-brand text-white rounded-xl font-semibold text-smhover:bg-brand/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                             >
                                 <Download className="h-4 w-4" />
                                 {exporting ? 'Exporting...' : 'Export CSV'}
@@ -396,7 +397,7 @@ export default function AdminAuditLogsPage() {
                     onClick={() => setSelectedRow(null)}
                 >
                     <div
-                        className="w-full sm:max-w-2xl bg-white rounded-t-2xl sm:rounded-2xl shadow-xl border border-gray-100 max-h-[85vh] overflow-hidden"
+                        className="admin-modal-panel w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl max-h-[85vh] overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">

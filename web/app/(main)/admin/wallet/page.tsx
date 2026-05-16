@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Wallet, Search, Plus, Minus, FileText, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
@@ -89,26 +90,24 @@ export default function AdminWalletPage() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Wallet className="h-7 w-7 text-brand" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Wallet management</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Adjust customer wallet balances and review wallet activity</p>
-                    </div>
-                </div>
-                <div className="relative min-w-0 sm:w-44">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-                    <input
-                        type="text"
+            <AdminPageHeader
+                icon={Wallet}
+                title="Wallet management"
+                subtitle="Adjust customer wallet balances and review wallet activity"
+                actions={
+                    <div className="relative min-w-0 sm:w-56">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" aria-hidden />
+                        <input
+                            type="search"
                             placeholder="Search by customer name, email, or phone..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full h-9 pl-8 pr-2.5 border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-                    />
-                </div>
-            </div>
-
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="admin-input w-full sm:w-56 pl-8"
+                            aria-label="Search wallets"
+                        />
+                    </div>
+                }
+            />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {stats.map((s, i) => (
                     <div key={i} className="admin-stat-card">
@@ -126,10 +125,10 @@ export default function AdminWalletPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">User</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Email</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Balance</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">Updated</th>
+                                <th className="admin-th">User</th>
+                                <th className="admin-th">Email</th>
+                                <th className="admin-th">Balance</th>
+                                <th className="admin-th">Updated</th>
                                 <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -193,7 +192,7 @@ export default function AdminWalletPage() {
             {adjusting && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/40" onClick={() => !submitting && setAdjusting(null)} aria-hidden />
-                    <div className="relative w-full max-w-md bg-white rounded-xl border border-gray-100 shadow-xl p-6">
+                    <div className="admin-modal-panel relative max-w-md p-6">
                         <h2 className="text-lg font-bold text-gray-900 mb-1">
                             {adjustType === 'credit' ? 'Credit' : 'Debit'} wallet
                         </h2>

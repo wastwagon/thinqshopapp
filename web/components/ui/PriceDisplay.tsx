@@ -2,6 +2,7 @@
 
 import { useCurrencyRates } from '@/hooks/useCurrencyRates';
 import { useCurrency } from '@/context/CurrencyContext';
+import { roundGhs } from '@/lib/money';
 
 interface PriceDisplayProps {
     amountGhs: number;
@@ -24,17 +25,18 @@ export default function PriceDisplay({
     const { currency } = useCurrency();
 
     const alwaysGhs = forceGhs || checkoutStyle;
+    const ghs = roundGhs(amountGhs);
 
     if (alwaysGhs) {
         return (
             <span className={className}>
-                ₵{amountGhs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                ₵{ghs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
         );
     }
 
-    const usd = rates?.ghs_to_usd != null ? amountGhs * rates.ghs_to_usd : null;
-    const cny = rates?.ghs_to_cny != null ? amountGhs * rates.ghs_to_cny : null;
+    const usd = rates?.ghs_to_usd != null ? roundGhs(ghs * rates.ghs_to_usd) : null;
+    const cny = rates?.ghs_to_cny != null ? roundGhs(ghs * rates.ghs_to_cny) : null;
 
     if (currency === 'USD' && usd != null) {
         return (
@@ -54,7 +56,7 @@ export default function PriceDisplay({
 
     return (
         <span className={className}>
-            ₵{amountGhs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ₵{ghs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </span>
     );
 }

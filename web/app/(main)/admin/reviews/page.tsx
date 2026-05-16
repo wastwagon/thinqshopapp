@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Eye, CheckCircle, XCircle, Loader2, Star, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
@@ -68,27 +69,25 @@ export default function AdminReviewsPage() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Eye className="h-7 w-7 text-brand" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Reviews</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Moderate customer reviews before they appear publicly</p>
+            <AdminPageHeader
+                icon={Eye}
+                title="Reviews"
+                subtitle="Moderate customer reviews before they appear publicly"
+                actions={
+                    <div className="flex gap-2">
+                        {(['all', 'pending', 'approved'] as const).map((f) => (
+                            <button
+                                key={f}
+                                type="button"
+                                onClick={() => setFilter(f)}
+                                className={`min-h-[44px] px-4 rounded-xl text-sm font-medium touch-manipulation ${filter === f ? 'admin-btn-primary' : 'admin-btn-secondary'}`}
+                            >
+                                {f === 'all' ? 'All' : f === 'pending' ? 'Pending' : 'Approved'}
+                            </button>
+                        ))}
                     </div>
-                </div>
-                <div className="flex gap-2">
-                    {(['all', 'pending', 'approved'] as const).map((f) => (
-                        <button
-                            key={f}
-                            type="button"
-                            onClick={() => setFilter(f)}
-                            className={`min-h-[44px] px-4 rounded-xl text-sm font-medium touch-manipulation ${filter === f ? 'bg-brand text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                        >
-                            {f === 'all' ? 'All' : f === 'pending' ? 'Pending' : 'Approved'}
-                        </button>
-                    ))}
-                </div>
-            </div>
+                }
+            />
 
             {loading ? (
                 <div className="min-h-[200px] flex items-center justify-center">

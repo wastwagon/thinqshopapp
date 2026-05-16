@@ -286,7 +286,7 @@ export default function LogisticsPage() {
             <div className="max-w-3xl">
                 {/* Booking Wizard */}
                 <div>
-                    <div className="bg-white rounded-2xl border border-gray-200/90 overflow-hidden">
+                    <div className="dashboard-table-wrap">
                         <div className="px-6 py-5 border-b border-gray-100">
                             <h2 className="text-lg font-bold text-gray-900 tracking-tight">Create New Shipment</h2>
                             <p className="text-xs text-gray-500 mt-1">Ship from our China warehouse to Ghana. All fields on one page.</p>
@@ -623,7 +623,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                         <HistoryIcon className="h-4 w-4 text-brand" />
                         Shipments
                     </h2>
-                    <div className="bg-white rounded-2xl border border-gray-200/90 overflow-hidden">
+                    <div className="dashboard-table-wrap">
                         <div className="px-4 py-4 md:px-8 md:py-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                             <h3 className="text-xs font-bold tracking-wider text-gray-400 flex items-center gap-2">
                                 <Package className="h-4 w-4 text-brand" />

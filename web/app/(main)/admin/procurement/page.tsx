@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import Link from 'next/link';
 import {
     ShoppingBag,
@@ -132,26 +133,24 @@ export default function AdminProcurementPage() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <ShoppingBag className="h-7 w-7 text-brand" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Procurement</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Sourcing requests</p>
+            <AdminPageHeader
+                icon={ShoppingBag}
+                title="Procurement"
+                subtitle="Sourcing requests"
+                actions={
+                    <div className="relative min-w-0 sm:w-56">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" aria-hidden />
+                        <input
+                            type="search"
+                            placeholder="Search requests..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="admin-input w-full sm:w-56 pl-9"
+                            aria-label="Search procurement requests"
+                        />
                     </div>
-                </div>
-                <div className="relative min-w-0 sm:w-56">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search requests..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full h-9 pl-9 pr-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-                    />
-                </div>
-            </div>
-
+                }
+            />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {stats.map((stat, i) => (
                     <div key={i} className="admin-stat-card">
@@ -171,7 +170,7 @@ export default function AdminProcurementPage() {
                         <p className="text-sm text-gray-500">Loading...</p>
                     </div>
                 ) : filteredRequests.length === 0 ? (
-                    <div className="py-10 text-center bg-white rounded-xl border border-dashed border-gray-200">
+                    <div className="py-10 text-center admin-card border-dashed">
                         <ShoppingBag className="h-10 w-10 text-gray-300 mx-auto mb-2" />
                         <p className="text-sm text-gray-500">No requests found</p>
                     </div>

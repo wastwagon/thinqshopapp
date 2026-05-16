@@ -241,7 +241,7 @@ export default function TransferPage() {
             <div className="max-w-2xl">
                 {/* Transfer Form */}
                 <div className="space-y-4">
-                    <div className="bg-white rounded-xl border border-gray-200/90 p-4 lg:p-5">
+                    <div className="dashboard-card p-4 lg:p-5">
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* Direction Selection */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -464,7 +464,7 @@ export default function TransferPage() {
                         <HistoryIcon className="h-4 w-4 text-brand" />
                         Transfers
                     </h2>
-                    <div className="bg-white rounded-2xl border border-gray-200/90 overflow-hidden">
+                    <div className="dashboard-table-wrap">
                         <div className="px-4 py-4 md:px-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                             <p className="text-xs font-semibold capitalize text-gray-500">All transfers</p>
                             <button onClick={fetchTransfers} className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-brand" aria-label="Refresh">

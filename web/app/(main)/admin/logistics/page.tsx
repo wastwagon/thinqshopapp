@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import BarcodeScanner from '@/components/ui/BarcodeScanner';
 import { Truck, Search, Package, User, Mail, Calendar, Clock, Zap, FileText, CheckCircle, ChevronRight, Camera, ExternalLink } from 'lucide-react';
 
@@ -135,48 +136,35 @@ export default function AdminLogisticsPage() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Truck className="h-7 w-7 text-brand" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Shipments</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Freight and delivery</p>
+            <AdminPageHeader
+                icon={Truck}
+                title="Shipments"
+                subtitle="Freight and delivery"
+                actions={
+                    <div className="flex flex-wrap gap-2 min-w-0 flex-1 sm:flex-initial sm:max-w-md">
+                        <div className="relative flex-1 min-w-0">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" aria-hidden />
+                            <input
+                                type="search"
+                                placeholder="Search tracking or customer..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && goToShipmentDetail()}
+                                className="admin-input w-full pl-9"
+                                aria-label="Search shipments"
+                            />
+                        </div>
+                        <button type="button" onClick={() => setScannerOpen(true)} className="admin-btn-secondary h-9 px-3 shrink-0" title="Scan barcode to find shipment" aria-label="Scan barcode">
+                            <Camera className="h-4 w-4" aria-hidden />
+                            <span className="hidden xs:inline text-xs font-medium">Scan</span>
+                        </button>
+                        <button type="button" onClick={goToShipmentDetail} className="admin-btn-primary h-9 px-3 shrink-0" title="Open shipment details">
+                            <span className="hidden xs:inline">Go</span>
+                            <ChevronRight className="h-4 w-4" aria-hidden />
+                        </button>
                     </div>
-                </div>
-                <div className="flex gap-2 min-w-0 flex-1 sm:flex-initial sm:max-w-md">
-                    <div className="relative flex-1 min-w-0">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
-                        <input
-                            type="text"
-                            placeholder="Search tracking or customer..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && goToShipmentDetail()}
-                            className="w-full h-9 pl-9 pr-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-                        />
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => setScannerOpen(true)}
-                        className="h-9 px-3 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-1.5 shrink-0"
-                        title="Scan barcode to find shipment"
-                        aria-label="Scan barcode"
-                    >
-                        <Camera className="h-4 w-4" />
-                        <span className="hidden xs:inline text-xs font-medium">Scan</span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={goToShipmentDetail}
-                        className="h-9 px-3 rounded-lg bg-brand text-white hover:bg-brand/90 flex items-center justify-center gap-1.5 shrink-0 text-sm font-medium"
-                        title="Open shipment details"
-                    >
-                        <span className="hidden xs:inline">Go</span>
-                        <ChevronRight className="h-4 w-4" />
-                    </button>
-                </div>
-            </div>
-
+                }
+            />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {stats.map((s, i) => (
                     <div key={i} className="admin-stat-card">

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Layers, Plus, Edit3, Trash2, FileText, X, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
@@ -146,23 +147,16 @@ export default function AdminVariationsPage() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-                <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                        <Layers className="h-7 w-7 text-brand" />
-                        <div>
-                            <h1 className="text-xl font-bold text-gray-900 tracking-tight">Variations</h1>
-                            <p className="text-xs text-gray-500 mt-0.5">Options (e.g. Size, Color) and values for product variants</p>
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => openOptionModal(null)}
-                        className="min-h-[44px] px-4 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 flex items-center gap-2"
-                    >
-                        <Plus className="h-4 w-4" /> Add option
-                    </button>
-                </div>
-
+                <AdminPageHeader
+                    icon={Layers}
+                    title="Variations"
+                    subtitle="Options (e.g. Size, Color) and values for product variants"
+                    actions={
+                        <button type="button" onClick={() => openOptionModal(null)} className="admin-btn-primary h-9 px-4 shrink-0">
+                            <Plus className="h-4 w-4" aria-hidden /> Add option
+                        </button>
+                    }
+                />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
                     <div className="admin-stat-card">
                         <div className="w-9 h-9 rounded-lg bg-brand/5 border border-brand/20 flex items-center justify-center text-brand mb-2">
@@ -262,7 +256,7 @@ export default function AdminVariationsPage() {
             {/* Option modal */}
             {optionModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setOptionModalOpen(false)}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-5" onClick={(e) => e.stopPropagation()}>
+                    <div className="admin-modal-panel max-w-md w-full p-5" onClick={(e) => e.stopPropagation()}>
                         <h2 className="text-lg font-bold text-gray-900 mb-4">{editingOption ? 'Edit option' : 'New option'}</h2>
                         <form onSubmit={saveOption} className="space-y-4">
                             <div>
@@ -311,7 +305,7 @@ export default function AdminVariationsPage() {
             {/* Value modal */}
             {valueModalOpen && selectedOption && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setValueModalOpen(false)}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-5" onClick={(e) => e.stopPropagation()}>
+                    <div className="admin-modal-panel max-w-md w-full p-5" onClick={(e) => e.stopPropagation()}>
                         <h2 className="text-lg font-bold text-gray-900 mb-4">
                             {editingValue ? 'Edit value' : 'Add value'} for {selectedOption.name}
                         </h2>

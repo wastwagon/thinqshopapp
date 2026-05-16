@@ -387,7 +387,7 @@ export default function ShippingCalculatorPage() {
                         <ArrowLeft className="h-4 w-4" />
                     </Link>
                     <div className="flex items-center gap-3 min-w-0">
-                        <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-brand to-brand/90 text-white shadow-sm">
+                        <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-brand to-brand/90 text-white">
                             <Calculator className="h-5 w-5" />
                         </div>
                         <div className="min-w-0">
@@ -521,7 +521,7 @@ export default function ShippingCalculatorPage() {
                                     }}
                                     className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
                                         mode === 'sea'
-                                            ? 'bg-white text-orange-600 shadow-sm border border-orange-200'
+                                            ? 'bg-white text-brand border border-brand/30'
                                             : 'text-gray-500 hover:text-gray-700'
                                     }`}
                                 >
@@ -539,7 +539,7 @@ export default function ShippingCalculatorPage() {
                                     }}
                                     className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
                                         mode === 'air'
-                                            ? 'bg-white text-orange-600 shadow-sm border border-orange-200'
+                                            ? 'bg-white text-brand border border-brand/30'
                                             : 'text-gray-500 hover:text-gray-700'
                                     }`}
                                 >
@@ -628,7 +628,7 @@ export default function ShippingCalculatorPage() {
                                             ))}
                                         </select>
                                         {unifiedRatesForMode.length === 0 && (
-                                            <p className="text-xs text-orange-600">
+                                            <p className="text-xs text-brand">
                                                 No air rates yet. Add rows under{' '}
                                                 <Link href="/admin/shipping-rates" className="underline font-medium">
                                                     Shipping Rates
@@ -691,7 +691,7 @@ export default function ShippingCalculatorPage() {
                                             ))}
                                         </select>
                                         {unifiedRatesForMode.length === 0 && (
-                                            <p className="text-xs text-orange-600">
+                                            <p className="text-xs text-brand">
                                                 No sea rates yet. Add CBM rows under{' '}
                                                 <Link href="/admin/shipping-rates" className="underline font-medium">
                                                     Shipping Rates
@@ -776,7 +776,7 @@ export default function ShippingCalculatorPage() {
                                     type="button"
                                     data-testid="calculate-btn"
                                     onClick={handleCalculate}
-                                    className="min-h-[44px] px-6 bg-orange-500 text-white rounded-xl font-semibold text-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 shadow-sm transition-all"
+                                    className="min-h-[44px] px-6 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2transition-colors"
                                 >
                                     Calculate
                                 </button>
@@ -812,7 +812,7 @@ export default function ShippingCalculatorPage() {
                                         </p>
                                     )}
                                     {nativeQuoteTotal != null && (
-                                        <p className="text-xl font-bold text-orange-600 pt-2 border-t border-orange-100/80 mt-2">
+                                        <p className="text-xl font-bold text-brand pt-2 border-t border-orange-100/80 mt-2">
                                             {invoiceLineAmount != null ? (
                                                 <>
                                                     Invoice line: {form.currency} {invoiceLineAmount.toFixed(2)}
@@ -890,7 +890,7 @@ export default function ShippingCalculatorPage() {
                             type="submit"
                             disabled={submitting || nativeQuoteTotal == null || invoiceLineAmount == null}
                             data-testid="create-invoice"
-                            className="min-h-[44px] px-6 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none shadow-sm transition-all"
+                            className="min-h-[44px] px-6 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-nonetransition-colors"
                         >
                             {submitting ? 'Saving…' : 'Create invoice from quote'}
                         </button>

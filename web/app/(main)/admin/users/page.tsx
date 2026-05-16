@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Users, Shield, Search, Mail, Calendar, Activity, Eye, Phone, Plus, X, ChevronRight } from 'lucide-react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
@@ -119,43 +120,33 @@ export default function AdminUsers() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Users className="h-7 w-7 text-brand" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Users</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">Manage customer and team accounts</p>
-                    </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={() => setAddUserOpen(true)}
-                        className="h-9 px-4 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 shrink-0 flex items-center gap-1.5"
-                    >
-                        <Plus className="h-4 w-4" /> Add user
-                    </button>
-                    <form onSubmit={handleSearch} className="flex gap-2 min-w-0 flex-1">
-                        <div className="relative flex-1 min-w-0">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
-                            <input
-                                type="text"
-                                placeholder="Search by name, email, or phone..."
-                                value={searchInput}
-                                onChange={(e) => setSearchInput(e.target.value)}
-                                className="w-full h-9 bg-white border border-gray-100 rounded-lg pl-9 pr-3 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-                            />
-                        </div>
-                        <button type="submit" className="h-9 px-4 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 shrink-0">
-                            Search
+            <AdminPageHeader
+                icon={Users}
+                title="Users"
+                subtitle="Manage customer and team accounts"
+                actions={
+                    <>
+                        <button type="button" onClick={() => setAddUserOpen(true)} className="admin-btn-primary h-9 px-4 shrink-0">
+                            <Plus className="h-4 w-4" aria-hidden /> Add user
                         </button>
-                        <button type="button" onClick={handleRefresh} className="h-9 px-4 border border-gray-200 rounded-lg font-semibold text-sm text-gray-500 hover:bg-gray-50 shrink-0">
-                            Refresh
-                        </button>
-                    </form>
-                </div>
-            </div>
-
+                        <form onSubmit={handleSearch} className="flex flex-wrap gap-2 min-w-0">
+                            <div className="relative flex-1 min-w-[12rem]">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" aria-hidden />
+                                <input
+                                    type="search"
+                                    placeholder="Search by name, email, or phone..."
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    className="admin-input w-full pl-9"
+                                    aria-label="Search users"
+                                />
+                            </div>
+                            <button type="submit" className="admin-btn-primary h-9 px-4 shrink-0">Search</button>
+                            <button type="button" onClick={handleRefresh} className="admin-btn-secondary h-9 px-4 shrink-0">Refresh</button>
+                        </form>
+                    </>
+                }
+            />
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                 {stats.map((stat, i) => (
                     <div key={i} className="admin-stat-card">
@@ -279,7 +270,7 @@ export default function AdminUsers() {
 
             {addUserOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setAddUserOpen(false)}>
-                    <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+                    <div className="admin-modal-panel max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-lg font-bold text-gray-900">Add new user</h2>
                             <button type="button" onClick={() => setAddUserOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg">

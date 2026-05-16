@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Search, Upload, Image as ImageIcon, Trash2, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
@@ -53,6 +54,10 @@ export default function AdminMediaPage() {
             toast.error('Please select an image (JPEG, PNG, GIF, WebP, SVG)');
             return;
         }
+        if (file.size > 10 * 1024 * 1024) {
+            toast.error('Image must be 10 MB or smaller');
+            return;
+        }
         setUploading(true);
         try {
             const formData = new FormData();
@@ -61,13 +66,14 @@ export default function AdminMediaPage() {
                 headers: { 'Content-Type': undefined },
             });
             if (data?.url) {
-                toast.success('Uploaded');
+                toast.success(`Uploaded ${file.name}`);
                 fetchMedia();
             } else {
                 toast.error(data?.error || 'Upload failed');
             }
-        } catch (err) {
-            toast.error('Upload failed');
+        } catch (err: unknown) {
+            const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+            toast.error(msg || 'Upload failed');
         } finally {
             setUploading(false);
             e.target.value = '';
@@ -88,46 +94,42 @@ export default function AdminMediaPage() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                <div className="flex items-center gap-3">
-                    <ImageIcon className="h-8 w-8 text-brand" />
-                    <div>
-                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight leading-tight">Media</h1>
-                        <p className="text-xs text-brand flex items-center gap-1.5 mt-0.5">
-                            Upload and reuse images across products
-                        </p>
-                    </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <AdminPageHeader
+                icon={ImageIcon}
+                title="Media"
+                subtitle="Upload and reuse images across products"
+                actions={
+                    <>
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" aria-hidden />
+                            <input
+                                type="search"
+                                placeholder="Search files..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="admin-input w-48 pl-9"
+                                aria-label="Search media files"
+                            />
+                        </div>
                         <input
-                            type="text"
-                            placeholder="Search files..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="h-10 pl-9 pr-4 border border-gray-100 rounded-xl text-sm font-medium w-48 focus:ring-2 focus:ring-brand focus:border-brand"
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+                            className="hidden"
+                            onChange={handleUpload}
                         />
-                    </div>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
-                        className="hidden"
-                        onChange={handleUpload}
-                    />
-                    <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploading}
-                        className="h-10 px-5 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 transition-all flex items-center gap-2 disabled:opacity-60"
-                    >
-                        {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                        Upload
-                    </button>
-                </div>
-            </div>
-
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploading}
+                            className="admin-btn-primary h-9 px-4 shrink-0 disabled:opacity-60"
+                        >
+                            {uploading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Upload className="h-4 w-4" aria-hidden />}
+                            Upload
+                        </button>
+                    </>
+                }
+            />
             <div className="admin-table-wrap">
                 {loading ? (
                     <div className="py-20 flex justify-center">
