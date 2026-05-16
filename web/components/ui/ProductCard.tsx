@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import Link from 'next/link';
 import { Heart, ShoppingCart, Star, Eye, ArrowRight } from 'lucide-react';
 import ProductImage from './ProductImage';
@@ -67,8 +68,74 @@ export default function ProductCard({ product }: ProductCardProps) {
     const desc = product.short_description || product.description;
     const descPreview = desc ? (desc.length > 80 ? desc.slice(0, 80).trim() + '…' : desc) : null;
 
+    const handleWishlist = (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const wishImages =
+            imagesList.length > 0
+                ? imagesList
+                : product.image
+                  ? [String(product.image)]
+                  : product.gallery_images?.filter(Boolean).map(String);
+        toggleWishlist({
+            id: Number(productId),
+            name: product.name,
+            price: fromPrice,
+            slug: productSlug,
+            images: wishImages,
+            gallery_images: product.gallery_images,
+            category: product.category,
+        });
+    };
+
+    const inWishlist = isInWishlist(Number(productId));
+    const wishlistBtnClass = inWishlist
+        ? 'border-red-200 text-red-500'
+        : 'border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white hover:border-blue-600';
+    const actionBtnBase =
+        'bg-white shadow-sm border rounded-full flex items-center justify-center transition-all';
+    const actionBtnCompact = `${actionBtnBase} w-8 h-8`;
+    const actionBtnDesktop = `${actionBtnBase} min-w-[44px] min-h-[44px] w-10 h-10`;
+    const iconCompact = 'h-3.5 w-3.5';
+    const iconDesktop = 'h-4 w-4';
+
+    const quickActions = (compact: boolean) => (
+        <>
+            <button
+                type="button"
+                onClick={handleWishlist}
+                className={`${compact ? actionBtnCompact : actionBtnDesktop} ${wishlistBtnClass}`}
+                title={inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+                <Heart className={`${compact ? iconCompact : iconDesktop} ${inWishlist ? 'fill-current' : ''}`} aria-hidden />
+            </button>
+            <Link
+                href={`/products/${productSlug}`}
+                className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white`}
+                title="Quick View"
+                aria-label="Quick view product"
+            >
+                <Eye className={compact ? iconCompact : iconDesktop} aria-hidden />
+            </Link>
+            <button
+                type="button"
+                onClick={() => productId && addToCart(productId, 1, firstVariantId)}
+                className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white`}
+                title={hasVariants ? 'Add first option to cart (choose options on product page)' : 'Add to Cart'}
+                aria-label="Add to cart"
+            >
+                <ShoppingCart className={compact ? iconCompact : iconDesktop} aria-hidden />
+            </button>
+        </>
+    );
+
     return (
         <div className="group bg-white rounded-xl border border-gray-100/90 shadow-sm hover:shadow-lg hover:shadow-brand/5 hover:border-brand/20 transition-all duration-300 overflow-hidden relative flex flex-col h-full">
+            <div className="flex md:hidden items-center justify-end gap-1 px-2 pt-2 pb-1 shrink-0">
+                {quickActions(true)}
+            </div>
+
             {/* Image Container */}
             <div className="aspect-square relative overflow-hidden bg-gray-50/80 flex items-center justify-center">
                 <ProductImage
@@ -86,52 +153,9 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </div>
                 )}
 
-                {/* Quick Actions - horizontal at top; always visible on mobile, hover reveal on desktop */}
-                <div className="absolute top-3 right-3 flex flex-row gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-20">
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            const wishImages =
-                                imagesList.length > 0
-                                    ? imagesList
-                                    : product.image
-                                      ? [String(product.image)]
-                                      : product.gallery_images?.filter(Boolean).map(String);
-                            toggleWishlist({
-                                id: Number(productId),
-                                name: product.name,
-                                price: fromPrice,
-                                slug: productSlug,
-                                images: wishImages,
-                                gallery_images: product.gallery_images,
-                                category: product.category,
-                            });
-                        }}
-                        className={`min-w-[44px] min-h-[44px] w-11 h-11 bg-white/95 shadow border rounded-full flex items-center justify-center transition-all ${
-                            isInWishlist(Number(productId)) ? 'border-red-200 text-red-500' : 'border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white hover:border-blue-600'
-                        }`}
-                        title={isInWishlist(Number(productId)) ? 'Remove from Wishlist' : 'Add to Wishlist'}
-                        aria-label={isInWishlist(Number(productId)) ? 'Remove from wishlist' : 'Add to wishlist'}
-                    >
-                        <Heart className={`h-4 w-4 ${isInWishlist(Number(productId)) ? 'fill-current' : ''}`} aria-hidden />
-                    </button>
-                    <Link
-                        href={`/products/${productSlug}`}
-                        className="min-w-[44px] min-h-[44px] w-11 h-11 bg-white/95 shadow border border-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-blue-600 hover:text-white transition-all"
-                        title="Quick View"
-                        aria-label="Quick view product"
-                    >
-                        <Eye className="h-4 w-4" aria-hidden />
-                    </Link>
-                    <button
-                        onClick={() => productId && addToCart(productId, 1, firstVariantId)}
-                        className="min-w-[44px] min-h-[44px] w-11 h-11 bg-white/95 shadow border border-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-blue-600 hover:text-white transition-all"
-                        title={hasVariants ? 'Add first option to cart (choose options on product page)' : 'Add to Cart'}
-                        aria-label="Add to cart"
-                    >
-                        <ShoppingCart className="h-4 w-4" aria-hidden />
-                    </button>
+                {/* Desktop: hover overlay on image */}
+                <div className="hidden md:flex absolute top-3 right-3 flex-row gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                    {quickActions(false)}
                 </div>
             </div>
 
