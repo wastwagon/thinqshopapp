@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import CartDrawer from '@/components/ui/CartDrawer';
 import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
 import OfflineBanner from '@/components/ui/OfflineBanner';
+import CookieConsent from '@/components/ui/CookieConsent';
 import WebViewGoldBridge from '@/components/WebViewGoldBridge';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -28,6 +29,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         }}
                     />
                     <CartDrawer />
+                    <CookieConsent />
                     {children}
                 </CartProvider>
                 </WishlistProvider>

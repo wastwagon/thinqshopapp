@@ -49,7 +49,7 @@ export default function AdminStorefront() {
             <div className="pb-6 md:pb-8">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <Type className="h-7 w-7 text-blue-600" />
+                    <Type className="h-7 w-7 text-brand" />
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Storefront</h1>
                         <p className="text-xs text-gray-500 mt-0.5">Manage storefront copy, shipping values, and support contacts</p>
@@ -59,7 +59,7 @@ export default function AdminStorefront() {
                     type="button"
                     onClick={handleSave}
                     disabled={saving || loading}
-                    className="min-h-[44px] px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50 touch-manipulation"
+                    className="min-h-[44px] px-5 py-2.5 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/50 transition-all flex items-center justify-center gap-2 disabled:opacity-50 touch-manipulation"
                 >
                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     Save
@@ -81,7 +81,7 @@ export default function AdminStorefront() {
                                 value={settings[key] ?? ''}
                                 onChange={(e) => setSettings((s) => ({ ...s, [key]: e.target.value }))}
                                 placeholder={placeholder}
-                                className="w-full min-h-[44px] px-4 rounded-xl border border-gray-200 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent touch-manipulation"
+                                className="w-full min-h-[44px] px-4 rounded-xl border border-gray-200 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent touch-manipulation"
                             />
                         </div>
                     ))}

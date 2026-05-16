@@ -1,9 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { createHash, randomBytes } from 'crypto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -90,15 +92,73 @@ export class AuthService {
         return result;
     }
 
+    private hashResetToken(token: string): string {
+        return createHash('sha256').update(token).digest('hex');
+    }
+
+    private getFrontendBaseUrl(): string {
+        const raw = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        return raw.split(',')[0]?.trim() || 'http://localhost:3000';
+    }
+
     async forgotPassword(email: string): Promise<void> {
-        // Stub: in production, find user, generate token, send email
-        // Always succeed to prevent email enumeration
-        if (email) {
-            const user = await this.prisma.user.findUnique({ where: { email } });
-            if (user) {
-                // TODO: generate reset token, send email via mail service
-            }
+        const normalized = (email || '').trim();
+        if (!normalized || !normalized.includes('@')) return;
+
+        const user = await this.prisma.user.findUnique({ where: { email: normalized } });
+        if (!user) return;
+
+        const rawToken = randomBytes(32).toString('hex');
+        const tokenHash = this.hashResetToken(rawToken);
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+        await this.prisma.passwordResetToken.deleteMany({ where: { user_id: user.id } });
+        await this.prisma.passwordResetToken.create({
+            data: { user_id: user.id, token_hash: tokenHash, expires_at: expiresAt },
+        });
+
+        const resetUrl = `${this.getFrontendBaseUrl()}/reset-password?token=${encodeURIComponent(rawToken)}`;
+        await this.prisma.emailQueue.create({
+            data: {
+                recipient: user.email,
+                subject: 'Reset your ThinQShop password',
+                body: [
+                    'Hi,',
+                    '',
+                    'We received a request to reset your password. Open this link within 1 hour:',
+                    '',
+                    resetUrl,
+                    '',
+                    'If you did not request this, you can ignore this email.',
+                    '',
+                    'ThinQShop',
+                ].join('\n'),
+                status: 'pending',
+            },
+        });
+    }
+
+    async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
+        const token = (dto.token || '').trim();
+        if (!token) throw new BadRequestException('Invalid or expired reset link');
+
+        const record = await this.prisma.passwordResetToken.findUnique({
+            where: { token_hash: this.hashResetToken(token) },
+        });
+        if (!record || record.expires_at < new Date()) {
+            throw new BadRequestException('Invalid or expired reset link');
         }
+
+        const hashedPassword = await bcrypt.hash(dto.password, 10);
+        await this.prisma.$transaction([
+            this.prisma.user.update({
+                where: { id: record.user_id },
+                data: { password: hashedPassword },
+            }),
+            this.prisma.passwordResetToken.deleteMany({ where: { user_id: record.user_id } }),
+        ]);
+
+        return { message: 'Password updated successfully' };
     }
 
     async changePassword(userId: number, dto: ChangePasswordDto) {

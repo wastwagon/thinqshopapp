@@ -20,7 +20,7 @@ interface ThankYouCardProps {
 }
 
 const accentStyles = {
-    blue: { bg: 'bg-brand', glow: 'shadow-blue-500/30', badge: 'bg-brand/10 text-blue-700 border-blue-100' },
+    blue: { bg: 'bg-brand', glow: 'shadow-brand/30', badge: 'bg-brand/10 text-brand border-brand/20' },
     emerald: { bg: 'bg-emerald-500', glow: 'shadow-emerald-500/30', badge: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
     violet: { bg: 'bg-violet-500', glow: 'shadow-violet-500/30', badge: 'bg-violet-50 text-violet-700 border-violet-100' },
     amber: { bg: 'bg-orange-500', glow: 'shadow-orange-500/30', badge: 'bg-orange-50 text-orange-700 border-orange-100' },

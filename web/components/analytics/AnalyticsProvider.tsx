@@ -2,13 +2,20 @@
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { initAnalytics, trackPageView } from '@/lib/analytics';
+import { hasAnalyticsConsent, initAnalytics, isAnalyticsEnabledInEnv, trackPageView } from '@/lib/analytics';
 
 export default function AnalyticsProvider() {
     const pathname = usePathname();
 
     useEffect(() => {
-        initAnalytics();
+        const boot = () => {
+            if (!isAnalyticsEnabledInEnv() || hasAnalyticsConsent()) {
+                initAnalytics();
+            }
+        };
+        boot();
+        window.addEventListener('thinqshop-analytics-consent', boot);
+        return () => window.removeEventListener('thinqshop-analytics-consent', boot);
     }, []);
 
     useEffect(() => {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { trackSearch } from '@/lib/analytics';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
@@ -18,6 +19,8 @@ interface SearchWithSuggestionsProps {
     mobile?: boolean;
     /** Callback when user navigates (e.g. selects a product). Use to close modal. */
     onNavigate?: () => void;
+    /** Focus the input when mounted (e.g. dashboard mobile search panel). */
+    autoFocus?: boolean;
 }
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -29,7 +32,7 @@ function useDebounce<T>(value: T, delay: number): T {
     return debouncedValue;
 }
 
-export default function SearchWithSuggestions({ id = 'nav-search', listboxId = 'search-suggestions', className = '', inputClassName = '', placeholder = 'Search products...', mobile = false, onNavigate }: SearchWithSuggestionsProps) {
+export default function SearchWithSuggestions({ id = 'nav-search', listboxId = 'search-suggestions', className = '', inputClassName = '', placeholder = 'Search products...', mobile = false, onNavigate, autoFocus = false }: SearchWithSuggestionsProps) {
     const router = useRouter();
     const [query, setQuery] = useState('');
     const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -37,7 +40,15 @@ export default function SearchWithSuggestions({ id = 'nav-search', listboxId = '
     const [showDropdown, setShowDropdown] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
     const containerRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const debouncedQuery = useDebounce(query.trim(), 300);
+
+    useEffect(() => {
+        if (autoFocus) {
+            const t = setTimeout(() => inputRef.current?.focus(), 50);
+            return () => clearTimeout(t);
+        }
+    }, [autoFocus]);
 
     useEffect(() => {
         if (!debouncedQuery || debouncedQuery.length < 2) {
@@ -97,9 +108,11 @@ export default function SearchWithSuggestions({ id = 'nav-search', listboxId = '
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setShowDropdown(false);
-        if (query.trim()) {
+        const term = query.trim();
+        if (term) {
+            trackSearch(term);
             onNavigate?.();
-            router.push(`/shop?search=${encodeURIComponent(query.trim())}`);
+            router.push(`/shop?search=${encodeURIComponent(term)}`);
         }
     };
 
@@ -129,8 +142,8 @@ export default function SearchWithSuggestions({ id = 'nav-search', listboxId = '
     };
 
     const baseInputClass = mobile
-        ? 'w-full h-14 pl-14 pr-6 bg-gray-50 border border-gray-200 rounded-2xl text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-        : 'w-full h-11 bg-gray-50 border border-gray-200 rounded-full px-6 pl-12 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all';
+        ? 'w-full h-14 pl-14 pr-6 bg-gray-50 border border-gray-200 rounded-2xl text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent'
+        : 'w-full h-11 bg-gray-50 border border-gray-200 rounded-full px-6 pl-12 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all';
 
     return (
         <div ref={containerRef} className={`relative ${className}`}>
@@ -138,6 +151,7 @@ export default function SearchWithSuggestions({ id = 'nav-search', listboxId = '
                 <label htmlFor={id} className="sr-only">Search products</label>
                 <div className="relative">
                     <input
+                        ref={inputRef}
                         id={id}
                         type="search"
                         value={query}
@@ -193,7 +207,7 @@ export default function SearchWithSuggestions({ id = 'nav-search', listboxId = '
                             <li className="border-t border-gray-100">
                                 <Link
                                     href={`/shop?search=${encodeURIComponent(debouncedQuery)}`}
-                                    className="block px-4 py-3 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                                    className="block px-4 py-3 text-sm font-medium text-brand hover:bg-brand/5"
                                     onClick={() => {
                                         setShowDropdown(false);
                                         onNavigate?.();

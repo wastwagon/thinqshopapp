@@ -129,7 +129,7 @@ export default function AdminOrderDetailPage() {
         return (
             <DashboardLayout isAdmin={true}>
                 <div className="p-6 pb-6 md:pb-8 text-center">
-                    <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3" />
+                    <div className="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full mx-auto mb-3" />
                     <p className="text-sm text-gray-500">Loading order...</p>
                 </div>
             </DashboardLayout>
@@ -156,7 +156,7 @@ export default function AdminOrderDetailPage() {
             <div className="mb-6 flex items-center justify-between gap-3">
                 <Link
                     href="/admin/orders"
-                    className="text-blue-600 hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
+                    className="text-brand hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
                 >
                     <ArrowLeft className="h-4 w-4 mr-1.5" /> Orders
                 </Link>
@@ -176,14 +176,14 @@ export default function AdminOrderDetailPage() {
                             <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 capitalize">
                                 {formatCmsLabel(order.payment_method)}
                             </span>
-                            <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 capitalize">
+                            <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-brand/5 text-brand capitalize">
                                 Payment: {formatCmsLabel(order.payment_status)}
                             </span>
                             <select
                                 value={order.status}
                                 onChange={(e) => handleStatusUpdate(e.target.value)}
                                 disabled={updating}
-                                className="text-xs font-semibold border border-gray-200 rounded-lg pl-3 pr-8 py-2 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                className="text-xs font-semibold border border-gray-200 rounded-lg pl-3 pr-8 py-2 bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand"
                             >
                                 {ORDER_STATUSES.map((s) => (
                                     <option key={s} value={s}>{formatCmsLabel(s)}</option>
@@ -220,7 +220,7 @@ export default function AdminOrderDetailPage() {
                                     type="button"
                                     disabled={resolvingReturn}
                                     onClick={() => resolveReturn('refund')}
-                                    className="min-h-[44px] px-3 py-2 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                                    className="min-h-[44px] px-3 py-2 rounded-lg text-xs font-semibold bg-brand text-white hover:bg-brand/90 disabled:opacity-60"
                                 >
                                     Refund
                                 </button>
@@ -318,12 +318,12 @@ export default function AdminOrderDetailPage() {
                             <div className="px-4 py-4 space-y-2">
                                 <p className="text-sm font-medium text-gray-900">{userName}</p>
                                 {order.user?.email && (
-                                    <a href={`mailto:${order.user.email}`} className="flex items-center gap-2 text-xs text-blue-600 hover:underline">
+                                    <a href={`mailto:${order.user.email}`} className="flex items-center gap-2 text-xs text-brand hover:underline">
                                         <Mail className="h-3.5 w-3.5" /> {order.user.email}
                                     </a>
                                 )}
                                 {order.user?.phone && (
-                                    <a href={`tel:${order.user.phone}`} className="flex items-center gap-2 text-xs text-blue-600 hover:underline">
+                                    <a href={`tel:${order.user.phone}`} className="flex items-center gap-2 text-xs text-brand hover:underline">
                                         <Phone className="h-3.5 w-3.5" /> {order.user.phone}
                                     </a>
                                 )}

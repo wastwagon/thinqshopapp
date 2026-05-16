@@ -91,7 +91,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     const inWishlist = isInWishlist(Number(productId));
     const wishlistBtnClass = inWishlist
         ? 'border-red-200 text-red-500'
-        : 'border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white hover:border-blue-600';
+        : 'border-gray-100 text-gray-600 hover:bg-brand hover:text-white hover:border-brand';
     const actionBtnBase =
         'bg-white shadow-sm border rounded-full flex items-center justify-center transition-all';
     const actionBtnCompact = `${actionBtnBase} w-8 h-8`;
@@ -112,7 +112,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </button>
             <Link
                 href={`/products/${productSlug}`}
-                className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white`}
+                className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-brand hover:text-white`}
                 title="Quick View"
                 aria-label="Quick view product"
             >
@@ -121,7 +121,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <button
                 type="button"
                 onClick={() => productId && addToCart(productId, 1, firstVariantId)}
-                className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white`}
+                className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-brand hover:text-white`}
                 title={hasVariants ? 'Add first option to cart (choose options on product page)' : 'Add to Cart'}
                 aria-label="Add to cart"
             >
@@ -172,7 +172,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </div>
 
                 <Link href={`/products/${productSlug}`}>
-                    <h3 className="text-xs font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug">
+                    <h3 className="text-xs font-semibold text-gray-900 group-hover:text-brand transition-colors line-clamp-2 leading-snug">
                         {product.name}
                     </h3>
                 </Link>

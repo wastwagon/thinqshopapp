@@ -74,7 +74,7 @@ export default function MediaPickerModal({
                 <div className="flex-1 overflow-y-auto overscroll-y-contain scrollbar-thin p-4">
                     {loading ? (
                         <div className="flex justify-center py-12">
-                            <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
+                            <Loader2 className="h-8 w-8 text-brand animate-spin" />
                         </div>
                     ) : items.length === 0 ? (
                         <p className="text-center text-gray-500 py-12">No media. Upload images in Media first.</p>
@@ -89,7 +89,7 @@ export default function MediaPickerModal({
                                         type="button"
                                         onClick={() => toggle(path)}
                                         className={`aspect-square rounded-xl border-2 overflow-hidden bg-gray-50 transition-all ${
-                                            isSelected ? 'border-blue-600 ring-2 ring-blue-200' : 'border-gray-100 hover:border-gray-200'
+                                            isSelected ? 'border-brand ring-2 ring-brand/20' : 'border-gray-100 hover:border-gray-200'
                                         }`}
                                     >
                                         <img
@@ -120,7 +120,7 @@ export default function MediaPickerModal({
                             type="button"
                             onClick={handleUseSelected}
                             disabled={selected.length === 0}
-                            className="h-10 px-4 rounded-xl bg-blue-600 text-white text-sm font-medium disabled:opacity-50"
+                            className="h-10 px-4 rounded-xl bg-brand text-white text-sm font-medium disabled:opacity-50"
                         >
                             Use {selected.length} selected
                         </button>

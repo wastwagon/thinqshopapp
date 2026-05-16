@@ -73,7 +73,7 @@ export default function DashboardPage() {
     ];
 
     const colorClasses: Record<string, string> = {
-        blue: 'bg-blue-50 border-blue-100 text-blue-600',
+        blue: 'bg-brand/5 border-brand/20 text-brand',
         emerald: 'bg-emerald-50 border-emerald-100 text-emerald-600',
         violet: 'bg-violet-50 border-violet-100 text-violet-600',
         slate: 'bg-slate-50 border-slate-100 text-slate-600',

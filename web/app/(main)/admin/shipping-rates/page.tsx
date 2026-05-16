@@ -147,7 +147,7 @@ export default function AdminShippingRatesPage() {
     const activeCount = rates.filter((r) => r.is_active).length;
 
     const stats = [
-        { label: 'Total', value: rates.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+        { label: 'Total', value: rates.length, icon: FileText, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
         { label: 'Air freight', value: rates.filter((r) => r.method === 'air_freight').length, icon: Plane, color: 'text-sky-600', bg: 'bg-sky-50', border: 'border-sky-100' },
         { label: 'Sea freight', value: rates.filter((r) => r.method === 'sea_freight').length, icon: Ship, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
         { label: 'Active', value: activeCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
@@ -190,7 +190,7 @@ export default function AdminShippingRatesPage() {
                                     </td>
                                     <td className="px-3 py-2.5 text-xs text-gray-500">{r.sort_order}</td>
                                     <td className="px-3 py-2.5 text-right">
-                                        <button type="button" onClick={() => openEdit(r)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg" aria-label="Edit">
+                                        <button type="button" onClick={() => openEdit(r)} className="p-1.5 text-gray-400 hover:text-brand rounded-lg" aria-label="Edit">
                                             <Pencil className="h-3.5 w-3.5" />
                                         </button>
                                         <button type="button" onClick={() => handleDelete(r.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg ml-0.5" aria-label="Delete">
@@ -211,7 +211,7 @@ export default function AdminShippingRatesPage() {
             <div className="pb-6 md:pb-8">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <Package className="h-7 w-7 text-blue-600" />
+                    <Package className="h-7 w-7 text-brand" />
                     <div>
                         <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Shipping rates</h1>
                         <p className="text-xs text-gray-500 mt-0.5">Air & sea freight (Ship for Me). Does not affect shop checkout.</p>
@@ -223,12 +223,12 @@ export default function AdminShippingRatesPage() {
                         placeholder="Search rates..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="h-9 px-3 border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-40 sm:w-48"
+                        className="h-9 px-3 border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand w-40 sm:w-48"
                     />
                     <button
                         type="button"
                         onClick={openAdd}
-                        className="min-h-[44px] h-9 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900 flex items-center gap-1.5 shrink-0"
+                        className="min-h-[44px] h-9 px-4 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 flex items-center gap-1.5 shrink-0"
                     >
                         <Plus className="h-3.5 w-3.5" /> Add rate
                     </button>
@@ -249,7 +249,7 @@ export default function AdminShippingRatesPage() {
 
             {loading ? (
                 <div className="py-10 text-center bg-white rounded-xl border border-gray-100">
-                    <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto" />
+                    <div className="animate-spin h-7 w-7 border-2 border-brand border-t-transparent rounded-full mx-auto" />
                     <p className="text-sm text-gray-500 mt-2">Loading...</p>
                 </div>
             ) : (
@@ -271,7 +271,7 @@ export default function AdminShippingRatesPage() {
                                     value={form.rate_id}
                                     onChange={(e) => setForm({ ...form, rate_id: e.target.value })}
                                     placeholder="e.g. air_express"
-                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                     required
                                     disabled={modal === 'edit'}
                                 />
@@ -281,7 +281,7 @@ export default function AdminShippingRatesPage() {
                                 <select
                                     value={form.method}
                                     onChange={(e) => setForm({ ...form, method: e.target.value })}
-                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 >
                                     <option value="air_freight">Air freight</option>
                                     <option value="sea_freight">Sea freight</option>
@@ -294,7 +294,7 @@ export default function AdminShippingRatesPage() {
                                     value={form.name}
                                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                                     placeholder="e.g. Express (3-5 days)"
-                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                     required
                                 />
                             </div>
@@ -307,7 +307,7 @@ export default function AdminShippingRatesPage() {
                                         min="0"
                                         value={form.price}
                                         onChange={(e) => setForm({ ...form, price: e.target.value })}
-                                        className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                         required
                                     />
                                 </div>
@@ -316,7 +316,7 @@ export default function AdminShippingRatesPage() {
                                     <select
                                         value={form.type}
                                         onChange={(e) => setForm({ ...form, type: e.target.value })}
-                                        className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                     >
                                         <option value="KG">KG</option>
                                         <option value="UNIT">UNIT</option>
@@ -329,7 +329,7 @@ export default function AdminShippingRatesPage() {
                                 <select
                                     value={form.currency}
                                     onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 >
                                     <option value="USD">USD ($)</option>
                                     <option value="RMB">RMB (¥)</option>
@@ -342,7 +342,7 @@ export default function AdminShippingRatesPage() {
                                     value={form.duration}
                                     onChange={(e) => setForm({ ...form, duration: e.target.value })}
                                     placeholder="e.g. 3-5 days"
-                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 />
                             </div>
                             <div className="flex items-center gap-2">
@@ -351,7 +351,7 @@ export default function AdminShippingRatesPage() {
                                     id="is_active"
                                     checked={form.is_active}
                                     onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="rounded border-gray-300 text-brand focus:ring-brand"
                                 />
                                 <label htmlFor="is_active" className="text-xs font-medium text-gray-700">Active</label>
                             </div>
@@ -359,7 +359,7 @@ export default function AdminShippingRatesPage() {
                                 <button type="button" onClick={() => setModal(null)} className="min-h-[44px] h-9 px-4 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-semibold flex items-center">
                                     Cancel
                                 </button>
-                                <button type="submit" className="min-h-[44px] h-9 px-4 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-gray-900 flex items-center">
+                                <button type="submit" className="min-h-[44px] h-9 px-4 bg-brand text-white rounded-lg text-sm font-semibold hover:bg-brand/90 flex items-center">
                                     {modal === 'add' ? 'Add' : 'Save'}
                                 </button>
                             </div>

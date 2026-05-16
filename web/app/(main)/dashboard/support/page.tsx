@@ -152,8 +152,8 @@ export default function SupportPage() {
 
                     <div className="lg:col-span-4 flex flex-col gap-4">
                         <div className="flat-card p-5 flex-1">
-                            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-3">
-                                <PhoneCall className="h-5 w-5 text-blue-600" />
+                            <div className="w-10 h-10 bg-brand/5 rounded-xl flex items-center justify-center mb-3">
+                                <PhoneCall className="h-5 w-5 text-brand" />
                             </div>
                             <p className="text-xs font-medium text-gray-500 mb-1">Phone & WhatsApp</p>
                             <a
@@ -173,8 +173,8 @@ export default function SupportPage() {
                         </div>
 
                         <div className="flat-card p-5 flex-1">
-                            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-3">
-                                <Mail className="h-5 w-5 text-blue-600" />
+                            <div className="w-10 h-10 bg-brand/5 rounded-xl flex items-center justify-center mb-3">
+                                <Mail className="h-5 w-5 text-brand" />
                             </div>
                             <p className="text-xs font-medium text-gray-500 mb-1">Email</p>
                             <a

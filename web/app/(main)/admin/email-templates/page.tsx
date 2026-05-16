@@ -79,7 +79,7 @@ export default function AdminEmailTemplatesPage() {
             <div className="pb-6 md:pb-8">
             <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div className="flex items-center gap-3">
-                    <Mail className="h-8 w-8 text-blue-600" />
+                    <Mail className="h-8 w-8 text-brand" />
                     <div>
                         <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Email templates</h1>
                         <p className="text-xs text-gray-500 mt-0.5">Notification templates and triggers. Placeholders: &#123;&#123;order_number&#125;&#125;, &#123;&#123;total&#125;&#125;, &#123;&#123;user_name&#125;&#125;, &#123;&#123;amount&#125;&#125;, &#123;&#123;transfer_token&#125;&#125;</p>
@@ -118,7 +118,7 @@ export default function AdminEmailTemplatesPage() {
                                     ) : (
                                         <>
                                             <button type="button" onClick={cancelEdit} className="h-8 px-3 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                                            <button type="button" onClick={saveEdit} disabled={saving} className="h-8 px-3 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-gray-900 flex items-center gap-2 disabled:opacity-50">
+                                            <button type="button" onClick={saveEdit} disabled={saving} className="h-8 px-3 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand/90 flex items-center gap-2 disabled:opacity-50">
                                                 <Save className="h-3.5 w-3.5" /> Save
                                             </button>
                                         </>

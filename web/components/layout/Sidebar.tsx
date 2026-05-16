@@ -106,7 +106,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
                         <button
                             type="button"
                             onClick={toggleSidebar}
-                            className="md:hidden touch-target min-w-[44px] min-h-[44px] p-3 rounded-xl bg-gray-50 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors"
+                            className="md:hidden touch-target min-w-[44px] min-h-[44px] p-3 rounded-xl bg-gray-50 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 transition-colors"
                             aria-label="Close navigation menu"
                         >
                             <ChevronLeft className="h-5 w-5 text-gray-400" aria-hidden />
@@ -124,11 +124,11 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
                                     href={link.href}
                                     onClick={() => toggleSidebar()}
                                     className={`flex items-center min-h-[44px] px-3 py-3 text-sm font-semibold rounded-xl transition-all group ${isActive
-                                        ? 'bg-gray-900 text-white shadow-sm'
+                                        ? 'bg-brand text-white shadow-sm'
                                         : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                                         }`}
                                 >
-                                    <Icon className={`mr-3 h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${isActive ? 'text-brand' : 'text-gray-400 group-hover:text-blue-600'}`} />
+                                    <Icon className={`mr-3 h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-brand'}`} />
                                     {link.name}
                                 </Link>
                             );

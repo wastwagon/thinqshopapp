@@ -17,6 +17,7 @@ import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { trackViewItem } from '@/lib/analytics';
 import { getMediaUrl } from '@/lib/media';
+import ProductReviewForm from '@/components/product/ProductReviewForm';
 
 function normalizeProductImages(product: any): string[] {
     let raw = product?.images ?? product?.gallery_images;
@@ -340,7 +341,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     </p>
                                     <p className="text-xs sm:text-sm font-medium text-gray-900">{p.short_text || '7–14 days (international)'}</p>
                                     {p.full_text && (
-                                        <Link href="/privacy" className="text-xs font-semibold text-blue-600 mt-2 inline-block touch-manipulation">Full delivery info</Link>
+                                        <Link href="/privacy" className="text-xs font-semibold text-brand mt-2 inline-block touch-manipulation">Full delivery info</Link>
                                     )}
                                 </div>
                             ))}
@@ -351,7 +352,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     </p>
                                     <p className="text-xs sm:text-sm font-medium text-gray-900">{p.short_text || '14-day returns on unused items'}</p>
                                     {p.full_text && (
-                                        <Link href="/terms" className="text-xs font-semibold text-blue-600 mt-2 inline-block touch-manipulation">Returns policy</Link>
+                                        <Link href="/terms" className="text-xs font-semibold text-brand mt-2 inline-block touch-manipulation">Returns policy</Link>
                                     )}
                                 </div>
                             ))}
@@ -371,31 +372,49 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                     </div>
                 </div>
 
-                {/* Reviews block — mobile-first */}
-                {(reviews.data.length > 0 || (product.review_count != null && product.review_count > 0)) && (
-                    <section className="mt-10 sm:mt-16 pt-6 sm:pt-12 border-t border-gray-100" aria-label="Customer reviews">
-                        <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Customer reviews</h2>
-                        <div className="space-y-4">
-                            {reviews.data.map((r) => (
-                                <div key={r.id} className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="flex items-center gap-0.5">
-                                            {[1, 2, 3, 4, 5].map((i) => (
-                                                <Star key={i} className={`h-4 w-4 ${i <= r.rating ? 'text-yellow-400 fill-current' : 'text-gray-200'}`} />
-                                            ))}
-                                        </span>
-                                        <span className="text-xs font-semibold text-gray-700">{r.display_name}</span>
-                                        <span className="text-xs text-gray-400">{new Date(r.created_at).toLocaleDateString()}</span>
-                                    </div>
-                                    {r.review_text && <p className="text-sm text-gray-700 leading-relaxed">{r.review_text}</p>}
-                                </div>
-                            ))}
+                {/* Reviews */}
+                <section className="mt-10 sm:mt-16 pt-6 sm:pt-12 border-t border-gray-100" aria-label="Customer reviews">
+                    <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Customer reviews</h2>
+                    <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] gap-6 lg:gap-8 items-start">
+                        <div className="space-y-4 order-2 lg:order-1">
+                            {reviews.data.length === 0 ? (
+                                <p className="text-sm text-gray-500">No published reviews yet. Be the first to share your experience.</p>
+                            ) : (
+                                reviews.data.map((r) => (
+                                    <article key={r.id} className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                            <span className="flex items-center gap-0.5">
+                                                {[1, 2, 3, 4, 5].map((i) => (
+                                                    <Star key={i} className={`h-4 w-4 ${i <= r.rating ? 'text-yellow-400 fill-current' : 'text-gray-200'}`} />
+                                                ))}
+                                            </span>
+                                            <span className="text-xs font-semibold text-gray-700">{r.display_name}</span>
+                                            <span className="text-xs text-gray-400">{new Date(r.created_at).toLocaleDateString()}</span>
+                                        </div>
+                                        {r.review_text && <p className="text-sm text-gray-700 leading-relaxed">{r.review_text}</p>}
+                                        {r.review_images && r.review_images.length > 0 && (
+                                            <div className="mt-3 flex flex-wrap gap-2">
+                                                {r.review_images.map((src, i) => (
+                                                    <div key={i} className="relative h-16 w-16 rounded-lg overflow-hidden border border-gray-200 bg-white">
+                                                        <Image src={getMediaUrl(src)} alt="" fill className="object-cover" sizes="64px" unoptimized={src.startsWith('http')} />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </article>
+                                ))
+                            )}
+                            {reviews.meta.total > reviews.data.length && (
+                                <p className="text-sm text-gray-500">Showing {reviews.data.length} of {reviews.meta.total} reviews.</p>
+                            )}
                         </div>
-                        {reviews.meta.total > reviews.data.length && (
-                            <p className="text-sm text-gray-500 mt-3">Showing {reviews.data.length} of {reviews.meta.total} reviews.</p>
+                        {product.id != null && (
+                            <div className="order-1 lg:order-2 lg:sticky lg:top-24">
+                                <ProductReviewForm productId={Number(product.id)} productSlug={slug} />
+                            </div>
                         )}
-                    </section>
-                )}
+                    </div>
+                </section>
 
                 {/* Related Products Section */}
                 {product && (

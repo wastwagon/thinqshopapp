@@ -78,7 +78,7 @@ export default function AdminDashboard() {
     const hasChartData = chartData.some((d) => d.value > 0);
 
     const statCards = [
-        { label: 'Shipments', value: loading ? '—' : stats.totalShipments, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+        { label: 'Shipments', value: loading ? '—' : stats.totalShipments, icon: Package, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
         { label: 'Pending transfers', value: loading ? '—' : stats.pendingTransfers, icon: Send, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'Procurement requests', value: loading ? '—' : stats.pendingRequests, icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
         { label: 'Status', value: 'Operational', icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
@@ -89,7 +89,7 @@ export default function AdminDashboard() {
             <div className="pb-6 md:pb-8">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <Shield className="h-7 w-7 text-blue-600" />
+                    <Shield className="h-7 w-7 text-brand" />
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
                         <p className="text-xs text-gray-500 mt-0.5">Overview and quick actions</p>
@@ -111,7 +111,7 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-4">
                 <div className="lg:col-span-8 bg-white rounded-xl p-5 border border-gray-100 shadow-sm relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-blue-600/5 blur-[60px]" />
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-brand/5 blur-[60px]" />
                     <div className="relative z-10">
                         <div className="mb-3">
                             <p className="text-xs font-semibold text-gray-500 mb-0.5">Activity</p>
@@ -169,29 +169,29 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="lg:col-span-4 bg-gray-900 rounded-xl p-5 relative overflow-hidden">
-                    <div className="absolute bottom-0 right-0 w-40 h-40 bg-blue-600/20 blur-[50px]" />
+                    <div className="absolute bottom-0 right-0 w-40 h-40 bg-brand/20 blur-[50px]" />
                     <div className="relative z-10 flex flex-col h-full text-white">
                         <div className="flex justify-between items-center mb-3">
                             <p className="text-xs font-semibold text-white/50">Needs attention</p>
-                            <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+                            <span className="w-1.5 h-1.5 bg-brand/60 rounded-full animate-pulse" />
                         </div>
                         <div className="space-y-2">
                             <Link href="/admin/transfers" className="block p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors group/item">
                                 <div className="flex justify-between items-start">
                                     <p className="text-2xl font-bold tracking-tight">{loading ? '—' : stats.pendingTransfers}</p>
-                                    <ArrowUpRight className="h-3.5 w-3.5 text-white/30 group-hover/item:text-blue-400 transition-colors" />
+                                    <ArrowUpRight className="h-3.5 w-3.5 text-white/30 group-hover/item:text-brand/70 transition-colors" />
                                 </div>
-                                <p className="text-xs font-semibold text-blue-300 mt-1">Pending transfers</p>
+                                <p className="text-xs font-semibold text-brand/70 mt-1">Pending transfers</p>
                             </Link>
                             <Link href="/admin/procurement" className="block p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors group/item">
                                 <div className="flex justify-between items-start">
                                     <p className="text-2xl font-bold tracking-tight">{loading ? '—' : stats.pendingRequests}</p>
-                                    <ArrowUpRight className="h-3.5 w-3.5 text-white/30 group-hover/item:text-blue-400 transition-colors" />
+                                    <ArrowUpRight className="h-3.5 w-3.5 text-white/30 group-hover/item:text-brand/70 transition-colors" />
                                 </div>
                                 <p className="text-xs font-semibold text-indigo-300 mt-1">Procurement requests</p>
                             </Link>
                         </div>
-                        <Link href="/admin/transfers" className="mt-3 block w-full min-h-[44px] h-9 bg-white text-gray-900 rounded-lg font-semibold text-xs hover:bg-blue-50 transition-colors flex items-center justify-center">
+                        <Link href="/admin/transfers" className="mt-3 block w-full min-h-[44px] h-9 bg-white text-gray-900 rounded-lg font-semibold text-xs hover:bg-brand/5 transition-colors flex items-center justify-center">
                             View all ({loading ? 0 : stats.pendingTransfers + stats.pendingRequests})
                         </Link>
                     </div>

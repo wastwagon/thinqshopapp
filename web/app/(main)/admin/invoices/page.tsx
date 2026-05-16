@@ -50,7 +50,7 @@ export default function AdminInvoicesPage() {
 
     const statusColor: Record<string, string> = {
         draft: 'bg-gray-50 text-gray-700 border-gray-200',
-        sent: 'bg-blue-50 text-blue-700 border-blue-200',
+        sent: 'bg-brand/5 text-brand border-brand/30',
         paid: 'bg-green-50 text-green-700 border-green-200',
         overdue: 'bg-red-50 text-red-700 border-red-200',
     };
@@ -60,7 +60,7 @@ export default function AdminInvoicesPage() {
             <div className="pb-6 md:pb-8">
                 <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <FileText className="h-7 w-7 text-blue-600" />
+                        <FileText className="h-7 w-7 text-brand" />
                         <div>
                             <h1 className="text-xl font-bold text-gray-900 tracking-tight">Invoices</h1>
                             <p className="text-xs text-gray-500 mt-0.5">Create, send, and track customer invoices</p>
@@ -68,7 +68,7 @@ export default function AdminInvoicesPage() {
                     </div>
                     <Link
                         href="/admin/invoices/new"
-                        className="min-h-[44px] h-9 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900 transition-all flex items-center justify-center gap-1.5 shrink-0"
+                        className="min-h-[44px] h-9 px-4 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 transition-all flex items-center justify-center gap-1.5 shrink-0"
                     >
                         <Plus className="h-4 w-4" /> New invoice
                     </Link>
@@ -82,13 +82,13 @@ export default function AdminInvoicesPage() {
                             placeholder="Search by invoice number, customer name, or email..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full h-9 pl-8 pr-2.5 border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="w-full h-9 pl-8 pr-2.5 border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                         />
                     </div>
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none bg-white"
+                        className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-brand/20 focus:border-brand appearance-none bg-white"
                     >
                         <option value="">All statuses</option>
                         {STATUSES.map((s) => (
@@ -120,7 +120,7 @@ export default function AdminInvoicesPage() {
                                         <td colSpan={6} className="py-10 text-center text-gray-500">
                                             <FileText className="h-10 w-10 mx-auto mb-2 text-gray-200" />
                                             <p className="text-sm">No invoices found</p>
-                                            <Link href="/admin/invoices/new" className="text-blue-600 text-sm font-medium mt-2 inline-block">Create one</Link>
+                                            <Link href="/admin/invoices/new" className="text-brand text-sm font-medium mt-2 inline-block">Create one</Link>
                                         </td>
                                     </tr>
                                 ) : (
@@ -147,7 +147,7 @@ export default function AdminInvoicesPage() {
                                             <td className="px-3 py-2.5 text-right">
                                                 <Link
                                                     href={`/admin/invoices/${inv.id}`}
-                                                    className="inline-flex items-center gap-1 min-w-[44px] min-h-[44px] w-9 h-9 justify-center rounded-lg border border-gray-100 text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all"
+                                                    className="inline-flex items-center gap-1 min-w-[44px] min-h-[44px] w-9 h-9 justify-center rounded-lg border border-gray-100 text-gray-400 hover:text-brand hover:border-brand transition-all"
                                                     title={inv.status === 'draft' ? 'View / Edit' : 'View'}
                                                 >
                                                     {inv.status === 'draft' ? <Edit3 className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

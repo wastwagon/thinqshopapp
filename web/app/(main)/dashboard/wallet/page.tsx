@@ -289,7 +289,7 @@ export default function WalletPage() {
                             <li key={tx.id} className="px-4 sm:px-5 py-4 hover:bg-gray-50/80 transition-colors">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
-                                        <div className={`flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center ${tx.service_type === 'wallet_topup' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-brand'}`}>
+                                        <div className={`flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center ${tx.service_type === 'wallet_topup' ? 'bg-green-50 text-green-600' : 'bg-brand/5 text-brand'}`}>
                                             {tx.service_type === 'wallet_topup' ? <ArrowDownLeft className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
                                         </div>
                                         <div className="ml-3 min-w-0">

@@ -213,11 +213,12 @@ export default function TopbarView(props: TopbarViewProps) {
             </div>
 
             {mobileSearchOpen && (
-                <div className="md:hidden px-3 pb-3 pt-0 border-t border-gray-100 bg-white/95">
+                <div className="md:hidden px-3 pb-3 pt-0 border-t border-gray-100 bg-white/95 relative z-40">
                     <SearchWithSuggestions
                         id="topbar-search-mobile"
                         listboxId="topbar-search-mobile-suggestions"
                         mobile
+                        autoFocus
                         placeholder="Search products..."
                         onNavigate={() => setMobileSearchOpen(false)}
                         className="w-full"

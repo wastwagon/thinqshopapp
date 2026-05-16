@@ -95,7 +95,7 @@ export default function AdminContent() {
         return (
             <DashboardLayout isAdmin={true}>
                 <div className="min-h-[40vh] flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                    <Loader2 className="h-8 w-8 animate-spin text-brand" />
                 </div>
             </DashboardLayout>
         );
@@ -114,7 +114,7 @@ export default function AdminContent() {
             <div className="pb-6 md:pb-8">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <Layout className="h-7 w-7 text-blue-600" />
+                    <Layout className="h-7 w-7 text-brand" />
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Content</h1>
                         <p className="text-xs text-gray-500 mt-0.5">Manage homepage sections, testimonials, and policy text</p>
@@ -304,14 +304,14 @@ function HeroSection({
     return (
         <div className="space-y-3 pt-3">
             {editing && editing.id === 0 && (
-                <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 space-y-2">
+                <div className="p-3 rounded-xl bg-brand/5 border border-brand/20 space-y-2">
                     <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
                     <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="Subtitle" value={form.subtitle} onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))} />
                     {heroImageBlock}
                     <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="CTA text" value={form.cta_text} onChange={(e) => setForm((f) => ({ ...f, cta_text: e.target.value }))} />
                     <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="CTA URL" value={form.cta_url} onChange={(e) => setForm((f) => ({ ...f, cta_url: e.target.value }))} />
                     <div className="flex gap-2">
-                        <button type="button" className="min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-medium flex items-center gap-2" onClick={saveSlide} disabled={!!saving}>
+                        <button type="button" className="min-h-[44px] px-4 rounded-lg bg-brand text-white text-sm font-medium flex items-center gap-2" onClick={saveSlide} disabled={!!saving}>
                             {saving === 'hero' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                             Save
                         </button>
@@ -331,7 +331,7 @@ function HeroSection({
                             <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="CTA text" value={form.cta_text} onChange={(e) => setForm((f) => ({ ...f, cta_text: e.target.value }))} />
                             <input className="w-full min-h-[44px] px-3 rounded-lg border text-sm" placeholder="CTA URL" value={form.cta_url} onChange={(e) => setForm((f) => ({ ...f, cta_url: e.target.value }))} />
                             <div className="flex gap-2">
-                                <button type="button" className="min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-medium flex items-center gap-2" onClick={saveSlide} disabled={!!saving}>
+                                <button type="button" className="min-h-[44px] px-4 rounded-lg bg-brand text-white text-sm font-medium flex items-center gap-2" onClick={saveSlide} disabled={!!saving}>
                                     {saving === 'hero' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                                     Save
                                 </button>
@@ -442,7 +442,7 @@ function PoliciesSection({
                             <textarea className="w-full min-h-[80px] px-3 py-2 rounded-lg border text-sm" placeholder="Short customer-facing summary" value={short} onChange={(e) => setShort(e.target.value)} />
                             <textarea className="w-full min-h-[120px] px-3 py-2 rounded-lg border text-sm" placeholder="Full policy text for policy pages" value={full} onChange={(e) => setFull(e.target.value)} />
                             <div className="flex gap-2">
-                                <button type="button" className="min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-medium" onClick={() => onUpdate(p.type, { short_text: short, full_text: full }).then(() => setEditing(null))} disabled={!!saving}>
+                                <button type="button" className="min-h-[44px] px-4 rounded-lg bg-brand text-white text-sm font-medium" onClick={() => onUpdate(p.type, { short_text: short, full_text: full }).then(() => setEditing(null))} disabled={!!saving}>
                                     Save
                                 </button>
                                 <button type="button" className="min-h-[44px] px-4 rounded-lg border text-sm" onClick={() => setEditing(null)}>Cancel</button>
@@ -479,7 +479,7 @@ function SectionsList({
                             type="button"
                             role="switch"
                             aria-checked={s.is_enabled}
-                            className={`min-w-[44px] min-h-[24px] rounded-full transition-colors touch-manipulation ${s.is_enabled ? 'bg-blue-600' : 'bg-gray-200'}`}
+                            className={`min-w-[44px] min-h-[24px] rounded-full transition-colors touch-manipulation ${s.is_enabled ? 'bg-brand' : 'bg-gray-200'}`}
                             onClick={() => onToggle(s.section_key, !s.is_enabled)}
                             disabled={!!saving}
                         />

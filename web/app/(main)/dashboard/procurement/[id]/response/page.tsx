@@ -103,7 +103,7 @@ export default function ProcurementResponsePage() {
                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden print:shadow-none print:border print:rounded-lg">
                     <div className="p-8 md:p-10 border-b border-gray-100 bg-gray-50/50">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-xl bg-brand flex items-center justify-center">
                                 <ShoppingBag className="h-6 w-6 text-white" />
                             </div>
                             <div>
@@ -167,7 +167,7 @@ export default function ProcurementResponsePage() {
                                         <p className="text-2xl font-bold text-gray-900">₵{Number(quote.quote_amount).toFixed(2)}</p>
                                         <p className="text-xs text-gray-500 mt-1">Quote date: {new Date(quote.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
                                     </div>
-                                    <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand/10 text-blue-700 border border-blue-100">
+                                    <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand/10 text-brand border border-brand/20">
                                         {quote.status.toUpperCase()}
                                     </span>
                                 </div>

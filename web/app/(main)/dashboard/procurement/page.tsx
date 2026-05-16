@@ -268,7 +268,7 @@ export default function ProcurementPage() {
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
                                     disabled={uploading}
-                                    className="w-full py-3 border-2 border-dashed border-gray-200 rounded-lg text-xs font-medium text-gray-500 hover:border-blue-300 hover:bg-brand/10/50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="w-full py-3 border-2 border-dashed border-gray-200 rounded-lg text-xs font-medium text-gray-500 hover:border-brand/40 hover:bg-brand/5 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
                                     <Upload className="h-4 w-4" />
                                     {uploading ? 'Uploading…' : 'Upload images'}
@@ -335,9 +335,9 @@ export default function ProcurementPage() {
                                         <span className="text-xs font-semibold text-gray-700">How it works</span>
                                     </div>
                                     <ul className="space-y-1 text-xs text-gray-500">
-                                        <li className="flex items-center gap-2"><Shield className="h-3 w-3 text-blue-500" /> Verified suppliers</li>
-                                        <li className="flex items-center gap-2"><Globe className="h-3 w-3 text-blue-500" /> China supply chain</li>
-                                        <li className="flex items-center gap-2"><Zap className="h-3 w-3 text-blue-500" /> Wallet checked before quote</li>
+                                        <li className="flex items-center gap-2"><Shield className="h-3 w-3 text-brand" /> Verified suppliers</li>
+                                        <li className="flex items-center gap-2"><Globe className="h-3 w-3 text-brand" /> China supply chain</li>
+                                        <li className="flex items-center gap-2"><Zap className="h-3 w-3 text-brand" /> Wallet checked before quote</li>
                                     </ul>
                                     <p className="text-xs text-gray-400 mt-2">Budget indicative; quotes may vary ±5%.</p>
                                 </div>

@@ -19,7 +19,7 @@ interface Order {
 function statusClass(status: string) {
     if (status === 'delivered') return 'bg-green-50 text-green-700';
     if (status === 'cancelled') return 'bg-red-50 text-red-600';
-    return 'bg-blue-50 text-blue-600';
+    return 'bg-brand/5 text-brand';
 }
 
 export default function OrderHistory() {

@@ -144,7 +144,7 @@ export default function AdminInvoiceRatesPage() {
             <div className="pb-6 md:pb-8">
                 <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <DollarSign className="h-7 w-7 text-blue-600" />
+                        <DollarSign className="h-7 w-7 text-brand" />
                         <div>
                             <h1 className="text-xl font-bold text-gray-900 tracking-tight">Invoice rates</h1>
                             <p className="text-xs text-gray-500 mt-0.5">Pricing per unit for invoice line items</p>
@@ -153,25 +153,25 @@ export default function AdminInvoiceRatesPage() {
                     <button
                         type="button"
                         onClick={openCreate}
-                        className="min-h-[44px] h-9 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900 transition-all flex items-center justify-center gap-1.5 shrink-0"
+                        className="min-h-[44px] h-9 px-4 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 transition-all flex items-center justify-center gap-1.5 shrink-0"
                     >
                         <Plus className="h-4 w-4" /> Add rate
                     </button>
                 </div>
 
-                <div className="mb-5 p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-100 flex gap-3 shadow-sm">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-100 text-blue-600 shrink-0">
+                <div className="mb-5 p-4 rounded-2xl bg-gradient-to-br from-brand/5 to-gray-50/80 border border-brand/20 flex gap-3 shadow-sm">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/10 text-brand shrink-0">
                         <Info className="h-5 w-5" />
                     </div>
                     <div className="text-sm text-gray-700 min-w-0">
                         <p className="font-semibold text-gray-900 mb-1">Shipping Calculator</p>
                         <p className="mb-2">
                             Invoice rates here drive the{' '}
-                            <Link href="/admin/invoices/new" className="text-blue-600 hover:text-blue-700 hover:underline font-medium inline-flex items-center gap-1">
+                            <Link href="/admin/invoices/new" className="text-brand hover:text-brand/80 hover:underline font-medium inline-flex items-center gap-1">
                                 <Calculator className="h-3.5 w-3.5" /> Shipping Calculator
                             </Link>
                             . Freight catalog rates from{' '}
-                            <Link href="/admin/shipping-rates" className="text-blue-600 hover:text-blue-700 hover:underline font-medium">
+                            <Link href="/admin/shipping-rates" className="text-brand hover:text-brand/80 hover:underline font-medium">
                                 Shipping Rates
                             </Link>{' '}
                             are merged in the calculator as well.
@@ -187,7 +187,7 @@ export default function AdminInvoiceRatesPage() {
                     <select
                         value={unitFilter}
                         onChange={(e) => setUnitFilter(e.target.value)}
-                        className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none bg-white"
+                        className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-brand/20 focus:border-brand appearance-none bg-white"
                     >
                         <option value="">All units</option>
                         {UNITS.map((u) => (
@@ -197,7 +197,7 @@ export default function AdminInvoiceRatesPage() {
                     <select
                         value={modeFilter}
                         onChange={(e) => setModeFilter(e.target.value)}
-                        className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none bg-white"
+                        className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-brand/20 focus:border-brand appearance-none bg-white"
                     >
                         <option value="">All modes</option>
                         <option value="air">Air</option>
@@ -207,7 +207,7 @@ export default function AdminInvoiceRatesPage() {
                     <select
                         value={activeFilter}
                         onChange={(e) => setActiveFilter(e.target.value)}
-                        className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none bg-white"
+                        className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-brand/20 focus:border-brand appearance-none bg-white"
                     >
                         <option value="">All</option>
                         <option value="true">Active only</option>
@@ -238,7 +238,7 @@ export default function AdminInvoiceRatesPage() {
                                         <td colSpan={6} className="py-10 text-center text-gray-500">
                                             <DollarSign className="h-10 w-10 mx-auto mb-2 text-gray-200" />
                                             <p className="text-sm">No rates yet</p>
-                                            <button type="button" onClick={openCreate} className="text-blue-600 text-sm font-medium mt-2 inline-block">Add a rate</button>
+                                            <button type="button" onClick={openCreate} className="text-brand text-sm font-medium mt-2 inline-block">Add a rate</button>
                                         </td>
                                     </tr>
                                 ) : (
@@ -259,7 +259,7 @@ export default function AdminInvoiceRatesPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => openEdit(r)}
-                                                    className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-100 text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all mr-1"
+                                                    className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-100 text-gray-400 hover:text-brand hover:border-brand transition-all mr-1"
                                                     title="Edit"
                                                 >
                                                     <Edit3 className="h-4 w-4" />
@@ -306,7 +306,7 @@ export default function AdminInvoiceRatesPage() {
                                     value={form.name}
                                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                                     placeholder="e.g. Regular Goods, Sea – per CBM"
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                     required
                                 />
                             </div>
@@ -315,7 +315,7 @@ export default function AdminInvoiceRatesPage() {
                                 <select
                                     value={form.unit}
                                     onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 >
                                     {UNITS.map((u) => (
                                         <option key={u} value={u}>{u}</option>
@@ -331,7 +331,7 @@ export default function AdminInvoiceRatesPage() {
                                     value={form.rate_per_unit}
                                     onChange={(e) => setForm((f) => ({ ...f, rate_per_unit: e.target.value }))}
                                     placeholder="0.00"
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                     required
                                 />
                             </div>
@@ -340,7 +340,7 @@ export default function AdminInvoiceRatesPage() {
                                 <select
                                     value={form.mode}
                                     onChange={(e) => setForm((f) => ({ ...f, mode: e.target.value }))}
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 >
                                     {MODES.map((m) => (
                                         <option key={m || '_'} value={m}>{m || '—'}</option>
@@ -354,7 +354,7 @@ export default function AdminInvoiceRatesPage() {
                                     min={0}
                                     value={form.sort_order}
                                     onChange={(e) => setForm((f) => ({ ...f, sort_order: e.target.value }))}
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 />
                             </div>
                             <div className="flex items-center gap-2">
@@ -363,7 +363,7 @@ export default function AdminInvoiceRatesPage() {
                                     id="is_active"
                                     checked={form.is_active}
                                     onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="rounded border-gray-300 text-brand focus:ring-brand"
                                 />
                                 <label htmlFor="is_active" className="text-sm text-gray-700">Active</label>
                             </div>
@@ -371,7 +371,7 @@ export default function AdminInvoiceRatesPage() {
                                 <button
                                     type="submit"
                                     disabled={submitting}
-                                    className="min-h-[44px] px-6 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 disabled:opacity-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                    className="min-h-[44px] px-6 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 disabled:opacity-50 focus:ring-2 focus:ring-brand focus:ring-offset-2"
                                 >
                                     {submitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
                                 </button>

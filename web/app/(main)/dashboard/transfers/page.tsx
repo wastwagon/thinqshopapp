@@ -252,7 +252,7 @@ export default function TransferPage() {
                                 >
                                     <p className={`text-xs font-semibold mb-0.5 ${transferDirection === 'send_to_china' ? 'text-brand' : 'text-gray-400'}`}>Send</p>
                                     <p className="text-xs font-bold text-gray-900">GHS → CNY</p>
-                                    {transferDirection === 'send_to_china' && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-600 rounded-full" />}
+                                    {transferDirection === 'send_to_china' && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-brand rounded-full" />}
                                 </button>
                                 <button
                                     type="button"
@@ -261,7 +261,7 @@ export default function TransferPage() {
                                 >
                                     <p className={`text-xs font-semibold mb-0.5 ${transferDirection === 'receive_from_china' ? 'text-brand' : 'text-gray-400'}`}>Receive</p>
                                     <p className="text-xs font-bold text-gray-900">CNY → GHS</p>
-                                    {transferDirection === 'receive_from_china' && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-600 rounded-full" />}
+                                    {transferDirection === 'receive_from_china' && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-brand rounded-full" />}
                                 </button>
                             </div>
 
@@ -276,7 +276,7 @@ export default function TransferPage() {
                                             type="number"
                                             value={amountGhs}
                                             onChange={(e) => setAmountGhs(e.target.value)}
-                                            className="block w-full pl-7 pr-3 py-2.5 bg-gray-50 border border-gray-100 rounded-lg text-sm font-semibold text-gray-900 focus:bg-white focus:ring-2 focus:ring-brand/100/20 focus:border-blue-500 outline-none"
+                                            className="block w-full pl-7 pr-3 py-2.5 bg-gray-50 border border-gray-100 rounded-lg text-sm font-semibold text-gray-900 focus:bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand outline-none"
                                             placeholder="0.00"
                                         />
                                     </div>
@@ -425,7 +425,7 @@ export default function TransferPage() {
                                                             )}
                                                         </div>
                                                     ))}
-                                                    <button type="button" onClick={addQrEntry} className="text-xs font-semibold text-brand hover:text-gray-900 flex items-center gap-1 bg-brand/10 px-3 py-2 rounded-lg border border-blue-100 min-h-[44px]">
+                                                    <button type="button" onClick={addQrEntry} className="text-xs font-semibold text-brand hover:text-gray-900 flex items-center gap-1 bg-brand/10 px-3 py-2 rounded-lg border border-brand/20 min-h-[44px]">
                                                         <Plus className="h-3 w-3" /> Upload new code
                                                     </button>
                                                 </div>
@@ -481,7 +481,7 @@ export default function TransferPage() {
                                 <p className="text-sm text-gray-500 mb-4">No transfers yet</p>
                                 <button
                                     onClick={() => setIsCreating(true)}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-xl text-sm font-semibold hover:bg-brand/90 transition-colors"
                                 >
                                     Send your first transfer
                                 </button>

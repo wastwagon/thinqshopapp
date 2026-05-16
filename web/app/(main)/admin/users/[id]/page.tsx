@@ -82,7 +82,7 @@ export default function AdminUserDetailPage() {
         return (
             <DashboardLayout isAdmin={true}>
                 <div className="p-6 pb-6 md:pb-8 text-center">
-                    <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3" />
+                    <div className="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full mx-auto mb-3" />
                     <p className="text-sm text-gray-500">Loading user...</p>
                 </div>
             </DashboardLayout>
@@ -97,7 +97,7 @@ export default function AdminUserDetailPage() {
             <div className="mb-6 flex items-center justify-between gap-3">
                 <Link
                     href="/admin/users"
-                    className="text-blue-600 hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
+                    className="text-brand hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
                 >
                     <ArrowLeft className="h-4 w-4 mr-1.5" /> Users
                 </Link>
@@ -114,7 +114,7 @@ export default function AdminUserDetailPage() {
                             </p>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <span className={`px-2.5 py-1 rounded-lg text-xs font-medium capitalize ${user.role === 'admin' || user.role === 'superadmin' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                            <span className={`px-2.5 py-1 rounded-lg text-xs font-medium capitalize ${user.role === 'admin' || user.role === 'superadmin' ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600'}`}>
                                 {formatCmsLabel(user.role)}
                             </span>
                             <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${user.is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
@@ -142,7 +142,7 @@ export default function AdminUserDetailPage() {
                             <div className="px-4 py-4 space-y-4">
                                 <div>
                                     <p className="text-xs font-semibold text-gray-500 mb-1">Email</p>
-                                    <a href={`mailto:${user.email}`} className="flex items-center gap-2 text-sm text-blue-600 hover:underline">
+                                    <a href={`mailto:${user.email}`} className="flex items-center gap-2 text-sm text-brand hover:underline">
                                         <Mail className="h-3.5 w-3.5" /> {user.email}
                                     </a>
                                 </div>

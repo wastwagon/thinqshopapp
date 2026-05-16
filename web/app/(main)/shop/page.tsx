@@ -29,6 +29,10 @@ function ShopContent() {
     const search = searchParams?.get('search') || '';
 
     useEffect(() => {
+        setSearchTerm(search);
+    }, [search]);
+
+    useEffect(() => {
         setPage(1);
         setHasMore(true);
         const load = async () => {

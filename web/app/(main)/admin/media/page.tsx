@@ -90,10 +90,10 @@ export default function AdminMediaPage() {
             <div className="pb-6 md:pb-8">
             <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div className="flex items-center gap-3">
-                    <ImageIcon className="h-8 w-8 text-blue-600" />
+                    <ImageIcon className="h-8 w-8 text-brand" />
                     <div>
                         <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-tight leading-tight">Media</h1>
-                        <p className="text-xs text-blue-600 flex items-center gap-1.5 mt-0.5">
+                        <p className="text-xs text-brand flex items-center gap-1.5 mt-0.5">
                             Upload and reuse images across products
                         </p>
                     </div>
@@ -106,7 +106,7 @@ export default function AdminMediaPage() {
                             placeholder="Search files..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="h-10 pl-9 pr-4 border border-gray-100 rounded-xl text-sm font-medium w-48 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="h-10 pl-9 pr-4 border border-gray-100 rounded-xl text-sm font-medium w-48 focus:ring-2 focus:ring-brand focus:border-brand"
                         />
                     </div>
                     <input
@@ -120,7 +120,7 @@ export default function AdminMediaPage() {
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
-                        className="h-10 px-5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-gray-900 transition-all flex items-center gap-2 disabled:opacity-60"
+                        className="h-10 px-5 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 transition-all flex items-center gap-2 disabled:opacity-60"
                     >
                         {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                         Upload
@@ -131,7 +131,7 @@ export default function AdminMediaPage() {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 {loading ? (
                     <div className="py-20 flex justify-center">
-                        <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
+                        <Loader2 className="h-10 w-10 text-brand animate-spin" />
                     </div>
                 ) : items.length === 0 ? (
                     <div className="py-20 text-center">
@@ -141,7 +141,7 @@ export default function AdminMediaPage() {
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="mt-4 h-10 px-5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-gray-900"
+                            className="mt-4 h-10 px-5 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90"
                         >
                             Upload image
                         </button>

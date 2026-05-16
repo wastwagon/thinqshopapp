@@ -80,7 +80,7 @@ export default function AdminWalletPage() {
     const withBalanceCount = wallets.filter((w) => (w.balance_ghs || 0) > 0).length;
 
     const stats = [
-        { label: 'Total wallets', value: wallets.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+        { label: 'Total wallets', value: wallets.length, icon: Users, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
         { label: 'Total balance', value: `₵${totalBalance.toFixed(2)}`, icon: Wallet, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
         { label: 'With balance', value: withBalanceCount, icon: Plus, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
         { label: 'Zero balance', value: zeroBalanceCount, icon: FileText, color: 'text-gray-600', bg: 'bg-gray-50', border: 'border-gray-100' },
@@ -91,7 +91,7 @@ export default function AdminWalletPage() {
             <div className="pb-6 md:pb-8">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <Wallet className="h-7 w-7 text-blue-600" />
+                    <Wallet className="h-7 w-7 text-brand" />
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Wallet management</h1>
                         <p className="text-xs text-gray-500 mt-0.5">Adjust customer wallet balances and review wallet activity</p>
@@ -104,7 +104,7 @@ export default function AdminWalletPage() {
                             placeholder="Search by customer name, email, or phone..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full h-9 pl-8 pr-2.5 border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                        className="w-full h-9 pl-8 pr-2.5 border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                     />
                 </div>
             </div>
@@ -137,7 +137,7 @@ export default function AdminWalletPage() {
                             {loading ? (
                                 <tr>
                                     <td colSpan={5} className="py-10 text-center">
-                                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
+                                        <div className="animate-spin h-7 w-7 border-2 border-brand border-t-transparent rounded-full mx-auto mb-2" />
                                         <p className="text-sm text-gray-500">Loading...</p>
                                     </td>
                                 </tr>
@@ -207,7 +207,7 @@ export default function AdminWalletPage() {
                                     step="0.01"
                                     min="0"
                                     placeholder="0.00"
-                                    className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                     value={adjustAmount}
                                     onChange={(e) => setAdjustAmount(e.target.value)}
                                 />

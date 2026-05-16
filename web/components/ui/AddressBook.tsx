@@ -107,7 +107,7 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
                 {!isAdding && (
                     <button
                         onClick={() => { setIsAdding(true); reset(); setEditingId(null); }}
-                        className="flex items-center text-sm font-medium text-brand hover:text-blue-700"
+                        className="flex items-center text-sm font-medium text-brand hover:text-brand/80"
                     >
                         <Plus className="mr-1.5 h-4 w-4" /> Add Address
                     </button>
@@ -119,27 +119,27 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="text-xs font-bold text-gray-400 font-medium ml-1 mb-2 block">Full Name</label>
-                            <input {...register('full_name')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/100/20 focus:border-blue-500 transition-all font-medium" />
+                            <input {...register('full_name')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all font-medium" />
                             {errors.full_name && <p className="text-red-500 text-xs font-bold mt-2 ml-1 capitalize">{errors.full_name.message}</p>}
                         </div>
                         <div>
                             <label className="text-xs font-bold text-gray-400 font-medium ml-1 mb-2 block">Phone Number</label>
-                            <input {...register('phone')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/100/20 focus:border-blue-500 transition-all font-medium" />
+                            <input {...register('phone')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all font-medium" />
                             {errors.phone && <p className="text-red-500 text-xs font-bold mt-2 ml-1 capitalize">{errors.phone.message}</p>}
                         </div>
                         <div className="md:col-span-2">
                             <label className="text-xs font-bold text-gray-400 font-medium ml-1 mb-2 block">Delivery Address / Street</label>
-                            <input {...register('street')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/100/20 focus:border-blue-500 transition-all font-medium" />
+                            <input {...register('street')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all font-medium" />
                             {errors.street && <p className="text-red-500 text-xs font-bold mt-2 ml-1 capitalize">{errors.street.message}</p>}
                         </div>
                         <div>
                             <label className="text-xs font-bold text-gray-400 font-medium ml-1 mb-2 block">City / Town</label>
-                            <input {...register('city')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/100/20 focus:border-blue-500 transition-all font-medium" />
+                            <input {...register('city')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all font-medium" />
                             {errors.city && <p className="text-red-500 text-xs font-bold mt-2 ml-1 capitalize">{errors.city.message}</p>}
                         </div>
                         <div>
                             <label className="text-xs font-bold text-gray-400 font-medium ml-1 mb-2 block">Region</label>
-                            <select {...register('region')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand/100/20 focus:border-blue-500 transition-all font-medium">
+                            <select {...register('region')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all font-medium">
                                 <option value="">Select Region</option>
                                 <option value="Greater Accra">Greater Accra</option>
                                 <option value="Ashanti">Ashanti</option>
@@ -151,7 +151,7 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <input type="checkbox" {...register('is_default')} className="h-5 w-5 rounded-lg border-gray-300 text-brand focus:ring-brand/100/20" />
+                        <input type="checkbox" {...register('is_default')} className="h-5 w-5 rounded-lg border-gray-300 text-brand focus:ring-brand/20" />
                         <label className="text-xs font-bold text-gray-500 capitalize">Set as primary destination</label>
                     </div>
                     <div className="flex justify-end gap-3 pt-4">

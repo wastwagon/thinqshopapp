@@ -95,7 +95,7 @@ export default function CartDrawer() {
                                                                         <div>
                                                                             <div className="flex justify-between gap-2">
                                                                                 <h3 className="line-clamp-2 text-sm font-semibold text-gray-900">
-                                                                                    <Link href={`/products/${(item.product as { slug?: string }).slug || item.product.id}`} onClick={toggleCart} className="hover:text-blue-600 transition-colors">{item.product.name}</Link>
+                                                                                    <Link href={`/products/${(item.product as { slug?: string }).slug || item.product.id}`} onClick={toggleCart} className="hover:text-brand transition-colors">{item.product.name}</Link>
                                                                                 </h3>
                                                                                 <p className="text-sm font-bold text-gray-900 whitespace-nowrap">
                                                                                     <PriceDisplay amountGhs={cartItemUnitGhs(item) * item.quantity} />

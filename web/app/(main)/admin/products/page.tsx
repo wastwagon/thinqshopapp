@@ -323,7 +323,7 @@ export default function AdminProducts() {
     const lowStockCount = products.filter((p) => (Number(p.stock_quantity) ?? 0) <= (Number(p.low_stock_threshold) ?? 10)).length;
 
     const stats = [
-        { label: 'Total', value: products.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+        { label: 'Total', value: products.length, icon: FileText, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
         { label: 'Active', value: activeCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
         { label: 'Low stock', value: lowStockCount, icon: AlertTriangle, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
     ];
@@ -333,7 +333,7 @@ export default function AdminProducts() {
             <div className="pb-6 md:pb-8">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <Package className="h-7 w-7 text-blue-600" />
+                    <Package className="h-7 w-7 text-brand" />
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">Products</h1>
                         <p className="text-xs text-gray-500 mt-0.5">Manage your storefront catalog</p>
@@ -347,13 +347,13 @@ export default function AdminProducts() {
                             placeholder="Search by product name or category..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full h-9 pl-9 pr-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="w-full h-9 pl-9 pr-3 bg-white border border-gray-100 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                         />
                     </div>
                     <button
                         type="button"
                         onClick={() => handleOpenModal()}
-                        className="min-h-[44px] h-9 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900 transition-all flex items-center gap-1.5 shrink-0"
+                        className="min-h-[44px] h-9 px-4 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 transition-all flex items-center gap-1.5 shrink-0"
                     >
                         <Plus className="h-3.5 w-3.5" /> Add product
                     </button>
@@ -388,7 +388,7 @@ export default function AdminProducts() {
                             {loading ? (
                                 <tr>
                                     <td colSpan={5} className="py-10 text-center">
-                                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
+                                        <div className="animate-spin h-7 w-7 border-2 border-brand border-t-transparent rounded-full mx-auto mb-2" />
                                         <p className="text-sm text-gray-500">Loading...</p>
                                     </td>
                                 </tr>
@@ -408,7 +408,7 @@ export default function AdminProducts() {
                                                     <img src={productImageUrl(getProductImage(p))} alt="" className="w-full h-full object-contain" />
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-xs font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">{p.name}</p>
+                                                    <p className="text-xs font-semibold text-gray-900 truncate group-hover:text-brand transition-colors">{p.name}</p>
                                                     <p className="text-xs text-gray-400">ID: {p.id}</p>
                                                 </div>
                                             </div>
@@ -431,8 +431,8 @@ export default function AdminProducts() {
                                         </td>
                                         <td className="px-3 py-2.5 text-right">
                                             <div className="flex justify-end gap-1.5">
-                                                <button type="button" className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all" aria-label="View"><Eye className="h-4 w-4" /></button>
-                                                <button type="button" onClick={() => handleOpenModal(p)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all" aria-label="Edit"><Edit3 className="h-4 w-4" /></button>
+                                                <button type="button" className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand transition-all" aria-label="View"><Eye className="h-4 w-4" /></button>
+                                                <button type="button" onClick={() => handleOpenModal(p)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand transition-all" aria-label="Edit"><Edit3 className="h-4 w-4" /></button>
                                                 <button type="button" onClick={() => handleDelete(p.id)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-all" aria-label="Delete"><Trash2 className="h-4 w-4" /></button>
                                             </div>
                                         </td>
@@ -459,7 +459,7 @@ export default function AdminProducts() {
                                     required
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 />
                             </div>
                             <div>
@@ -468,7 +468,7 @@ export default function AdminProducts() {
                                     required
                                     value={formData.category_id}
                                     onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 >
                                     <option value="">Select category</option>
                                     {categories.map((c) => (
@@ -503,7 +503,7 @@ export default function AdminProducts() {
                                     value={formData.short_description}
                                     onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
                                     placeholder="One line summary (e.g. Reliable computing for everyday tasks)"
-                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 />
                             </div>
                             <div>
@@ -513,7 +513,7 @@ export default function AdminProducts() {
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     placeholder="Full product description and key highlights shown on the product page."
                                     rows={4}
-                                    className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y min-h-[80px]"
+                                    className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand resize-y min-h-[80px]"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-3">
@@ -528,7 +528,7 @@ export default function AdminProducts() {
                                         value={formData.price}
                                         onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                                         placeholder={formData.product_kind === 'variable' ? '0 if using full price per variant' : ''}
-                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                     />
                                 </div>
                                 <div>
@@ -540,7 +540,7 @@ export default function AdminProducts() {
                                         value={formData.compare_price}
                                         onChange={(e) => setFormData({ ...formData, compare_price: e.target.value })}
                                         placeholder="Original price for sale display"
-                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                     />
                                     <p className="text-xs text-gray-400 mt-0.5">Shows in Featured Deals when set</p>
                                 </div>
@@ -551,7 +551,7 @@ export default function AdminProducts() {
                                         min="0"
                                         value={formData.stock_quantity}
                                         onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
-                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                     />
                                 </div>
                             </div>
@@ -561,7 +561,7 @@ export default function AdminProducts() {
                                     id="is_featured"
                                     checked={formData.is_featured}
                                     onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
-                                    className="w-4 h-4 rounded border-gray-200 text-blue-600 focus:ring-blue-500"
+                                    className="w-4 h-4 rounded border-gray-200 text-brand focus:ring-brand"
                                 />
                                 <label htmlFor="is_featured" className="text-sm font-medium text-gray-700">Show in Featured section on homepage</label>
                             </div>
@@ -640,7 +640,7 @@ export default function AdminProducts() {
                                     <button
                                         type="button"
                                         onClick={() => setFormData((f) => ({ ...f, variants: [...f.variants, { variant_type: '', variant_value: '' }] }))}
-                                        className="min-h-[40px] px-3 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm font-medium flex items-center gap-1.5 hover:border-blue-400 hover:text-blue-600"
+                                        className="min-h-[40px] px-3 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm font-medium flex items-center gap-1.5 hover:border-brand/40 hover:text-brand"
                                     >
                                         <Plus className="h-3.5 w-3.5" /> Add variant
                                     </button>
@@ -656,7 +656,7 @@ export default function AdminProducts() {
                                         value={formData.wholesale_min_quantity}
                                         onChange={(e) => setFormData({ ...formData, wholesale_min_quantity: e.target.value })}
                                         placeholder="e.g. 10"
-                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                     />
                                 </div>
                                 <div>
@@ -669,7 +669,7 @@ export default function AdminProducts() {
                                         value={formData.wholesale_discount_pct}
                                         onChange={(e) => setFormData({ ...formData, wholesale_discount_pct: e.target.value })}
                                         placeholder="e.g. 10"
-                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                     />
                                 </div>
                             </div>
@@ -680,7 +680,7 @@ export default function AdminProducts() {
                                     onChange={(e) => setFormData({ ...formData, specifications_json: e.target.value })}
                                     placeholder={'Screen: 14"\nRAM: 8GB\nStorage: 128GB\nProcessor: Intel Core i7'}
                                     rows={4}
-                                    className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y min-h-[80px]"
+                                    className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand resize-y min-h-[80px]"
                                 />
                                 <p className="text-xs text-gray-400 mt-0.5">Add one item per line as <strong>Label: Value</strong>. These show in a clean specs table on the product page.</p>
                             </div>
@@ -750,7 +750,7 @@ export default function AdminProducts() {
                                 </div>
                             </div>
                             <div className="flex gap-2 pt-2">
-                                <button type="submit" className="flex-1 min-h-[44px] h-10 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900 flex items-center justify-center">
+                                <button type="submit" className="flex-1 min-h-[44px] h-10 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 flex items-center justify-center">
                                     {editingProduct ? 'Update' : 'Create'}
                                 </button>
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="min-h-[44px] h-10 px-4 border border-gray-200 rounded-lg font-semibold text-sm text-gray-600 hover:bg-gray-50 flex items-center">

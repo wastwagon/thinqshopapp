@@ -5,6 +5,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { PermissionGuard } from './permission.guard';
 import { Public } from './public.decorator';
 import { RequirePermission } from './require-permission.decorator';
@@ -45,6 +46,13 @@ export class AuthController {
         // Always return success to prevent email enumeration
         await this.authService.forgotPassword(dto.email || '');
         return { message: 'If an account exists, reset instructions have been sent.' };
+    }
+
+    @Public()
+    @Post('reset-password')
+    @HttpCode(HttpStatus.OK)
+    async resetPassword(@Body() dto: ResetPasswordDto) {
+        return this.authService.resetPassword(dto);
     }
 
     @UseGuards(AuthGuard)

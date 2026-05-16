@@ -208,7 +208,7 @@ export default function InvoiceDetailPage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className={`px-3 py-1 rounded-lg text-xs font-semibold border ${invoice.status === 'draft' ? 'bg-gray-100 text-gray-700 border-gray-200' : invoice.status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                        <span className={`px-3 py-1 rounded-lg text-xs font-semibold border ${invoice.status === 'draft' ? 'bg-gray-100 text-gray-700 border-gray-200' : invoice.status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-brand/5 text-brand border-brand/30'}`}>
                             {formatCmsLabel(invoice.status)}
                         </span>
                         {isDraft && !editing && (
@@ -276,7 +276,7 @@ export default function InvoiceDetailPage() {
                             </div>
                             <div className="flex justify-between items-center">
                                 <h3 className="text-sm font-bold text-gray-700">Invoice items</h3>
-                                <button type="button" onClick={addLine} className="text-sm text-blue-600 font-medium">+ Add item</button>
+                                <button type="button" onClick={addLine} className="text-sm text-brand font-medium">+ Add item</button>
                             </div>
                             {form.items.map((item: any, idx: number) => (
                                 <div key={idx} className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg">
@@ -308,7 +308,7 @@ export default function InvoiceDetailPage() {
                             </div>
                         </div>
                         <div className="flex gap-3">
-                            <button type="submit" disabled={submitting} className="min-h-[44px] px-6 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900 disabled:opacity-50">
+                            <button type="submit" disabled={submitting} className="min-h-[44px] px-6 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 disabled:opacity-50">
                                 {submitting ? 'Saving...' : 'Save'}
                             </button>
                             <button type="button" onClick={() => { setEditing(false); fetchInvoice(); }} className="min-h-[44px] px-6 border border-gray-200 rounded-lg font-semibold text-sm text-gray-700 hover:bg-gray-50">

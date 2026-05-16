@@ -150,7 +150,7 @@ export default function ProfilePage() {
                                 type="button"
                                 disabled={avatarUploading}
                                 onClick={() => fileInputRef.current?.click()}
-                                className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center border-2 border-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                className="absolute bottom-0 right-0 w-8 h-8 bg-brand text-white rounded-lg flex items-center justify-center border-2 border-white hover:bg-brand/90 transition-colors disabled:opacity-50"
                                 aria-label="Upload profile photo"
                             >
                                 <Camera className="h-3.5 w-3.5" />
@@ -189,12 +189,12 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    <div className="mt-4 flat-card border-l-4 border-l-blue-600 p-5">
+                    <div className="mt-4 flat-card border-l-4 border-l-brand p-5">
                         <h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                            <Shield className="h-4 w-4 text-blue-600" /> Security
+                            <Shield className="h-4 w-4 text-brand" /> Security
                         </h3>
                         <p className="text-xs text-gray-500 leading-relaxed mb-4">Your data is encrypted and secure.</p>
-                        <button type="button" className="text-sm font-medium text-blue-600 flex items-center gap-2 hover:text-blue-700 transition-colors">
+                        <button type="button" className="text-sm font-medium text-brand flex items-center gap-2 hover:text-brand/80 transition-colors">
                             <Lock className="h-3.5 w-3.5" /> Change password
                         </button>
                     </div>
@@ -229,7 +229,7 @@ export default function ProfilePage() {
                                         type="text"
                                         value={formData.first_name}
                                         onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white"
                                     />
                                 </div>
                                 <div>
@@ -238,7 +238,7 @@ export default function ProfilePage() {
                                         type="text"
                                         value={formData.last_name}
                                         onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white"
                                     />
                                 </div>
                                 <div>
@@ -259,7 +259,7 @@ export default function ProfilePage() {
                                         type="text"
                                         value={formData.phone}
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white"
                                     />
                                 </div>
                             </div>

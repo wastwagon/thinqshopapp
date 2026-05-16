@@ -148,7 +148,7 @@ export default function AdminVariationsPage() {
             <div className="pb-6 md:pb-8">
                 <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <Layers className="h-7 w-7 text-blue-600" />
+                        <Layers className="h-7 w-7 text-brand" />
                         <div>
                             <h1 className="text-xl font-bold text-gray-900 tracking-tight">Variations</h1>
                             <p className="text-xs text-gray-500 mt-0.5">Options (e.g. Size, Color) and values for product variants</p>
@@ -157,7 +157,7 @@ export default function AdminVariationsPage() {
                     <button
                         type="button"
                         onClick={() => openOptionModal(null)}
-                        className="min-h-[44px] px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 flex items-center gap-2"
+                        className="min-h-[44px] px-4 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 flex items-center gap-2"
                     >
                         <Plus className="h-4 w-4" /> Add option
                     </button>
@@ -165,7 +165,7 @@ export default function AdminVariationsPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
                     <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-                        <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 mb-2">
+                        <div className="w-9 h-9 rounded-lg bg-brand/5 border border-brand/20 flex items-center justify-center text-brand mb-2">
                             <FileText className="h-4 w-4" />
                         </div>
                         <p className="text-xs font-semibold text-gray-500 mb-0.5">Options</p>
@@ -176,7 +176,7 @@ export default function AdminVariationsPage() {
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                     {loading ? (
                         <div className="py-12 flex justify-center">
-                            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                            <Loader2 className="h-8 w-8 animate-spin text-brand" />
                         </div>
                     ) : options.length === 0 ? (
                         <div className="py-12 text-center text-gray-500">
@@ -186,7 +186,7 @@ export default function AdminVariationsPage() {
                             <button
                                 type="button"
                                 onClick={() => openOptionModal(null)}
-                                className="mt-4 min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold"
+                                className="mt-4 min-h-[44px] px-4 rounded-lg bg-brand text-white text-sm font-semibold"
                             >
                                 Add first option
                             </button>
@@ -247,7 +247,7 @@ export default function AdminVariationsPage() {
                                         <button
                                             type="button"
                                             onClick={() => openValueModal(opt, null)}
-                                            className="inline-flex items-center gap-1 min-h-[32px] px-2 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm hover:border-blue-400 hover:text-blue-600"
+                                            className="inline-flex items-center gap-1 min-h-[32px] px-2 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm hover:border-brand/40 hover:text-brand"
                                         >
                                             <Plus className="h-3.5 w-3.5" /> Add value
                                         </button>
@@ -296,7 +296,7 @@ export default function AdminVariationsPage() {
                                 />
                             </div>
                             <div className="flex gap-2 pt-2">
-                                <button type="submit" disabled={saving} className="min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-60">
+                                <button type="submit" disabled={saving} className="min-h-[44px] px-4 rounded-lg bg-brand text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-60">
                                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Save
                                 </button>
                                 <button type="button" onClick={() => setOptionModalOpen(false)} className="min-h-[44px] px-4 rounded-lg border border-gray-200 text-sm">
@@ -337,7 +337,7 @@ export default function AdminVariationsPage() {
                                 />
                             </div>
                             <div className="flex gap-2 pt-2">
-                                <button type="submit" disabled={saving} className="min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-60">
+                                <button type="submit" disabled={saving} className="min-h-[44px] px-4 rounded-lg bg-brand text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-60">
                                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Save
                                 </button>
                                 <button type="button" onClick={() => setValueModalOpen(false)} className="min-h-[44px] px-4 rounded-lg border border-gray-200 text-sm">

@@ -153,7 +153,7 @@ export default function AdminProcurementDetailPage() {
         return (
             <DashboardLayout isAdmin={true}>
                 <div className="p-6 pb-6 md:pb-8 text-center">
-                    <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3" />
+                    <div className="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full mx-auto mb-3" />
                     <p className="text-sm text-gray-500">Loading request...</p>
                 </div>
             </DashboardLayout>
@@ -168,7 +168,7 @@ export default function AdminProcurementDetailPage() {
             <div className="mb-6 flex items-center justify-between gap-3">
                 <Link
                     href="/admin/procurement"
-                    className="text-blue-600 hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
+                    className="text-brand hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
                 >
                     <ArrowLeft className="h-4 w-4 mr-1.5" /> Procurement
                 </Link>
@@ -186,7 +186,7 @@ export default function AdminProcurementDetailPage() {
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                             {request.request_type && (
-                                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 capitalize">
+                                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-brand/5 text-brand capitalize">
                                     {formatCmsLabel(request.request_type)}
                                 </span>
                             )}
@@ -197,7 +197,7 @@ export default function AdminProcurementDetailPage() {
                                 value={request.status}
                                 onChange={(e) => handleStatusUpdate(e.target.value)}
                                 disabled={updating}
-                                className="text-xs font-semibold border border-gray-200 rounded-lg pl-3 pr-8 py-2 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                className="text-xs font-semibold border border-gray-200 rounded-lg pl-3 pr-8 py-2 bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand"
                             >
                                 {STATUS_OPTIONS.map((s) => (
                                     <option key={s} value={s}>{formatCmsLabel(s)}</option>
@@ -235,7 +235,7 @@ export default function AdminProcurementDetailPage() {
                                         href={request.reference_link}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1.5 text-blue-600 hover:underline text-sm"
+                                        className="inline-flex items-center gap-1.5 text-brand hover:underline text-sm"
                                     >
                                         <ExternalLink className="h-3.5 w-3.5" /> Reference link
                                     </a>
@@ -306,12 +306,12 @@ export default function AdminProcurementDetailPage() {
                             <div className="px-4 py-4 space-y-2">
                                 <p className="text-sm font-medium text-gray-900">{userName}</p>
                                 {request.user?.email && (
-                                    <a href={`mailto:${request.user.email}`} className="flex items-center gap-2 text-xs text-blue-600 hover:underline">
+                                    <a href={`mailto:${request.user.email}`} className="flex items-center gap-2 text-xs text-brand hover:underline">
                                         <Mail className="h-3.5 w-3.5" /> {request.user.email}
                                     </a>
                                 )}
                                 {request.user?.phone && (
-                                    <a href={`tel:${request.user.phone}`} className="flex items-center gap-2 text-xs text-blue-600 hover:underline">
+                                    <a href={`tel:${request.user.phone}`} className="flex items-center gap-2 text-xs text-brand hover:underline">
                                         <Phone className="h-3.5 w-3.5" /> {request.user.phone}
                                     </a>
                                 )}
@@ -329,7 +329,7 @@ export default function AdminProcurementDetailPage() {
                                         <button
                                             type="button"
                                             onClick={() => setShowQuoteForm(true)}
-                                            className="w-full h-10 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-gray-900 transition-all flex items-center justify-center gap-2"
+                                            className="w-full h-10 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 transition-all flex items-center justify-center gap-2"
                                         >
                                             <Plus className="h-4 w-4" /> Add quote
                                         </button>
@@ -342,7 +342,7 @@ export default function AdminProcurementDetailPage() {
                                                     step="0.01"
                                                     required
                                                     placeholder="0.00"
-                                                    className="w-full h-9 px-3 border border-gray-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                                    className="w-full h-9 px-3 border border-gray-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                                     value={quoteDraft.amount}
                                                     onChange={(e) => setQuoteDraft({ ...quoteDraft, amount: e.target.value })}
                                                 />
@@ -352,7 +352,7 @@ export default function AdminProcurementDetailPage() {
                                                 <textarea
                                                     placeholder="Timeline, notes..."
                                                     rows={2}
-                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand resize-none"
                                                     value={quoteDraft.details}
                                                     onChange={(e) => setQuoteDraft({ ...quoteDraft, details: e.target.value })}
                                                 />
@@ -361,7 +361,7 @@ export default function AdminProcurementDetailPage() {
                                                 <button
                                                     type="submit"
                                                     disabled={updating}
-                                                    className="flex-1 h-9 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700"
+                                                    className="flex-1 h-9 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90"
                                                 >
                                                     Submit
                                                 </button>
@@ -381,8 +381,8 @@ export default function AdminProcurementDetailPage() {
 
                         {/* Existing quotes */}
                         {request.quotes?.length > 0 && (
-                            <div className="bg-blue-50 rounded-2xl border border-blue-100 p-4">
-                                <h3 className="text-sm font-semibold text-blue-900 mb-2">Quotes</h3>
+                            <div className="bg-brand/5 rounded-2xl border border-brand/20 p-4">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-2">Quotes</h3>
                                 {request.quotes.map((q) => (
                                     <div key={q.id} className="mb-3 last:mb-0">
                                         <p className="text-lg font-bold text-gray-900">

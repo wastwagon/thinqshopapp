@@ -197,7 +197,7 @@ export default function AdminAuditLogsPage() {
             <div className="pb-6 md:pb-8">
                 <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <Shield className="h-7 w-7 text-blue-600" />
+                        <Shield className="h-7 w-7 text-brand" />
                         <div>
                             <h1 className="text-xl font-bold text-gray-900 tracking-tight">Audit logs</h1>
                             <p className="text-xs text-gray-500 mt-0.5">Security and admin action history</p>
@@ -206,7 +206,7 @@ export default function AdminAuditLogsPage() {
                     <button
                         type="button"
                         onClick={fetchLogs}
-                        className="min-h-[44px] px-4 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-500 transition-all flex items-center justify-center gap-2"
+                        className="min-h-[44px] px-4 py-2.5 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/50 transition-all flex items-center justify-center gap-2"
                     >
                         <RefreshCw className="h-4 w-4" />
                         Refresh
@@ -223,7 +223,7 @@ export default function AdminAuditLogsPage() {
                                     value={draftFilters.action}
                                     onChange={(e) => setDraftFilters((prev) => ({ ...prev, action: e.target.value }))}
                                     placeholder="Filter by action (e.g. order, wallet, product)"
-                                    className="w-full min-h-[44px] pl-9 pr-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="w-full min-h-[44px] pl-9 pr-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 />
                             </div>
                             <input
@@ -231,7 +231,7 @@ export default function AdminAuditLogsPage() {
                                 value={draftFilters.table_name}
                                 onChange={(e) => setDraftFilters((prev) => ({ ...prev, table_name: e.target.value }))}
                                 placeholder="Filter by table (e.g. orders, users, wallets)"
-                                className="w-full min-h-[44px] px-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                className="w-full min-h-[44px] px-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                             />
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
@@ -239,13 +239,13 @@ export default function AdminAuditLogsPage() {
                                 type="datetime-local"
                                 value={draftFilters.from}
                                 onChange={(e) => setDraftFilters((prev) => ({ ...prev, from: e.target.value }))}
-                                className="w-full min-h-[44px] px-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                className="w-full min-h-[44px] px-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                             />
                             <input
                                 type="datetime-local"
                                 value={draftFilters.to}
                                 onChange={(e) => setDraftFilters((prev) => ({ ...prev, to: e.target.value }))}
-                                className="w-full min-h-[44px] px-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                className="w-full min-h-[44px] px-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                             />
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -305,7 +305,7 @@ export default function AdminAuditLogsPage() {
                                                 <p className="text-xs text-gray-500">{row.admin?.email || '-'}</p>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className="px-2 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold">
+                                                <span className="px-2 py-1 rounded-lg bg-brand/5 text-brand text-xs font-semibold">
                                                     {formatActionName(row.action)}
                                                 </span>
                                             </td>
@@ -352,7 +352,7 @@ export default function AdminAuditLogsPage() {
                                                             <button
                                                                 type="button"
                                                                 onClick={() => setSelectedRow(row)}
-                                                                className="text-blue-600 hover:text-blue-700 font-semibold"
+                                                                className="text-brand hover:text-brand/80 font-semibold"
                                                             >
                                                                 View details
                                                             </button>

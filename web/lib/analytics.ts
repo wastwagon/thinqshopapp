@@ -16,10 +16,28 @@ export type AnalyticsEvent =
 
 const noop = () => {};
 
+const CONSENT_KEY = 'thinqshop_analytics_consent';
+
+export function isAnalyticsEnabledInEnv(): boolean {
+    const key = process.env.NEXT_PUBLIC_ANALYTICS_ENABLED;
+    return key === 'true' || key === '1';
+}
+
+export function hasAnalyticsConsent(): boolean {
+    if (typeof window === 'undefined') return false;
+    if (!isAnalyticsEnabledInEnv()) return true;
+    return window.localStorage.getItem(CONSENT_KEY) === 'accepted';
+}
+
+export function setAnalyticsConsent(accepted: boolean): void {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(CONSENT_KEY, accepted ? 'accepted' : 'declined');
+}
+
 function getTracker() {
     if (typeof window === 'undefined') return noop;
-    const key = process.env.NEXT_PUBLIC_ANALYTICS_ENABLED;
-    if (key !== 'true' && key !== '1') return noop;
+    if (!isAnalyticsEnabledInEnv()) return noop;
+    if (!hasAnalyticsConsent()) return noop;
     return (event: AnalyticsEvent) => {
         try {
             (window as any).__analytics?.track?.(event);
