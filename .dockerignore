@@ -40,10 +40,6 @@ coverage
 **/*.test.ts
 **/*.spec.ts
 
-# Mobile
-mobile
-**/mobile
-
 # Misc
 *.md
 !README.md

@@ -6,7 +6,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends ca-certifica
 
 WORKDIR /app
 
-# Copy monorepo files (mobile excluded via .dockerignore)
+# Copy monorepo workspace files
 COPY package.json package-lock.json ./
 COPY web/ ./web/
 COPY packages/ ./packages/

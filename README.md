@@ -1,12 +1,11 @@
 # ThinQShop
 
-Premium e-commerce and money transfer platform built with NestJS, Next.js, Expo, and PostgreSQL.
+Premium e-commerce and money transfer platform built with NestJS, Next.js, and PostgreSQL.
 
 ## Stack
 
 - **Backend:** NestJS, Prisma, PostgreSQL
-- **Web:** Next.js 14, React 18, Tailwind
-- **Mobile:** Expo / React Native
+- **Web:** Next.js 14, React 18, Tailwind (responsive / mobile-first storefront)
 - **Deploy:** Docker, Coolify
 
 ## Quick Start
@@ -28,9 +27,6 @@ npm run dev:backend
 
 # Web (port 7001) — this is the storefront
 npm run dev:web
-
-# Mobile
-npm run dev:mobile
 ```
 
 **Viewing the storefront:** Open **http://localhost:7001** in your browser. You must run **both** the backend and the web app:
@@ -73,7 +69,6 @@ npm run build:backend:docker
 |--------|-------------|
 | `npm run dev:backend` | Start NestJS in watch mode |
 | `npm run dev:web` | Start Next.js dev server |
-| `npm run dev:mobile` | Start Expo |
 | `npm run build:web:docker` | Build web Docker image |
 | `npm run build:backend:docker` | Build backend Docker image |
 | `npm run clean` | Remove `backend/dist` and `web/.next` |
@@ -86,8 +81,7 @@ Deploy with Docker Compose or Coolify. See [DEPLOY.md](./DEPLOY.md) and [docs/CO
 
 ```
 ├── backend/          # NestJS API
-├── web/              # Next.js app
-├── mobile/           # Expo app
+├── web/              # Next.js app (storefront + admin + customer dashboard)
 ├── database/         # Prisma schema
 ├── docker-compose.yml         # Local dev (with db)
 ├── docker-compose.coolify.yml # Coolify / VPS (external DB)

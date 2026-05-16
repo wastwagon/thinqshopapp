@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Removed
+
+- Expo / React Native `mobile/` workspace (unused; web app is the customer surface)
+
 ## [1.0.0-alpha.1] - 2026-02-23
 
 ### Added
@@ -25,4 +31,4 @@
 ## [1.0.0-alpha.0] - 2026-02-19
 
 - Initial monorepo setup
-- NestJS backend, Next.js web, Expo mobile
+- NestJS backend, Next.js web

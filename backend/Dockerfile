@@ -6,7 +6,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-c
 
 WORKDIR /app
 
-# Copy monorepo files (mobile excluded via .dockerignore)
+# Copy monorepo workspace files
 COPY package.json package-lock.json ./
 COPY backend/ ./backend/
 COPY database/ ./database/
