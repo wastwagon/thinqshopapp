@@ -6,6 +6,7 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import api from '@/lib/axios';
 import { Shield, Search, RefreshCw, Download, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { AUDIT_PATCH_BADGE } from '@/lib/status-styles';
 
 type AuditRow = {
     id: number;
@@ -330,7 +331,7 @@ export default function AdminAuditLogsPage() {
                                                         <div className="space-y-2">
                                                             <div className="flex flex-wrap gap-1.5">
                                                                 {method !== '-' && (
-                                                                    <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-semibold">
+                                                                    <span className={AUDIT_PATCH_BADGE}>
                                                                         {method}
                                                                     </span>
                                                                 )}

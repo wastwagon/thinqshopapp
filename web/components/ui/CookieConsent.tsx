@@ -30,7 +30,7 @@ export default function CookieConsent() {
         <div
             role="dialog"
             aria-label="Cookie preferences"
-            className="fixed bottom-0 left-0 right-0 z-[60] p-4 md:p-6 pointer-events-none"
+            className="fixed left-0 right-0 z-[105] p-4 md:p-6 pointer-events-none bottom-[calc(3.25rem+env(safe-area-inset-bottom,0px))] md:bottom-0"
         >
             <div className="max-w-3xl mx-auto pointer-events-auto flat-card border border-gray-200/90 shadow-xl p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
                 <p className="text-sm text-gray-600 flex-1">

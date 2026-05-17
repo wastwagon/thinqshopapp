@@ -16,9 +16,11 @@ import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import { getMediaUrl } from '@/lib/media';
+import ChangePasswordForm from '@/components/auth/ChangePasswordForm';
 
 export default function ProfilePage() {
     const { user, refreshUser } = useAuth();
+    const [showChangePassword, setShowChangePassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [avatarUploading, setAvatarUploading] = useState(false);
     const [pendingPreview, setPendingPreview] = useState<string | null>(null);
@@ -194,9 +196,17 @@ export default function ProfilePage() {
                             <Shield className="h-4 w-4 text-brand" /> Security
                         </h3>
                         <p className="text-xs text-gray-500 leading-relaxed mb-4">Your data is encrypted and secure.</p>
-                        <button type="button" className="text-sm font-medium text-brand flex items-center gap-2 hover:text-brand/80 transition-colors">
-                            <Lock className="h-3.5 w-3.5" /> Change password
-                        </button>
+                        {!showChangePassword ? (
+                            <button
+                                type="button"
+                                onClick={() => setShowChangePassword(true)}
+                                className="text-sm font-medium text-brand flex items-center gap-2 hover:text-brand/80 transition-colors min-h-[44px]"
+                            >
+                                <Lock className="h-3.5 w-3.5" /> Change password
+                            </button>
+                        ) : (
+                            <ChangePasswordForm onCancel={() => setShowChangePassword(false)} />
+                        )}
                     </div>
 
                     <div className="mt-4 flat-card border-l-4 border-l-red-500 p-5">

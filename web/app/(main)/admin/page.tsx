@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { ADMIN_STAT_PROGRESS } from '@/lib/status-styles';
 import {
     AreaChart,
     Area,
@@ -85,7 +86,7 @@ export default function AdminDashboard() {
     const statCards = [
         { label: 'Shipments', value: loading ? '—' : stats.totalShipments, icon: Package, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
         { label: 'Pending transfers', value: loading ? '—' : stats.pendingTransfers, icon: Send, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
-        { label: 'Procurement requests', value: loading ? '—' : stats.pendingRequests, icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+        { label: 'Procurement requests', value: loading ? '—' : stats.pendingRequests, icon: FileText, ...ADMIN_STAT_PROGRESS },
         { label: 'Pending orders', value: loading ? '—' : stats.pendingOrders, icon: CheckCircle, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
     ];
 
@@ -180,7 +181,7 @@ export default function AdminDashboard() {
                                     <p className="text-2xl font-bold tracking-tight text-gray-900">{loading ? '—' : stats.pendingRequests}</p>
                                     <ArrowUpRight className="h-3.5 w-3.5 text-gray-300 group-hover/item:text-brand transition-colors" aria-hidden />
                                 </div>
-                                <p className="text-xs font-semibold text-indigo-600 mt-1">Procurement requests</p>
+                                <p className="text-xs font-semibold text-brand mt-1">Procurement requests</p>
                             </Link>
                         </div>
                         <Link

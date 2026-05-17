@@ -17,8 +17,8 @@ import { cartItemUnitGhs } from '@/lib/product-utils';
 import LiveRegion from '@/components/ui/LiveRegion';
 import { roundGhs } from '@/lib/money';
 
-const CheckoutPaystackTrigger = dynamic(
-    () => import('@/components/checkout/CheckoutPaystackTrigger').then((m) => m.default),
+const PaystackTrigger = dynamic(
+    () => import('@/components/payments/PaystackTrigger').then((m) => m.default),
     { ssr: false }
 );
 
@@ -174,8 +174,8 @@ export default function CheckoutClient() {
     return (
         <ShopLayout>
             {paystackOrder && (
-                <CheckoutPaystackTrigger
-                    config={paystackOrder}
+                <PaystackTrigger
+                    config={{ reference: paystackOrder.reference, amount: paystackOrder.amount_pesewas }}
                     userEmail={user?.email}
                     onSuccess={handlePaystackSuccess}
                     onClose={handlePaystackClose}

@@ -16,6 +16,7 @@ import {
     Calendar,
     Zap,
 } from 'lucide-react';
+import { STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
 import toast from 'react-hot-toast';
 
 const SHIPMENT_STATUSES = ['booked', 'pickup_scheduled', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled'];
@@ -89,7 +90,7 @@ function StatusBadge({ status }: { status: string }) {
     const colors: Record<string, string> = {
         booked: 'bg-orange-50 text-orange-700 border-orange-200',
         pickup_scheduled: 'bg-brand/5 text-brand border-brand/30',
-        picked_up: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        picked_up: STATUS_PROGRESS_BADGE,
         in_transit: 'bg-purple-50 text-purple-700 border-purple-200',
         out_for_delivery: 'bg-orange-50 text-orange-700 border-orange-200',
         delivered: 'bg-green-50 text-green-700 border-green-200',

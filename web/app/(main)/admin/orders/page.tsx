@@ -8,6 +8,7 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import AdminStatGrid from '@/components/admin/AdminStatGrid';
 import Link from 'next/link';
 import { Package, Search, ChevronRight, FileText, Clock, Truck, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { ADMIN_STAT_PROGRESS, STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
 
 const ORDER_STATUSES = ['pending', 'processing', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'];
 
@@ -69,7 +70,7 @@ export default function AdminOrdersPage() {
     const stats = [
         { label: 'Total', value: orders.length, icon: FileText, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
         { label: 'Pending', value: pendingCount, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
-        { label: 'In progress', value: processingCount, icon: Truck, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+        { label: 'In progress', value: processingCount, icon: Truck, ...ADMIN_STAT_PROGRESS },
         { label: 'Delivered', value: deliveredCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
         { label: 'Cancelled', value: cancelledCount, icon: XCircle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100' },
     ];
@@ -78,7 +79,7 @@ export default function AdminOrdersPage() {
         const colors: Record<string, string> = {
             pending: 'bg-orange-50 text-orange-700 border-orange-200',
             processing: 'bg-brand/5 text-brand border-brand/30',
-            packed: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            packed: STATUS_PROGRESS_BADGE,
             shipped: 'bg-purple-50 text-purple-700 border-purple-200',
             out_for_delivery: 'bg-orange-50 text-orange-700 border-orange-200',
             delivered: 'bg-green-50 text-green-700 border-green-200',

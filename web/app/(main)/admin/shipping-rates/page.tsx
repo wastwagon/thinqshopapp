@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Package, Plus, Pencil, Trash2, Plane, Ship, CheckCircle, FileText } from 'lucide-react';
+import { ADMIN_STAT_LOGISTICS } from '@/lib/status-styles';
 
 interface ShippingRate {
     id: number;
@@ -150,7 +151,7 @@ export default function AdminShippingRatesPage() {
     const stats = [
         { label: 'Total', value: rates.length, icon: FileText, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
         { label: 'Air freight', value: rates.filter((r) => r.method === 'air_freight').length, icon: Plane, color: 'text-sky-600', bg: 'bg-sky-50', border: 'border-sky-100' },
-        { label: 'Sea freight', value: rates.filter((r) => r.method === 'sea_freight').length, icon: Ship, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+        { label: 'Sea freight', value: rates.filter((r) => r.method === 'sea_freight').length, icon: Ship, ...ADMIN_STAT_LOGISTICS },
         { label: 'Active', value: activeCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
     ];
 

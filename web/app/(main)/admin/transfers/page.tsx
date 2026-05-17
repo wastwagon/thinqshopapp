@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Send, Search, History, ChevronRight, Calendar, ArrowRight, QrCode, Upload, ImagePlus, Download, CheckCircle, Loader2, FileText, Clock, Package } from 'lucide-react';
+import { STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
 
 type QrCodeEntry = { image: string; amount_ghs?: number; amount_cny?: number; recipient_name?: string };
 type QrFulfillment = { qr_index: number; status: string; confirmation_image?: string; admin_notes?: string; fulfilled_at?: string };
@@ -164,7 +165,7 @@ export default function AdminTransfersPage() {
         const colors: Record<string, string> = {
             pending: 'bg-orange-50 text-orange-700 border-orange-200',
             payment_received: 'bg-brand/5 text-brand border-brand/30',
-            processing: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            processing: STATUS_PROGRESS_BADGE,
             sent_to_partner: 'bg-purple-50 text-purple-700 border-purple-200',
             completed: 'bg-green-50 text-green-700 border-green-200',
             failed: 'bg-red-50 text-red-700 border-red-200',

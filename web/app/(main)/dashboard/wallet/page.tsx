@@ -6,6 +6,7 @@ import api from '@/lib/axios';
 import { Plus, ArrowUpRight, ArrowDownLeft, Wallet, RefreshCw, History as HistoryIcon, Activity, TrendingUp, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { GroupedList, GroupedListHeader, GroupedListEmpty, GroupedListRow } from '@/components/ui/GroupedList';
 import { useAuth } from '@/context/AuthContext';
 import {
     AreaChart,
@@ -17,8 +18,8 @@ import {
     ResponsiveContainer,
 } from 'recharts';
 
-const WalletPaystackTrigger = dynamic(
-    () => import('@/components/wallet/WalletPaystackTrigger').then((m) => m.default),
+const PaystackTrigger = dynamic(
+    () => import('@/components/payments/PaystackTrigger').then((m) => m.default),
     { ssr: false }
 );
 
@@ -120,8 +121,8 @@ export default function WalletPage() {
         <DashboardLayout>
             <div className="pb-20 md:pb-10">
             {paystackTopUpConfig && (
-                <WalletPaystackTrigger
-                    config={paystackTopUpConfig}
+                <PaystackTrigger
+                    config={{ reference: paystackTopUpConfig.reference, amount: paystackTopUpConfig.amount_pesewas }}
                     userEmail={user?.email}
                     onSuccess={handlePaystackTopUpSuccess}
                     onClose={handlePaystackTopUpClose}
@@ -261,62 +262,69 @@ export default function WalletPage() {
             )}
 
             {/* Transaction History */}
-            <div id="wallet-transaction-history" className="flat-card overflow-hidden scroll-mt-6">
-                <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                    <h3 className="text-sm font-medium text-gray-700 flex items-center">
-                        <HistoryIcon className="h-4 w-4 mr-2 text-brand" />
-                        Transaction history
-                    </h3>
-                    <button onClick={fetchData} className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-brand transition-colors">
-                        <RefreshCw className="h-4 w-4" />
-                    </button>
-                </div>
-                {loading && transactions.length === 0 ? (
-                    <div className="p-20 text-center">
-                        <div className="animate-pulse flex flex-col items-center">
-                            <div className="w-10 h-10 bg-gray-100 rounded-full mb-3" />
-                            <p className="text-xs text-gray-400">Loading...</p>
-                        </div>
-                    </div>
-                ) : transactions.length === 0 ? (
-                    <div className="p-10 text-center">
-                        <Wallet className="h-12 w-12 mx-auto mb-4 text-gray-200" />
-                        <p className="text-xs text-gray-400">No transactions yet</p>
-                    </div>
-                ) : (
-                    <ul role="list" className="divide-y divide-gray-50">
-                        {transactions.map((tx) => (
-                            <li key={tx.id} className="px-4 sm:px-5 py-4 hover:bg-gray-50/80 transition-colors">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <div className={`flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center ${tx.service_type === 'wallet_topup' ? 'bg-green-50 text-green-600' : 'bg-brand/5 text-brand'}`}>
-                                            {tx.service_type === 'wallet_topup' ? <ArrowDownLeft className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
-                                        </div>
-                                        <div className="ml-3 min-w-0">
-                                            <p className="text-sm font-medium text-gray-900 capitalize truncate">
-                                                {tx.service_type.replace(/_/g, ' ')}
-                                            </p>
-                                            <p className="text-xs text-gray-500 mt-0.5">
-                                                {new Date(tx.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col items-end gap-2">
-                                        <p className={`text-sm font-semibold tabular-nums ${tx.service_type === 'wallet_topup' ? 'text-green-600' : 'text-gray-900'}`}>
-                                            {tx.service_type === 'wallet_topup' ? '+' : '-'} ₵{Number(tx.amount).toFixed(2)}
-                                        </p>
-                                        <span className={`px-2 py-0.5 text-[10px] font-medium rounded-md capitalize ${tx.status === 'success' ? 'bg-green-50 text-green-700' :
-                                            tx.status === 'failed' ? 'bg-red-50 text-red-600' :
-                                                'bg-amber-50 text-amber-700'
-                                            }`}>
-                                            {tx.status}
+            <div id="wallet-transaction-history" className="scroll-mt-6">
+                <GroupedList aria-label="Transaction history">
+                    <GroupedListHeader
+                        title="Transaction history"
+                        icon={HistoryIcon}
+                        action={
+                            <button
+                                type="button"
+                                onClick={fetchData}
+                                className="min-w-[44px] min-h-[44px] rounded-xl border border-gray-200/90 bg-white flex items-center justify-center text-gray-400 hover:text-brand transition-colors"
+                                aria-label="Refresh transactions"
+                            >
+                                <RefreshCw className="h-4 w-4" />
+                            </button>
+                        }
+                    />
+                    {loading && transactions.length === 0 ? (
+                        <GroupedListEmpty message="Loading transactions…" />
+                    ) : transactions.length === 0 ? (
+                        <GroupedListEmpty icon={Wallet} message="No transactions yet" />
+                    ) : (
+                        transactions.map((tx) => {
+                            const isTopUp = tx.service_type === 'wallet_topup';
+                            return (
+                                <GroupedListRow
+                                    key={tx.id}
+                                    icon={isTopUp ? ArrowDownLeft : ArrowUpRight}
+                                    iconClassName={
+                                        isTopUp ? 'bg-green-50 text-green-600' : 'bg-brand/10 text-brand'
+                                    }
+                                    title={tx.service_type.replace(/_/g, ' ')}
+                                    subtitle={new Date(tx.created_at).toLocaleDateString(undefined, {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                    })}
+                                    trailing={
+                                        <span className="flex flex-col items-end gap-1">
+                                            <span
+                                                className={`text-sm font-semibold tabular-nums ${isTopUp ? 'text-green-600' : 'text-gray-900'}`}
+                                            >
+                                                {isTopUp ? '+' : '-'}₵{Number(tx.amount).toFixed(2)}
+                                            </span>
+                                            <span
+                                                className={`px-2 py-0.5 text-xs font-medium rounded-md capitalize ${
+                                                    tx.status === 'success'
+                                                        ? 'bg-green-50 text-green-700'
+                                                        : tx.status === 'failed'
+                                                          ? 'bg-red-50 text-red-600'
+                                                          : 'bg-amber-50 text-amber-700'
+                                                }`}
+                                            >
+                                                {tx.status}
+                                            </span>
                                         </span>
-                                    </div>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                )}
+                                    }
+                                />
+                            );
+                        })
+                    )}
+                </GroupedList>
             </div>
             </div>
         </DashboardLayout>

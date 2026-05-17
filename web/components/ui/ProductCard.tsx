@@ -192,7 +192,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         )}
                         <div className="flex flex-col items-start gap-0">
                             {hasVariants && (
-                                <span className="text-[10px] font-medium text-gray-500">From</span>
+                                <span className="text-xs font-medium text-gray-500">From</span>
                             )}
                             <PriceDisplay amountGhs={fromPrice} className="text-base font-semibold text-gray-900" />
                         </div>

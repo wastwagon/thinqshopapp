@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
 const PaystackTrigger = dynamic(
-    () => import('@/components/transfers/PaystackTrigger').then((m) => m.default),
+    () => import('@/components/payments/PaystackTrigger').then((m) => m.default),
     { ssr: false }
 );
 
@@ -215,7 +215,7 @@ export default function TransferPage() {
             <div className="pb-20 md:pb-10">
             {paystackConfig && (
                 <PaystackTrigger
-                    config={paystackConfig}
+                    config={{ reference: paystackConfig.reference, amount: paystackConfig.amount }}
                     onSuccess={handlePaystackSuccess}
                     onClose={handlePaystackClose}
                     userEmail={user?.email}

@@ -21,7 +21,7 @@ export default function ShopLayout({ children }: ShopLayoutProps) {
                 <Footer />
             </main>
 
-            <MobileBottomNav />
+            <MobileBottomNav variant="shop" />
         </div>
     );
 }

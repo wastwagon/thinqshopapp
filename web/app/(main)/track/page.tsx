@@ -6,6 +6,7 @@ import { Search, MapPin, Package, Truck, Wallet, ShoppingBag } from 'lucide-reac
 import api from '@/lib/axios';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
+import { STATUS_PROGRESS_BADGE_STRONG } from '@/lib/status-styles';
 
 const TRACKABLE_SERVICES = [
     {
@@ -51,14 +52,14 @@ function StatusBadge({ status }: { status: string }) {
     const colors: Record<string, string> = {
         pending: 'bg-orange-100 text-orange-800 border-orange-200',
         processing: 'bg-brand/10 text-brand border-brand/20',
-        packed: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+        packed: STATUS_PROGRESS_BADGE_STRONG,
         shipped: 'bg-purple-100 text-purple-800 border-purple-200',
         out_for_delivery: 'bg-orange-100 text-orange-800 border-orange-200',
         delivered: 'bg-green-100 text-green-800 border-green-200',
         cancelled: 'bg-red-100 text-red-800 border-red-200',
         payment_received: 'bg-emerald-100 text-emerald-800 border-emerald-200',
         sourcing: 'bg-brand/10 text-brand border-brand/20',
-        items_received: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+        items_received: STATUS_PROGRESS_BADGE_STRONG,
         ready_for_delivery: 'bg-orange-100 text-orange-800 border-orange-200',
         submitted: 'bg-slate-100 text-slate-800 border-slate-200',
         accepted: 'bg-green-100 text-green-800 border-green-200',

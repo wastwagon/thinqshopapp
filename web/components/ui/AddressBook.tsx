@@ -115,7 +115,7 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
             </div>
 
             {isAdding && (
-                <form onSubmit={handleSubmit(onSubmit)} className="bg-gray-50 p-8 rounded-xl border border-gray-100 mb-8 space-y-6 shadow-sm">
+                <form onSubmit={handleSubmit(onSubmit)} className="flat-card bg-gray-50/50 p-8 mb-8 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="text-xs font-bold text-gray-400 font-medium ml-1 mb-2 block">Full Name</label>

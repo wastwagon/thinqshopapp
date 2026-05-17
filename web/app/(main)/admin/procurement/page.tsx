@@ -18,6 +18,7 @@ import {
     FileText,
     Eye
 } from 'lucide-react';
+import { STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
 
 interface ProcurementRequest {
     id: number;
@@ -111,7 +112,7 @@ export default function AdminProcurementPage() {
             submitted: 'bg-orange-50 text-orange-700 border-orange-200',
             quote_provided: 'bg-brand/5 text-brand border-brand/30',
             accepted: 'bg-green-50 text-green-700 border-green-200',
-            payment_received: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            payment_received: STATUS_PROGRESS_BADGE,
             processing: 'bg-purple-50 text-purple-700 border-purple-200',
             delivered: 'bg-emerald-50 text-emerald-700 border-emerald-200',
             cancelled: 'bg-red-50 text-red-700 border-red-200'
@@ -176,7 +177,7 @@ export default function AdminProcurementPage() {
                     </div>
                 ) : (
                     filteredRequests.map((req) => (
-                        <div key={req.id} className="admin-table-wrap hover:shadow-md transition-all">
+                        <div key={req.id} className="admin-table-wrap hover:border-gray-300/90 transition-colors">
                             <div className="p-4 lg:p-5">
                                 <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                                     <div className="flex-1 min-w-0 space-y-3">

@@ -9,6 +9,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import BarcodeScanner from '@/components/ui/BarcodeScanner';
 import { Truck, Search, Package, User, Mail, Calendar, Clock, Zap, FileText, CheckCircle, ChevronRight, Camera, ExternalLink } from 'lucide-react';
+import { ADMIN_STAT_PROGRESS, STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
 
 interface Shipment {
     id: number;
@@ -112,7 +113,7 @@ export default function AdminLogisticsPage() {
     const stats = [
         { label: 'Total', value: shipments.length, icon: FileText, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
         { label: 'Booked', value: bookedCount, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
-        { label: 'In transit', value: inTransitCount, icon: Truck, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+        { label: 'In transit', value: inTransitCount, icon: Truck, ...ADMIN_STAT_PROGRESS },
         { label: 'Delivered', value: deliveredCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
     ];
 
@@ -120,7 +121,7 @@ export default function AdminLogisticsPage() {
         const colors: Record<string, string> = {
             booked: 'bg-orange-50 text-orange-700 border-orange-200',
             pickup_scheduled: 'bg-brand/5 text-brand border-brand/30',
-            picked_up: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            picked_up: STATUS_PROGRESS_BADGE,
             in_transit: 'bg-purple-50 text-purple-700 border-purple-200',
             out_for_delivery: 'bg-orange-50 text-orange-700 border-orange-200',
             delivered: 'bg-green-50 text-green-700 border-green-200',
