@@ -11,7 +11,7 @@
 | Log message | Fix |
 |-------------|-----|
 | `FATAL: JWT_SECRET is not set` | Coolify → Environment → set `JWT_SECRET` → redeploy |
-| `FATAL: POSTGRES_PASSWORD is not set` | Set `POSTGRES_PASSWORD` in Coolify |
+| `FATAL: DATABASE_URL is not set` | Set `POSTGRES_PASSWORD` in Coolify (compose builds `DATABASE_URL` for backend) |
 | `FATAL: Migration failed after 5 attempts` | See migration / password rows below |
 | `JWT_SECRET environment variable is required` (from Nest) | Same as first row |
 | Prisma `P1001` / authentication failed | `POSTGRES_PASSWORD` in Coolify **does not match** the existing `postgres_data` volume (password was changed after first deploy). Restore the original password **or** reset the DB volume (data loss) |

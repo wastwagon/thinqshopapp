@@ -10,9 +10,9 @@ if [ -z "$JWT_SECRET" ]; then
   exit 1
 fi
 
-if [ -z "$POSTGRES_PASSWORD" ]; then
-  echo "FATAL: POSTGRES_PASSWORD is not set."
-  echo "  Fix: Coolify → Environment → set POSTGRES_PASSWORD. It must match the postgres_data volume password from first deploy."
+if [ -z "$DATABASE_URL" ]; then
+  echo "FATAL: DATABASE_URL is not set."
+  echo "  Fix: Coolify → Environment → set POSTGRES_PASSWORD (compose builds DATABASE_URL for the backend)."
   exit 1
 fi
 
