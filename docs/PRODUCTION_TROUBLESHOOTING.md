@@ -1,5 +1,30 @@
 # Production Troubleshooting
 
+## Container restart loop (Coolify: “Restarting”, 11x restarts)
+
+**Symptom:** Deploy log shows “Deployment is Finished”, but the app status is **Restarting** and the site returns **502** / “no available server”.
+
+**Cause:** A service process **exits** (non-zero). [`docker-compose.yaml`](../docker-compose.yaml) uses `restart: unless-stopped`, so Docker keeps restarting it.
+
+**Check logs first:** Coolify → **Logs** → **backend** (then **web** if backend looks fine). Look for lines starting with **`FATAL:`** (added in [`backend/docker-entrypoint.sh`](../backend/docker-entrypoint.sh)).
+
+| Log message | Fix |
+|-------------|-----|
+| `FATAL: JWT_SECRET is not set` | Coolify → Environment → set `JWT_SECRET` → redeploy |
+| `FATAL: POSTGRES_PASSWORD is not set` | Set `POSTGRES_PASSWORD` in Coolify |
+| `FATAL: Migration failed after 5 attempts` | See migration / password rows below |
+| `JWT_SECRET environment variable is required` (from Nest) | Same as first row |
+| Prisma `P1001` / authentication failed | `POSTGRES_PASSWORD` in Coolify **does not match** the existing `postgres_data` volume (password was changed after first deploy). Restore the original password **or** reset the DB volume (data loss) |
+| Prisma `P3009` failed migration | Backend shell: `npx prisma migrate resolve --rolled-back <migration_name>` then redeploy |
+
+**Required Coolify env (full stack):** `POSTGRES_PASSWORD`, `JWT_SECRET`, `PAYSTACK_SECRET_KEY`, `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY`, `FRONTEND_URL`, `NEXT_PUBLIC_API_URL`. Keep `SEED_ON_STARTUP=false` after initial setup.
+
+**Verify after fix:** `https://api.thinqshopping.app/health` → `{"status":"ok",...}`
+
+**Note:** Local scripts (`db:import-xlsx`, `db:sync-catalog`) do **not** run on deploy. They cannot cause this loop unless run manually against production.
+
+---
+
 ## 502 Backend Unreachable (Coolify/Docker)
 
 If you see **502** or *"Backend unreachable. Is the API running on http://backend:7000?"*:

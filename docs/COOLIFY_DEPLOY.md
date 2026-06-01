@@ -93,6 +93,7 @@ Coolify exposes these via its reverse proxy based on your domain configuration.
 
 | Issue | Fix |
 |-------|-----|
+| **Restarting (11x restarts)** after deploy | Open **Logs → backend**; look for `FATAL:` lines. Usually missing `JWT_SECRET`, empty `POSTGRES_PASSWORD`, or migration/DB password mismatch. See [PRODUCTION_TROUBLESHOOTING.md](./PRODUCTION_TROUBLESHOOTING.md#container-restart-loop-coolify-restarting-11x-restarts) |
 | Build fails | Ensure `package-lock.json` is committed and in sync |
 | **Deployment failed (exit 255)** | Often transient (SSH/connection). **Try Deploy again.** If it persists, check Coolify → Server → Advanced for deployment timeout; ensure server has enough RAM (2GB+ for parallel builds) |
 | Backend can't connect to DB | Check `POSTGRES_PASSWORD` is set; db service must be healthy before backend starts |
