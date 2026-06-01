@@ -130,7 +130,7 @@ function ShopContent() {
                         </div>
                         <input
                             type="text"
-                            className="admin-input block w-full pl-11 pr-4 h-12 font-medium"
+                            className="block w-full pl-11 pr-4 py-3 h-12 bg-gray-50 border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white transition-all font-medium"
                             placeholder="Search products..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}

@@ -87,3 +87,7 @@ Deploy with Docker Compose or Coolify. See [DEPLOY.md](./DEPLOY.md) and [docs/CO
 ├── docker-compose.coolify.yml # Coolify / VPS (external DB)
 ├── docker-compose.full.yml    # Full stack with PostgreSQL
 ```
+
+## Architecture
+
+For a full map of modules, auth, payments, and routes, see **[docs/PROJECT_UNDERSTANDING.md](docs/PROJECT_UNDERSTANDING.md)**. AI agents should start with **[AGENTS.md](AGENTS.md)**.

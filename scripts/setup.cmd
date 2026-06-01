@@ -21,12 +21,18 @@ echo.
 
 echo ==^> Prisma migrate deploy...
 call npx prisma migrate deploy --schema=database/schema.prisma
-if errorlevel 1 echo Warning: Migrate failed. Is PostgreSQL running? Run "npx prisma migrate deploy --schema=database/schema.prisma" after starting the DB.
+if errorlevel 1 echo Warning: Migrate failed. Is PostgreSQL running? Run "docker compose -f docker-compose.yml up -d db" then retry.
+echo.
+
+echo ==^> Seed database...
+call npm run db:seed
+if errorlevel 1 echo Warning: Seed failed. Run "npm run db:seed" after DB is up.
 echo.
 
 echo ==^> Setup complete.
-echo     Backend:  npm run dev:backend
-echo     Web:      npm run dev:web
-echo     Test:     npm run test:local
+echo     Storefront: http://localhost:7001
+echo     API:        http://localhost:7000
+echo     Start both: scripts\dev-start.cmd
+echo     Or:         npm run dev:backend  ^&  npm run dev:web
 echo.
 pause
