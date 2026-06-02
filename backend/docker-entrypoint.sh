@@ -16,10 +16,20 @@ if [ -z "$DATABASE_URL" ]; then
   exit 1
 fi
 
-if [ ! -f dist/backend/src/main.js ]; then
-  echo "FATAL: dist/backend/src/main.js not found — backend image build may be broken."
+MAIN_JS=""
+for candidate in dist/src/main.js dist/main.js dist/backend/src/main.js; do
+  if [ -f "$candidate" ]; then
+    MAIN_JS="$candidate"
+    break
+  fi
+done
+if [ -z "$MAIN_JS" ]; then
+  echo "FATAL: NestJS entry file not found (expected dist/src/main.js)."
+  echo "  dist contents:"
+  ls -la dist 2>/dev/null || echo "  (dist/ missing)"
   exit 1
 fi
+echo "Using entry: $MAIN_JS"
 
 # Wait for DB to be fully ready (pg_isready can report healthy before connections work)
 echo "Waiting for database..."
@@ -97,4 +107,4 @@ fi
 mkdir -p /app/uploads/files /app/uploads/profile-images /app/uploads/shipment-declarations
 
 echo "Starting application on port ${PORT:-7000}..."
-exec node dist/backend/src/main.js
+exec node "$MAIN_JS"
