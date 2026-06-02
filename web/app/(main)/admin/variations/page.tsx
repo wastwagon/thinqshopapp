@@ -10,6 +10,23 @@ import api from '@/lib/axios';
 type VariationValue = { id: number; value: string; sort_order: number };
 type VariationOption = { id: number; name: string; slug: string; sort_order: number; values: VariationValue[] };
 
+function formatApiError(e: unknown, fallback: string): string {
+    const err = e as { response?: { status?: number; data?: { message?: string | string[] } } };
+    const raw = err?.response?.data?.message;
+    const msg = Array.isArray(raw) ? raw.join(', ') : typeof raw === 'string' ? raw : '';
+    const status = err?.response?.status;
+    if (status === 403) {
+        return msg || 'Permission denied. Log in as an admin with variation access.';
+    }
+    if (status === 409) {
+        return msg || 'This value already exists for this option.';
+    }
+    if (status === 502) {
+        return 'Backend unavailable. Check that the API service is running.';
+    }
+    return msg || fallback;
+}
+
 export default function AdminVariationsPage() {
     const [options, setOptions] = useState<VariationOption[]>([]);
     const [loading, setLoading] = useState(true);
@@ -70,8 +87,8 @@ export default function AdminVariationsPage() {
             }
             setOptionModalOpen(false);
             fetchOptions();
-        } catch (e: any) {
-            toast.error(e?.response?.data?.message || 'Failed to save');
+        } catch (e: unknown) {
+            toast.error(formatApiError(e, 'Failed to save'));
         } finally {
             setSaving(false);
         }
@@ -83,8 +100,8 @@ export default function AdminVariationsPage() {
             await api.delete(`/variations/admin/options/${id}`);
             toast.success('Deleted');
             setOptions(options.filter((o) => o.id !== id));
-        } catch (e: any) {
-            toast.error(e?.response?.data?.message || 'Failed to delete');
+        } catch (e: unknown) {
+            toast.error(formatApiError(e, 'Failed to delete'));
         }
     };
 
@@ -122,8 +139,8 @@ export default function AdminVariationsPage() {
             }
             setValueModalOpen(false);
             fetchOptions();
-        } catch (e: any) {
-            toast.error(e?.response?.data?.message || 'Failed to save');
+        } catch (e: unknown) {
+            toast.error(formatApiError(e, 'Failed to save'));
         } finally {
             setSaving(false);
         }
@@ -139,8 +156,8 @@ export default function AdminVariationsPage() {
                     o.id === optionId ? { ...o, values: o.values.filter((v) => v.id !== valueId) } : o
                 )
             );
-        } catch (e: any) {
-            toast.error(e?.response?.data?.message || 'Failed to delete');
+        } catch (e: unknown) {
+            toast.error(formatApiError(e, 'Failed to delete'));
         }
     };
 

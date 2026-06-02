@@ -88,6 +88,14 @@ if [ "$MIGRATE_OK" -ne 1 ]; then
   exit 1
 fi
 
+# Ensure global variation catalog (Size: Small–XXL, etc.) — idempotent, safe on every deploy
+echo "Ensuring variation catalog..."
+if npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed-variations.ts; then
+  echo "Variation catalog OK."
+else
+  echo "Variation catalog seed skipped or failed (see above). Continuing startup..."
+fi
+
 # Optional: seed on startup (set SEED_ON_STARTUP=true for fresh deploys only)
 if [ "$SEED_ON_STARTUP" = "true" ]; then
   echo "Running database seed..."

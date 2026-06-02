@@ -54,7 +54,15 @@ Coolify will set up the reverse proxy and SSL.
 
 The backend runs `prisma migrate deploy` on startup, so migrations are applied automatically.
 
-**To seed the database** (creates admin user, test user, products, reviews, warehouses, etc.):
+**Variation catalog (Size values):** On every backend start, the entrypoint runs [`database/seed-variations.ts`](../database/seed-variations.ts) (idempotent upsert of Size → Small, Medium, Large, XL, XXL). No extra env var is required. Check backend logs for `Variation catalog OK.` after deploy.
+
+If sizes are still missing before you redeploy with this change, open a shell on the **backend** container and run:
+
+```bash
+npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed-variations.ts
+```
+
+**To seed the full database** (creates admin user, test user, products, reviews, warehouses, etc.):
 
 **Option A — Auto-seed on startup:** In Coolify → Environment, add `SEED_ON_STARTUP=true`. Redeploy. After first successful login, set it back to `false` (or remove it).
 
@@ -100,6 +108,8 @@ Coolify exposes these via its reverse proxy based on your domain configuration.
 | CORS errors | Set `FRONTEND_URL` to your exact frontend domain (no trailing slash) |
 | 502 Bad Gateway | Check backend logs in Coolify → Terminal (backend container). Backend may need 30–60s for migrations on first start |
 | Migrations not applied | Backend runs them on startup; check backend logs for Prisma errors |
+| **Product sizes missing** / Variations only shows Small | Backend auto-seeds sizes on startup (`seed-variations.ts`). Redeploy or run `npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed-variations.ts` in backend shell. Check logs for `Variation catalog OK.` |
+| **Failed to save** when adding variation value | Often duplicate value (409) or validation error — retry after seed; check browser Network tab for `/api/variations/admin/values` response |
 | Product images **404** (`GET /media/files/... 404`) | Ensure `docker-compose.yaml` mounts `backend_uploads:/app/uploads` on the **backend** service (included in repo). Redeploy once so the volume exists. Files uploaded **before** the volume was added are gone — re-upload in **Admin → Media** and update affected products. |
 | `GET /content/currency-rates` very slow (~10s) | Usually a slow external FX API on first request; the API now returns cached DB rates immediately and refreshes in the background. |
 
