@@ -39,7 +39,8 @@ COPY --from=builder /app/backend/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/database ./database
 
-# Copy entrypoint
+# Copy entrypoint + startup helpers
+COPY backend/scripts/db-connect-test.js ./scripts/db-connect-test.js
 COPY backend/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 

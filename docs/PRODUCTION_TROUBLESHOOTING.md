@@ -21,6 +21,8 @@
 
 **Verify after fix:** `https://api.thinqshopping.app/health` → `{"status":"ok",...}`
 
+**If backend logs show `Authentication failed` / `P1000`:** The password in Coolify (`POSTGRES_PASSWORD`) does **not** match what PostgreSQL was initialized with on the `postgres_data` volume. Changing the env var alone does not change the DB password. Either restore the **original** password in Coolify, or delete the `postgres_data` volume in Coolify/Docker and redeploy ( **all DB data lost** — only for a fresh start).
+
 **Note:** Local scripts (`db:import-xlsx`, `db:sync-catalog`) do **not** run on deploy. They cannot cause this loop unless run manually against production.
 
 ---

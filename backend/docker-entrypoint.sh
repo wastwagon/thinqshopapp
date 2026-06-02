@@ -23,7 +23,20 @@ fi
 
 # Wait for DB to be fully ready (pg_isready can report healthy before connections work)
 echo "Waiting for database..."
-sleep 5
+DB_OK=0
+for i in 1 2 3 4 5 6 7 8 9 10; do
+  if node scripts/db-connect-test.js; then
+    DB_OK=1
+    break
+  fi
+  echo "Database not ready (attempt $i/10). Retrying in 3s..."
+  sleep 3
+done
+if [ "$DB_OK" -ne 1 ]; then
+  echo "FATAL: Could not connect to database after 10 attempts."
+  echo "  See errors above. Common fix: POSTGRES_PASSWORD must match the password used when postgres_data was first created."
+  exit 1
+fi
 
 # Run migrations with retries (first deploy can race with DB)
 echo "Running database migrations..."
