@@ -25,7 +25,21 @@ fi
 echo "Waiting for database..."
 DB_OK=0
 for i in 1 2 3 4 5 6 7 8 9 10; do
-  if node scripts/db-connect-test.js; then
+  if node -e "
+    const { PrismaClient } = require('@prisma/client');
+    const p = new PrismaClient();
+    p.\$connect()
+      .then(() => p.\$disconnect())
+      .then(() => { console.log('Database connection OK'); process.exit(0); })
+      .catch((e) => {
+        const msg = e?.message || String(e);
+        console.error('Database connection FAILED:', msg);
+        if (/authentication failed|P1000/i.test(msg)) {
+          console.error('  POSTGRES_PASSWORD in Coolify likely does not match the existing postgres_data volume.');
+        }
+        process.exit(1);
+      });
+  "; then
     DB_OK=1
     break
   fi
