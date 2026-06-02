@@ -269,6 +269,10 @@ export async function runSeed(prisma: PrismaClient) {
         });
     }
 
+    // --- Variation catalog (Size values, etc.) ---
+    const { seedVariations } = await import('./seed-variations');
+    await seedVariations(prisma);
+
     // --- World-class content ---
     const { seedWorldClassContent } = await import('./seed-world-class-content');
     await seedWorldClassContent(prisma);

@@ -21,6 +21,7 @@
     "db:migrate": "npx prisma generate --schema=database/schema.prisma && npx prisma migrate deploy --schema=database/schema.prisma",
     "db:migrate-seed": "bash scripts/db-migrate-and-seed.sh",
     "db:seed:content": "npx prisma generate --schema=database/schema.prisma && node scripts/run-ts.cjs database/seed-world-class-content.ts",
+    "db:seed-variations": "npx prisma generate --schema=database/schema.prisma && node scripts/run-ts.cjs database/seed-variations.ts",
     "db:sync-catalog": "npx prisma generate --schema=database/schema.prisma && node scripts/run-ts.cjs database/sync-catalog-from-production.ts",
     "db:import-xlsx": "npx prisma generate --schema=database/schema.prisma && node scripts/run-ts.cjs database/import-products-xlsx.ts",
     "email:process": "node scripts/run-ts.cjs backend/scripts/process-email-queue.ts",
