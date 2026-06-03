@@ -47,14 +47,12 @@ function ShopContent() {
                 const apiProducts = productsRes.data?.data ?? [];
                 const apiCategories = categoriesRes.data ?? [];
                 const meta = productsRes.data?.meta ?? {};
-                if (apiProducts.length > 0) {
-                    setProducts(apiProducts.map((p: any, i: number) => normalizeProduct(p, i)));
-                    setCategories(Array.isArray(apiCategories) ? apiCategories : []);
-                    setHasMore(1 < (meta.totalPages ?? 1));
-                    setUseApi(true);
-                } else {
-                    throw new Error('No API products');
-                }
+                setProducts(apiProducts.map((p: any, i: number) => normalizeProduct(p, i)));
+                setCategories(Array.isArray(apiCategories) ? apiCategories : []);
+                setHasMore(1 < (meta.totalPages ?? 1));
+                setUseApi(true);
+                setLoading(false);
+                return;
             } catch (_) {
                 const normalized = (staticProducts as any[]).map((p, i) => normalizeProduct({ ...p, id: p.id ?? i + 1 }, i));
                 let filtered = normalized;

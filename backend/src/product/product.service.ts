@@ -108,6 +108,9 @@ export class ProductService {
             if (categoryRecord) {
                 const ids = await this.resolveCategoryIdsForFilter(categoryRecord);
                 where.category_id = ids.length === 1 ? ids[0] : { in: ids };
+            } else {
+                // Unknown slug — do not return unfiltered catalog
+                where.category_id = -1;
             }
         }
 

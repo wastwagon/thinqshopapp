@@ -96,6 +96,14 @@ else
   echo "Variation catalog seed skipped or failed (see above). Continuing startup..."
 fi
 
+# Category tree (Cameras/Drones + subcategories) — idempotent, safe on every deploy
+echo "Ensuring category tree..."
+if npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed-categories.ts; then
+  echo "Category tree OK."
+else
+  echo "Category tree seed skipped or failed (see above). Continuing startup..."
+fi
+
 # Optional: seed on startup (set SEED_ON_STARTUP=true for fresh deploys only)
 if [ "$SEED_ON_STARTUP" = "true" ]; then
   echo "Running database seed..."
