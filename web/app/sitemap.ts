@@ -61,7 +61,7 @@ async function fetchCategorySlugs(): Promise<string[]> {
                 }
             }
         }
-        return [...new Set(slugs.filter((slug) => slug.length > 0))];
+        return Array.from(new Set(slugs.filter((slug) => slug.length > 0)));
     } catch {
         return [];
     }

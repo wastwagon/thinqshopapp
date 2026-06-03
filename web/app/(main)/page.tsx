@@ -27,7 +27,7 @@ import HomeHero from '@/components/home/HomeHero';
 import TrustStrip from '@/components/home/TrustStrip';
 import TestimonialsBlock from '@/components/home/TestimonialsBlock';
 import { STATIC_CATEGORIES as CATEGORY_CATALOG } from '@/lib/product-utils';
-import { getRootCategories } from '@/lib/category-utils';
+import { getRootCategories, type CategoryNode } from '@/lib/category-utils';
 
 type Product = {
     category: string | { name: string; slug: string };
@@ -119,7 +119,7 @@ type Testimonial = { id: number; quote: string; author_name: string; author_role
 export default function Home() {
     const [mounted, setMounted] = useState(false);
     const [productsList, setProductsList] = useState<Product[]>([]);
-    const [categories, setCategories] = useState<{ id?: number; name: string; slug: string; parent_id?: number | null; children?: { name: string; slug: string }[] }[]>([]);
+    const [categories, setCategories] = useState<CategoryNode[]>([]);
     const [source, setSource] = useState<'api' | 'static'>('static');
     const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
     const [trustBadges, setTrustBadges] = useState<TrustBadge[]>([]);
@@ -157,7 +157,7 @@ export default function Home() {
                 if (apiProducts.length > 0 && Array.isArray(apiProducts)) {
                     const list = apiProducts.map((p: any, i: number) => normalizeProduct(p, i));
                     setProductsList(list);
-                    setCategories(apiCategories);
+                    setCategories(apiCategories as CategoryNode[]);
                     setSource('api');
                     setHeroSlides(contentHeroSlides);
                     return;
@@ -167,7 +167,14 @@ export default function Home() {
             }
             const staticProducts = (products as Product[]).map((p, i) => normalizeProduct({ ...p, id: p.id ?? i + 1 }, i));
             setProductsList(staticProducts);
-            setCategories(CATEGORY_CATALOG.map((c) => ({ name: c.name, slug: c.slug })));
+            setCategories(
+                CATEGORY_CATALOG.map((c, i) => ({
+                    id: -(i + 1),
+                    name: c.name,
+                    slug: c.slug,
+                    parent_id: null,
+                })),
+            );
             setSource('static');
             setHeroSlides([]);
         };
@@ -191,7 +198,7 @@ export default function Home() {
     const allProducts = productsWithIds;
 
     const categoryCards = useMemo(() => {
-        const roots = getRootCategories(categories as { parent_id?: number | null; name: string; slug: string }[]);
+        const roots = getRootCategories(categories);
         const rootList = roots.length > 0 ? roots.map((r) => ({ name: r.name, slug: r.slug })) : categories;
         return buildEightCategories(rootList);
     }, [categories]);
@@ -199,7 +206,7 @@ export default function Home() {
     /** Count products per main category (rollup of subcategories) */
     const categoryProductCounts = useMemo(() => {
         const m = new Map<string, number>();
-        const roots = getRootCategories(categories as { id?: number; parent_id?: number | null; name: string; slug: string; children?: { slug: string }[] }[]);
+        const roots = getRootCategories(categories);
         for (const root of roots) {
             const childSlugs = new Set(
                 (root.children ?? categories.filter((c) => c.parent_id === root.id))
