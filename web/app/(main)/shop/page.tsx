@@ -9,6 +9,8 @@ import { Search, Loader2 } from 'lucide-react';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import CategoryBadges from '@/components/shop/CategoryBadges';
+import CategoryNav from '@/components/shop/CategoryNav';
+import type { CategoryNode } from '@/lib/category-utils';
 import staticProducts from '@/lib/data/scraped_products.json';
 import { normalizeProduct, STATIC_CATEGORIES } from '@/lib/product-utils';
 
@@ -147,23 +149,7 @@ function ShopContent() {
                     <aside className="hidden lg:block w-full lg:w-64 flex-shrink-0">
                         <div className="sticky top-24">
                             <h3 className="section-label mb-6">Categories</h3>
-                            <div className="space-y-1.5">
-                                <Link
-                                    href="/shop"
-                                    className={`block w-full text-left px-5 py-3.5 rounded-xl text-sm font-medium transition-all ${!category ? 'bg-brand text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
-                                >
-                                    All products
-                                </Link>
-                                {categories.map((cat) => (
-                                    <Link
-                                        key={cat.id ?? cat.slug ?? cat.name}
-                                        href={`/shop/${cat.slug ?? cat.name?.toLowerCase?.()?.replace(/\s+/g, '-')}`}
-                                        className={`block w-full text-left px-5 py-3.5 rounded-xl text-sm font-medium transition-all ${category === (cat.slug ?? '') ? 'bg-brand text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
-                                    >
-                                        {cat.name}
-                                    </Link>
-                                ))}
-                            </div>
+                            <CategoryNav categories={categories as CategoryNode[]} currentSlug={category} />
                             <div className="mt-12 flat-card border-l-4 border-l-brand p-5">
                                 <p className="text-xs font-medium text-brand mb-2">Shipping</p>
                                 <p className="text-xs font-bold text-gray-900 leading-tight">International delivery. Items ship from abroad with 7–14 day estimated delivery.</p>

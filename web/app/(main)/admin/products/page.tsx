@@ -22,6 +22,7 @@ import {
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import api from '@/lib/axios';
+import { groupLeavesByParent } from '@/lib/category-utils';
 import { getMediaUrl } from '@/lib/media';
 import MediaPickerModal from '@/components/admin/MediaPickerModal';
 
@@ -41,7 +42,7 @@ function resolveOptionSlug(variantType: string, options: VariationOptionRow[]): 
 
 export default function AdminProducts() {
     const [products, setProducts] = useState<any[]>([]);
-    const [categories, setCategories] = useState<{ id: number; name: string; slug: string }[]>([]);
+    const [categories, setCategories] = useState<{ id: number; name: string; slug: string; parent_id?: number | null }[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -508,9 +509,13 @@ export default function AdminProducts() {
                                     onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                                     className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 >
-                                    <option value="">Select category</option>
-                                    {categories.map((c) => (
-                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                    <option value="">Select subcategory</option>
+                                    {groupLeavesByParent(categories).map(({ parent, leaves }) => (
+                                        <optgroup key={parent.id || parent.slug} label={parent.name}>
+                                            {leaves.map((c) => (
+                                                <option key={c.id} value={c.id}>{c.name}</option>
+                                            ))}
+                                        </optgroup>
                                     ))}
                                 </select>
                             </div>

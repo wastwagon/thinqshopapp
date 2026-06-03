@@ -27,8 +27,8 @@ export class ProductController {
     @Public()
     @Get('categories')
     @Header('Cache-Control', 'public, max-age=60')
-    getCategories() {
-        return this.productService.getCategories();
+    getCategories(@Query('tree') tree?: string) {
+        return this.productService.getCategories(tree === '1' || tree === 'true');
     }
 
     @Get('categories/admin')

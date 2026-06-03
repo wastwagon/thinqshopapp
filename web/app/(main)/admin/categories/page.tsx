@@ -6,6 +6,7 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Search, Plus, FolderTree, Edit3, Trash2, FileText, CheckCircle, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
+import { flattenCategoryTree, getRootCategories, type CategoryNode } from '@/lib/category-utils';
 
 export default function AdminCategories() {
     const [categories, setCategories] = useState<any[]>([]);
@@ -18,7 +19,8 @@ export default function AdminCategories() {
         slug: '',
         description: '',
         sort_order: '0',
-        is_active: 'true'
+        is_active: 'true',
+        parent_id: '',
     });
 
     useEffect(() => {
@@ -44,11 +46,12 @@ export default function AdminCategories() {
                 slug: cat.slug ?? '',
                 description: cat.description ?? '',
                 sort_order: String(cat.sort_order ?? 0),
-                is_active: cat.is_active === false ? 'false' : 'true'
+                is_active: cat.is_active === false ? 'false' : 'true',
+                parent_id: cat.parent_id != null ? String(cat.parent_id) : '',
             });
         } else {
             setEditingCategory(null);
-            setFormData({ name: '', slug: '', description: '', sort_order: '0', is_active: 'true' });
+            setFormData({ name: '', slug: '', description: '', sort_order: '0', is_active: 'true', parent_id: '' });
         }
         setIsModalOpen(true);
     };
@@ -60,12 +63,13 @@ export default function AdminCategories() {
             return;
         }
         try {
-            const payload = {
+            const payload: Record<string, unknown> = {
                 name: formData.name.trim(),
                 slug: formData.slug.trim() || undefined,
                 description: formData.description.trim() || undefined,
                 sort_order: parseInt(formData.sort_order, 10) || 0,
-                is_active: formData.is_active === 'true'
+                is_active: formData.is_active === 'true',
+                parent_id: formData.parent_id ? parseInt(formData.parent_id, 10) : null,
             };
             if (editingCategory) {
                 await api.patch(`/products/categories/${editingCategory.id}`, payload);
@@ -76,8 +80,11 @@ export default function AdminCategories() {
             }
             setIsModalOpen(false);
             fetchCategories();
-        } catch {
-            toast.error('Failed to save category');
+        } catch (e: unknown) {
+            const err = e as { response?: { data?: { message?: string | string[] } } };
+            const raw = err?.response?.data?.message;
+            const msg = Array.isArray(raw) ? raw.join(', ') : raw;
+            toast.error(msg || 'Failed to save category');
         }
     };
 
@@ -92,10 +99,12 @@ export default function AdminCategories() {
         }
     };
 
-    const filtered = categories.filter(
-        (c) =>
-            c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.slug?.toLowerCase().includes(searchTerm.toLowerCase())
+    const roots = getRootCategories(categories as CategoryNode[]);
+    const treeRows = flattenCategoryTree(categories as CategoryNode[]);
+    const filtered = treeRows.filter(
+        ({ cat }) =>
+            cat.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            cat.slug?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const activeCount = categories.filter((c) => c.is_active !== false).length;
@@ -152,6 +161,7 @@ export default function AdminCategories() {
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-50">
                                 <th className="admin-th">Name</th>
+                                <th className="admin-th">Parent</th>
                                 <th className="admin-th">Slug</th>
                                 <th className="admin-th">Status</th>
                                 <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
@@ -160,7 +170,7 @@ export default function AdminCategories() {
                         <tbody className="divide-y divide-gray-50">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={4} className="py-10 text-center">
+                                    <td colSpan={5} className="py-10 text-center">
                                         <div className="animate-spin h-7 w-7 border-2 border-brand border-t-transparent rounded-full mx-auto mb-2" />
                                         <p className="text-sm text-gray-500">Loading...</p>
                                     </td>
@@ -173,15 +183,18 @@ export default function AdminCategories() {
                                     </td>
                                 </tr>
                             ) : (
-                                filtered.map((c) => (
+                                filtered.map(({ cat: c, depth }) => (
                                     <tr key={c.id} className="hover:bg-gray-50/50 transition-colors group">
                                         <td className="px-3 py-2.5">
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2" style={{ paddingLeft: depth * 16 }}>
                                                 <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
                                                     <FolderTree className="h-3.5 w-3.5 text-gray-400" />
                                                 </div>
-                                                <span className="text-xs font-semibold text-gray-900">{c.name}</span>
+                                                <span className="text-xs font-semibold text-gray-900">{depth > 0 ? `↳ ${c.name}` : c.name}</span>
                                             </div>
+                                        </td>
+                                        <td className="px-3 py-2.5 text-xs text-gray-500">
+                                            {c.parent?.name ?? (c.parent_id ? '—' : 'Main')}
                                         </td>
                                         <td className="px-3 py-2.5 text-xs font-mono text-gray-500">{c.slug}</td>
                                         <td className="px-3 py-2.5">
@@ -219,6 +232,27 @@ export default function AdminCategories() {
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Parent category</label>
+                                <select
+                                    value={formData.parent_id}
+                                    onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
+                                    disabled={!!(editingCategory?.children?.length)}
+                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:opacity-60"
+                                >
+                                    <option value="">None (main category)</option>
+                                    {roots
+                                        .filter((r) => !editingCategory || r.id !== editingCategory.id)
+                                        .map((r) => (
+                                            <option key={r.id} value={r.id}>
+                                                {r.name}
+                                            </option>
+                                        ))}
+                                </select>
+                                {editingCategory?.children?.length ? (
+                                    <p className="text-xs text-gray-400 mt-1">Main categories with subcategories cannot be moved under another parent.</p>
+                                ) : null}
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Slug (optional)</label>

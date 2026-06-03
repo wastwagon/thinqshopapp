@@ -1,14 +1,43 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { CreateReviewDto } from './dto/review.dto';
 
+/**
+ * Legacy flat categories rolled into shop URLs (no product reassignment).
+ * Subcategories: new-cameras inherits photography; used-cameras stays empty until assigned in Admin.
+ */
+const CAMERA_TREE_ROOT_SLUG = 'cameras';
+
+const LEGACY_CHILD_SLUGS: Record<string, string[]> = {
+    cameras: ['photography'],
+    'new-cameras': ['photography'],
+    'used-cameras': [],
+    drones: [],
+    'new-drones': [],
+    'used-drones': [],
+};
+
 @Injectable()
 export class ProductService {
     constructor(private prisma: PrismaService) { }
 
+    private readonly categoryIncludePublic = {
+        parent: { select: { id: true, name: true, slug: true } },
+        children: {
+            where: { is_active: true },
+            orderBy: { sort_order: 'asc' as const },
+        },
+    };
+
+    private readonly categoryIncludeAdmin = {
+        parent: { select: { id: true, name: true, slug: true } },
+        children: { orderBy: { sort_order: 'asc' as const } },
+    };
+
     async create(createProductDto: CreateProductDto) {
+        await this.assertLeafCategory(createProductDto.category_id);
         const slug = createProductDto.slug || this.slugify(createProductDto.name);
         const { variants, ...rest } = createProductDto as CreateProductDto & { variants?: Array<{ variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number; image?: string }> };
         const data = { ...rest, slug } as any;
@@ -77,7 +106,8 @@ export class ProductService {
         if (category) {
             const categoryRecord = await this.prisma.category.findUnique({ where: { slug: category } });
             if (categoryRecord) {
-                where.category_id = categoryRecord.id;
+                const ids = await this.resolveCategoryIdsForFilter(categoryRecord);
+                where.category_id = ids.length === 1 ? ids[0] : { in: ids };
             }
         }
 
@@ -231,6 +261,9 @@ export class ProductService {
     }
 
     async update(id: number, updateProductDto: UpdateProductDto) {
+        if (updateProductDto.category_id != null) {
+            await this.assertLeafCategory(updateProductDto.category_id);
+        }
         const { variants, ...rest } = updateProductDto as UpdateProductDto & { variants?: Array<{ variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number; image?: string }> };
         await this.prisma.product.update({
             where: { id },
@@ -262,36 +295,161 @@ export class ProductService {
         return this.prisma.product.delete({ where: { id } });
     }
 
-    async getCategories() {
-        return this.prisma.category.findMany({
-            where: { is_active: true },
-            orderBy: { sort_order: 'asc' }
+    private async resolveLegacyCategoryIds(parentSlug: string): Promise<number[]> {
+        const legacySlugs = LEGACY_CHILD_SLUGS[parentSlug] ?? [];
+        if (legacySlugs.length === 0) return [];
+        const legacy = await this.prisma.category.findMany({
+            where: { slug: { in: legacySlugs }, is_active: true },
+            select: { id: true },
         });
+        return legacy.map((c) => c.id);
+    }
+
+    /** Same product set as /shop/cameras (parent + subcategories + legacy Photography). */
+    private async resolveCameraCatalogIds(): Promise<number[]> {
+        const cameras = await this.prisma.category.findUnique({
+            where: { slug: CAMERA_TREE_ROOT_SLUG },
+        });
+        if (!cameras) {
+            return [];
+        }
+        return this.resolveCategoryIdsForFilter(cameras);
+    }
+
+    private async resolveCategoryIdsForFilter(category: {
+        id: number;
+        parent_id: number | null;
+        slug: string;
+    }) {
+        if (category.slug === 'photography') {
+            const catalogIds = await this.resolveCameraCatalogIds();
+            if (catalogIds.length > 0) {
+                return catalogIds;
+            }
+        }
+        if (category.parent_id != null) {
+            const legacyIds = await this.resolveLegacyCategoryIds(category.slug);
+            if (legacyIds.length === 0) {
+                return [category.id];
+            }
+            return [...new Set([category.id, ...legacyIds])];
+        }
+        const children = await this.prisma.category.findMany({
+            where: { parent_id: category.id, is_active: true },
+            select: { id: true },
+        });
+        if (children.length > 0) {
+            const legacyIds = await this.resolveLegacyCategoryIds(category.slug);
+            const ids = new Set<number>([
+                category.id,
+                ...children.map((c) => c.id),
+                ...legacyIds,
+            ]);
+            return [...ids];
+        }
+        const legacyIds = await this.resolveLegacyCategoryIds(category.slug);
+        if (legacyIds.length > 0) {
+            return [...new Set([category.id, ...legacyIds])];
+        }
+        return [category.id];
+    }
+
+    private async assertLeafCategory(categoryId: number) {
+        const cat = await this.prisma.category.findUnique({
+            where: { id: categoryId },
+            include: { _count: { select: { children: true } } },
+        });
+        if (!cat) {
+            throw new NotFoundException(`Category ${categoryId} not found`);
+        }
+        if (cat._count.children > 0) {
+            throw new BadRequestException(
+                'Products must be assigned to a subcategory, not a main category with children',
+            );
+        }
+        if (cat.parent_id == null) {
+            throw new BadRequestException(
+                'Products must be assigned to a subcategory (e.g. New Cameras), not a main category',
+            );
+        }
+    }
+
+    private async validateCategoryParent(parentId: number | null | undefined, categoryId?: number) {
+        if (parentId == null || parentId === undefined) return;
+        if (categoryId != null && parentId === categoryId) {
+            throw new BadRequestException('A category cannot be its own parent');
+        }
+        const parent = await this.prisma.category.findUnique({ where: { id: parentId } });
+        if (!parent) {
+            throw new NotFoundException(`Parent category ${parentId} not found`);
+        }
+        if (parent.parent_id != null) {
+            throw new BadRequestException('Subcategories cannot have children; choose a main category as parent');
+        }
+        if (categoryId != null) {
+            const current = await this.prisma.category.findUnique({
+                where: { id: categoryId },
+                include: { _count: { select: { children: true } } },
+            });
+            if (!current) {
+                throw new NotFoundException(`Category ${categoryId} not found`);
+            }
+            if (current._count.children > 0) {
+                throw new BadRequestException(
+                    'Cannot set a parent on a main category that already has subcategories',
+                );
+            }
+        }
+    }
+
+    async getCategories(tree?: boolean) {
+        const list = await this.prisma.category.findMany({
+            where: { is_active: true },
+            include: this.categoryIncludePublic,
+            orderBy: [{ sort_order: 'asc' }, { name: 'asc' }],
+        });
+        if (tree) {
+            return { roots: list.filter((c) => c.parent_id == null) };
+        }
+        return list;
     }
 
     async getCategoriesForAdmin() {
         return this.prisma.category.findMany({
-            orderBy: [{ sort_order: 'asc' }, { name: 'asc' }]
+            include: this.categoryIncludeAdmin,
+            orderBy: [{ sort_order: 'asc' }, { name: 'asc' }],
         });
     }
 
     async createCategory(dto: CreateCategoryDto) {
+        await this.validateCategoryParent(dto.parent_id ?? null);
         const slug = dto.slug || this.slugify(dto.name);
         return this.prisma.category.create({
-            data: { ...dto, slug } as any
+            data: { ...dto, slug } as any,
+            include: this.categoryIncludeAdmin,
         });
     }
 
     async updateCategory(id: number, dto: UpdateCategoryDto) {
+        if (dto.parent_id !== undefined) {
+            await this.validateCategoryParent(dto.parent_id ?? null, id);
+        }
         const data: any = { ...dto };
         if (dto.name && !dto.slug) data.slug = this.slugify(dto.name);
         return this.prisma.category.update({
             where: { id },
-            data
+            data,
+            include: this.categoryIncludeAdmin,
         });
     }
 
     async removeCategory(id: number) {
+        const childCount = await this.prisma.category.count({ where: { parent_id: id } });
+        if (childCount > 0) {
+            throw new BadRequestException(
+                `Cannot delete: ${childCount} subcategor${childCount === 1 ? 'y' : 'ies'} under this category`,
+            );
+        }
         const count = await this.prisma.product.count({ where: { category_id: id } });
         if (count > 0) {
             throw new NotFoundException(`Cannot delete: ${count} product(s) use this category`);
