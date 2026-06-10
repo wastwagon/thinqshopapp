@@ -9,8 +9,86 @@ export type CategoryNode = {
     children?: CategoryNode[];
 };
 
+/** Legacy root slugs hidden from shop nav when a replacement tree exists */
+export const NAV_SUPERSEDED_BY: Record<string, string> = {
+    photography: 'cameras',
+};
+
+function sortCategories(list: CategoryNode[]): CategoryNode[] {
+    return list
+        .slice()
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.name.localeCompare(b.name));
+}
+
 export function getRootCategories(categories: CategoryNode[]): CategoryNode[] {
     return categories.filter((c) => c.parent_id == null);
+}
+
+export function getSubcategoriesForRoot(categories: CategoryNode[], rootId: number): CategoryNode[] {
+    const root = categories.find((c) => c.id === rootId);
+    const children = root?.children ?? categories.filter((c) => c.parent_id === rootId);
+    return sortCategories(children.filter((c) => c.is_active !== false));
+}
+
+export function rootHasSubcategories(categories: CategoryNode[], rootId: number): boolean {
+    return getSubcategoriesForRoot(categories, rootId).length > 0;
+}
+
+export function getActiveRoot(categories: CategoryNode[], currentSlug: string): CategoryNode | undefined {
+    if (!currentSlug) return undefined;
+    const current = findCategoryBySlug(categories, currentSlug);
+    if (!current) return undefined;
+    if (current.parent_id != null) {
+        const parent = categories.find((c) => c.id === current.parent_id);
+        return parent ?? (current.parent as CategoryNode | undefined);
+    }
+    return current;
+}
+
+export function getShopNavRoots(categories: CategoryNode[]): CategoryNode[] {
+    const roots = getRootCategories(categories);
+    const filtered = roots.filter((r) => {
+        const supersededBy = NAV_SUPERSEDED_BY[r.slug];
+        if (!supersededBy) return true;
+        const replacement = roots.find((x) => x.slug === supersededBy);
+        if (!replacement) return true;
+        return !rootHasSubcategories(categories, replacement.id);
+    });
+    return sortCategories(filtered);
+}
+
+export function rootsWithSubcategories(categories: CategoryNode[]): CategoryNode[] {
+    return getShopNavRoots(categories).filter((r) => rootHasSubcategories(categories, r.id));
+}
+
+export function flatShopRoots(categories: CategoryNode[]): CategoryNode[] {
+    return getShopNavRoots(categories).filter((r) => !rootHasSubcategories(categories, r.id));
+}
+
+export function resolveAdminCategoryIds(
+    categories: CategoryNode[],
+    categoryId: number,
+): { mainId: string; conditionId: string } {
+    const cat = categories.find((c) => c.id === categoryId);
+    if (!cat) return { mainId: '', conditionId: '' };
+    if (cat.parent_id != null) {
+        return { mainId: String(cat.parent_id), conditionId: String(cat.id) };
+    }
+    return { mainId: String(cat.id), conditionId: '' };
+}
+
+export function resolveCategoryIdForAdmin(
+    categories: CategoryNode[],
+    mainId: string,
+    conditionId: string,
+): number | null {
+    const main = parseInt(mainId, 10);
+    if (!main) return null;
+    if (rootHasSubcategories(categories, main)) {
+        const cond = parseInt(conditionId, 10);
+        return cond || null;
+    }
+    return main;
 }
 
 /** Subcategories only — for product assignment */

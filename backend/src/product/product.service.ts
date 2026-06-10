@@ -370,11 +370,6 @@ export class ProductService {
                 'Products must be assigned to a subcategory, not a main category with children',
             );
         }
-        if (cat.parent_id == null) {
-            throw new BadRequestException(
-                'Products must be assigned to a subcategory (e.g. New Cameras), not a main category',
-            );
-        }
     }
 
     private async validateCategoryParent(parentId: number | null | undefined, categoryId?: number) {

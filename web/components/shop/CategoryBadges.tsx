@@ -1,7 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { getRootCategories, findCategoryBySlug, type CategoryNode } from '@/lib/category-utils';
+import {
+    getShopNavRoots,
+    getActiveRoot,
+    getSubcategoriesForRoot,
+    type CategoryNode,
+} from '@/lib/category-utils';
+import SubcategoryLinks from '@/components/shop/SubcategoryLinks';
 
 type Category = CategoryNode;
 
@@ -16,20 +22,11 @@ function getSlug(cat: Category): string {
 
 export default function CategoryBadges({ categories, currentSlug = '' }: CategoryBadgesProps) {
     const isAll = !currentSlug;
-    const roots = getRootCategories(categories);
-    const current = currentSlug ? findCategoryBySlug(categories, currentSlug) : undefined;
-    const activeRoot =
-        current?.parent_id != null
-            ? categories.find((c) => c.id === current.parent_id) ?? current.parent
-            : current?.parent_id == null
-              ? current
-              : undefined;
-    const activeRootId = activeRoot && 'id' in activeRoot ? activeRoot.id : (activeRoot as CategoryNode | undefined)?.id;
+    const roots = getShopNavRoots(categories);
+    const activeRoot = getActiveRoot(categories, currentSlug);
+    const activeRootId = activeRoot?.id;
     const childChips =
-        activeRootId != null
-            ? (categories.find((c) => c.id === activeRootId)?.children ??
-              categories.filter((c) => c.parent_id === activeRootId))
-            : [];
+        activeRootId != null ? getSubcategoriesForRoot(categories, activeRootId) : [];
 
     return (
         <div className="space-y-3">
@@ -62,22 +59,11 @@ export default function CategoryBadges({ categories, currentSlug = '' }: Categor
             </div>
             {childChips.length > 0 && (
                 <div className="lg:hidden w-full -mx-4 sm:-mx-6 px-4 sm:px-6 overflow-x-auto overflow-y-hidden pb-1 no-scrollbar overflow-touch">
-                    <div className="flex flex-nowrap gap-2 min-w-max items-stretch">
-                        {childChips.map((cat) => {
-                            const slug = getSlug(cat);
-                            const isActive = currentSlug === slug;
-                            return (
-                                <Link
-                                    key={cat.id ?? slug}
-                                    href={`/shop/${slug}`}
-                                    className={`shrink-0 min-h-[40px] flex items-center px-3.5 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${isActive ? 'bg-brand/10 text-brand border-brand/30' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
-                                    aria-current={isActive ? 'page' : undefined}
-                                >
-                                    {cat.name}
-                                </Link>
-                            );
-                        })}
-                    </div>
+                    <SubcategoryLinks
+                        subcategories={childChips}
+                        currentSlug={currentSlug}
+                        variant="chips"
+                    />
                 </div>
             )}
         </div>

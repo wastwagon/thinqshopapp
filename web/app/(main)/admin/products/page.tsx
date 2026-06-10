@@ -22,7 +22,14 @@ import {
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import api from '@/lib/axios';
-import { groupLeavesByParent } from '@/lib/category-utils';
+import {
+    getShopNavRoots,
+    getSubcategoriesForRoot,
+    rootHasSubcategories,
+    resolveAdminCategoryIds,
+    resolveCategoryIdForAdmin,
+    type CategoryNode,
+} from '@/lib/category-utils';
 import { getMediaUrl } from '@/lib/media';
 import MediaPickerModal from '@/components/admin/MediaPickerModal';
 
@@ -42,7 +49,7 @@ function resolveOptionSlug(variantType: string, options: VariationOptionRow[]): 
 
 export default function AdminProducts() {
     const [products, setProducts] = useState<any[]>([]);
-    const [categories, setCategories] = useState<{ id: number; name: string; slug: string; parent_id?: number | null }[]>([]);
+    const [categories, setCategories] = useState<CategoryNode[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -51,7 +58,8 @@ export default function AdminProducts() {
     const [editingProduct, setEditingProduct] = useState<any>(null);
     const [formData, setFormData] = useState({
         name: '',
-        category_id: '',
+        main_category_id: '',
+        condition_category_id: '',
         product_kind: 'simple' as 'simple' | 'variable',
         price: '',
         compare_price: '',
@@ -140,7 +148,12 @@ export default function AdminProducts() {
         if (product) {
             setEditingProduct(product);
             const catName = product.category?.name ?? product.category;
-            const catId = product.category_id ?? categories.find(c => c.name === catName)?.id ?? '';
+            const catId = Number(
+                product.category_id ?? categories.find((c) => c.name === catName)?.id ?? 0,
+            );
+            const { mainId, conditionId } = catId
+                ? resolveAdminCategoryIds(categories, catId)
+                : { mainId: '', conditionId: '' };
             const imgs = Array.isArray(product.images) ? product.images.filter(Boolean) : product.image ? [product.image] : [];
             const variants = (product.variants || []).map((v: any) => ({
                 variant_type: resolveOptionSlug(v.variant_type ?? '', options),
@@ -151,7 +164,8 @@ export default function AdminProducts() {
             }));
             setFormData({
                 name: product.name ?? '',
-                category_id: String(catId),
+                main_category_id: mainId,
+                condition_category_id: conditionId,
                 product_kind: variants.length > 0 ? 'variable' : 'simple',
                 price: String(Number(product.price ?? 0)),
                 compare_price: product.compare_price != null ? String(Number(product.compare_price)) : '',
@@ -176,7 +190,8 @@ export default function AdminProducts() {
             setEditingProduct(null);
             setFormData({
                 name: '',
-                category_id: '',
+                main_category_id: '',
+                condition_category_id: '',
                 product_kind: 'simple',
                 price: '',
                 compare_price: '',
@@ -251,9 +266,18 @@ export default function AdminProducts() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const categoryId = parseInt(formData.category_id, 10);
+        const categoryId = resolveCategoryIdForAdmin(
+            categories,
+            formData.main_category_id,
+            formData.condition_category_id,
+        );
         if (!categoryId || !formData.name) {
-            toast.error('Name and category are required');
+            const main = parseInt(formData.main_category_id, 10);
+            if (main && rootHasSubcategories(categories, main) && !formData.condition_category_id) {
+                toast.error('Select New or Used for this category');
+            } else {
+                toast.error('Name and category are required');
+            }
             return;
         }
         const isVariable = formData.product_kind === 'variable';
@@ -502,23 +526,53 @@ export default function AdminProducts() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Category</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Main category</label>
                                 <select
                                     required
-                                    value={formData.category_id}
-                                    onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                                    value={formData.main_category_id}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            main_category_id: e.target.value,
+                                            condition_category_id: '',
+                                        })
+                                    }
                                     className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 >
-                                    <option value="">Select subcategory</option>
-                                    {groupLeavesByParent(categories).map(({ parent, leaves }) => (
-                                        <optgroup key={parent.id || parent.slug} label={parent.name}>
-                                            {leaves.map((c) => (
-                                                <option key={c.id} value={c.id}>{c.name}</option>
-                                            ))}
-                                        </optgroup>
+                                    <option value="">Select category</option>
+                                    {getShopNavRoots(categories).map((c) => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
+                            {formData.main_category_id &&
+                                rootHasSubcategories(categories, parseInt(formData.main_category_id, 10)) && (
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                            Condition
+                                        </label>
+                                        <select
+                                            required
+                                            value={formData.condition_category_id}
+                                            onChange={(e) =>
+                                                setFormData({ ...formData, condition_category_id: e.target.value })
+                                            }
+                                            className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                        >
+                                            <option value="">Select New or Used</option>
+                                            {getSubcategoriesForRoot(
+                                                categories,
+                                                parseInt(formData.main_category_id, 10),
+                                            ).map((c) => (
+                                                <option key={c.id} value={c.id}>
+                                                    {c.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Product type</label>
                                 <div className="flex rounded-lg border border-gray-100 p-0.5 bg-gray-50 gap-0.5">
