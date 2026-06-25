@@ -85,6 +85,7 @@ export default function WalletPage() {
             setWithdrawals(wdRes.data);
         } catch (error) {
             console.error('Failed to fetch wallet data', error);
+            toast.error('Failed to load wallet');
         } finally {
             setLoading(false);
         }
@@ -266,6 +267,30 @@ export default function WalletPage() {
                                     >
                                         Cancel
                                     </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                {withdrawals.some((w) => w.status !== 'pending') && (
+                    <div className="flat-card p-4 mb-4">
+                        <p className="text-xs font-semibold text-gray-700 mb-2">Withdrawal history</p>
+                        <ul className="space-y-2">
+                            {withdrawals.filter((w) => w.status !== 'pending').map((w) => (
+                                <li key={w.id} className="text-sm border-b border-gray-50 pb-2 last:border-0 last:pb-0">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="text-gray-800">₵{Number(w.amount_ghs).toFixed(2)}</span>
+                                        <span className={`text-xs font-semibold capitalize ${
+                                            w.status === 'paid' ? 'text-green-600' : w.status === 'rejected' ? 'text-red-600' : 'text-gray-500'
+                                        }`}>
+                                            {w.status.replace(/_/g, ' ')}
+                                        </span>
+                                    </div>
+                                    {w.rejection_reason && (
+                                        <p className="text-xs text-red-600 mt-1">{w.rejection_reason}</p>
+                                    )}
+                                    <p className="text-[10px] text-gray-400 mt-0.5">{new Date(w.created_at).toLocaleString()}</p>
                                 </li>
                             ))}
                         </ul>

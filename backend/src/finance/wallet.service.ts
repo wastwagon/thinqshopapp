@@ -265,25 +265,28 @@ export class WalletService {
             }
         }
 
-        const available = await this.getAvailableBalance(userId);
-        if (amt > available) {
-            throw new BadRequestException(
-                `Insufficient available balance. Available: ₵${available.toFixed(2)}`,
-            );
-        }
-
         const fee = 0;
         const net = amt - fee;
-        return this.prisma.walletWithdrawal.create({
-            data: {
-                user_id: userId,
-                amount_ghs: amt,
-                fee_ghs: fee,
-                net_amount_ghs: net,
-                method,
-                recipient_details: recipientDetails as Prisma.InputJsonValue,
-                status: 'pending',
-            },
+        return this.prisma.$transaction(async (tx) => {
+            const wallet = await this.ensureWallet(userId, tx);
+            const pending = await this.getPendingWithdrawalTotal(userId, tx);
+            const available = Math.max(0, Number(wallet.balance_ghs) - pending);
+            if (amt > available) {
+                throw new BadRequestException(
+                    `Insufficient available balance. Available: ₵${available.toFixed(2)}`,
+                );
+            }
+            return tx.walletWithdrawal.create({
+                data: {
+                    user_id: userId,
+                    amount_ghs: amt,
+                    fee_ghs: fee,
+                    net_amount_ghs: net,
+                    method,
+                    recipient_details: recipientDetails as Prisma.InputJsonValue,
+                    status: 'pending',
+                },
+            });
         });
     }
 

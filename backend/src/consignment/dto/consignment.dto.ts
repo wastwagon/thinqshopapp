@@ -6,6 +6,7 @@ import {
     IsIn,
     IsObject,
     Min,
+    Max,
     MinLength,
     ArrayMinSize,
     IsBoolean,
@@ -60,6 +61,62 @@ export class CreateConsignmentSubmissionDto {
     serial_number?: string;
 }
 
+export class UpdateConsignmentSubmissionDto {
+    @IsOptional()
+    @IsString()
+    @MinLength(2)
+    name?: string;
+
+    @IsOptional()
+    @IsNumber()
+    category_id?: number;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(10)
+    description?: string;
+
+    @IsOptional()
+    @IsString()
+    short_description?: string;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(1)
+    asking_price?: number;
+
+    @IsOptional()
+    @IsIn(['new', 'like_new', 'good', 'fair'])
+    condition?: 'new' | 'like_new' | 'good' | 'fair';
+
+    @IsOptional()
+    @IsArray()
+    @ArrayMinSize(1)
+    @IsString({ each: true })
+    images?: string[];
+
+    @IsOptional()
+    @IsObject()
+    specifications?: Record<string, unknown>;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(5)
+    pickup_details?: string;
+
+    @IsOptional()
+    @IsString()
+    brand?: string;
+
+    @IsOptional()
+    @IsString()
+    model?: string;
+
+    @IsOptional()
+    @IsString()
+    serial_number?: string;
+}
+
 export class ApproveConsignmentDto {
     @IsOptional()
     @IsNumber()
@@ -69,6 +126,7 @@ export class ApproveConsignmentDto {
     @IsOptional()
     @IsNumber()
     @Min(0)
+    @Max(100)
     commission_pct?: number;
 
     @IsOptional()
@@ -104,6 +162,7 @@ export class UpdateConsignmentSettingsDto {
     @IsOptional()
     @IsNumber()
     @Min(0)
+    @Max(100)
     default_commission_pct?: number;
 
     @IsOptional()

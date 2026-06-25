@@ -9,10 +9,12 @@ import {
     ClipboardList,
     User,
     Settings,
+    Tag,
 } from 'lucide-react';
 
 const accountLinks = [
-    { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet, description: 'Balance, deposit & history' },
+    { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet, description: 'Balance, deposit & withdrawals' },
+    { name: 'Sell for Me', href: '/dashboard/sell-for-me', icon: Tag, description: 'List items for us to sell' },
     { name: 'Order history', href: '/dashboard/orders', icon: ClipboardList, description: 'Track and manage orders' },
     { name: 'Wishlist', href: '/wishlist', icon: Heart, description: 'Saved items' },
     { name: 'Profile', href: '/dashboard/profile', icon: User, description: 'Personal details & security' },

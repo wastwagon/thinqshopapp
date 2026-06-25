@@ -38,6 +38,7 @@ const STATUS_LABELS: Record<string, string> = {
     under_review: 'Under review',
     changes_requested: 'Changes requested',
     listed: 'Live on shop',
+    delisted: 'Taken offline',
     rejected: 'Rejected',
     sold: 'Sold',
     paid_out: 'Paid out',
@@ -51,6 +52,8 @@ export default function SellForMePage() {
     const [submitting, setSubmitting] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [serviceEnabled, setServiceEnabled] = useState(true);
+    const [defaultCommissionPct, setDefaultCommissionPct] = useState(20);
+    const [editingId, setEditingId] = useState<number | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [form, setForm] = useState({
@@ -78,6 +81,7 @@ export default function SellForMePage() {
             setSubmissions(subRes.data);
             setCategories(Array.isArray(catRes.data) ? catRes.data : []);
             setServiceEnabled(settingsRes.data?.sell_for_me_enabled !== false);
+            setDefaultCommissionPct(Number(settingsRes.data?.default_commission_pct ?? 20));
         } catch {
             toast.error('Failed to load listings');
         } finally {
@@ -116,6 +120,48 @@ export default function SellForMePage() {
         }
     };
 
+    const resetForm = () => {
+        setForm({
+            name: '',
+            category_id: '',
+            description: '',
+            short_description: '',
+            asking_price: '',
+            condition: 'good',
+            brand: '',
+            model: '',
+            serial_number: '',
+            pickup_details: '',
+            images: [],
+        });
+        setEditingId(null);
+        setIsCreating(false);
+    };
+
+    const startEditing = async (id: number) => {
+        try {
+            const { data } = await api.get(`/consignment/submissions/${id}`);
+            const specs = (data.specifications && typeof data.specifications === 'object') ? data.specifications as Record<string, string> : {};
+            setForm({
+                name: data.name || '',
+                category_id: String(data.category_id || ''),
+                description: data.description || '',
+                short_description: data.short_description || '',
+                asking_price: String(data.asking_price ?? ''),
+                condition: data.condition || 'good',
+                brand: specs.brand || '',
+                model: specs.model || '',
+                serial_number: specs.serial_number || '',
+                pickup_details: data.pickup_details || '',
+                images: Array.isArray(data.images) ? data.images : [],
+            });
+            setEditingId(id);
+            setIsCreating(true);
+        } catch {
+            toast.error('Failed to load listing for editing');
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const categoryId = parseInt(form.category_id, 10);
@@ -139,7 +185,7 @@ export default function SellForMePage() {
 
         setSubmitting(true);
         try {
-            await api.post('/consignment/submissions', {
+            const payload = {
                 name: form.name.trim(),
                 category_id: categoryId,
                 description: form.description.trim(),
@@ -151,22 +197,15 @@ export default function SellForMePage() {
                 brand: form.brand.trim() || undefined,
                 model: form.model.trim() || undefined,
                 serial_number: form.serial_number.trim() || undefined,
-            });
-            toast.success('Listing submitted for review');
-            setIsCreating(false);
-            setForm({
-                name: '',
-                category_id: '',
-                description: '',
-                short_description: '',
-                asking_price: '',
-                condition: 'good',
-                brand: '',
-                model: '',
-                serial_number: '',
-                pickup_details: '',
-                images: [],
-            });
+            };
+            if (editingId) {
+                await api.patch(`/consignment/submissions/${editingId}`, payload);
+                toast.success('Listing updated and resubmitted');
+            } else {
+                await api.post('/consignment/submissions', payload);
+                toast.success('Listing submitted for review');
+            }
+            resetForm();
             fetchData();
         } catch (err: any) {
             toast.error(err.response?.data?.message || 'Submission failed');
@@ -205,7 +244,15 @@ export default function SellForMePage() {
 
                 {isCreating && serviceEnabled && (
                     <div className="flat-card p-4 md:p-6 mb-6 border border-brand/20">
-                        <h2 className="text-sm font-semibold text-gray-900 mb-4">Submit a product listing</h2>
+                        <h2 className="text-sm font-semibold text-gray-900 mb-1">
+                            {editingId ? 'Update your listing' : 'Submit a product listing'}
+                        </h2>
+                        {!editingId && (
+                            <p className="text-xs text-gray-500 mb-4">
+                                ThinQShop keeps {defaultCommissionPct}% commission on successful sales. The rest is credited to your wallet after delivery.
+                            </p>
+                        )}
+                        {editingId && <div className="mb-4" />}
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -331,9 +378,9 @@ export default function SellForMePage() {
 
                             <div className="flex gap-2 pt-2">
                                 <button type="submit" disabled={submitting} className="h-10 px-5 bg-brand text-white rounded-xl text-xs font-semibold disabled:opacity-50">
-                                    {submitting ? 'Submitting…' : 'Submit for review'}
+                                    {submitting ? 'Saving…' : editingId ? 'Resubmit for review' : 'Submit for review'}
                                 </button>
-                                <button type="button" onClick={() => setIsCreating(false)} className="h-10 px-5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600">
+                                <button type="button" onClick={resetForm} className="h-10 px-5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600">
                                     Cancel
                                 </button>
                             </div>
@@ -365,6 +412,15 @@ export default function SellForMePage() {
                                     )}
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
+                                    {s.status === 'changes_requested' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => startEditing(s.id)}
+                                            className="text-xs font-semibold text-brand hover:underline"
+                                        >
+                                            Update & resubmit
+                                        </button>
+                                    )}
                                     {s.product?.slug && s.status === 'listed' && (
                                         <Link
                                             href={`/products/${s.product.slug}`}

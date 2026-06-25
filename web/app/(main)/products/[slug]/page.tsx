@@ -235,7 +235,9 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 )}
                             </div>
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 border border-brand/15 text-xs font-medium text-brand mb-4">
-                                Ships from abroad · 7–14 day delivery
+                                {product.is_consignment
+                                    ? 'Sell for Me · Local pickup & handover'
+                                    : 'Ships from abroad · 7–14 day delivery'}
                             </div>
                             <h1 className="page-title text-base sm:text-lg md:text-xl leading-snug">{product.name}</h1>
                         </div>

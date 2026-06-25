@@ -45,7 +45,7 @@ export class ConsignmentService {
     }
 
     private submissionNumber(): string {
-        return `CON-${Date.now()}`;
+        return `CON-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     }
 
     private frontendBaseUrl(): string {
@@ -281,6 +281,47 @@ export class ConsignmentService {
         return row;
     }
 
+    async updateUserSubmission(userId: number, id: number, dto: Partial<CreateConsignmentSubmissionDto>) {
+        const row = await this.findUserSubmission(userId, id);
+        if (row.status !== 'changes_requested') {
+            throw new BadRequestException('Only submissions awaiting changes can be updated');
+        }
+
+        if (dto.category_id !== undefined) {
+            const category = await this.prisma.category.findFirst({
+                where: { id: dto.category_id, is_active: true },
+            });
+            if (!category) throw new BadRequestException('Invalid category');
+        }
+
+        const specs: Record<string, unknown> = {
+            ...(typeof row.specifications === 'object' && row.specifications !== null ? row.specifications as Record<string, unknown> : {}),
+            ...(dto.specifications ?? {}),
+        };
+        if (dto.condition) specs.condition = dto.condition;
+        if (dto.brand?.trim()) specs.brand = dto.brand.trim();
+        if (dto.model?.trim()) specs.model = dto.model.trim();
+        if (dto.serial_number?.trim()) specs.serial_number = dto.serial_number.trim();
+
+        return this.prisma.consignmentSubmission.update({
+            where: { id },
+            data: {
+                ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
+                ...(dto.category_id !== undefined ? { category_id: dto.category_id } : {}),
+                ...(dto.description !== undefined ? { description: dto.description.trim() } : {}),
+                ...(dto.short_description !== undefined ? { short_description: dto.short_description?.trim() || null } : {}),
+                ...(dto.asking_price !== undefined ? { asking_price: dto.asking_price } : {}),
+                ...(dto.condition !== undefined ? { condition: dto.condition } : {}),
+                ...(dto.images !== undefined ? { images: dto.images } : {}),
+                ...(dto.pickup_details !== undefined ? { pickup_details: dto.pickup_details.trim() } : {}),
+                specifications: specs as Prisma.InputJsonValue,
+                status: 'submitted',
+                admin_notes: null,
+            },
+            include: { category: true, product: { select: { id: true, slug: true, is_active: true } } },
+        });
+    }
+
     async markUnderReview(id: number, adminId: number) {
         const row = await this.findOneForAdmin(id);
         if (!['submitted', 'changes_requested'].includes(row.status)) {
@@ -395,13 +436,51 @@ export class ConsignmentService {
         });
     }
 
+    /** Take a live listing offline without rejecting the submission. */
+    async delistSubmission(id: number, adminId: number, reason?: string) {
+        const submission = await this.findOneForAdmin(id);
+        if (submission.status !== 'listed' || !submission.product_id) {
+            throw new BadRequestException('Only live shop listings can be delisted');
+        }
+
+        return this.prisma.$transaction(async (tx) => {
+            await tx.product.update({
+                where: { id: submission.product_id! },
+                data: { is_active: false, stock_quantity: 0 },
+            });
+            return tx.consignmentSubmission.update({
+                where: { id },
+                data: {
+                    status: 'delisted',
+                    admin_notes: reason?.trim() || submission.admin_notes || 'Delisted by admin',
+                    reviewed_by_admin_id: adminId,
+                    reviewed_at: new Date(),
+                },
+                include: {
+                    category: true,
+                    product: { select: { id: true, slug: true, is_active: true } },
+                    user: { select: { id: true, email: true } },
+                },
+            });
+        }).then(async (updated) => {
+            await this.notificationService.createNotification({
+                userId: submission.user_id,
+                type: 'consignment',
+                title: 'Listing taken offline',
+                message: `"${submission.name}" was removed from the shop by our team.`,
+                link: '/dashboard/sell-for-me',
+            });
+            return updated;
+        });
+    }
+
     async countPendingForAdmin() {
         return this.prisma.consignmentSubmission.count({
             where: { status: { in: ['submitted', 'under_review'] } },
         });
     }
 
-    /** When order is paid — remove consignment items from shop */
+    /** When order is paid — mark consignment items sold (stock reserved at checkout). */
     async handleOrderPaid(orderId: number) {
         const order = await this.prisma.order.findUnique({
             where: { id: orderId },
@@ -413,21 +492,18 @@ export class ConsignmentService {
             const product = item.product;
             if (!product?.is_consignment) continue;
 
-            await this.prisma.product.update({
+            await this.prisma.product.updateMany({
                 where: { id: product.id },
                 data: { stock_quantity: 0, is_active: false },
             });
 
-            const submission = await this.prisma.consignmentSubmission.findFirst({
-                where: { product_id: product.id },
+            const sold = await this.prisma.consignmentSubmission.updateMany({
+                where: { product_id: product.id, status: 'listed' },
+                data: { status: 'sold' },
             });
-            if (submission && submission.status === 'listed') {
-                await this.prisma.consignmentSubmission.update({
-                    where: { id: submission.id },
-                    data: { status: 'sold' },
-                });
+            if (sold.count > 0 && product.consignor_user_id) {
                 await this.notifySold(
-                    product.consignor_user_id ?? submission.user_id,
+                    product.consignor_user_id,
                     product.name,
                     order.order_number,
                 );
@@ -435,13 +511,13 @@ export class ConsignmentService {
         }
     }
 
-    /** When order is delivered — credit consignor wallet minus commission */
+    /** When order is delivered — credit consignor wallet minus commission (idempotent). */
     async handleOrderDelivered(orderId: number) {
         const order = await this.prisma.order.findUnique({
             where: { id: orderId },
             include: { items: { include: { product: true } } },
         });
-        if (!order) return;
+        if (!order || order.payment_status !== 'success') return;
 
         for (const item of order.items) {
             const product = item.product;
@@ -451,40 +527,53 @@ export class ConsignmentService {
                 where: { product_id: product.id },
             });
             if (!submission) continue;
-            if (submission.status === 'paid_out') continue;
 
             const saleAmount = Number(item.total);
             const commissionPct = Number(submission.commission_pct ?? product.commission_pct ?? FALLBACK_COMMISSION_PCT);
             const commission = saleAmount * (commissionPct / 100);
             const payout = Math.max(0, saleAmount - commission);
 
-            if (payout <= 0) {
-                await this.prisma.consignmentSubmission.update({
-                    where: { id: submission.id },
+            let shouldNotify = false;
+            let notifyAmount = 0;
+
+            await this.prisma.$transaction(async (tx) => {
+                const transitioned = await tx.consignmentSubmission.updateMany({
+                    where: { id: submission.id, status: 'sold' },
                     data: { status: 'paid_out', payout_order_id: orderId },
                 });
-                continue;
-            }
+                if (transitioned.count === 0) return;
 
-            await this.walletService.credit(
-                product.consignor_user_id,
-                payout,
-                'consignment_payout',
-                `Sell for Me payout: ${product.name} (${submission.submission_number})`,
-                submission.id,
-            );
+                const existingLedger = await tx.walletTransaction.findFirst({
+                    where: {
+                        user_id: product.consignor_user_id!,
+                        source: 'consignment_payout',
+                        reference_id: submission.id,
+                    },
+                });
+                if (existingLedger) return;
 
-            await this.prisma.consignmentSubmission.update({
-                where: { id: submission.id },
-                data: { status: 'paid_out', payout_order_id: orderId },
+                if (payout > 0) {
+                    await this.walletService.credit(
+                        product.consignor_user_id!,
+                        payout,
+                        'consignment_payout',
+                        `Sell for Me payout: ${product.name} (${submission.submission_number})`,
+                        submission.id,
+                        tx,
+                    );
+                }
+                shouldNotify = true;
+                notifyAmount = payout;
             });
 
-            await this.notifyPayout(
-                product.consignor_user_id,
-                product.name,
-                submission.submission_number,
-                payout,
-            );
+            if (shouldNotify && notifyAmount > 0) {
+                await this.notifyPayout(
+                    product.consignor_user_id!,
+                    product.name,
+                    submission.submission_number,
+                    notifyAmount,
+                );
+            }
         }
     }
 }

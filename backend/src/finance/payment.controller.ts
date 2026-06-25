@@ -1,12 +1,16 @@
-import { Controller, Post, Body, UseGuards, Request, Headers, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Headers, UnauthorizedException, Inject, forwardRef } from '@nestjs/common';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { PaymentService } from './payment.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Public } from '../auth/public.decorator';
+import { OrderService } from '../order/order.service';
 
 @Controller('payments')
 export class PaymentController {
-    constructor(private paymentService: PaymentService) { }
+    constructor(
+        private paymentService: PaymentService,
+        @Inject(forwardRef(() => OrderService)) private orderService: OrderService,
+    ) { }
 
     @Post('init')
     @UseGuards(AuthGuard)
@@ -46,6 +50,10 @@ export class PaymentController {
         if (!reference || !status) {
             throw new UnauthorizedException('Invalid webhook payload');
         }
-        return this.paymentService.verifyWebhook(reference, status, body);
+        const payment = await this.paymentService.verifyWebhook(reference, status, body);
+        if (payment?.status === 'success' && payment.service_type === 'ecommerce') {
+            await this.orderService.completeEcommercePaymentFromWebhook(payment);
+        }
+        return payment;
     }
 }

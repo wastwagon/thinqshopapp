@@ -264,10 +264,30 @@ export class ProductService {
     }
 
     async update(id: number, updateProductDto: UpdateProductDto) {
+        const existing = await this.prisma.product.findUnique({ where: { id } });
+        if (!existing) throw new NotFoundException('Product not found');
+
         if (updateProductDto.category_id != null) {
             await this.assertLeafCategory(updateProductDto.category_id);
         }
         const { variants, ...rest } = updateProductDto as UpdateProductDto & { variants?: Array<{ variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number; image?: string }> };
+
+        if (existing.is_consignment) {
+            const dto = updateProductDto as Record<string, unknown>;
+            const blocked = ['is_consignment', 'consignor_user_id', 'commission_pct'];
+            for (const key of blocked) {
+                if (dto[key] !== undefined) {
+                    throw new BadRequestException(`Cannot change ${key} on a Sell for Me product`);
+                }
+            }
+            if (rest.stock_quantity !== undefined && Number(rest.stock_quantity) !== Number(existing.stock_quantity)) {
+                throw new BadRequestException('Consignment stock is managed via Sell for Me admin (approve, sale, delist)');
+            }
+            if (dto.is_active === true && !existing.is_active) {
+                throw new BadRequestException('Re-list consignment items from Admin → Sell for Me, not Products');
+            }
+        }
+
         await this.prisma.product.update({
             where: { id },
             data: rest as any,

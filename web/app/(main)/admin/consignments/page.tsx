@@ -33,7 +33,7 @@ interface Submission {
     };
 }
 
-const TABS = ['', 'submitted', 'under_review', 'listed', 'sold', 'paid_out', 'rejected'] as const;
+const TABS = ['', 'submitted', 'under_review', 'changes_requested', 'listed', 'delisted', 'sold', 'paid_out', 'rejected'] as const;
 
 export default function AdminConsignmentsPage() {
     const [rows, setRows] = useState<Submission[]>([]);
@@ -48,7 +48,8 @@ export default function AdminConsignmentsPage() {
     });
     const [rejectReason, setRejectReason] = useState('');
     const [changesNote, setChangesNote] = useState('');
-    const [modal, setModal] = useState<'approve' | 'reject' | 'changes' | 'view' | null>(null);
+    const [delistReason, setDelistReason] = useState('');
+    const [modal, setModal] = useState<'approve' | 'reject' | 'changes' | 'view' | 'delist' | null>(null);
     const [processing, setProcessing] = useState(false);
     const [platformSettings, setPlatformSettings] = useState({
         default_commission_pct: '20',
@@ -188,6 +189,25 @@ export default function AdminConsignmentsPage() {
         }
     };
 
+    const handleDelist = async () => {
+        if (!selected) return;
+        setProcessing(true);
+        try {
+            await api.patch(`/consignment/admin/${selected.id}/delist`, {
+                reason: delistReason.trim() || undefined,
+            });
+            toast.success('Listing removed from shop');
+            setModal(null);
+            setSelected(null);
+            setDelistReason('');
+            fetchRows();
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Delist failed');
+        } finally {
+            setProcessing(false);
+        }
+    };
+
     const handleReview = async (id: number) => {
         try {
             await api.patch(`/consignment/admin/${id}/review`);
@@ -315,6 +335,15 @@ export default function AdminConsignmentsPage() {
                                                             Shop <ExternalLink className="h-3 w-3" />
                                                         </Link>
                                                     )}
+                                                    {s.status === 'listed' && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => { setSelected(s); setDelistReason(''); setModal('delist'); }}
+                                                            className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-gray-100 text-gray-700 border border-gray-200"
+                                                        >
+                                                            Delist
+                                                        </button>
+                                                    )}
                                                     {['submitted', 'changes_requested'].includes(s.status) && (
                                                         <button type="button" onClick={() => handleReview(s.id)} className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-gray-100 text-gray-700">
                                                             Review
@@ -324,6 +353,13 @@ export default function AdminConsignmentsPage() {
                                                         <>
                                                             <button type="button" onClick={() => openApprove(s)} className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-green-50 text-green-700 border border-green-100">
                                                                 Approve
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => { setSelected(s); setChangesNote(s.admin_notes || ''); setModal('changes'); }}
+                                                                className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-amber-50 text-amber-800 border border-amber-100"
+                                                            >
+                                                                Changes
                                                             </button>
                                                             <button
                                                                 type="button"
@@ -436,6 +472,25 @@ export default function AdminConsignmentsPage() {
                                         onChange={(e) => setChangesNote(e.target.value)}
                                     />
                                     <button type="button" disabled={processing} onClick={handleRequestChanges} className="mt-4 h-10 px-4 rounded-lg bg-brand text-white text-sm font-semibold">Send</button>
+                                </>
+                            )}
+
+                            {modal === 'delist' && (
+                                <>
+                                    <h2 className="text-lg font-bold text-gray-900 mb-1">Remove from shop</h2>
+                                    <p className="text-xs text-gray-500 mb-4">Takes the product offline. The consignor can contact support to re-list.</p>
+                                    <textarea
+                                        className="w-full min-h-[80px] admin-input"
+                                        placeholder="Optional note to consignor"
+                                        value={delistReason}
+                                        onChange={(e) => setDelistReason(e.target.value)}
+                                    />
+                                    <div className="flex gap-2 mt-4">
+                                        <button type="button" disabled={processing} onClick={handleDelist} className="flex-1 h-10 rounded-lg bg-gray-800 text-white text-sm font-semibold">
+                                            {processing ? 'Removing…' : 'Delist from shop'}
+                                        </button>
+                                        <button type="button" onClick={() => setModal(null)} className="h-10 px-4 rounded-lg bg-gray-100 text-sm">Cancel</button>
+                                    </div>
                                 </>
                             )}
                         </div>

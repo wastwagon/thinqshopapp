@@ -27,6 +27,7 @@ import {
     RejectConsignmentDto,
     RequestChangesConsignmentDto,
     UpdateConsignmentSettingsDto,
+    UpdateConsignmentSubmissionDto,
 } from './dto/consignment.dto';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -82,6 +83,16 @@ export class ConsignmentController {
     @UseGuards(AuthGuard)
     async getUserSubmission(@Request() req: any, @Param('id') id: string) {
         return this.consignmentService.findUserSubmission(req.user.sub, Number(id));
+    }
+
+    @Patch('submissions/:id')
+    @UseGuards(AuthGuard)
+    async updateUserSubmission(
+        @Request() req: any,
+        @Param('id') id: string,
+        @Body() body: UpdateConsignmentSubmissionDto,
+    ) {
+        return this.consignmentService.updateUserSubmission(req.user.sub, Number(id), body);
     }
 
     @Get('admin/list')
@@ -176,6 +187,18 @@ export class ConsignmentController {
             body.admin_notes,
         );
         await this.auditService.logAdminAction(req, 'consignment.request_changes', {
+            tableName: 'consignment_submissions',
+            recordId: Number(id),
+        });
+        return updated;
+    }
+
+    @Patch('admin/:id/delist')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_MANAGE)
+    async delist(@Request() req: any, @Param('id') id: string, @Body() body: { reason?: string }) {
+        const updated = await this.consignmentService.delistSubmission(Number(id), req.user.sub, body?.reason);
+        await this.auditService.logAdminAction(req, 'consignment.delist', {
             tableName: 'consignment_submissions',
             recordId: Number(id),
         });

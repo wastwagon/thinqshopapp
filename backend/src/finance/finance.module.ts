@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentController } from './payment.controller';
 import { WalletService } from './wallet.service';
@@ -10,9 +10,10 @@ import { TransferService } from './transfer.service';
 import { TransferController } from './transfer.controller';
 import { SmsModule } from '../sms/sms.module';
 import { AuditModule } from '../audit/audit.module';
+import { OrderModule } from '../order/order.module';
 
 @Module({
-    imports: [PrismaModule, AuthModule, SmsModule, AuditModule],
+    imports: [PrismaModule, AuthModule, SmsModule, AuditModule, forwardRef(() => OrderModule)],
     providers: [PaymentService, WalletService, TransferService],
     controllers: [PaymentController, WalletController, TransferController],
     exports: [WalletService, PaymentService, TransferService],

@@ -1,7 +1,21 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Tag, ArrowRight, Wallet } from 'lucide-react';
+import api from '@/lib/axios';
 
 export default function SellForMeCta() {
+    const [enabled, setEnabled] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        api.get('/consignment/settings')
+            .then(({ data }) => setEnabled(data.sell_for_me_enabled !== false))
+            .catch(() => setEnabled(true));
+    }, []);
+
+    if (enabled === false) return null;
+
     return (
         <section className="py-8 sm:py-10" aria-labelledby="sell-for-me-cta-heading">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">

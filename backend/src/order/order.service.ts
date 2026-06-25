@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/order.dto';
 import { CartService } from '../cart/cart.service';
@@ -10,6 +11,15 @@ import { SmsService } from '../sms/sms.service';
 import { NotificationService } from '../notification/notification.service';
 import { WalletService } from '../finance/wallet.service';
 import { ConsignmentService } from '../consignment/consignment.service';
+
+type TxClient = Prisma.TransactionClient;
+type CartLine = Awaited<ReturnType<CartService['getCart']>>[number];
+type OrderItemLine = {
+    product_id: number;
+    variant_id: number | null;
+    quantity: number;
+    product?: { is_consignment: boolean; name?: string } | null;
+};
 
 @Injectable()
 export class OrderService {
@@ -24,6 +34,79 @@ export class OrderService {
         private walletService: WalletService,
         private consignmentService: ConsignmentService,
     ) { }
+
+    private async reserveStockForCartItems(tx: TxClient, cartItems: CartLine[], userId: number) {
+        for (const item of cartItems) {
+            const product = item.product;
+            if (!product.is_active) {
+                throw new BadRequestException(`${product.name} is no longer available`);
+            }
+            if (product.is_consignment && product.consignor_user_id === userId) {
+                throw new BadRequestException('You cannot purchase your own consignment listing');
+            }
+            if (product.is_consignment && item.quantity > 1) {
+                throw new BadRequestException('Consignment items can only be purchased one at a time');
+            }
+
+            if (item.variant_id) {
+                const updated = await tx.productVariant.updateMany({
+                    where: { id: item.variant_id, stock_quantity: { gte: item.quantity } },
+                    data: { stock_quantity: { decrement: item.quantity } },
+                });
+                if (updated.count === 0) {
+                    throw new BadRequestException(`${product.name} is out of stock`);
+                }
+                continue;
+            }
+
+            const updated = await tx.product.updateMany({
+                where: {
+                    id: item.product_id,
+                    is_active: true,
+                    stock_quantity: { gte: item.quantity },
+                },
+                data: {
+                    stock_quantity: { decrement: item.quantity },
+                    ...(product.is_consignment ? { is_active: false } : {}),
+                },
+            });
+            if (updated.count === 0) {
+                throw new BadRequestException(`${product.name} is no longer available`);
+            }
+            if (!product.is_consignment) {
+                await tx.product.updateMany({
+                    where: { id: item.product_id, stock_quantity: { lte: 0 } },
+                    data: { is_active: false },
+                });
+            }
+        }
+    }
+
+    private async restoreStockForOrderItems(tx: TxClient, items: OrderItemLine[]) {
+        for (const item of items) {
+            if (item.variant_id) {
+                await tx.productVariant.update({
+                    where: { id: item.variant_id },
+                    data: { stock_quantity: { increment: item.quantity } },
+                });
+                continue;
+            }
+            const product = item.product;
+            await tx.product.update({
+                where: { id: item.product_id },
+                data: {
+                    stock_quantity: { increment: item.quantity },
+                    ...(product?.is_consignment ? { is_active: true } : {}),
+                },
+            });
+            if (!product?.is_consignment) {
+                await tx.product.updateMany({
+                    where: { id: item.product_id, stock_quantity: { gt: 0 } },
+                    data: { is_active: true },
+                });
+            }
+        }
+    }
 
     private async getCheckoutPricing(userId: number, shippingAddressId: number) {
         const cartItems = await this.cartService.getCart(userId);
@@ -83,6 +166,8 @@ export class OrderService {
         const isPaystack = dto.payment_method === 'card' || dto.payment_method === 'mobile_money';
 
         return this.prisma.$transaction(async (prisma) => {
+            await this.reserveStockForCartItems(prisma, cartItems, userId);
+
             const order = await prisma.order.create({
                 data: {
                     user_id: userId,
@@ -203,7 +288,10 @@ export class OrderService {
         });
         if (!order) throw new NotFoundException('Order not found');
         if (order.user_id !== userId) throw new BadRequestException('Unauthorized');
-        if (order.payment_status === 'success') return order;
+        if (order.payment_status === 'success') {
+            await this.consignmentService.handleOrderPaid(orderId);
+            return order;
+        }
 
         const result = await this.paymentService.verifyWithPaystack(paystackReference);
         if (!result) throw new BadRequestException('Payment verification failed');
@@ -212,33 +300,85 @@ export class OrderService {
             throw new BadRequestException('Invalid payment for this order');
         }
 
-        await this.prisma.order.update({
-            where: { id: orderId },
-            data: {
-                payment_status: 'success',
-                paystack_reference: paystackReference,
-                status: 'processing',
-            },
-        });
-        await this.prisma.orderTracking.create({
-            data: {
-                order_id: orderId,
-                status: 'processing',
-                notes: 'Payment confirmed via Paystack',
-            },
+        const updated = await this.prisma.$transaction(async (tx) => {
+            const current = await tx.order.findUnique({ where: { id: orderId } });
+            if (!current) throw new NotFoundException('Order not found');
+            if (current.payment_status === 'success') return current;
+
+            await tx.order.update({
+                where: { id: orderId },
+                data: {
+                    payment_status: 'success',
+                    paystack_reference: paystackReference,
+                    status: 'processing',
+                },
+            });
+            await tx.orderTracking.create({
+                data: {
+                    order_id: orderId,
+                    status: 'processing',
+                    notes: 'Payment confirmed via Paystack',
+                },
+            });
+            await tx.cartItem.deleteMany({ where: { user_id: userId } });
+            return tx.order.findUnique({
+                where: { id: orderId },
+                include: { items: true },
+            });
         });
 
-        await this.prisma.cartItem.deleteMany({
-            where: { user_id: userId },
-        });
-
-        const updated = await this.prisma.order.findUnique({
-            where: { id: orderId },
-            include: { items: true },
-        });
         if (updated) {
             this.queueOrderConfirmationEmail(userId, updated.order_number, String(updated.total));
             this.smsService.sendToUser(userId, `Payment confirmed. Your order ${updated.order_number} (GHS ${updated.total}) is being processed. Thank you!`).catch(() => {});
+            await this.consignmentService.handleOrderPaid(orderId);
+        }
+        return updated;
+    }
+
+    /** Called from Paystack webhook when an ecommerce payment succeeds. */
+    async completeEcommercePaymentFromWebhook(payment: {
+        service_type: string;
+        service_id: number;
+        status: string;
+        transaction_ref: string;
+        user_id: number;
+    }) {
+        if (payment.service_type !== 'ecommerce' || payment.status !== 'success') return null;
+
+        const orderId = payment.service_id;
+        const updated = await this.prisma.$transaction(async (tx) => {
+            const order = await tx.order.findUnique({ where: { id: orderId } });
+            if (!order) return null;
+            if (order.payment_status === 'success') return order;
+
+            await tx.order.update({
+                where: { id: orderId },
+                data: {
+                    payment_status: 'success',
+                    paystack_reference: payment.transaction_ref,
+                    status: 'processing',
+                },
+            });
+            await tx.orderTracking.create({
+                data: {
+                    order_id: orderId,
+                    status: 'processing',
+                    notes: 'Payment confirmed via Paystack webhook',
+                },
+            });
+            await tx.cartItem.deleteMany({ where: { user_id: payment.user_id } });
+            return tx.order.findUnique({
+                where: { id: orderId },
+                include: { items: true },
+            });
+        });
+
+        if (updated) {
+            this.queueOrderConfirmationEmail(payment.user_id, updated.order_number, String(updated.total));
+            this.smsService.sendToUser(
+                payment.user_id,
+                `Payment confirmed. Your order ${updated.order_number} (GHS ${updated.total}) is being processed. Thank you!`,
+            ).catch(() => {});
             await this.consignmentService.handleOrderPaid(orderId);
         }
         return updated;
@@ -337,6 +477,21 @@ export class OrderService {
     }
 
     async updateOrderStatus(id: number, status: string) {
+        const existing = await this.prisma.order.findUnique({ where: { id } });
+        if (!existing) throw new NotFoundException('Order not found');
+
+        if (status === 'delivered') {
+            if (existing.payment_status !== 'success') {
+                throw new BadRequestException('Cannot mark delivered before payment is confirmed');
+            }
+            const deliverable = ['processing', 'packed', 'shipped', 'out_for_delivery'];
+            if (!deliverable.includes(existing.status)) {
+                throw new BadRequestException(
+                    `Order must be processing or shipped before delivery (current: ${existing.status})`,
+                );
+            }
+        }
+
         const order = await this.prisma.order.update({
             where: { id },
             data: { status: status as any },
@@ -359,21 +514,26 @@ export class OrderService {
     async cancelOwnOrder(id: number, userId: number) {
         const order = await this.prisma.order.findFirst({
             where: { id, user_id: userId },
+            include: { items: { include: { product: true } } },
         });
         if (!order) throw new NotFoundException('Order not found');
         if (order.status !== 'pending' || order.payment_status !== 'pending') {
             throw new BadRequestException('Only unpaid pending orders can be cancelled');
         }
-        const updated = await this.prisma.order.update({
-            where: { id: order.id },
-            data: { status: 'cancelled' },
-        });
-        await this.prisma.orderTracking.create({
-            data: {
-                order_id: updated.id,
-                status: 'cancelled',
-                notes: 'Cancelled by customer before payment',
-            },
+        const updated = await this.prisma.$transaction(async (tx) => {
+            await this.restoreStockForOrderItems(tx, order.items);
+            const row = await tx.order.update({
+                where: { id: order.id },
+                data: { status: 'cancelled' },
+            });
+            await tx.orderTracking.create({
+                data: {
+                    order_id: row.id,
+                    status: 'cancelled',
+                    notes: 'Cancelled by customer before payment',
+                },
+            });
+            return row;
         });
         return updated;
     }
@@ -470,7 +630,50 @@ export class OrderService {
         }
 
         const updated = await this.prisma.$transaction(async (tx) => {
-            if (Object.keys(orderData).length > 0) {
+            if (action === 'refund') {
+                await tx.order.update({
+                    where: { id: order.id },
+                    data: { payment_status: 'refunded' },
+                });
+                await this.walletService.credit(
+                    order.user_id,
+                    Number(order.total),
+                    'other',
+                    `Refund for order ${order.order_number}`,
+                    order.id,
+                    tx,
+                );
+
+                const orderItems = await tx.order.findUnique({
+                    where: { id: order.id },
+                    include: { items: { include: { product: true } } },
+                });
+                for (const item of orderItems?.items ?? []) {
+                    const product = item.product;
+                    if (!product?.is_consignment || !product.consignor_user_id) continue;
+                    const submission = await tx.consignmentSubmission.findFirst({
+                        where: { product_id: product.id },
+                    });
+                    if (!submission || submission.status !== 'paid_out') continue;
+                    const payoutTx = await tx.walletTransaction.findFirst({
+                        where: {
+                            user_id: product.consignor_user_id,
+                            source: 'consignment_payout',
+                            reference_id: submission.id,
+                        },
+                    });
+                    if (payoutTx) {
+                        await this.walletService.debit(
+                            product.consignor_user_id,
+                            Number(payoutTx.amount_ghs),
+                            'other',
+                            `Clawback: refund for order ${order.order_number}`,
+                            submission.id,
+                            tx,
+                        );
+                    }
+                }
+            } else if (Object.keys(orderData).length > 0) {
                 await tx.order.update({
                     where: { id: order.id },
                     data: orderData,
