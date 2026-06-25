@@ -50,6 +50,7 @@ const mainNavItems = [
     { href: '/dashboard/logistics', label: 'Logistics' },
     { href: '/dashboard/transfers', label: 'Transfer' },
     { href: '/dashboard/procurement', label: 'Procurement' },
+    { href: '/dashboard/sell-for-me', label: 'Sell for Me' },
     { href: '/shop?search=deal', label: 'Offers', highlight: true },
 ];
 

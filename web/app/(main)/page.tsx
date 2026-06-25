@@ -25,6 +25,7 @@ import ProductCard from '@/components/ui/ProductCard';
 import ShopLayout from '@/components/layout/ShopLayout';
 import HomeHero from '@/components/home/HomeHero';
 import TrustStrip from '@/components/home/TrustStrip';
+import SellForMeCta from '@/components/home/SellForMeCta';
 import TestimonialsBlock from '@/components/home/TestimonialsBlock';
 import { STATIC_CATEGORIES as CATEGORY_CATALOG } from '@/lib/product-utils';
 
@@ -211,6 +212,7 @@ export default function Home() {
     const sectionNodes: Record<string, React.ReactNode> = {
         hero: <HomeHero slides={heroSlides} />,
         trust_strip: <TrustStrip badges={trustBadges} />,
+        sell_for_me: <SellForMeCta />,
         flash_sales: (
             <section className="py-8 sm:py-12 relative">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -340,7 +342,12 @@ export default function Home() {
                 {sectionOrder.map((key) => {
                     if (!sectionNodes[key]) return null;
                     if (productSectionKeys.has(key) && !hasProducts) return null;
-                    return <Fragment key={key}>{sectionNodes[key]}</Fragment>;
+                    return (
+                        <Fragment key={key}>
+                            {sectionNodes[key]}
+                            {key === 'trust_strip' ? sectionNodes.sell_for_me : null}
+                        </Fragment>
+                    );
                 })}
                 {!hasProducts && (
                     <div className="min-h-[40vh] flex items-center justify-center px-4">

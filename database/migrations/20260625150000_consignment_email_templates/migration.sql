@@ -1,0 +1,5 @@
+INSERT INTO "email_templates" ("trigger_key", "name", "subject", "body", "is_enabled", "updated_at") VALUES
+('consignment_listed', 'Sell for Me — listing live', 'Your item is now live on ThinQShop', 'Hi {{user_name}},\n\nGood news! Your listing "{{item_name}}" ({{submission_number}}) has been approved and is now live on our shop.\n\nView it here: {{product_url}}\n\nWe will notify you when it sells.', true, NOW()),
+('consignment_sold', 'Sell for Me — item sold', 'Your item sold on ThinQShop', 'Hi {{user_name}},\n\nYour listing "{{item_name}}" has been purchased (order {{order_number}}).\n\nYour payout will be credited to your wallet once the order is marked delivered.', true, NOW()),
+('consignment_payout', 'Sell for Me — payout credited', '₵{{payout_amount}} credited to your wallet', 'Hi {{user_name}},\n\nWe have credited ₵{{payout_amount}} to your ThinQ Wallet for the sale of "{{item_name}}" ({{submission_number}}).\n\nOpen your wallet to view your balance or request a withdrawal.', true, NOW())
+ON CONFLICT ("trigger_key") DO NOTHING;

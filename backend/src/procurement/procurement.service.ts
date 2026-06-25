@@ -153,11 +153,14 @@ export class ProcurementService {
         }
 
         return this.prisma.$transaction(async (prisma) => {
-            // Deduct Funds
-            await prisma.userWallet.update({
-                where: { user_id: userId },
-                data: { balance_ghs: { decrement: quote.quote_amount } }
-            });
+            await this.walletService.debit(
+                userId,
+                Number(quote.quote_amount),
+                'procurement_payment',
+                `Procurement order for request ${quote.request.request_number}`,
+                quoteId,
+                prisma,
+            );
 
             // Update Quote Status
             await prisma.procurementQuote.update({

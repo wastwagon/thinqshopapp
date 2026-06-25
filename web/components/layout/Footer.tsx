@@ -116,6 +116,7 @@ export default function Footer() {
                             <li><Link href="/dashboard/logistics" className="hover:text-brand transition-colors inline-block">Digital Logistics</Link></li>
                             <li><Link href="/track" className="hover:text-brand transition-colors inline-block">Order Tracking</Link></li>
                             <li><Link href="/dashboard/procurement" className="hover:text-brand transition-colors inline-block">Tech Sourcing</Link></li>
+                            <li><Link href="/dashboard/sell-for-me" className="hover:text-brand transition-colors inline-block">Sell for Me</Link></li>
                         </ul>
                     </div>
 

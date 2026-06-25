@@ -11,8 +11,10 @@ import { SmsModule } from '../sms/sms.module';
 import { NotificationModule } from '../notification/notification.module';
 import { AuditModule } from '../audit/audit.module';
 
+import { ConsignmentModule } from '../consignment/consignment.module';
+
 @Module({
-    imports: [PrismaModule, AuthModule, CartModule, AddressModule, FinanceModule, EmailTemplateModule, SmsModule, NotificationModule, AuditModule],
+    imports: [PrismaModule, AuthModule, CartModule, AddressModule, FinanceModule, EmailTemplateModule, SmsModule, NotificationModule, AuditModule, ConsignmentModule],
     controllers: [OrderController],
     providers: [OrderService],
     exports: [OrderService],

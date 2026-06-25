@@ -44,6 +44,9 @@ model User {
   notifications     Notification[]
   saved_recipients  SavedRecipient[]
   password_reset_tokens PasswordResetToken[]
+  wallet_transactions   WalletTransaction[]
+  wallet_withdrawals    WalletWithdrawal[]
+  consignment_submissions ConsignmentSubmission[]
 
   @@map("users")
 }
@@ -94,6 +97,82 @@ model UserWallet {
   @@map("user_wallets")
 }
 
+model WalletTransaction {
+  id             Int                    @id @default(autoincrement())
+  user_id        Int
+  type           WalletTransactionType
+  amount_ghs     Decimal                @db.Decimal(10, 2)
+  balance_after  Decimal                @db.Decimal(10, 2)
+  source         WalletTransactionSource
+  reference_id   Int?
+  description    String?                @db.VarChar(500)
+  status         WalletLedgerStatus     @default(success)
+  created_at     DateTime               @default(now())
+
+  user           User                   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, created_at])
+  @@map("wallet_transactions")
+}
+
+enum WalletTransactionType {
+  credit
+  debit
+}
+
+enum WalletTransactionSource {
+  wallet_topup
+  consignment_payout
+  shop_payment
+  transfer_payment
+  procurement_payment
+  logistics_payment
+  withdrawal
+  admin_adjust
+  other
+}
+
+enum WalletLedgerStatus {
+  success
+  pending
+  failed
+}
+
+model WalletWithdrawal {
+  id                 Int                    @id @default(autoincrement())
+  user_id            Int
+  amount_ghs         Decimal                @db.Decimal(10, 2)
+  fee_ghs            Decimal                @default(0.00) @db.Decimal(10, 2)
+  net_amount_ghs     Decimal                @db.Decimal(10, 2)
+  method             WalletWithdrawalMethod
+  recipient_details  Json
+  status             WalletWithdrawalStatus @default(pending)
+  admin_id           Int?
+  admin_note         String?
+  rejection_reason   String?
+  paid_at            DateTime?
+  created_at         DateTime               @default(now())
+  updated_at         DateTime               @updatedAt
+
+  user               User                   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, status])
+  @@index([status, created_at])
+  @@map("wallet_withdrawals")
+}
+
+enum WalletWithdrawalMethod {
+  mobile_money
+  bank_transfer
+}
+
+enum WalletWithdrawalStatus {
+  pending
+  paid
+  rejected
+  cancelled
+}
+
 model Address {
   id             Int         @id @default(autoincrement())
   user_id        Int
@@ -141,6 +220,7 @@ model Category {
   parent      Category?  @relation("CategoryParent", fields: [parent_id], references: [id], onDelete: SetNull)
   children    Category[] @relation("CategoryParent")
   products    Product[]
+  consignment_submissions ConsignmentSubmission[]
 
   @@map("categories")
 }
@@ -167,10 +247,14 @@ model Product {
   meta_description    String?
   rating_aggregate    Decimal?         @db.Decimal(3, 2)
   review_count        Int              @default(0)
+  is_consignment      Boolean          @default(false)
+  consignor_user_id   Int?
+  commission_pct      Decimal?         @db.Decimal(5, 2)
   created_at          DateTime         @default(now())
   updated_at          DateTime         @updatedAt
 
   category            Category         @relation(fields: [category_id], references: [id])
+  consignment_submission ConsignmentSubmission?
   variants            ProductVariant[]
   cart_items          CartItem[]
   order_items         OrderItem[]
@@ -179,6 +263,58 @@ model Product {
 
   @@index([category_id, is_active])
   @@map("products")
+}
+
+model ConsignmentSubmission {
+  id                   Int                   @id @default(autoincrement())
+  user_id              Int
+  submission_number    String                @unique @db.VarChar(50)
+  name                 String                @db.VarChar(255)
+  short_description    String?
+  description          String?
+  category_id          Int
+  asking_price         Decimal               @db.Decimal(10, 2)
+  approved_price       Decimal?              @db.Decimal(10, 2)
+  compare_price        Decimal?              @db.Decimal(10, 2)
+  commission_pct       Decimal?              @db.Decimal(5, 2)
+  condition            ConsignmentCondition  @default(good)
+  images               Json?
+  specifications       Json?
+  pickup_details       String?
+  status               ConsignmentStatus     @default(submitted)
+  product_id           Int?                  @unique
+  admin_notes          String?
+  rejection_reason     String?
+  reviewed_by_admin_id Int?
+  reviewed_at          DateTime?
+  payout_order_id      Int?
+  created_at           DateTime              @default(now())
+  updated_at           DateTime              @updatedAt
+
+  user                 User                  @relation(fields: [user_id], references: [id])
+  category             Category              @relation(fields: [category_id], references: [id])
+  product              Product?              @relation(fields: [product_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id, status])
+  @@index([status, created_at])
+  @@map("consignment_submissions")
+}
+
+enum ConsignmentCondition {
+  new
+  like_new
+  good
+  fair
+}
+
+enum ConsignmentStatus {
+  submitted
+  under_review
+  changes_requested
+  listed
+  rejected
+  sold
+  paid_out
 }
 
 // Global variation options (e.g. Size, Color) and values (e.g. S, M, L / Red, Blue) for products
@@ -751,6 +887,7 @@ enum ServiceTypeFinance {
   logistics
   procurement
   wallet_topup
+  consignment_payout
 }
 
 model Coupon {

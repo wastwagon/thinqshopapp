@@ -34,6 +34,8 @@ import {
     FileText,
     Calculator,
     Shield,
+    Banknote,
+    Tag,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -54,6 +56,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
         { name: 'Transfers', href: '/dashboard/transfers', icon: Send },
         { name: 'Logistics', href: '/dashboard/logistics', icon: Package },
         { name: 'Procurement', href: '/dashboard/procurement', icon: ShoppingBag },
+        { name: 'Sell for Me', href: '/dashboard/sell-for-me', icon: Tag },
         { name: 'Wishlist', href: '/wishlist', icon: Heart },
         { name: 'Order History', href: '/dashboard/orders', icon: History },
         { name: 'Support', href: '/dashboard/support', icon: LifeBuoy },
@@ -77,8 +80,10 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
         { name: 'Shipping Rates', href: '/admin/shipping-rates', icon: DollarSign },
         { name: 'Transfers', href: '/admin/transfers', icon: Send },
         { name: 'Procurement', href: '/admin/procurement', icon: ShoppingBag },
+        { name: 'Sell for Me', href: '/admin/consignments', icon: Tag },
         { name: 'Users', href: '/admin/users', icon: User },
         { name: 'Wallet management', href: '/admin/wallet', icon: Wallet },
+        { name: 'Withdrawals', href: '/admin/withdrawals', icon: Banknote },
         { name: 'Email templates', href: '/admin/email-templates', icon: Edit3 },
         { name: 'Audit logs', href: '/admin/audit-logs', icon: Shield },
         { name: 'Settings', href: '/admin/settings', icon: Settings },

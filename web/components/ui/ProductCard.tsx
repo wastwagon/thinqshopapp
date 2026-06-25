@@ -29,6 +29,7 @@ interface Product {
     short_description?: string | null;
     description?: string | null;
     variants?: ProductVariantRow[];
+    is_consignment?: boolean;
 }
 
 interface ProductCardProps {
@@ -150,6 +151,11 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {product.compare_price && (
                     <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded z-10">
                         OFFER
+                    </div>
+                )}
+                {product.is_consignment && (
+                    <div className={`absolute top-3 ${product.compare_price ? 'left-[4.5rem]' : 'left-3'} bg-violet-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10`}>
+                        CONSIGNMENT
                     </div>
                 )}
 

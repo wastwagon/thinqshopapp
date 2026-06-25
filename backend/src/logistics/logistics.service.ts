@@ -207,13 +207,12 @@ export class LogisticsService implements OnModuleInit {
             // Calculate Price
             priceDetails = await this.calculatePrice({ weight, zoneId: Number(zoneId), serviceType: service_type });
 
-            // Payment Logic (Immediate for Courier)
+            // Payment Logic (Immediate for Courier) — balance check only; debit after shipment exists
             if (payment_method === 'wallet') {
                 const wallet = await this.walletService.getBalance(userId);
                 if (!wallet || Number(wallet.balance_ghs) < priceDetails.total) {
                     throw new BadRequestException('Insufficient wallet balance');
                 }
-                await this.walletService.topUp(userId, -priceDetails.total);
             }
         } else {
             // Freight Forwarding: Local pickup at destination warehouse (no delivery address needed)
@@ -226,7 +225,7 @@ export class LogisticsService implements OnModuleInit {
 
         const tracking_number = `SHP-${Date.now()}`;
 
-        return this.prisma.shipment.create({
+        const shipment = await this.prisma.shipment.create({
             data: {
                 user_id: userId,
                 tracking_number,
@@ -255,6 +254,18 @@ export class LogisticsService implements OnModuleInit {
                 declaration_image_urls: Array.isArray(dto.declaration_image_urls) ? dto.declaration_image_urls : null,
             }
         });
+
+        if (!isFreightForwarding && payment_method === 'wallet' && priceDetails.total > 0) {
+            await this.walletService.debit(
+                userId,
+                priceDetails.total,
+                'logistics_payment',
+                `Logistics shipment ${tracking_number}`,
+                shipment.id,
+            );
+        }
+
+        return shipment;
     }
 
     async getShipmentById(userId: number, id: number) {

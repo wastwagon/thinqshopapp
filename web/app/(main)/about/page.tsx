@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Target, Globe, Truck, Zap } from 'lucide-react';
+import { Target, Globe, Truck, Zap, Tag } from 'lucide-react';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
 
@@ -42,6 +42,10 @@ export default function AboutPage() {
                         <li className="flex items-start gap-3">
                             <Target className="h-5 w-5 text-brand shrink-0 mt-0.5" />
                             <span><strong className="text-gray-900">Tech Sourcing</strong> — Custom procurement and sourcing for businesses and professionals.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <Tag className="h-5 w-5 text-brand shrink-0 mt-0.5" />
+                            <span><strong className="text-gray-900">Sell for Me</strong> — List items you can&apos;t sell yourself; we list, sell, and pay you via your wallet.</span>
                         </li>
                     </ul>
 

@@ -28,6 +28,7 @@ import { AuthGuard } from './auth/auth.guard';
 import { PermissionGuard } from './auth/permission.guard';
 import { AuthBeforePermissionGlobalGuard } from './auth/auth-before-permission-global.guard';
 import { SupportModule } from './support/support.module';
+import { ConsignmentModule } from './consignment/consignment.module';
 
 @Module({
     imports: [
@@ -57,6 +58,7 @@ import { SupportModule } from './support/support.module';
         InvoiceModule,
         AuditModule,
         SupportModule,
+        ConsignmentModule,
     ],
     controllers: [AppController],
     providers: [

@@ -97,13 +97,12 @@ export class TransferService {
         const isWallet = payment_method === 'wallet';
         const isPaystack = payment_method === 'card' || payment_method === 'mobile_money';
 
-        // Payment Logic - wallet: deduct now; card/mobile_money: create pending, pay via Paystack
+        // Payment Logic - wallet: deduct after transfer record exists; card/mobile_money: create pending, pay via Paystack
         if (isWallet) {
             const wallet = await this.walletService.getBalance(userId);
             if (!wallet || Number(wallet.balance_ghs) < total_amount) {
                 throw new BadRequestException('Insufficient wallet balance');
             }
-            await this.walletService.topUp(userId, -total_amount);
         }
 
         const token = `TRF-${Date.now()}`;
@@ -136,6 +135,16 @@ export class TransferService {
                 admin_reply_images: []
             }
         });
+
+        if (isWallet) {
+            await this.walletService.debit(
+                userId,
+                total_amount,
+                'transfer_payment',
+                `Money transfer ${token}`,
+                transfer.id,
+            );
+        }
 
         // Create Payment record for Paystack (reference used in Paystack popup)
         if (isPaystack && paystackRef) {

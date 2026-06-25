@@ -8,6 +8,8 @@ import { PaymentService } from '../finance/payment.service';
 import { EmailTemplateService } from '../email-template/email-template.service';
 import { SmsService } from '../sms/sms.service';
 import { NotificationService } from '../notification/notification.service';
+import { WalletService } from '../finance/wallet.service';
+import { ConsignmentService } from '../consignment/consignment.service';
 
 @Injectable()
 export class OrderService {
@@ -19,6 +21,8 @@ export class OrderService {
         private emailTemplateService: EmailTemplateService,
         private smsService: SmsService,
         private notificationService: NotificationService,
+        private walletService: WalletService,
+        private consignmentService: ConsignmentService,
     ) { }
 
     private async getCheckoutPricing(userId: number, shippingAddressId: number) {
@@ -103,16 +107,14 @@ export class OrderService {
             });
 
             if (dto.payment_method === 'wallet') {
-                const wallet = await prisma.userWallet.findUnique({
-                    where: { user_id: userId },
-                });
-                if (!wallet || Number(wallet.balance_ghs) < authoritativeTotal) {
-                    throw new BadRequestException('Insufficient wallet balance');
-                }
-                await prisma.userWallet.update({
-                    where: { user_id: userId },
-                    data: { balance_ghs: { decrement: authoritativeTotal } },
-                });
+                await this.walletService.debit(
+                    userId,
+                    authoritativeTotal,
+                    'shop_payment',
+                    `Shop order ${orderNumber}`,
+                    order.id,
+                    prisma,
+                );
                 await prisma.payment.create({
                     data: {
                         user_id: userId,
@@ -186,6 +188,11 @@ export class OrderService {
             }
 
             return finalOrder;
+        }).then(async (result) => {
+            if (dto.payment_method === 'wallet' && result?.id) {
+                await this.consignmentService.handleOrderPaid(result.id);
+            }
+            return result;
         });
     }
 
@@ -232,6 +239,7 @@ export class OrderService {
         if (updated) {
             this.queueOrderConfirmationEmail(userId, updated.order_number, String(updated.total));
             this.smsService.sendToUser(userId, `Payment confirmed. Your order ${updated.order_number} (GHS ${updated.total}) is being processed. Thank you!`).catch(() => {});
+            await this.consignmentService.handleOrderPaid(orderId);
         }
         return updated;
     }
@@ -342,6 +350,9 @@ export class OrderService {
         });
         const statusMsg = status.replace(/_/g, ' ');
         this.smsService.sendToUser(order.user_id, `Your order ${order.order_number} status: ${statusMsg}. Track at ThinQShop.`).catch(() => {});
+        if (status === 'delivered') {
+            await this.consignmentService.handleOrderDelivered(order.id);
+        }
         return order;
     }
 

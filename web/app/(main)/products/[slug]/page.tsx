@@ -225,6 +225,11 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${stockToShow > (product.low_stock_threshold ?? 10) ? 'bg-green-50 text-green-700 border border-green-100' : stockToShow > 0 ? 'bg-orange-50 text-orange-700 border border-orange-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
                                     {stockToShow === 0 ? 'Out of stock' : stockToShow <= (product.low_stock_threshold ?? 10) ? `Only ${stockToShow} left` : 'In stock'}
                                 </span>
+                                {product.is_consignment && (
+                                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-100">
+                                        Sell for Me listing
+                                    </span>
+                                )}
                             </div>
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 border border-brand/15 text-xs font-medium text-brand mb-4">
                                 Ships from abroad · 7–14 day delivery
