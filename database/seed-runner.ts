@@ -8,6 +8,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { seedCategoryTree } from './seed-categories';
 
 function isProductionDb(): boolean {
     const dbUrl = process.env.DATABASE_URL || '';
@@ -115,6 +116,8 @@ export async function runSeed(prisma: PrismaClient) {
         update: {},
         create: { name: 'Computers', slug: 'computers', description: 'Laptops and desktops' },
     });
+
+    await seedCategoryTree(prisma);
 
     // Placeholder images (Unsplash - allowed in next.config)
     const IMG_CAMERA = 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800';
@@ -268,6 +271,10 @@ export async function runSeed(prisma: PrismaClient) {
             },
         });
     }
+
+    // --- Variation catalog (Size values, etc.) ---
+    const { seedVariations } = await import('./seed-variations');
+    await seedVariations(prisma);
 
     // --- World-class content ---
     const { seedWorldClassContent } = await import('./seed-world-class-content');

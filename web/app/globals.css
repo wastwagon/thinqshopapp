@@ -181,6 +181,12 @@
   }
 }
 
+@layer components {
+  .admin-input {
+    @apply h-10 px-3 bg-white border border-gray-200/90 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand;
+  }
+}
+
 @layer utilities {
   /* App-wide soft background (shop + marketing) — flat, minimal mesh */
   .bg-app {
@@ -213,10 +219,6 @@
 
   .admin-table-wrap {
     @apply flat-card overflow-hidden;
-  }
-
-  .admin-input {
-    @apply h-10 px-3 bg-white border border-gray-200/90 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand;
   }
 
   .admin-page-title {

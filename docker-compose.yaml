@@ -37,6 +37,8 @@ services:
       PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY}
       FRONTEND_URL: ${FRONTEND_URL}
       ENABLE_RUNTIME_DB_ADMIN: ${ENABLE_RUNTIME_DB_ADMIN:-false}
+    # No Docker healthcheck: entrypoint runs migrations before Node listens on :7000.
+    # Coolify can restart "unhealthy" containers and interrupt startup.
     depends_on:
       db:
         condition: service_healthy
@@ -57,7 +59,8 @@ services:
       # Server-side API proxy: internal URL (Coolify can override via env)
       BACKEND_URL: ${BACKEND_URL:-http://backend:7000}
     depends_on:
-      - backend
+      backend:
+        condition: service_started
 
 volumes:
   postgres_data:

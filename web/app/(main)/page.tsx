@@ -28,6 +28,7 @@ import TrustStrip from '@/components/home/TrustStrip';
 import SellForMeCta from '@/components/home/SellForMeCta';
 import TestimonialsBlock from '@/components/home/TestimonialsBlock';
 import { STATIC_CATEGORIES as CATEGORY_CATALOG } from '@/lib/product-utils';
+import { getRootCategories, type CategoryNode } from '@/lib/category-utils';
 
 type Product = {
     category: string | { name: string; slug: string };
@@ -119,7 +120,7 @@ type Testimonial = { id: number; quote: string; author_name: string; author_role
 export default function Home() {
     const [mounted, setMounted] = useState(false);
     const [productsList, setProductsList] = useState<Product[]>([]);
-    const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
+    const [categories, setCategories] = useState<CategoryNode[]>([]);
     const [source, setSource] = useState<'api' | 'static'>('static');
     const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
     const [trustBadges, setTrustBadges] = useState<TrustBadge[]>([]);
@@ -157,7 +158,7 @@ export default function Home() {
                 if (apiProducts.length > 0 && Array.isArray(apiProducts)) {
                     const list = apiProducts.map((p: any, i: number) => normalizeProduct(p, i));
                     setProductsList(list);
-                    setCategories(apiCategories.map((c: any) => ({ name: c.name, slug: c.slug })));
+                    setCategories(apiCategories as CategoryNode[]);
                     setSource('api');
                     setHeroSlides(contentHeroSlides);
                     return;
@@ -167,7 +168,14 @@ export default function Home() {
             }
             const staticProducts = (products as Product[]).map((p, i) => normalizeProduct({ ...p, id: p.id ?? i + 1 }, i));
             setProductsList(staticProducts);
-            setCategories(CATEGORY_CATALOG.map((c) => ({ name: c.name, slug: c.slug })));
+            setCategories(
+                CATEGORY_CATALOG.map((c, i) => ({
+                    id: -(i + 1),
+                    name: c.name,
+                    slug: c.slug,
+                    parent_id: null,
+                })),
+            );
             setSource('static');
             setHeroSlides([]);
         };
@@ -190,18 +198,40 @@ export default function Home() {
 
     const allProducts = productsWithIds;
 
-    const categoryCards = useMemo(() => buildEightCategories(categories), [categories]);
+    const categoryCards = useMemo(() => {
+        const roots = getRootCategories(categories);
+        const rootList = roots.length > 0 ? roots.map((r) => ({ name: r.name, slug: r.slug })) : categories;
+        return buildEightCategories(rootList);
+    }, [categories]);
 
-    /** One pass over products — avoid O(categories × products) filters per tile */
+    /** Count products per main category (rollup of subcategories) */
     const categoryProductCounts = useMemo(() => {
         const m = new Map<string, number>();
-        for (const p of allProducts) {
-            const name = typeof p.category === 'string' ? p.category : p.category?.name;
-            if (!name) continue;
-            m.set(name, (m.get(name) ?? 0) + 1);
+        const roots = getRootCategories(categories);
+        for (const root of roots) {
+            const childSlugs = new Set(
+                (root.children ?? categories.filter((c) => c.parent_id === root.id))
+                    .map((c) => c.slug)
+                    .filter(Boolean),
+            );
+            childSlugs.add(root.slug);
+            let count = 0;
+            for (const p of allProducts) {
+                const cat = typeof p.category === 'string' ? null : p.category;
+                const slug = cat?.slug ?? (typeof p.category === 'string' ? p.category.toLowerCase().replace(/\s+/g, '-') : '');
+                if (slug && childSlugs.has(slug)) count++;
+            }
+            m.set(root.name, count);
+        }
+        if (roots.length === 0) {
+            for (const p of allProducts) {
+                const name = typeof p.category === 'string' ? p.category : p.category?.name;
+                if (!name) continue;
+                m.set(name, (m.get(name) ?? 0) + 1);
+            }
         }
         return m;
-    }, [allProducts]);
+    }, [allProducts, categories]);
 
 
     if (!mounted) return null;

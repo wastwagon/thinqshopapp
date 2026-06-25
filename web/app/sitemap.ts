@@ -51,9 +51,17 @@ async function fetchCategorySlugs(): Promise<string[]> {
         if (!res.ok) return [];
         const data = await res.json();
         if (!Array.isArray(data)) return [];
-        return data
-            .map((c: { slug?: string }) => c?.slug)
-            .filter((slug): slug is string => typeof slug === 'string' && slug.length > 0);
+        const slugs: string[] = [];
+        for (const c of data) {
+            if (c?.slug) slugs.push(c.slug);
+            const children = (c as { children?: { slug?: string }[] }).children;
+            if (Array.isArray(children)) {
+                for (const ch of children) {
+                    if (ch?.slug) slugs.push(ch.slug);
+                }
+            }
+        }
+        return Array.from(new Set(slugs.filter((slug) => slug.length > 0)));
     } catch {
         return [];
     }

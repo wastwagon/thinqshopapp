@@ -4,7 +4,6 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import { AuthGuard } from '../auth/auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
-import { runSeed } from '../../../database/seed-runner';
 import { PermissionGuard } from '../auth/permission.guard';
 import { RequirePermission } from '../auth/require-permission.decorator';
 import { PERMISSION_MAP } from '../auth/permissions';
@@ -33,6 +32,17 @@ export class DatabaseController {
             if (existsSync(schemaPath)) return root;
         }
         return process.cwd();
+    }
+
+    /** Load seed-runner from repo root (static import breaks when resolved from backend/dist). */
+    private async runSeed(prisma: PrismaService): Promise<void> {
+        const seedPath = join(this.projectRoot, 'database', 'seed-runner.ts');
+        if (!existsSync(seedPath)) {
+            throw new Error(`Seed runner not found at ${seedPath}`);
+        }
+        require('ts-node/register');
+        const { runSeed: runSeedFn } = require(seedPath) as { runSeed: (p: PrismaService) => Promise<void> };
+        await runSeedFn(prisma);
     }
 
     private ensureAdmin(req: any) {
@@ -77,7 +87,7 @@ export class DatabaseController {
     async seed(@Req() req: any) {
         this.ensureAdmin(req);
         try {
-            await runSeed(this.prisma);
+            await this.runSeed(this.prisma);
             await this.auditService.logAdminAction(req, 'database.seed', { tableName: 'database' });
             return { success: true, message: 'Database seeded successfully' };
         } catch (err: any) {
@@ -102,7 +112,7 @@ export class DatabaseController {
                 stdio: 'pipe',
                 env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
             });
-            await runSeed(this.prisma);
+            await this.runSeed(this.prisma);
             await this.auditService.logAdminAction(req, 'database.migrate_seed', { tableName: 'database' });
             return { success: true, message: 'Migration and seeding complete' };
         } catch (err: any) {

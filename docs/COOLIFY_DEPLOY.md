@@ -54,7 +54,18 @@ Coolify will set up the reverse proxy and SSL.
 
 The backend runs `prisma migrate deploy` on startup, so migrations are applied automatically.
 
-**To seed the database** (creates admin user, test user, products, reviews, warehouses, etc.):
+**Variation catalog (Size values):** On every backend start, the entrypoint runs [`database/seed-variations.ts`](../database/seed-variations.ts) (idempotent upsert of Size → Small, Medium, Large, XL, XXL). No extra env var is required. Check backend logs for `Variation catalog OK.` after deploy.
+
+**Category tree (Cameras / Drones):** On every backend start, the entrypoint runs [`database/seed-categories.ts`](../database/seed-categories.ts) (idempotent upsert of main categories and New/Used subcategories). Check backend logs for `Category tree OK.` Without this, `/shop/cameras` may show the full catalog instead of cameras only.
+
+If sizes or categories are still missing before you redeploy with this change, open a shell on the **backend** container and run:
+
+```bash
+npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed-variations.ts
+npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed-categories.ts
+```
+
+**To seed the full database** (creates admin user, test user, products, reviews, warehouses, etc.):
 
 **Option A — Auto-seed on startup:** In Coolify → Environment, add `SEED_ON_STARTUP=true`. Redeploy. After first successful login, set it back to `false` (or remove it).
 
@@ -93,12 +104,16 @@ Coolify exposes these via its reverse proxy based on your domain configuration.
 
 | Issue | Fix |
 |-------|-----|
+| **Restarting (11x restarts)** after deploy | Open **Logs → backend**; look for `FATAL:` lines. Usually missing `JWT_SECRET`, missing `DATABASE_URL` (set `POSTGRES_PASSWORD` in Coolify), or migration/DB password mismatch. See [PRODUCTION_TROUBLESHOOTING.md](./PRODUCTION_TROUBLESHOOTING.md#container-restart-loop-coolify-restarting-11x-restarts) |
 | Build fails | Ensure `package-lock.json` is committed and in sync |
 | **Deployment failed (exit 255)** | Often transient (SSH/connection). **Try Deploy again.** If it persists, check Coolify → Server → Advanced for deployment timeout; ensure server has enough RAM (2GB+ for parallel builds) |
 | Backend can't connect to DB | Check `POSTGRES_PASSWORD` is set; db service must be healthy before backend starts |
 | CORS errors | Set `FRONTEND_URL` to your exact frontend domain (no trailing slash) |
 | 502 Bad Gateway | Check backend logs in Coolify → Terminal (backend container). Backend may need 30–60s for migrations on first start |
 | Migrations not applied | Backend runs them on startup; check backend logs for Prisma errors |
+| **Product sizes missing** / Variations only shows Small | Backend auto-seeds sizes on startup (`seed-variations.ts`). Redeploy or run `npx ts-node --compiler-options '{"module":"CommonJS"}' database/seed-variations.ts` in backend shell. Check logs for `Variation catalog OK.` |
+| **`/shop/cameras` shows all products** | Category tree not seeded or old backend. Redeploy; check logs for `Category tree OK.` Run `database/seed-categories.ts` in backend shell if needed. |
+| **Failed to save** when adding variation value | Often duplicate value (409) or validation error — retry after seed; check browser Network tab for `/api/variations/admin/values` response |
 | Product images **404** (`GET /media/files/... 404`) | Ensure `docker-compose.yaml` mounts `backend_uploads:/app/uploads` on the **backend** service (included in repo). Redeploy once so the volume exists. Files uploaded **before** the volume was added are gone — re-upload in **Admin → Media** and update affected products. |
 | `GET /content/currency-rates` very slow (~10s) | Usually a slow external FX API on first request; the API now returns cached DB rates immediately and refreshes in the background. |
 

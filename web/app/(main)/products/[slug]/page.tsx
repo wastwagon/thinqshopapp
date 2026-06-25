@@ -191,20 +191,23 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                 <div className="lg:grid lg:grid-cols-2 lg:gap-x-16 lg:items-start">
                     {/* Image Gallery */}
                     <div className="flex flex-col-reverse">
-                        <div className="hidden mt-8 w-full max-w-2xl mx-auto sm:block lg:max-w-none">
-                            <div className="grid grid-cols-4 gap-6">
-                                {images.map((img: string, idx: number) => (
-                                    <button
-                                        key={idx}
-                                        type="button"
-                                        className={`relative h-24 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden border transition-all ${selectedImage === idx ? 'border-brand ring-1 ring-brand/15' : 'border-gray-100 hover:border-gray-200'}`}
-                                        onClick={() => setSelectedImage(idx)}
-                                    >
-                                        <Image src={img} alt="" fill className="object-contain p-2" sizes="96px" unoptimized={imgUnoptimized(img)} />
-                                    </button>
-                                ))}
+                        {images.length > 1 && (
+                            <div className="mt-4 sm:mt-8 w-full max-w-2xl mx-auto lg:max-w-none">
+                                <div className="flex sm:grid sm:grid-cols-4 gap-3 sm:gap-6 overflow-x-auto sm:overflow-visible pb-1 sm:pb-0">
+                                    {images.map((img: string, idx: number) => (
+                                        <button
+                                            key={idx}
+                                            type="button"
+                                            aria-label={`View image ${idx + 1} of ${images.length}`}
+                                            className={`relative h-20 w-20 sm:h-24 sm:w-auto shrink-0 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden border transition-all ${selectedImage === idx ? 'border-brand ring-1 ring-brand/15' : 'border-gray-100 hover:border-gray-200'}`}
+                                            onClick={() => setSelectedImage(idx)}
+                                        >
+                                            <Image src={img} alt="" fill className="object-contain p-2" sizes="96px" unoptimized={imgUnoptimized(img)} />
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <div className="w-full aspect-square relative rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
                             <Image

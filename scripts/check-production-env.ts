@@ -20,6 +20,12 @@ function runChecks(): Check[] {
     const prod = isProduction();
     return [
         {
+            key: 'POSTGRES_PASSWORD',
+            level: prod ? 'error' : 'warn',
+            ok: has(process.env.POSTGRES_PASSWORD),
+            hint: 'Required for docker-compose.yaml full stack; must match postgres_data volume after first deploy',
+        },
+        {
             key: 'DATABASE_URL',
             level: 'error',
             ok: has(process.env.DATABASE_URL),

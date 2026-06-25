@@ -20,13 +20,36 @@ import {
     Layers
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 import api from '@/lib/axios';
+import {
+    getShopNavRoots,
+    getSubcategoriesForRoot,
+    rootHasSubcategories,
+    resolveAdminCategoryIds,
+    resolveCategoryIdForAdmin,
+    type CategoryNode,
+} from '@/lib/category-utils';
 import { getMediaUrl } from '@/lib/media';
 import MediaPickerModal from '@/components/admin/MediaPickerModal';
 
+type VariationOptionRow = { id: number; name: string; slug: string; values: { id: number; value: string }[] };
+
+function resolveOptionSlug(variantType: string, options: VariationOptionRow[]): string {
+    if (!variantType?.trim()) return '';
+    const t = variantType.trim();
+    const exact = options.find((o) => o.slug === t);
+    if (exact) return exact.slug;
+    const lower = t.toLowerCase();
+    const bySlug = options.find((o) => o.slug.toLowerCase() === lower);
+    if (bySlug) return bySlug.slug;
+    const byName = options.find((o) => o.name.toLowerCase() === lower);
+    return byName?.slug ?? t;
+}
+
 export default function AdminProducts() {
     const [products, setProducts] = useState<any[]>([]);
-    const [categories, setCategories] = useState<{ id: number; name: string; slug: string }[]>([]);
+    const [categories, setCategories] = useState<CategoryNode[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -35,7 +58,8 @@ export default function AdminProducts() {
     const [editingProduct, setEditingProduct] = useState<any>(null);
     const [formData, setFormData] = useState({
         name: '',
-        category_id: '',
+        main_category_id: '',
+        condition_category_id: '',
         product_kind: 'simple' as 'simple' | 'variable',
         price: '',
         compare_price: '',
@@ -50,24 +74,52 @@ export default function AdminProducts() {
         specifications_json: '', // JSON text for specs (e.g. {"Screen": "14\"", "RAM": "8GB"})
         variants: [] as { variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number }[],
     });
-    const [variationOptions, setVariationOptions] = useState<{ id: number; name: string; slug: string; values: { id: number; value: string }[] }[]>([]);
+    const [variationOptions, setVariationOptions] = useState<VariationOptionRow[]>([]);
     const [mediaPickerOpen, setMediaPickerOpen] = useState<'featured' | 'gallery' | null>(null);
     const [uploadingFeatured, setUploadingFeatured] = useState(false);
     const [uploadingGallery, setUploadingGallery] = useState(false);
     const featuredInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
+    const variationOptionsRef = useRef<VariationOptionRow[]>([]);
+
+    const applyVariationOptions = (opts: VariationOptionRow[]) => {
+        variationOptionsRef.current = opts;
+        setVariationOptions(opts);
+    };
+
+    const defaultVariantType = (options: VariationOptionRow[]) =>
+        options.find((o) => o.slug === 'size')?.slug ?? options[0]?.slug ?? '';
+
+    const newVariantRow = (options: VariationOptionRow[] = variationOptionsRef.current) => ({
+        variant_type: defaultVariantType(options),
+        variant_value: '',
+    });
+
+    const getValuesForOption = (variantType: string, options: VariationOptionRow[] = variationOptionsRef.current) => {
+        const slug = resolveOptionSlug(variantType, options);
+        return options.find((o) => o.slug === slug)?.values ?? [];
+    };
 
     useEffect(() => {
         fetchProducts();
         fetchCategories();
     }, []);
 
-    const fetchVariationOptions = async () => {
+    const fetchVariationOptions = async (): Promise<VariationOptionRow[]> => {
         try {
-            const { data } = await api.get('/variations/options');
-            setVariationOptions(Array.isArray(data) ? data : []);
+            let data: unknown;
+            try {
+                ({ data } = await api.get('/variations/admin/options'));
+            } catch {
+                ({ data } = await api.get('/variations/options'));
+            }
+            const opts = Array.isArray(data) ? data : [];
+            applyVariationOptions(opts);
+            return opts;
         } catch {
-            setVariationOptions([]);
+            toast.error('Failed to load variation options');
+            applyVariationOptions([]);
+            return [];
         }
     };
 
@@ -91,15 +143,20 @@ export default function AdminProducts() {
         }
     };
 
-    const handleOpenModal = (product: any = null) => {
-        fetchVariationOptions();
+    const handleOpenModal = async (product: any = null) => {
+        const options = await fetchVariationOptions();
         if (product) {
             setEditingProduct(product);
             const catName = product.category?.name ?? product.category;
-            const catId = product.category_id ?? categories.find(c => c.name === catName)?.id ?? '';
+            const catId = Number(
+                product.category_id ?? categories.find((c) => c.name === catName)?.id ?? 0,
+            );
+            const { mainId, conditionId } = catId
+                ? resolveAdminCategoryIds(categories, catId)
+                : { mainId: '', conditionId: '' };
             const imgs = Array.isArray(product.images) ? product.images.filter(Boolean) : product.image ? [product.image] : [];
             const variants = (product.variants || []).map((v: any) => ({
-                variant_type: v.variant_type ?? '',
+                variant_type: resolveOptionSlug(v.variant_type ?? '', options),
                 variant_value: v.variant_value ?? '',
                 sku: v.sku ?? undefined,
                 price_adjust: v.price_adjust != null ? Number(v.price_adjust) : undefined,
@@ -107,7 +164,8 @@ export default function AdminProducts() {
             }));
             setFormData({
                 name: product.name ?? '',
-                category_id: String(catId),
+                main_category_id: mainId,
+                condition_category_id: conditionId,
                 product_kind: variants.length > 0 ? 'variable' : 'simple',
                 price: String(Number(product.price ?? 0)),
                 compare_price: product.compare_price != null ? String(Number(product.compare_price)) : '',
@@ -132,7 +190,8 @@ export default function AdminProducts() {
             setEditingProduct(null);
             setFormData({
                 name: '',
-                category_id: '',
+                main_category_id: '',
+                condition_category_id: '',
                 product_kind: 'simple',
                 price: '',
                 compare_price: '',
@@ -207,9 +266,18 @@ export default function AdminProducts() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const categoryId = parseInt(formData.category_id, 10);
+        const categoryId = resolveCategoryIdForAdmin(
+            categories,
+            formData.main_category_id,
+            formData.condition_category_id,
+        );
         if (!categoryId || !formData.name) {
-            toast.error('Name and category are required');
+            const main = parseInt(formData.main_category_id, 10);
+            if (main && rootHasSubcategories(categories, main) && !formData.condition_category_id) {
+                toast.error('Select New or Used for this category');
+            } else {
+                toast.error('Name and category are required');
+            }
             return;
         }
         const isVariable = formData.product_kind === 'variable';
@@ -458,19 +526,53 @@ export default function AdminProducts() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Category</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1">Main category</label>
                                 <select
                                     required
-                                    value={formData.category_id}
-                                    onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                                    value={formData.main_category_id}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            main_category_id: e.target.value,
+                                            condition_category_id: '',
+                                        })
+                                    }
                                     className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                 >
                                     <option value="">Select category</option>
-                                    {categories.map((c) => (
-                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                    {getShopNavRoots(categories).map((c) => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
+                            {formData.main_category_id &&
+                                rootHasSubcategories(categories, parseInt(formData.main_category_id, 10)) && (
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 mb-1">
+                                            Condition
+                                        </label>
+                                        <select
+                                            required
+                                            value={formData.condition_category_id}
+                                            onChange={(e) =>
+                                                setFormData({ ...formData, condition_category_id: e.target.value })
+                                            }
+                                            className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                        >
+                                            <option value="">Select New or Used</option>
+                                            {getSubcategoriesForRoot(
+                                                categories,
+                                                parseInt(formData.main_category_id, 10),
+                                            ).map((c) => (
+                                                <option key={c.id} value={c.id}>
+                                                    {c.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">Product type</label>
                                 <div className="flex rounded-lg border border-gray-100 p-0.5 bg-gray-50 gap-0.5">
@@ -483,7 +585,16 @@ export default function AdminProducts() {
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => setFormData((f) => ({ ...f, product_kind: 'variable' }))}
+                                        onClick={async () => {
+                                            const opts = variationOptionsRef.current.length
+                                                ? variationOptionsRef.current
+                                                : await fetchVariationOptions();
+                                            setFormData((f) => ({
+                                                ...f,
+                                                product_kind: 'variable',
+                                                variants: f.variants.length > 0 ? f.variants : [newVariantRow(opts)],
+                                            }));
+                                        }}
                                         className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'variable' ? 'bg-white text-gray-900border border-gray-200/90' : 'text-gray-500 hover:text-gray-700'}`}
                                     >
                                         Variable
@@ -565,7 +676,14 @@ export default function AdminProducts() {
                                 <label className="block text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1.5">
                                     <Layers className="h-3.5 w-3.5" /> Variants
                                 </label>
-                                <p className="text-xs text-gray-400 mb-2">Add options from Variations (e.g. Size, Color). Price = base + amount below (use base 0 and enter full GHS price per row if you prefer).</p>
+                                <p className="text-xs text-gray-400 mb-2">Add options from Variations (e.g. Size, Color). Select <strong>Option</strong> first (e.g. Size), then pick a <strong>Value</strong>. Price = base + amount below (use base 0 and enter full GHS price per row if you prefer).</p>
+                                {variationOptions.length === 0 && (
+                                    <p className="text-xs text-amber-600 mb-2">
+                                        No variation options loaded.{' '}
+                                        <Link href="/admin/variations" className="underline font-medium">Set up Size/Color in Variations</Link>
+                                        {' '}or run <code className="text-[11px] bg-gray-100 px-1 rounded">npm run db:seed-variations</code> locally.
+                                    </p>
+                                )}
                                 <div className="space-y-2">
                                     {formData.variants.map((v, idx) => (
                                         <div key={idx} className="flex flex-wrap items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-100">
@@ -584,17 +702,23 @@ export default function AdminProducts() {
                                             </select>
                                             <select
                                                 value={v.variant_value}
+                                                disabled={!v.variant_type}
                                                 onChange={(e) => setFormData((f) => ({
                                                     ...f,
                                                     variants: f.variants.map((x, i) => i === idx ? { ...x, variant_value: e.target.value } : x),
                                                 }))}
-                                                className="h-9 px-2 rounded-lg border border-gray-200 text-sm min-w-[90px]"
+                                                className="h-9 px-2 rounded-lg border border-gray-200 text-sm min-w-[90px] disabled:bg-gray-100 disabled:text-gray-400"
                                             >
-                                                <option value="">Value</option>
-                                                {variationOptions.find((o) => o.slug === v.variant_type)?.values?.map((val) => (
+                                                <option value="">{v.variant_type ? 'Value' : 'Select option first'}</option>
+                                                {getValuesForOption(v.variant_type).map((val) => (
                                                     <option key={val.id} value={val.value}>{val.value}</option>
                                                 ))}
                                             </select>
+                                            {v.variant_type && getValuesForOption(v.variant_type).length <= 1 && (
+                                                <Link href="/admin/variations" className="text-xs text-brand hover:underline whitespace-nowrap">
+                                                    Add more values in Variations
+                                                </Link>
+                                            )}
                                             <input
                                                 type="text"
                                                 placeholder="SKU"
@@ -634,7 +758,7 @@ export default function AdminProducts() {
                                     ))}
                                     <button
                                         type="button"
-                                        onClick={() => setFormData((f) => ({ ...f, variants: [...f.variants, { variant_type: '', variant_value: '' }] }))}
+                                        onClick={() => setFormData((f) => ({ ...f, variants: [...f.variants, newVariantRow()] }))}
                                         className="min-h-[40px] px-3 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm font-medium flex items-center gap-1.5 hover:border-brand/40 hover:text-brand"
                                     >
                                         <Plus className="h-3.5 w-3.5" /> Add variant
