@@ -367,6 +367,38 @@ export class ConsignmentService {
         return this.prisma.consignmentClawback.count({ where: { status: 'pending' } });
     }
 
+    /** Outstanding Sell for Me clawbacks owed by a consignor (post-refund). */
+    async getPendingClawbackSummary(userId: number) {
+        const rows = await this.prisma.consignmentClawback.findMany({
+            where: { consignor_user_id: userId, status: 'pending' },
+            include: {
+                submission: { select: { id: true, submission_number: true, name: true } },
+            },
+            orderBy: { created_at: 'desc' },
+        });
+        const items = rows.map((row) => {
+            const outstanding = Math.max(
+                0,
+                Number(row.amount_ghs) - Number(row.recovered_ghs ?? 0),
+            );
+            return {
+                id: row.id,
+                order_id: row.order_id,
+                submission_id: row.consignment_submission_id,
+                submission_number: row.submission.submission_number,
+                item_name: row.submission.name,
+                outstanding_ghs: Number(outstanding.toFixed(2)),
+                recovered_ghs: Number(row.recovered_ghs ?? 0),
+                notes: row.notes,
+                created_at: row.created_at,
+            };
+        });
+        const pending_clawback_ghs = Number(
+            items.reduce((sum, item) => sum + item.outstanding_ghs, 0).toFixed(2),
+        );
+        return { pending_clawback_ghs, items };
+    }
+
     async findClawbacksForAdmin(status?: string) {
         const where: Prisma.ConsignmentClawbackWhereInput = {};
         if (status?.trim()) where.status = status.trim() as any;
@@ -392,37 +424,81 @@ export class ConsignmentService {
         action: 'recovered' | 'waived',
         note?: string,
     ) {
-        const row = await this.prisma.consignmentClawback.findUnique({ where: { id: clawbackId } });
+        const row = await this.prisma.consignmentClawback.findUnique({
+            where: { id: clawbackId },
+            include: { submission: { select: { submission_number: true, name: true } } },
+        });
         if (!row) throw new NotFoundException('Clawback not found');
         if (row.status !== 'pending') {
             throw new BadRequestException('Clawback already settled');
         }
 
-        if (action === 'recovered') {
-            const outstanding = Number(row.amount_ghs) - Number(row.recovered_ghs);
-            if (outstanding > 0) {
-                await this.walletService.debit(
-                    row.consignor_user_id,
-                    outstanding,
-                    'other',
-                    `Clawback settlement for order #${row.order_id}`,
-                    row.consignment_submission_id,
-                );
-            }
+        if (action === 'waived') {
+            const updated = await this.prisma.consignmentClawback.update({
+                where: { id: clawbackId },
+                data: {
+                    status: 'waived',
+                    notes: note?.trim() || row.notes,
+                    settled_at: new Date(),
+                    settled_by_admin_id: adminId,
+                },
+            });
+            return {
+                clawback: updated,
+                recovered_now_ghs: 0,
+                outstanding_ghs: 0,
+                fully_settled: true,
+            };
         }
 
-        return this.prisma.consignmentClawback.update({
+        const outstanding = Math.max(0, Number(row.amount_ghs) - Number(row.recovered_ghs ?? 0));
+        const available = await this.walletService.getAvailableBalance(row.consignor_user_id);
+        const debitAmount = Math.min(available, outstanding);
+        let recoveredNow = 0;
+
+        if (debitAmount > 0) {
+            await this.walletService.debit(
+                row.consignor_user_id,
+                debitAmount,
+                'other',
+                `Clawback recovery: ${row.submission.name} (order #${row.order_id})`,
+                row.consignment_submission_id,
+            );
+            recoveredNow = debitAmount;
+        }
+
+        const newRecovered = Number(row.recovered_ghs ?? 0) + recoveredNow;
+        const stillOwing = Math.max(0, Number((Number(row.amount_ghs) - newRecovered).toFixed(2)));
+        const fullySettled = stillOwing <= 0;
+
+        const updated = await this.prisma.consignmentClawback.update({
             where: { id: clawbackId },
             data: {
-                status: action,
+                status: fullySettled ? 'recovered' : 'pending',
+                recovered_ghs: newRecovered,
                 notes: note?.trim() || row.notes,
-                settled_at: new Date(),
-                settled_by_admin_id: adminId,
-                ...(action === 'recovered'
-                    ? { recovered_ghs: row.amount_ghs }
+                ...(fullySettled
+                    ? { settled_at: new Date(), settled_by_admin_id: adminId }
                     : {}),
             },
         });
+
+        if (recoveredNow > 0 && !fullySettled) {
+            await this.notificationService.createNotification({
+                userId: row.consignor_user_id,
+                type: 'consignment',
+                title: 'Clawback partially recovered',
+                message: `₵${recoveredNow.toFixed(2)} recovered toward your Sell for Me adjustment. ₵${stillOwing.toFixed(2)} still outstanding.`,
+                link: '/dashboard/wallet',
+            });
+        }
+
+        return {
+            clawback: updated,
+            recovered_now_ghs: recoveredNow,
+            outstanding_ghs: stillOwing,
+            fully_settled: fullySettled,
+        };
     }
 
     /** Re-list a delisted submission on the shop. */

@@ -22,12 +22,21 @@ export class WalletController {
     @UseGuards(AuthGuard)
     async getWallet(@Request() req) {
         await this.walletService.ensureWallet(req.user.sub);
-        const [summary, escrow] = await Promise.all([
+        const [summary, escrow, clawbacks] = await Promise.all([
             this.walletService.getWalletSummary(req.user.sub),
             this.consignmentService.getPendingEscrowSummary(req.user.sub),
+            this.consignmentService.getPendingClawbackSummary(req.user.sub),
         ]);
+        const clawbackHold = clawbacks.pending_clawback_ghs ?? 0;
+        const availableAfterClawback = Math.max(
+            0,
+            Number(summary.available_balance_ghs) - clawbackHold,
+        );
         return {
             ...summary,
+            available_balance_ghs: availableAfterClawback,
+            pending_clawback_ghs: clawbackHold,
+            pending_clawback_items: clawbacks.items,
             pending_consignment_payout_ghs: escrow.pending_consignment_payout_ghs,
             pending_consignment_sales: escrow.items,
         };
@@ -106,6 +115,21 @@ export class WalletController {
     @Post('withdraw')
     @UseGuards(AuthGuard)
     async requestWithdraw(@Request() req, @Body() body: CreateWithdrawalDto) {
+        const [summary, clawbacks] = await Promise.all([
+            this.walletService.getWalletSummary(req.user.sub),
+            this.consignmentService.getPendingClawbackSummary(req.user.sub),
+        ]);
+        const available = Math.max(
+            0,
+            Number(summary.available_balance_ghs) - (clawbacks.pending_clawback_ghs ?? 0),
+        );
+        if (Number(body.amount) > available) {
+            throw new BadRequestException(
+                clawbacks.pending_clawback_ghs > 0
+                    ? `Insufficient withdrawable balance (₵${available.toFixed(2)}). ₵${clawbacks.pending_clawback_ghs.toFixed(2)} is reserved for an outstanding Sell for Me adjustment.`
+                    : `Insufficient available balance. Available: ₵${available.toFixed(2)}`,
+            );
+        }
         const created = await this.walletService.requestWithdrawal(
             req.user.sub,
             body.amount,

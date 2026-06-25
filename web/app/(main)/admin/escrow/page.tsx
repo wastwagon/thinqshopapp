@@ -211,8 +211,18 @@ export default function AdminEscrowPage() {
     const settleClawback = async (id: number, action: 'recovered' | 'waived') => {
         setSettlingClawbackId(id);
         try {
-            await api.patch(`/consignment/admin/clawbacks/${id}/settle`, { action });
-            toast.success(action === 'recovered' ? 'Clawback recovered' : 'Clawback waived');
+            const { data } = await api.patch(`/consignment/admin/clawbacks/${id}/settle`, { action });
+            if (action === 'recovered') {
+                if (data?.fully_settled) {
+                    toast.success('Clawback fully recovered');
+                } else if (Number(data?.recovered_now_ghs) > 0) {
+                    toast.success(`Partial recovery: ₵${Number(data.recovered_now_ghs).toFixed(2)} collected, ₵${Number(data.outstanding_ghs).toFixed(2)} still owed`);
+                } else {
+                    toast.error('Seller has insufficient wallet balance — try again after they top up or waive');
+                }
+            } else {
+                toast.success('Clawback waived');
+            }
             fetchRows();
         } catch (err: any) {
             toast.error(err.response?.data?.message || 'Failed to settle clawback');

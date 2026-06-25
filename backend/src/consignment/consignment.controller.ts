@@ -206,6 +206,12 @@ export class ConsignmentController {
         return this.consignmentService.getEscrowLedgerForSubmission(Number(id));
     }
 
+    @Get('clawbacks')
+    @UseGuards(AuthGuard)
+    async userClawbacks(@Request() req: any) {
+        return this.consignmentService.getPendingClawbackSummary(req.user.sub);
+    }
+
     @Get('submissions/:id/escrow-ledger')
     @UseGuards(AuthGuard)
     async userEscrowLedger(@Request() req: any, @Param('id') id: string) {
@@ -244,7 +250,12 @@ export class ConsignmentController {
         await this.auditService.logAdminAction(req, 'consignment.clawback.settle', {
             tableName: 'consignment_clawbacks',
             recordId: Number(id),
-            details: { action: body.action },
+            details: {
+                action: body.action,
+                recovered_now_ghs: updated.recovered_now_ghs,
+                outstanding_ghs: updated.outstanding_ghs,
+                fully_settled: updated.fully_settled,
+            },
         });
         return updated;
     }

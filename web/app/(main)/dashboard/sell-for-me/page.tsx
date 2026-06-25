@@ -79,6 +79,7 @@ export default function SellForMePage() {
     const [ledgerModal, setLedgerModal] = useState<{ id: number; name: string } | null>(null);
     const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([]);
     const [ledgerLoading, setLedgerLoading] = useState(false);
+    const [pendingClawback, setPendingClawback] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [form, setForm] = useState({
@@ -112,15 +113,17 @@ export default function SellForMePage() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [subRes, catRes, settingsRes] = await Promise.all([
+            const [subRes, catRes, settingsRes, clawRes] = await Promise.all([
                 api.get('/consignment/submissions'),
                 api.get('/products/categories'),
                 api.get('/consignment/settings').catch(() => ({ data: { sell_for_me_enabled: true } })),
+                api.get('/consignment/clawbacks').catch(() => ({ data: { pending_clawback_ghs: 0 } })),
             ]);
             setSubmissions(subRes.data);
             setCategories(Array.isArray(catRes.data) ? catRes.data : []);
             setServiceEnabled(settingsRes.data?.sell_for_me_enabled !== false);
             setDefaultCommissionPct(Number(settingsRes.data?.default_commission_pct ?? 20));
+            setPendingClawback(Number(clawRes.data?.pending_clawback_ghs ?? 0));
         } catch {
             toast.error('Failed to load listings');
         } finally {
@@ -278,6 +281,16 @@ export default function SellForMePage() {
                 {!serviceEnabled && (
                     <div className="flat-card p-4 mb-4 border border-amber-200 bg-amber-50 text-sm text-amber-800">
                         Sell for Me is temporarily paused. Check back soon or contact support.
+                    </div>
+                )}
+
+                {pendingClawback > 0 && (
+                    <div className="flat-card p-4 mb-4 border border-amber-200 bg-amber-50/80 text-sm text-amber-900">
+                        <p className="font-semibold">Payout adjustment due: ₵{pendingClawback.toFixed(2)}</p>
+                        <p className="text-xs text-amber-800 mt-1">
+                            A buyer refund occurred after a payout was credited. This reduces your withdrawable wallet balance.{' '}
+                            <Link href="/dashboard/wallet" className="text-brand font-semibold hover:underline">View wallet</Link>
+                        </p>
                     </div>
                 )}
 

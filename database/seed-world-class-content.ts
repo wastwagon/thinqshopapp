@@ -57,8 +57,12 @@ export async function seedWorldClassContent(prisma: PrismaClient) {
     // --- Site policies (upsert by type) ---
     const deliveryShort = 'All orders are shipped from abroad. Estimated delivery to Ghana: 7–14 days.';
     const deliveryFull = `All orders are shipped from abroad and delivered to Ghana. Estimated delivery time is 7–14 days from dispatch. Delivery fees are calculated at checkout based on your location. You can track your order anytime from your account or the Track page.`;
-    const returnsShort = '14-day returns on unused items. Contact support to start a return.';
-    const returnsFull = `You may return most unused items within 14 days of delivery for a refund or exchange. Items must be in original packaging and condition. To start a return, contact our support team with your order number. Refunds are processed within 5–7 business days after we receive the item.`;
+    const returnsShort = '14-day returns. Approved refunds are credited to your ThinQ Wallet.';
+    const returnsFull = `You may return most unused items within 14 days of delivery. Items must be in original packaging and condition. Request a return from your order history after delivery.
+
+When we approve a refund, the amount is credited to your ThinQ Wallet — not reversed to your card or mobile money. You can spend the balance on shop purchases and services, or request a withdrawal subject to wallet rules.
+
+Contact support if you need help starting a return.`;
     await prisma.sitePolicy.upsert({ where: { type: 'delivery' }, update: { short_text: deliveryShort, full_text: deliveryFull, updated_at: now }, create: { type: 'delivery', short_text: deliveryShort, full_text: deliveryFull, updated_at: now } });
     await prisma.sitePolicy.upsert({ where: { type: 'returns' }, update: { short_text: returnsShort, full_text: returnsFull, updated_at: now }, create: { type: 'returns', short_text: returnsShort, full_text: returnsFull, updated_at: now } });
     console.log('Seeded site_policies');

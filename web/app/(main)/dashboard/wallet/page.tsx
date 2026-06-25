@@ -28,6 +28,16 @@ const SOURCE_LABELS: Record<string, string> = {
     other: 'Adjustment',
 };
 
+const ESCROW_EVENT_LABELS: Record<string, string> = {
+    locked: 'Escrow locked',
+    hold_placed: 'Dispute hold',
+    hold_released: 'Hold released',
+    released: 'Payout released',
+    voided: 'Sale voided',
+    auto_released: 'Auto-released',
+    clawback_pending: 'Clawback pending',
+};
+
 interface LedgerTx {
     id: number;
     type: 'credit' | 'debit';
@@ -63,6 +73,22 @@ export default function WalletPage() {
         escrow_on_hold?: boolean;
         escrow_hold_reason?: string | null;
     }>>([]);
+    const [pendingClawback, setPendingClawback] = useState(0);
+    const [pendingClawbackItems, setPendingClawbackItems] = useState<Array<{
+        id: number;
+        item_name: string;
+        submission_number: string;
+        outstanding_ghs: number;
+        notes?: string | null;
+    }>>([]);
+    const [escrowLedgerModal, setEscrowLedgerModal] = useState<{ id: number; name: string } | null>(null);
+    const [escrowLedgerEntries, setEscrowLedgerEntries] = useState<Array<{
+        id: number;
+        event_type: string;
+        note?: string | null;
+        created_at: string;
+    }>>([]);
+    const [escrowLedgerLoading, setEscrowLedgerLoading] = useState(false);
     const [transactions, setTransactions] = useState<LedgerTx[]>([]);
     const [withdrawals, setWithdrawals] = useState<WithdrawalRow[]>([]);
     const [loading, setLoading] = useState(true);
@@ -82,6 +108,20 @@ export default function WalletPage() {
         account_number: '',
     });
 
+    const openEscrowLedger = async (id: number, name: string) => {
+        setEscrowLedgerModal({ id, name });
+        setEscrowLedgerLoading(true);
+        try {
+            const { data } = await api.get(`/consignment/submissions/${id}/escrow-ledger`);
+            setEscrowLedgerEntries(Array.isArray(data) ? data : []);
+        } catch {
+            toast.error('Could not load payout history');
+            setEscrowLedgerEntries([]);
+        } finally {
+            setEscrowLedgerLoading(false);
+        }
+    };
+
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -95,6 +135,8 @@ export default function WalletPage() {
             setPendingWithdrawal(Number(walletRes.data.pending_withdrawal_ghs ?? 0));
             setPendingConsignmentPayout(Number(walletRes.data.pending_consignment_payout_ghs ?? 0));
             setPendingConsignmentSales(Array.isArray(walletRes.data.pending_consignment_sales) ? walletRes.data.pending_consignment_sales : []);
+            setPendingClawback(Number(walletRes.data.pending_clawback_ghs ?? 0));
+            setPendingClawbackItems(Array.isArray(walletRes.data.pending_clawback_items) ? walletRes.data.pending_clawback_items : []);
             setTransactions(txRes.data);
             setWithdrawals(wdRes.data);
         } catch (error) {
@@ -222,7 +264,7 @@ export default function WalletPage() {
                 <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                     <div>
                         <h1 className="page-title">Wallet</h1>
-                        <p className="page-subtitle">Unified balance for shop, services, and Sell for Me payouts</p>
+                        <p className="page-subtitle">Unified balance for shop, services, Sell for Me payouts, and order refunds</p>
                     </div>
                     <button
                         type="button"
@@ -242,7 +284,7 @@ export default function WalletPage() {
                         </span>
                     </div>
                     <p className="text-xs text-gray-500 mb-2">
-                        In your wallet now · Min withdrawal ₵50
+                        In your wallet now · Min withdrawal ₵50 · Approved order refunds are credited here (not to card/MoMo)
                     </p>
                     {balance !== null && (
                         <p className="text-xs text-gray-500 mb-1">
@@ -251,8 +293,13 @@ export default function WalletPage() {
                         </p>
                     )}
                     {pendingConsignmentPayout > 0 && (
-                        <p className="text-xs text-violet-700 mb-3">
+                        <p className="text-xs text-violet-700 mb-1">
                             ₵{pendingConsignmentPayout.toFixed(2)} pending from Sell for Me sales (released when buyer delivery is confirmed)
+                        </p>
+                    )}
+                    {pendingClawback > 0 && (
+                        <p className="text-xs text-amber-700 mb-3">
+                            ₵{pendingClawback.toFixed(2)} reserved — Sell for Me payout adjustment after buyer refund
                         </p>
                     )}
                     <div className="flex flex-wrap gap-2 mt-4">
@@ -294,17 +341,7 @@ export default function WalletPage() {
                                     <div className="flex items-center gap-2 shrink-0">
                                         <button
                                             type="button"
-                                            onClick={async () => {
-                                                try {
-                                                    const { data } = await api.get(`/consignment/submissions/${sale.id}/escrow-ledger`);
-                                                    const lines = (Array.isArray(data) ? data : [])
-                                                        .map((e: { event_type: string; note?: string }) => `${e.event_type}${e.note ? `: ${e.note}` : ''}`)
-                                                        .join('\n');
-                                                    toast(lines || 'No history yet', { duration: 5000 });
-                                                } catch {
-                                                    toast.error('Could not load history');
-                                                }
-                                            }}
+                                            onClick={() => openEscrowLedger(sale.id, sale.name)}
                                             className="text-[10px] font-semibold text-brand hover:underline"
                                         >
                                             History
@@ -313,6 +350,31 @@ export default function WalletPage() {
                                             ₵{Number(sale.expected_payout_ghs).toFixed(2)}
                                         </span>
                                     </div>
+                                </li>
+                            ))}
+                        </ul>
+                        <Link href="/dashboard/sell-for-me" className="inline-block mt-3 text-xs font-semibold text-brand hover:underline">
+                            View Sell for Me listings
+                        </Link>
+                    </div>
+                )}
+
+                {pendingClawbackItems.length > 0 && (
+                    <div className="flat-card p-4 mb-4 border border-amber-200 bg-amber-50/50">
+                        <p className="text-xs font-semibold text-amber-900 mb-1">Sell for Me payout adjustment due</p>
+                        <p className="text-[11px] text-amber-800/90 mb-3">
+                            A buyer refund occurred after your payout was credited. The outstanding amount reduces what you can withdraw until settled.
+                        </p>
+                        <ul className="space-y-2">
+                            {pendingClawbackItems.map((item) => (
+                                <li key={item.id} className="flex items-center justify-between gap-2 text-sm">
+                                    <span className="text-gray-800 truncate min-w-0">
+                                        {item.item_name}
+                                        <span className="block text-[10px] text-gray-500">{item.submission_number}</span>
+                                    </span>
+                                    <span className="text-amber-800 font-semibold tabular-nums shrink-0">
+                                        ₵{Number(item.outstanding_ghs).toFixed(2)} due
+                                    </span>
                                 </li>
                             ))}
                         </ul>
@@ -508,6 +570,34 @@ export default function WalletPage() {
                     </GroupedList>
                 </div>
             </div>
+
+            {escrowLedgerModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/40" onClick={() => setEscrowLedgerModal(null)} aria-hidden />
+                    <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto">
+                        <h2 className="text-lg font-bold text-gray-900 mb-1">Payout history</h2>
+                        <p className="text-xs text-gray-500 mb-4">{escrowLedgerModal.name}</p>
+                        {escrowLedgerLoading ? (
+                            <p className="text-sm text-gray-500">Loading…</p>
+                        ) : escrowLedgerEntries.length === 0 ? (
+                            <p className="text-sm text-gray-500">No events recorded yet.</p>
+                        ) : (
+                            <ul className="space-y-2">
+                                {escrowLedgerEntries.map((e) => (
+                                    <li key={e.id} className="border border-gray-100 rounded-lg p-3 text-xs">
+                                        <div className="flex justify-between gap-2">
+                                            <span className="font-semibold">{ESCROW_EVENT_LABELS[e.event_type] ?? e.event_type}</span>
+                                            <span className="text-gray-400">{new Date(e.created_at).toLocaleString()}</span>
+                                        </div>
+                                        {e.note && <p className="text-gray-600 mt-1">{e.note}</p>}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        <button type="button" onClick={() => setEscrowLedgerModal(null)} className="mt-4 w-full h-10 rounded-xl bg-gray-100 text-sm font-semibold">Close</button>
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 }

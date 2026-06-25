@@ -384,6 +384,31 @@ export class OrderService {
         return updated;
     }
 
+    private frontendBaseUrl(): string {
+        return (process.env.FRONTEND_URL || 'http://localhost:7001').replace(/\/$/, '');
+    }
+
+    private async queueOrderRefundWalletEmail(userId: number, orderNumber: string, refundAmount: number) {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { id: userId },
+                include: { profile: true },
+            });
+            if (!user?.email) return;
+            const user_name = user.profile
+                ? [user.profile.first_name, user.profile.last_name].filter(Boolean).join(' ') || 'Customer'
+                : 'Customer';
+            await this.emailTemplateService.queueFromTemplate('order_refund_wallet', user.email, {
+                user_name,
+                order_number: orderNumber,
+                refund_amount: refundAmount.toFixed(2),
+                wallet_url: `${this.frontendBaseUrl()}/dashboard/wallet`,
+            });
+        } catch {
+            // ignore email queue errors
+        }
+    }
+
     private async queueOrderConfirmationEmail(userId: number, orderNumber: string, total: string) {
         try {
             const user = await this.prisma.user.findUnique({
@@ -659,6 +684,7 @@ export class OrderService {
                     pending: number;
                 }>;
             } | null = null;
+            let walletRefundCredited = false;
 
             if (action === 'refund') {
                 await tx.order.update({
@@ -682,6 +708,7 @@ export class OrderService {
                         order.id,
                         tx,
                     );
+                    walletRefundCredited = true;
                 }
 
                 refundConsignmentResult = await this.consignmentService.handleOrderRefundConsignment(
@@ -706,8 +733,20 @@ export class OrderService {
                 where: { id: order.id },
                 include: { items: true, tracking: { orderBy: { created_at: 'asc' } } },
             });
-            return { order: resolved, refundConsignmentResult };
+            return { order: resolved, refundConsignmentResult, walletRefundCredited };
         });
+
+        if (action === 'refund' && updated.walletRefundCredited) {
+            await this.queueOrderRefundWalletEmail(
+                order.user_id,
+                order.order_number,
+                Number(order.total),
+            );
+            this.smsService.sendToUser(
+                order.user_id,
+                `ThinQShop: ₵${Number(order.total).toFixed(2)} refunded to your wallet for order ${order.order_number}. View balance in your dashboard.`,
+            ).catch(() => {});
+        }
 
         if (updated.refundConsignmentResult) {
             await this.consignmentService.notifyAfterOrderRefund(
@@ -725,7 +764,7 @@ export class OrderService {
                 : action === 'approve'
                     ? `Your return for ${order.order_number} has been approved.`
                     : `Your return for ${order.order_number} was not approved.`,
-            link: `/dashboard/orders/${order.id}`,
+            link: action === 'refund' ? '/dashboard/wallet' : `/dashboard/orders/${order.id}`,
         });
 
         return updated.order;

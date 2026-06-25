@@ -43,7 +43,15 @@ export default function TermsPage() {
                     <section>
                         <h2 className="text-base font-semibold text-gray-900 mb-3">4. Warranty &amp; Returns</h2>
                         <p className="leading-relaxed mb-3">
-                            Products may come with manufacturer warranties as stated on the product page. Our return and refund policy is as described at checkout and in order confirmations. Defective or misdescribed items should be reported within the period stated in our policy. Warranty T&amp;C for specific products may be provided separately or by the manufacturer.
+                            Products may come with manufacturer warranties as stated on the product page. Defective or misdescribed items should be reported within the return period stated on our product and policy pages.
+                        </p>
+                        <p className="leading-relaxed mb-3">
+                            You may return most unused items within <strong>14 days of delivery</strong>. Items must be in original packaging and condition. Request a return from your order history after delivery; our team will review your request.
+                        </p>
+                        <p className="leading-relaxed">
+                            <strong>Refunds are credited to your ThinQ Wallet</strong> — not reversed to your card or mobile money. You can use the balance for shop purchases and services, or request a withdrawal subject to wallet rules. See your{' '}
+                            <Link href="/dashboard/wallet" className="text-brand font-semibold hover:underline">wallet dashboard</Link>{' '}
+                            for your balance and transaction history.
                         </p>
                     </section>
 
