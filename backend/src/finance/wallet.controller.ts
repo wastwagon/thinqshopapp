@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards, Request, BadRequestException, Param, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards, Request, BadRequestException, Param, Patch, Delete, Inject, forwardRef } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { PaymentService } from './payment.service';
 import { AuthGuard } from '../auth/auth.guard';
@@ -7,6 +7,7 @@ import { RequirePermission } from '../auth/require-permission.decorator';
 import { PERMISSION_MAP } from '../auth/permissions';
 import { AuditService } from '../audit/audit.service';
 import { ApproveWithdrawalDto, CreateWithdrawalDto, RejectWithdrawalDto } from './dto/wallet.dto';
+import { ConsignmentService } from '../consignment/consignment.service';
 
 @Controller('finance/wallet')
 export class WalletController {
@@ -14,13 +15,22 @@ export class WalletController {
         private walletService: WalletService,
         private paymentService: PaymentService,
         private auditService: AuditService,
+        @Inject(forwardRef(() => ConsignmentService)) private consignmentService: ConsignmentService,
     ) { }
 
     @Get()
     @UseGuards(AuthGuard)
     async getWallet(@Request() req) {
         await this.walletService.ensureWallet(req.user.sub);
-        return this.walletService.getWalletSummary(req.user.sub);
+        const [summary, escrow] = await Promise.all([
+            this.walletService.getWalletSummary(req.user.sub),
+            this.consignmentService.getPendingEscrowSummary(req.user.sub),
+        ]);
+        return {
+            ...summary,
+            pending_consignment_payout_ghs: escrow.pending_consignment_payout_ghs,
+            pending_consignment_sales: escrow.items,
+        };
     }
 
     @Get('transactions')

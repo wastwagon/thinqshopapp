@@ -644,6 +644,16 @@ export class OrderService {
                     tx,
                 );
 
+                await tx.consignmentSubmission.updateMany({
+                    where: { sale_order_id: order.id, status: 'sold' },
+                    data: {
+                        status: 'sale_voided',
+                        expected_payout_ghs: null,
+                        sale_order_id: null,
+                        sold_at: null,
+                    },
+                });
+
                 const orderItems = await tx.order.findUnique({
                     where: { id: order.id },
                     include: { items: { include: { product: true } } },

@@ -79,6 +79,12 @@ export class ConsignmentController {
         return this.consignmentService.findUserSubmissions(req.user.sub);
     }
 
+    @Get('escrow')
+    @UseGuards(AuthGuard)
+    async getEscrow(@Request() req: any) {
+        return this.consignmentService.getPendingEscrowSummary(req.user.sub);
+    }
+
     @Get('submissions/:id')
     @UseGuards(AuthGuard)
     async getUserSubmission(@Request() req: any, @Param('id') id: string) {

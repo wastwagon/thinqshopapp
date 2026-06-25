@@ -48,6 +48,7 @@ export class WalletService {
         return {
             balance_ghs: balance,
             pending_withdrawal_ghs: pending,
+            /** Withdrawable now — excludes in-escrow consignment sales and pending withdrawal requests */
             available_balance_ghs: Math.max(0, balance - pending),
         };
     }

@@ -102,6 +102,62 @@ export class ConsignmentService {
         return settings.default_commission_pct;
     }
 
+    /** Net payout to consignor after platform commission. */
+    computeExpectedPayout(
+        saleAmount: number,
+        commissionPct: number,
+    ): number {
+        const amount = Number(saleAmount);
+        const pct = Number(commissionPct);
+        if (!Number.isFinite(amount) || amount <= 0) return 0;
+        const commission = amount * ((Number.isFinite(pct) ? pct : FALLBACK_COMMISSION_PCT) / 100);
+        return Math.max(0, Number((amount - commission).toFixed(2)));
+    }
+
+    /** Sum of payouts awaiting delivery confirmation (not in wallet yet). */
+    async getPendingEscrowSummary(userId: number) {
+        const rows = await this.prisma.consignmentSubmission.findMany({
+            where: { user_id: userId, status: 'sold' },
+            select: {
+                id: true,
+                name: true,
+                submission_number: true,
+                expected_payout_ghs: true,
+                sale_order_id: true,
+                sold_at: true,
+            },
+            orderBy: { sold_at: 'desc' },
+        });
+        const pending_consignment_payout_ghs = rows.reduce(
+            (sum, row) => sum + Number(row.expected_payout_ghs ?? 0),
+            0,
+        );
+        return {
+            pending_consignment_payout_ghs: Number(pending_consignment_payout_ghs.toFixed(2)),
+            items: rows.map((row) => ({
+                id: row.id,
+                name: row.name,
+                submission_number: row.submission_number,
+                expected_payout_ghs: Number(row.expected_payout_ghs ?? 0),
+                sale_order_id: row.sale_order_id,
+                sold_at: row.sold_at,
+            })),
+        };
+    }
+
+    /** Clear escrow when order is refunded before delivery payout. */
+    async voidEscrowForOrder(orderId: number) {
+        await this.prisma.consignmentSubmission.updateMany({
+            where: { sale_order_id: orderId, status: 'sold' },
+            data: {
+                status: 'sale_voided',
+                expected_payout_ghs: null,
+                sale_order_id: null,
+                sold_at: null,
+            },
+        });
+    }
+
     private async userDisplayName(userId: number): Promise<string> {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
@@ -152,12 +208,12 @@ export class ConsignmentService {
             userId,
             type: 'consignment',
             title: 'Your item sold',
-            message: `"${itemName}" was purchased (order ${orderNumber}). Payout after delivery.`,
-            link: '/dashboard/sell-for-me',
+            message: `"${itemName}" was purchased (order ${orderNumber}). ₵ payout held until delivery is confirmed.`,
+            link: '/dashboard/wallet',
         });
         this.smsService.sendToUser(
             userId,
-            `ThinQShop: Your item "${itemName}" sold (order ${orderNumber}). Payout after delivery.`,
+            `ThinQShop: Your item "${itemName}" sold (order ${orderNumber}). Payout held in escrow until delivery is confirmed.`,
         ).catch(() => {});
     }
 
@@ -480,7 +536,7 @@ export class ConsignmentService {
         });
     }
 
-    /** When order is paid — mark consignment items sold (stock reserved at checkout). */
+    /** When order is paid — mark sold and lock expected payout in escrow (wallet credited on delivery). */
     async handleOrderPaid(orderId: number) {
         const order = await this.prisma.order.findUnique({
             where: { id: orderId },
@@ -492,14 +548,29 @@ export class ConsignmentService {
             const product = item.product;
             if (!product?.is_consignment) continue;
 
+            const submission = await this.prisma.consignmentSubmission.findFirst({
+                where: { product_id: product.id, status: 'listed' },
+            });
+            if (!submission) continue;
+
+            const commissionPct = Number(
+                submission.commission_pct ?? product.commission_pct ?? FALLBACK_COMMISSION_PCT,
+            );
+            const expectedPayout = this.computeExpectedPayout(Number(item.total), commissionPct);
+
             await this.prisma.product.updateMany({
                 where: { id: product.id },
                 data: { stock_quantity: 0, is_active: false },
             });
 
             const sold = await this.prisma.consignmentSubmission.updateMany({
-                where: { product_id: product.id, status: 'listed' },
-                data: { status: 'sold' },
+                where: { id: submission.id, status: 'listed' },
+                data: {
+                    status: 'sold',
+                    sale_order_id: orderId,
+                    expected_payout_ghs: expectedPayout,
+                    sold_at: new Date(),
+                },
             });
             if (sold.count > 0 && product.consignor_user_id) {
                 await this.notifySold(
@@ -511,7 +582,7 @@ export class ConsignmentService {
         }
     }
 
-    /** When order is delivered — credit consignor wallet minus commission (idempotent). */
+    /** When order is delivered — release escrow into withdrawable wallet balance. */
     async handleOrderDelivered(orderId: number) {
         const order = await this.prisma.order.findUnique({
             where: { id: orderId },
@@ -526,12 +597,12 @@ export class ConsignmentService {
             const submission = await this.prisma.consignmentSubmission.findFirst({
                 where: { product_id: product.id },
             });
-            if (!submission) continue;
+            if (!submission || submission.status !== 'sold') continue;
 
             const saleAmount = Number(item.total);
             const commissionPct = Number(submission.commission_pct ?? product.commission_pct ?? FALLBACK_COMMISSION_PCT);
-            const commission = saleAmount * (commissionPct / 100);
-            const payout = Math.max(0, saleAmount - commission);
+            const calculated = this.computeExpectedPayout(saleAmount, commissionPct);
+            const payout = Number(submission.expected_payout_ghs ?? calculated);
 
             let shouldNotify = false;
             let notifyAmount = 0;
@@ -539,7 +610,11 @@ export class ConsignmentService {
             await this.prisma.$transaction(async (tx) => {
                 const transitioned = await tx.consignmentSubmission.updateMany({
                     where: { id: submission.id, status: 'sold' },
-                    data: { status: 'paid_out', payout_order_id: orderId },
+                    data: {
+                        status: 'paid_out',
+                        payout_order_id: orderId,
+                        expected_payout_ghs: null,
+                    },
                 });
                 if (transitioned.count === 0) return;
 

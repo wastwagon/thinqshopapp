@@ -288,6 +288,9 @@ model ConsignmentSubmission {
   reviewed_by_admin_id Int?
   reviewed_at          DateTime?
   payout_order_id      Int?
+  sale_order_id        Int?
+  expected_payout_ghs  Decimal?              @db.Decimal(10, 2)
+  sold_at              DateTime?
   created_at           DateTime              @default(now())
   updated_at           DateTime              @updatedAt
 
@@ -316,6 +319,7 @@ enum ConsignmentStatus {
   sold
   paid_out
   delisted
+  sale_voided
 }
 
 // Global variation options (e.g. Size, Color) and values (e.g. S, M, L / Red, Blue) for products

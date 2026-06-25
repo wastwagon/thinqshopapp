@@ -21,6 +21,7 @@ interface Submission {
     asking_price: number | string;
     status: string;
     created_at: string;
+    expected_payout_ghs?: number | string | null;
     rejection_reason?: string;
     admin_notes?: string;
     product?: { slug: string; is_active: boolean } | null;
@@ -40,8 +41,9 @@ const STATUS_LABELS: Record<string, string> = {
     listed: 'Live on shop',
     delisted: 'Taken offline',
     rejected: 'Rejected',
-    sold: 'Sold',
-    paid_out: 'Paid out',
+    sold: 'Sold · payout pending delivery',
+    paid_out: 'Paid to wallet',
+    sale_voided: 'Sale cancelled',
 };
 
 export default function SellForMePage() {
@@ -404,6 +406,11 @@ export default function SellForMePage() {
                                     <p className="text-sm font-semibold text-gray-900 truncate">{s.name}</p>
                                     <p className="text-xs text-gray-500">{s.submission_number} · ₵{Number(s.asking_price).toFixed(2)}</p>
                                     <p className="text-xs text-brand font-medium mt-1">{STATUS_LABELS[s.status] || s.status}</p>
+                                    {s.status === 'sold' && s.expected_payout_ghs != null && (
+                                        <p className="text-xs text-violet-700 mt-1">
+                                            ₵{Number(s.expected_payout_ghs).toFixed(2)} in escrow until delivery confirmed
+                                        </p>
+                                    )}
                                     {s.rejection_reason && (
                                         <p className="text-xs text-red-600 mt-1">Rejected: {s.rejection_reason}</p>
                                     )}

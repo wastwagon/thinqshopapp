@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import api from '@/lib/axios';
 import { Plus, ArrowUpRight, ArrowDownLeft, Wallet, RefreshCw, History as HistoryIcon, Activity, Banknote } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -51,6 +52,14 @@ export default function WalletPage() {
     const [balance, setBalance] = useState<number | null>(null);
     const [availableBalance, setAvailableBalance] = useState<number | null>(null);
     const [pendingWithdrawal, setPendingWithdrawal] = useState(0);
+    const [pendingConsignmentPayout, setPendingConsignmentPayout] = useState(0);
+    const [pendingConsignmentSales, setPendingConsignmentSales] = useState<Array<{
+        id: number;
+        name: string;
+        submission_number: string;
+        expected_payout_ghs: number;
+        sold_at?: string;
+    }>>([]);
     const [transactions, setTransactions] = useState<LedgerTx[]>([]);
     const [withdrawals, setWithdrawals] = useState<WithdrawalRow[]>([]);
     const [loading, setLoading] = useState(true);
@@ -81,6 +90,8 @@ export default function WalletPage() {
             setBalance(Number(walletRes.data.balance_ghs));
             setAvailableBalance(Number(walletRes.data.available_balance_ghs));
             setPendingWithdrawal(Number(walletRes.data.pending_withdrawal_ghs ?? 0));
+            setPendingConsignmentPayout(Number(walletRes.data.pending_consignment_payout_ghs ?? 0));
+            setPendingConsignmentSales(Array.isArray(walletRes.data.pending_consignment_sales) ? walletRes.data.pending_consignment_sales : []);
             setTransactions(txRes.data);
             setWithdrawals(wdRes.data);
         } catch (error) {
@@ -221,15 +232,24 @@ export default function WalletPage() {
                 </div>
 
                 <div className="flat-card border-l-4 border-l-brand p-4 md:p-6 mb-4">
-                    <p className="text-brand text-xs font-medium mb-2">Available balance</p>
+                    <p className="text-brand text-xs font-medium mb-2">Available to withdraw</p>
                     <div className="flex items-baseline gap-1 mb-1">
                         <span className="text-4xl font-semibold tracking-tight text-gray-900">
                             ₵{availableBalance !== null ? availableBalance.toFixed(2) : '0.00'}
                         </span>
                     </div>
-                    {balance !== null && pendingWithdrawal > 0 && (
-                        <p className="text-xs text-amber-600 mb-3">
-                            ₵{pendingWithdrawal.toFixed(2)} reserved in pending withdrawals · Total balance ₵{balance.toFixed(2)}
+                    <p className="text-xs text-gray-500 mb-2">
+                        In your wallet now · Min withdrawal ₵50
+                    </p>
+                    {balance !== null && (
+                        <p className="text-xs text-gray-500 mb-1">
+                            Wallet balance ₵{balance.toFixed(2)}
+                            {pendingWithdrawal > 0 && ` · ₵${pendingWithdrawal.toFixed(2)} reserved for pending withdrawals`}
+                        </p>
+                    )}
+                    {pendingConsignmentPayout > 0 && (
+                        <p className="text-xs text-violet-700 mb-3">
+                            ₵{pendingConsignmentPayout.toFixed(2)} pending from Sell for Me sales (released when buyer delivery is confirmed)
                         </p>
                     )}
                     <div className="flex flex-wrap gap-2 mt-4">
@@ -252,6 +272,28 @@ export default function WalletPage() {
                         </button>
                     </div>
                 </div>
+
+                {pendingConsignmentSales.length > 0 && (
+                    <div className="flat-card p-4 mb-4 border border-violet-100 bg-violet-50/40">
+                        <p className="text-xs font-semibold text-violet-900 mb-1">Pending from sales (escrow)</p>
+                        <p className="text-[11px] text-violet-700/90 mb-3">
+                            Not withdrawable yet. Admin marks the order delivered after verifying shipment with the buyer.
+                        </p>
+                        <ul className="space-y-2">
+                            {pendingConsignmentSales.map((sale) => (
+                                <li key={sale.id} className="flex items-center justify-between gap-2 text-sm">
+                                    <span className="text-gray-800 truncate">{sale.name}</span>
+                                    <span className="text-violet-800 font-semibold tabular-nums shrink-0">
+                                        ₵{Number(sale.expected_payout_ghs).toFixed(2)}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                        <Link href="/dashboard/sell-for-me" className="inline-block mt-3 text-xs font-semibold text-brand hover:underline">
+                            View Sell for Me listings
+                        </Link>
+                    </div>
+                )}
 
                 {withdrawals.some((w) => w.status === 'pending') && (
                     <div className="flat-card p-4 mb-4 border border-amber-100 bg-amber-50/50">
