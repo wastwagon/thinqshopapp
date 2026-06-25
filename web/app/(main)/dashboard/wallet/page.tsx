@@ -59,6 +59,8 @@ export default function WalletPage() {
         submission_number: string;
         expected_payout_ghs: number;
         sold_at?: string;
+        escrow_on_hold?: boolean;
+        escrow_hold_reason?: string | null;
     }>>([]);
     const [transactions, setTransactions] = useState<LedgerTx[]>([]);
     const [withdrawals, setWithdrawals] = useState<WithdrawalRow[]>([]);
@@ -282,7 +284,12 @@ export default function WalletPage() {
                         <ul className="space-y-2">
                             {pendingConsignmentSales.map((sale) => (
                                 <li key={sale.id} className="flex items-center justify-between gap-2 text-sm">
-                                    <span className="text-gray-800 truncate">{sale.name}</span>
+                                    <span className="text-gray-800 truncate">
+                                        {sale.name}
+                                        {sale.escrow_on_hold && (
+                                            <span className="block text-[10px] text-amber-700">On hold — {sale.escrow_hold_reason || 'under review'}</span>
+                                        )}
+                                    </span>
                                     <span className="text-violet-800 font-semibold tabular-nums shrink-0">
                                         ₵{Number(sale.expected_payout_ghs).toFixed(2)}
                                     </span>

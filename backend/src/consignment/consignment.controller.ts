@@ -28,6 +28,7 @@ import {
     RequestChangesConsignmentDto,
     UpdateConsignmentSettingsDto,
     UpdateConsignmentSubmissionDto,
+    EscrowHoldDto,
 } from './dto/consignment.dto';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -133,6 +134,82 @@ export class ConsignmentController {
             details: body as Record<string, unknown>,
         });
         return updated;
+    }
+
+    @Get('admin/escrow')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_READ_ALL)
+    async adminEscrowQueue(
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
+        @Query('hold_only') hold_only?: string,
+        @Query('search') search?: string,
+        @Query('order_status') order_status?: string,
+    ) {
+        return this.consignmentService.findEscrowQueueForAdmin({
+            page: page ? Number(page) : 1,
+            limit: limit ? Number(limit) : 25,
+            hold_only: hold_only === 'true',
+            search,
+            order_status,
+        });
+    }
+
+    @Get('admin/escrow/count')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_READ_ALL)
+    async adminEscrowCount() {
+        const count = await this.consignmentService.countEscrowPendingForAdmin();
+        return { count };
+    }
+
+    @Post('admin/escrow/run-auto-release')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_MANAGE)
+    async runAutoEscrowRelease(@Request() req: any) {
+        const result = await this.consignmentService.processAutoEscrowReleases({ source: 'manual' });
+        await this.auditService.logAdminAction(req, 'consignment.escrow.auto_release', {
+            tableName: 'consignment_submissions',
+            details: result as Record<string, unknown>,
+        });
+        return result;
+    }
+
+    @Patch('admin/escrow/:id/hold')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_MANAGE)
+    async escrowHold(@Request() req: any, @Param('id') id: string, @Body() body: EscrowHoldDto) {
+        const updated = await this.consignmentService.setEscrowHold(Number(id), req.user.sub, body.reason);
+        await this.auditService.logAdminAction(req, 'consignment.escrow.hold', {
+            tableName: 'consignment_submissions',
+            recordId: Number(id),
+        });
+        return updated;
+    }
+
+    @Patch('admin/escrow/:id/release-hold')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_MANAGE)
+    async escrowReleaseHold(@Request() req: any, @Param('id') id: string) {
+        const updated = await this.consignmentService.releaseEscrowHold(Number(id), req.user.sub);
+        await this.auditService.logAdminAction(req, 'consignment.escrow.release_hold', {
+            tableName: 'consignment_submissions',
+            recordId: Number(id),
+        });
+        return updated;
+    }
+
+    @Get('admin/escrow/:id/ledger')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_READ_ALL)
+    async adminEscrowLedger(@Param('id') id: string) {
+        return this.consignmentService.getEscrowLedgerForSubmission(Number(id));
+    }
+
+    @Get('submissions/:id/escrow-ledger')
+    @UseGuards(AuthGuard)
+    async userEscrowLedger(@Request() req: any, @Param('id') id: string) {
+        return this.consignmentService.getEscrowLedgerForSubmission(Number(id), req.user.sub);
     }
 
     @Get('admin/:id')

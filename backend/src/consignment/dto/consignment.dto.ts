@@ -168,4 +168,16 @@ export class UpdateConsignmentSettingsDto {
     @IsOptional()
     @IsBoolean()
     sell_for_me_enabled?: boolean;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    @Max(365)
+    auto_release_days_after_shipped?: number;
+}
+
+export class EscrowHoldDto {
+    @IsString()
+    @MinLength(3)
+    reason: string;
 }

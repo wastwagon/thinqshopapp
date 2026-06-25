@@ -81,6 +81,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
         { name: 'Transfers', href: '/admin/transfers', icon: Send },
         { name: 'Procurement', href: '/admin/procurement', icon: ShoppingBag },
         { name: 'Sell for Me', href: '/admin/consignments', icon: Tag },
+        { name: 'Escrow payouts', href: '/admin/escrow', icon: ShieldCheck },
         { name: 'Users', href: '/admin/users', icon: User },
         { name: 'Wallet management', href: '/admin/wallet', icon: Wallet },
         { name: 'Withdrawals', href: '/admin/withdrawals', icon: Banknote },

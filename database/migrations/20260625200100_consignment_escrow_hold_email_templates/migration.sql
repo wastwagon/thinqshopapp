@@ -1,0 +1,4 @@
+INSERT INTO "email_templates" ("trigger_key", "name", "subject", "body", "is_enabled", "updated_at") VALUES
+('consignment_escrow_hold', 'Sell for Me — payout on hold', 'Payout temporarily on hold — {{item_name}}', 'Hi {{user_name}},\n\nYour Sell for Me payout for "{{item_name}}" ({{submission_number}}) is temporarily on hold while we review a buyer concern.\n\nReason: {{hold_reason}}\n\nWe will notify you when the hold is released. Your funds remain in escrow and are not lost.', true, NOW()),
+('consignment_escrow_hold_released', 'Sell for Me — hold released', 'Payout hold released — {{item_name}}', 'Hi {{user_name}},\n\nThe hold on your Sell for Me payout for "{{item_name}}" ({{submission_number}}) has been released.\n\nYour payout will be credited to your wallet once the order is marked delivered.', true, NOW())
+ON CONFLICT ("trigger_key") DO NOTHING;

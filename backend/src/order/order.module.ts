@@ -14,7 +14,7 @@ import { AuditModule } from '../audit/audit.module';
 import { ConsignmentModule } from '../consignment/consignment.module';
 
 @Module({
-    imports: [PrismaModule, AuthModule, CartModule, AddressModule, forwardRef(() => FinanceModule), EmailTemplateModule, SmsModule, NotificationModule, AuditModule, ConsignmentModule],
+    imports: [PrismaModule, AuthModule, CartModule, AddressModule, forwardRef(() => FinanceModule), EmailTemplateModule, SmsModule, NotificationModule, AuditModule, forwardRef(() => ConsignmentModule)],
     controllers: [OrderController],
     providers: [OrderService],
     exports: [OrderService],

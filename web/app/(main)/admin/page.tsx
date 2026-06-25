@@ -51,6 +51,7 @@ export default function AdminDashboard() {
         pendingOrders: 0,
         pendingWithdrawals: 0,
         pendingConsignments: 0,
+        pendingEscrow: 0,
     });
     const [shipments, setShipments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -58,13 +59,14 @@ export default function AdminDashboard() {
     useEffect(() => {
         const fetchAdminStats = async () => {
             try {
-                const [shipRes, transRes, procRes, ordersRes, wdRes, conRes] = await Promise.all([
+                const [shipRes, transRes, procRes, ordersRes, wdRes, conRes, escrowRes] = await Promise.all([
                     api.get('/logistics/admin/shipments'),
                     api.get('/finance/transfers/admin/all'),
                     api.get('/procurement/admin/requests'),
                     api.get('/orders/admin/list', { params: { status: 'pending', limit: 1, page: 1 } }).catch(() => ({ data: { meta: { total: 0 } } })),
                     api.get('/finance/wallet/admin/withdrawals/pending-count').catch(() => ({ data: { count: 0 } })),
                     api.get('/consignment/admin/pending-count').catch(() => ({ data: { count: 0 } })),
+                    api.get('/consignment/admin/escrow/count').catch(() => ({ data: { count: 0 } })),
                 ]);
 
                 const shipList = Array.isArray(shipRes.data) ? shipRes.data : [];
@@ -76,6 +78,7 @@ export default function AdminDashboard() {
                     pendingOrders: ordersRes.data?.meta?.total ?? 0,
                     pendingWithdrawals: wdRes.data?.count ?? 0,
                     pendingConsignments: conRes.data?.count ?? 0,
+                    pendingEscrow: escrowRes.data?.count ?? 0,
                 });
             } catch {
                 toast.error('Failed to load dashboard stats');
@@ -96,7 +99,7 @@ export default function AdminDashboard() {
         { label: 'Pending orders', value: loading ? '—' : stats.pendingOrders, icon: CheckCircle, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
     ];
 
-    const attentionTotal = stats.pendingTransfers + stats.pendingRequests + stats.pendingWithdrawals + stats.pendingConsignments;
+    const attentionTotal = stats.pendingTransfers + stats.pendingRequests + stats.pendingWithdrawals + stats.pendingConsignments + stats.pendingEscrow;
 
     return (
         <DashboardLayout isAdmin={true}>
@@ -208,6 +211,16 @@ export default function AdminDashboard() {
                                     <ArrowUpRight className="h-3.5 w-3.5 text-gray-300 group-hover/item:text-brand transition-colors" aria-hidden />
                                 </div>
                                 <p className="text-xs font-semibold text-brand mt-1">Sell for Me queue</p>
+                            </Link>
+                            <Link
+                                href="/admin/escrow"
+                                className="block p-3 rounded-xl border border-violet-100 bg-violet-50/50 hover:bg-violet-50 hover:border-violet-200 transition-colors group/item"
+                            >
+                                <div className="flex justify-between items-start">
+                                    <p className="text-2xl font-bold tracking-tight text-violet-900">{loading ? '—' : stats.pendingEscrow}</p>
+                                    <ArrowUpRight className="h-3.5 w-3.5 text-violet-300 group-hover/item:text-violet-700 transition-colors" aria-hidden />
+                                </div>
+                                <p className="text-xs font-semibold text-violet-700 mt-1">Escrow payouts</p>
                             </Link>
                         </div>
                         <Link

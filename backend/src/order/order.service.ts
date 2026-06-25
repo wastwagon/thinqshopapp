@@ -476,7 +476,14 @@ export class OrderService {
         return { data: orders, meta: { total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) } };
     }
 
-    async updateOrderStatus(id: number, status: string) {
+    async updateOrderStatus(
+        id: number,
+        status: string,
+        options?: {
+            consignmentReleaseNote?: string;
+            consignmentReleaseEvent?: 'released' | 'auto_released';
+        },
+    ) {
         const existing = await this.prisma.order.findUnique({ where: { id } });
         if (!existing) throw new NotFoundException('Order not found');
 
@@ -488,6 +495,14 @@ export class OrderService {
             if (!deliverable.includes(existing.status)) {
                 throw new BadRequestException(
                     `Order must be processing or shipped before delivery (current: ${existing.status})`,
+                );
+            }
+            const escrowHeld = await this.prisma.consignmentSubmission.count({
+                where: { sale_order_id: id, status: 'sold', escrow_on_hold: true },
+            });
+            if (escrowHeld > 0) {
+                throw new BadRequestException(
+                    'Cannot mark delivered while Sell for Me escrow is on hold. Release the hold in Admin → Escrow first.',
                 );
             }
         }
@@ -506,7 +521,10 @@ export class OrderService {
         const statusMsg = status.replace(/_/g, ' ');
         this.smsService.sendToUser(order.user_id, `Your order ${order.order_number} status: ${statusMsg}. Track at ThinQShop.`).catch(() => {});
         if (status === 'delivered') {
-            await this.consignmentService.handleOrderDelivered(order.id);
+            await this.consignmentService.handleOrderDelivered(order.id, {
+                releaseNote: options?.consignmentReleaseNote,
+                releaseEvent: options?.consignmentReleaseEvent,
+            });
         }
         return order;
     }

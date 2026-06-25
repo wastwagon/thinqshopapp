@@ -291,16 +291,45 @@ model ConsignmentSubmission {
   sale_order_id        Int?
   expected_payout_ghs  Decimal?              @db.Decimal(10, 2)
   sold_at              DateTime?
+  escrow_on_hold       Boolean               @default(false)
+  escrow_hold_reason   String?
   created_at           DateTime              @default(now())
   updated_at           DateTime              @updatedAt
 
-  user                 User                  @relation(fields: [user_id], references: [id])
-  category             Category              @relation(fields: [category_id], references: [id])
-  product              Product?              @relation(fields: [product_id], references: [id], onDelete: SetNull)
+  user                 User                      @relation(fields: [user_id], references: [id])
+  category             Category                  @relation(fields: [category_id], references: [id])
+  product              Product?                  @relation(fields: [product_id], references: [id], onDelete: SetNull)
+  escrow_ledger        ConsignmentEscrowLedger[]
 
   @@index([user_id, status])
   @@index([status, created_at])
   @@map("consignment_submissions")
+}
+
+model ConsignmentEscrowLedger {
+  id                        Int                    @id @default(autoincrement())
+  consignment_submission_id Int
+  order_id                  Int?
+  event_type                ConsignmentEscrowEvent
+  amount_ghs                Decimal?               @db.Decimal(10, 2)
+  note                      String?
+  actor_user_id             Int?
+  created_at                DateTime               @default(now())
+
+  submission ConsignmentSubmission @relation(fields: [consignment_submission_id], references: [id], onDelete: Cascade)
+
+  @@index([consignment_submission_id, created_at])
+  @@index([order_id])
+  @@map("consignment_escrow_ledger")
+}
+
+enum ConsignmentEscrowEvent {
+  locked
+  hold_placed
+  hold_released
+  released
+  voided
+  auto_released
 }
 
 enum ConsignmentCondition {

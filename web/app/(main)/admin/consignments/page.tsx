@@ -54,6 +54,7 @@ export default function AdminConsignmentsPage() {
     const [platformSettings, setPlatformSettings] = useState({
         default_commission_pct: '20',
         sell_for_me_enabled: true,
+        auto_release_days_after_shipped: '0',
     });
     const [savingSettings, setSavingSettings] = useState(false);
 
@@ -77,6 +78,7 @@ export default function AdminConsignmentsPage() {
                 setPlatformSettings({
                     default_commission_pct: String(data.default_commission_pct ?? 20),
                     sell_for_me_enabled: data.sell_for_me_enabled !== false,
+                    auto_release_days_after_shipped: String(data.auto_release_days_after_shipped ?? 0),
                 });
                 setApproveForm((f) => ({ ...f, commission_pct: String(data.default_commission_pct ?? 20) }));
             })
@@ -115,10 +117,12 @@ export default function AdminConsignmentsPage() {
             const { data } = await api.patch('/consignment/admin/settings', {
                 default_commission_pct: parseFloat(platformSettings.default_commission_pct),
                 sell_for_me_enabled: platformSettings.sell_for_me_enabled,
+                auto_release_days_after_shipped: parseInt(platformSettings.auto_release_days_after_shipped, 10) || 0,
             });
             setPlatformSettings({
                 default_commission_pct: String(data.default_commission_pct ?? 20),
                 sell_for_me_enabled: data.sell_for_me_enabled !== false,
+                auto_release_days_after_shipped: String(data.auto_release_days_after_shipped ?? 0),
             });
             toast.success('Sell for Me settings saved');
         } catch (err: any) {
@@ -275,6 +279,18 @@ export default function AdminConsignmentsPage() {
                             />
                             Accept new submissions
                         </label>
+                        <div>
+                            <label className="text-xs font-semibold text-gray-500 block mb-1">Auto-release after shipped (days)</label>
+                            <input
+                                type="number"
+                                min={0}
+                                max={365}
+                                className="admin-input w-full max-w-[140px]"
+                                value={platformSettings.auto_release_days_after_shipped}
+                                onChange={(e) => setPlatformSettings({ ...platformSettings, auto_release_days_after_shipped: e.target.value })}
+                            />
+                            <p className="text-[10px] text-gray-400 mt-1">0 = disabled. When set, auto-release also runs daily at 3:00 UTC; admins can trigger manually from Escrow payouts.</p>
+                        </div>
                     </div>
                     <button
                         type="button"
