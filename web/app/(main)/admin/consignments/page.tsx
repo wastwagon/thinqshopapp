@@ -212,6 +212,19 @@ export default function AdminConsignmentsPage() {
         }
     };
 
+    const handleRelist = async (id: number) => {
+        setProcessing(true);
+        try {
+            await api.patch(`/consignment/admin/${id}/relist`);
+            toast.success('Listing is live on the shop again');
+            fetchRows();
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Re-list failed');
+        } finally {
+            setProcessing(false);
+        }
+    };
+
     const handleReview = async (id: number) => {
         try {
             await api.patch(`/consignment/admin/${id}/review`);
@@ -350,6 +363,16 @@ export default function AdminConsignmentsPage() {
                                                         >
                                                             Shop <ExternalLink className="h-3 w-3" />
                                                         </Link>
+                                                    )}
+                                                    {s.status === 'delisted' && (
+                                                        <button
+                                                            type="button"
+                                                            disabled={processing}
+                                                            onClick={() => handleRelist(s.id)}
+                                                            className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-green-50 text-green-700 border border-green-100"
+                                                        >
+                                                            Re-list
+                                                        </button>
                                                     )}
                                                     {s.status === 'listed' && (
                                                         <button

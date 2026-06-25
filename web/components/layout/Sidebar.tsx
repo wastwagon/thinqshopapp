@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import api from '@/lib/axios';
 import {
     LayoutDashboard,
     Wallet,
@@ -47,7 +48,19 @@ interface SidebarProps {
 
 export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps) {
     const pathname = usePathname();
+    const [adminBadges, setAdminBadges] = useState<Record<string, number>>({});
     const isActiveRoute = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
+    useEffect(() => {
+        if (!isAdmin) return;
+        Promise.all([
+            api.get('/consignment/admin/escrow/count').catch(() => ({ data: { count: 0 } })),
+        ]).then(([escrow]) => {
+            setAdminBadges({
+                '/admin/escrow': escrow.data?.count ?? 0,
+            });
+        });
+    }, [isAdmin, pathname]);
 
     const userLinks = [
         { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
@@ -135,7 +148,12 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
                                         }`}
                                 >
                                     <Icon className={`mr-3 h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-brand'}`} />
-                                    {link.name}
+                                    <span className="flex-1">{link.name}</span>
+                                    {isAdmin && adminBadges[link.href] > 0 && (
+                                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center ${isActive ? 'bg-white/20 text-white' : 'bg-violet-100 text-violet-800'}`}>
+                                            {adminBadges[link.href] > 99 ? '99+' : adminBadges[link.href]}
+                                        </span>
+                                    )}
                                 </Link>
                             );
                         })}

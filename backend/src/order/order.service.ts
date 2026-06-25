@@ -430,7 +430,8 @@ export class OrderService {
             },
         });
         if (!order) throw new NotFoundException('Order not found');
-        return order;
+        const consignment_escrow = await this.consignmentService.getEscrowSummaryForOrder(id);
+        return { ...order, consignment_escrow };
     }
 
     /** Public lookup by order_number for track page. Returns minimal safe data (no user email, no full address). */
@@ -643,64 +644,51 @@ export class OrderService {
             trackingNotes = notes?.trim() || 'Return request rejected by admin';
         } else if (action === 'refund') {
             trackingStatus = 'refunded';
-            trackingNotes = notes?.trim() || 'Refund processed by admin';
+            trackingNotes = notes?.trim() || 'Refund credited to customer ThinQ Wallet (not Paystack reversal)';
             orderData.payment_status = 'refunded';
         }
 
         const updated = await this.prisma.$transaction(async (tx) => {
+            let refundConsignmentResult: {
+                voided: Array<{ user_id: number; name: string; submission_number: string }>;
+                clawbackNotices: Array<{
+                    userId: number;
+                    itemName: string;
+                    submissionNumber: string;
+                    recovered: number;
+                    pending: number;
+                }>;
+            } | null = null;
+
             if (action === 'refund') {
                 await tx.order.update({
                     where: { id: order.id },
                     data: { payment_status: 'refunded' },
                 });
-                await this.walletService.credit(
-                    order.user_id,
-                    Number(order.total),
-                    'other',
-                    `Refund for order ${order.order_number}`,
-                    order.id,
-                    tx,
-                );
 
-                await tx.consignmentSubmission.updateMany({
-                    where: { sale_order_id: order.id, status: 'sold' },
-                    data: {
-                        status: 'sale_voided',
-                        expected_payout_ghs: null,
-                        sale_order_id: null,
-                        sold_at: null,
+                const existingRefund = await tx.walletTransaction.findFirst({
+                    where: {
+                        user_id: order.user_id,
+                        source: 'order_refund',
+                        reference_id: order.id,
                     },
                 });
-
-                const orderItems = await tx.order.findUnique({
-                    where: { id: order.id },
-                    include: { items: { include: { product: true } } },
-                });
-                for (const item of orderItems?.items ?? []) {
-                    const product = item.product;
-                    if (!product?.is_consignment || !product.consignor_user_id) continue;
-                    const submission = await tx.consignmentSubmission.findFirst({
-                        where: { product_id: product.id },
-                    });
-                    if (!submission || submission.status !== 'paid_out') continue;
-                    const payoutTx = await tx.walletTransaction.findFirst({
-                        where: {
-                            user_id: product.consignor_user_id,
-                            source: 'consignment_payout',
-                            reference_id: submission.id,
-                        },
-                    });
-                    if (payoutTx) {
-                        await this.walletService.debit(
-                            product.consignor_user_id,
-                            Number(payoutTx.amount_ghs),
-                            'other',
-                            `Clawback: refund for order ${order.order_number}`,
-                            submission.id,
-                            tx,
-                        );
-                    }
+                if (!existingRefund) {
+                    await this.walletService.credit(
+                        order.user_id,
+                        Number(order.total),
+                        'order_refund',
+                        `Refund for order ${order.order_number} (wallet credit)`,
+                        order.id,
+                        tx,
+                    );
                 }
+
+                refundConsignmentResult = await this.consignmentService.handleOrderRefundConsignment(
+                    order.id,
+                    order.order_number,
+                    tx,
+                );
             } else if (Object.keys(orderData).length > 0) {
                 await tx.order.update({
                     where: { id: order.id },
@@ -714,24 +702,32 @@ export class OrderService {
                     notes: trackingNotes,
                 },
             });
-            return tx.order.findUnique({
+            const resolved = await tx.order.findUnique({
                 where: { id: order.id },
                 include: { items: true, tracking: { orderBy: { created_at: 'asc' } } },
             });
+            return { order: resolved, refundConsignmentResult };
         });
+
+        if (updated.refundConsignmentResult) {
+            await this.consignmentService.notifyAfterOrderRefund(
+                order.order_number,
+                updated.refundConsignmentResult,
+            );
+        }
 
         await this.notificationService.createNotification({
             userId: order.user_id,
             type: 'return_request',
-            title: `Return ${action === 'refund' ? 'refunded' : action === 'approve' ? 'approved' : 'rejected'}`,
+            title: `Return ${action === 'refund' ? 'refunded to wallet' : action === 'approve' ? 'approved' : 'rejected'}`,
             message: action === 'refund'
-                ? `Your return for ${order.order_number} has been refunded.`
+                ? `Your return for ${order.order_number} was approved. ₵${Number(order.total).toFixed(2)} has been credited to your ThinQ Wallet (not back to card/MoMo).`
                 : action === 'approve'
                     ? `Your return for ${order.order_number} has been approved.`
                     : `Your return for ${order.order_number} was not approved.`,
             link: `/dashboard/orders/${order.id}`,
         });
 
-        return updated;
+        return updated.order;
     }
 }

@@ -56,6 +56,18 @@ const EVENT_LABELS: Record<string, string> = {
     released: 'Payout released',
     voided: 'Voided (refund)',
     auto_released: 'Auto-released',
+    clawback_pending: 'Clawback pending',
+};
+
+type ClawbackRow = {
+    id: number;
+    amount_ghs: number | string;
+    recovered_ghs: number | string;
+    status: string;
+    notes?: string | null;
+    order_id: number;
+    submission?: { submission_number: string; name: string };
+    consignor?: { email: string; profile?: { first_name?: string; last_name?: string } };
 };
 
 export default function AdminEscrowPage() {
@@ -74,6 +86,8 @@ export default function AdminEscrowPage() {
     const [ledgerModal, setLedgerModal] = useState<{ id: number; name: string } | null>(null);
     const [ledgerEntries, setLedgerEntries] = useState<EscrowLedgerEntry[]>([]);
     const [ledgerLoading, setLedgerLoading] = useState(false);
+    const [clawbacks, setClawbacks] = useState<ClawbackRow[]>([]);
+    const [settlingClawbackId, setSettlingClawbackId] = useState<number | null>(null);
 
     useEffect(() => {
         const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 300);
@@ -83,7 +97,7 @@ export default function AdminEscrowPage() {
     const fetchRows = useCallback(async () => {
         setLoading(true);
         try {
-            const [escrowRes, settingsRes] = await Promise.all([
+            const [escrowRes, settingsRes, clawRes] = await Promise.all([
                 api.get('/consignment/admin/escrow', {
                     params: {
                         page,
@@ -94,9 +108,11 @@ export default function AdminEscrowPage() {
                     },
                 }),
                 api.get('/consignment/admin/settings'),
+                api.get('/consignment/admin/clawbacks', { params: { status: 'pending' } }),
             ]);
             setData(escrowRes.data as EscrowResponse);
             setAutoReleaseDays(Number(settingsRes.data?.auto_release_days_after_shipped ?? 0));
+            setClawbacks(Array.isArray(clawRes.data) ? clawRes.data : []);
         } catch {
             toast.error('Failed to load escrow queue');
         } finally {
@@ -189,6 +205,19 @@ export default function AdminEscrowPage() {
             toast.error(err.response?.data?.message || 'Auto-release failed');
         } finally {
             setRunningAuto(false);
+        }
+    };
+
+    const settleClawback = async (id: number, action: 'recovered' | 'waived') => {
+        setSettlingClawbackId(id);
+        try {
+            await api.patch(`/consignment/admin/clawbacks/${id}/settle`, { action });
+            toast.success(action === 'recovered' ? 'Clawback recovered' : 'Clawback waived');
+            fetchRows();
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Failed to settle clawback');
+        } finally {
+            setSettlingClawbackId(null);
         }
     };
 
@@ -402,6 +431,66 @@ export default function AdminEscrowPage() {
                             >
                                 Next
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {clawbacks.length > 0 && (
+                    <div className="mt-8 admin-table-wrap">
+                        <div className="px-4 py-3 border-b border-gray-50 bg-amber-50/50">
+                            <h3 className="text-sm font-semibold text-amber-900">Pending clawbacks (post-payout refunds)</h3>
+                            <p className="text-xs text-amber-700">Seller wallet was insufficient — recover manually or waive.</p>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr className="bg-gray-50/50 border-b border-gray-50">
+                                        <th className="admin-th">Item</th>
+                                        <th className="admin-th">Consignor</th>
+                                        <th className="admin-th">Outstanding</th>
+                                        <th className="admin-th text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                    {clawbacks.map((c) => {
+                                        const outstanding = Number(c.amount_ghs) - Number(c.recovered_ghs ?? 0);
+                                        const p = c.consignor?.profile;
+                                        const cName = p?.first_name || p?.last_name
+                                            ? `${p?.first_name || ''} ${p?.last_name || ''}`.trim()
+                                            : c.consignor?.email ?? '—';
+                                        return (
+                                            <tr key={c.id}>
+                                                <td className="px-3 py-2.5 text-xs">
+                                                    <p className="font-semibold">{c.submission?.name}</p>
+                                                    <p className="text-gray-500">{c.submission?.submission_number}</p>
+                                                </td>
+                                                <td className="px-3 py-2.5 text-xs text-gray-600">{cName}</td>
+                                                <td className="px-3 py-2.5 text-sm font-semibold text-amber-800">₵{outstanding.toFixed(2)}</td>
+                                                <td className="px-3 py-2.5 text-right">
+                                                    <div className="flex justify-end gap-1">
+                                                        <button
+                                                            type="button"
+                                                            disabled={settlingClawbackId === c.id}
+                                                            onClick={() => settleClawback(c.id, 'recovered')}
+                                                            className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-green-50 text-green-700 border border-green-100"
+                                                        >
+                                                            Mark recovered
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            disabled={settlingClawbackId === c.id}
+                                                            onClick={() => settleClawback(c.id, 'waived')}
+                                                            className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-gray-100 text-gray-700"
+                                                        >
+                                                            Waive
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 )}

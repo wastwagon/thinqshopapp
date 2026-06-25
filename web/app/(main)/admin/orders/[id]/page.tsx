@@ -58,6 +58,16 @@ interface Order {
         landmark?: string;
     };
     tracking?: Array<{ id: number; status: string; notes?: string | null; created_at: string }>;
+    consignment_escrow?: Array<{
+        id: number;
+        submission_number: string;
+        name: string;
+        status: string;
+        expected_payout_ghs: number | null;
+        escrow_on_hold: boolean;
+        escrow_hold_reason?: string | null;
+        consignor_email?: string;
+    }>;
 }
 
 export default function AdminOrderDetailPage() {
@@ -90,9 +100,10 @@ export default function AdminOrderDetailPage() {
         try {
             await api.patch(`/orders/admin/${order.id}/status`, { status: newStatus });
             toast.success('Status updated');
-            setOrder((o) => (o ? { ...o, status: newStatus } : null));
-        } catch {
-            toast.error('Failed to update status');
+            const { data } = await api.get(`/orders/admin/${order.id}`);
+            setOrder(data);
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Failed to update status');
         } finally {
             setUpdating(false);
         }
@@ -198,6 +209,9 @@ export default function AdminOrderDetailPage() {
                             <div>
                                 <p className="text-sm font-semibold text-amber-900">Return request pending review</p>
                                 <p className="text-xs text-amber-700">Resolve this customer return request.</p>
+                                <p className="text-xs text-amber-800/90 mt-1">
+                                    <strong>Refund</strong> credits the buyer&apos;s <strong>ThinQ Wallet</strong> — not a Paystack or card reversal. They can spend it on shop/services or withdraw per wallet rules.
+                                </p>
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
@@ -221,10 +235,45 @@ export default function AdminOrderDetailPage() {
                                     disabled={resolvingReturn}
                                     onClick={() => resolveReturn('refund')}
                                     className="min-h-[44px] px-3 py-2 rounded-lg text-xs font-semibold bg-brand text-white hover:bg-brand/90 disabled:opacity-60"
+                                    title="Credits buyer ThinQ Wallet — not Paystack"
                                 >
-                                    Refund
+                                    Refund to wallet
                                 </button>
                             </div>
+                        </div>
+                    )}
+
+                    {(order.consignment_escrow?.length ?? 0) > 0 && (
+                        <div className="bg-violet-50 border border-violet-200 rounded-2xl p-4">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <p className="text-sm font-semibold text-violet-900">Sell for Me escrow</p>
+                                    <p className="text-xs text-violet-700 mt-0.5">
+                                        Payout releases when you mark this order delivered (unless on dispute hold).
+                                    </p>
+                                </div>
+                                <Link href="/admin/escrow" className="text-xs font-semibold text-brand hover:underline">
+                                    Open escrow queue
+                                </Link>
+                            </div>
+                            <ul className="mt-3 space-y-2">
+                                {order.consignment_escrow!.map((row) => (
+                                    <li key={row.id} className="text-xs bg-white/80 rounded-lg px-3 py-2 border border-violet-100">
+                                        <p className="font-semibold text-gray-900">{row.name}</p>
+                                        <p className="text-gray-500">{row.submission_number} · {row.consignor_email}</p>
+                                        <p className="text-violet-800 font-semibold mt-1">
+                                            {row.expected_payout_ghs != null
+                                                ? `₵${Number(row.expected_payout_ghs).toFixed(2)} pending`
+                                                : `Status: ${row.status.replace(/_/g, ' ')}`}
+                                        </p>
+                                        {row.escrow_on_hold && (
+                                            <p className="text-amber-700 mt-1 font-medium">
+                                                On hold — {row.escrow_hold_reason || 'dispute review'}
+                                            </p>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     )}
 

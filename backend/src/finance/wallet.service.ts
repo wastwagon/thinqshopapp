@@ -34,6 +34,13 @@ export class WalletService {
         return Number(agg._sum.amount_ghs ?? 0);
     }
 
+    /** Available balance inside an existing transaction (balance minus pending withdrawals). */
+    async getAvailableBalanceInTx(userId: number, tx: TxClient) {
+        const wallet = await this.ensureWallet(userId, tx);
+        const pending = await this.getPendingWithdrawalTotal(userId, tx);
+        return Math.max(0, Number(wallet.balance_ghs) - pending);
+    }
+
     async getAvailableBalance(userId: number) {
         const wallet = await this.ensureWallet(userId);
         const pending = await this.getPendingWithdrawalTotal(userId);

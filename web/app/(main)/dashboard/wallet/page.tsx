@@ -24,6 +24,7 @@ const SOURCE_LABELS: Record<string, string> = {
     logistics_payment: 'Logistics',
     withdrawal: 'Withdrawal',
     admin_adjust: 'Admin adjustment',
+    order_refund: 'Order refund',
     other: 'Adjustment',
 };
 
@@ -284,15 +285,34 @@ export default function WalletPage() {
                         <ul className="space-y-2">
                             {pendingConsignmentSales.map((sale) => (
                                 <li key={sale.id} className="flex items-center justify-between gap-2 text-sm">
-                                    <span className="text-gray-800 truncate">
+                                    <span className="text-gray-800 truncate min-w-0">
                                         {sale.name}
                                         {sale.escrow_on_hold && (
                                             <span className="block text-[10px] text-amber-700">On hold — {sale.escrow_hold_reason || 'under review'}</span>
                                         )}
                                     </span>
-                                    <span className="text-violet-800 font-semibold tabular-nums shrink-0">
-                                        ₵{Number(sale.expected_payout_ghs).toFixed(2)}
-                                    </span>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                try {
+                                                    const { data } = await api.get(`/consignment/submissions/${sale.id}/escrow-ledger`);
+                                                    const lines = (Array.isArray(data) ? data : [])
+                                                        .map((e: { event_type: string; note?: string }) => `${e.event_type}${e.note ? `: ${e.note}` : ''}`)
+                                                        .join('\n');
+                                                    toast(lines || 'No history yet', { duration: 5000 });
+                                                } catch {
+                                                    toast.error('Could not load history');
+                                                }
+                                            }}
+                                            className="text-[10px] font-semibold text-brand hover:underline"
+                                        >
+                                            History
+                                        </button>
+                                        <span className="text-violet-800 font-semibold tabular-nums">
+                                            ₵{Number(sale.expected_payout_ghs).toFixed(2)}
+                                        </span>
+                                    </div>
                                 </li>
                             ))}
                         </ul>

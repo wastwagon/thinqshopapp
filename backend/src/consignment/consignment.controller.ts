@@ -212,6 +212,43 @@ export class ConsignmentController {
         return this.consignmentService.getEscrowLedgerForSubmission(Number(id), req.user.sub);
     }
 
+    @Get('admin/clawbacks')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_READ_ALL)
+    async adminClawbacks(@Query('status') status?: string) {
+        return this.consignmentService.findClawbacksForAdmin(status);
+    }
+
+    @Get('admin/clawbacks/pending-count')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_READ_ALL)
+    async adminClawbacksPendingCount() {
+        const count = await this.consignmentService.countPendingClawbacksForAdmin();
+        return { count };
+    }
+
+    @Patch('admin/clawbacks/:id/settle')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_MANAGE)
+    async settleClawback(
+        @Request() req: any,
+        @Param('id') id: string,
+        @Body() body: { action: 'recovered' | 'waived'; note?: string },
+    ) {
+        const updated = await this.consignmentService.settleClawback(
+            Number(id),
+            req.user.sub,
+            body.action,
+            body.note,
+        );
+        await this.auditService.logAdminAction(req, 'consignment.clawback.settle', {
+            tableName: 'consignment_clawbacks',
+            recordId: Number(id),
+            details: { action: body.action },
+        });
+        return updated;
+    }
+
     @Get('admin/:id')
     @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.CONSIGNMENT_READ_ALL)
@@ -282,6 +319,18 @@ export class ConsignmentController {
     async delist(@Request() req: any, @Param('id') id: string, @Body() body: { reason?: string }) {
         const updated = await this.consignmentService.delistSubmission(Number(id), req.user.sub, body?.reason);
         await this.auditService.logAdminAction(req, 'consignment.delist', {
+            tableName: 'consignment_submissions',
+            recordId: Number(id),
+        });
+        return updated;
+    }
+
+    @Patch('admin/:id/relist')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_MANAGE)
+    async relist(@Request() req: any, @Param('id') id: string) {
+        const updated = await this.consignmentService.relistSubmission(Number(id), req.user.sub);
+        await this.auditService.logAdminAction(req, 'consignment.relist', {
             tableName: 'consignment_submissions',
             recordId: Number(id),
         });

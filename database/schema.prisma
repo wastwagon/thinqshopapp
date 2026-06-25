@@ -47,6 +47,7 @@ model User {
   wallet_transactions   WalletTransaction[]
   wallet_withdrawals    WalletWithdrawal[]
   consignment_submissions ConsignmentSubmission[]
+  consignment_clawbacks   ConsignmentClawback[]
 
   @@map("users")
 }
@@ -129,6 +130,7 @@ enum WalletTransactionSource {
   logistics_payment
   withdrawal
   admin_adjust
+  order_refund
   other
 }
 
@@ -300,6 +302,7 @@ model ConsignmentSubmission {
   category             Category                  @relation(fields: [category_id], references: [id])
   product              Product?                  @relation(fields: [product_id], references: [id], onDelete: SetNull)
   escrow_ledger        ConsignmentEscrowLedger[]
+  clawbacks            ConsignmentClawback[]
 
   @@index([user_id, status])
   @@index([status, created_at])
@@ -330,6 +333,36 @@ enum ConsignmentEscrowEvent {
   released
   voided
   auto_released
+  clawback_pending
+}
+
+model ConsignmentClawback {
+  id                        Int                      @id @default(autoincrement())
+  consignment_submission_id Int
+  order_id                  Int
+  consignor_user_id         Int
+  amount_ghs                Decimal                  @db.Decimal(10, 2)
+  recovered_ghs             Decimal                  @default(0) @db.Decimal(10, 2)
+  status                    ConsignmentClawbackStatus @default(pending)
+  notes                     String?
+  settled_at                DateTime?
+  settled_by_admin_id       Int?
+  created_at                DateTime                 @default(now())
+  updated_at                DateTime                 @updatedAt
+
+  submission ConsignmentSubmission @relation(fields: [consignment_submission_id], references: [id], onDelete: Cascade)
+  consignor  User                  @relation(fields: [consignor_user_id], references: [id], onDelete: Cascade)
+
+  @@index([status, created_at])
+  @@index([consignor_user_id])
+  @@index([order_id])
+  @@map("consignment_clawbacks")
+}
+
+enum ConsignmentClawbackStatus {
+  pending
+  recovered
+  waived
 }
 
 enum ConsignmentCondition {

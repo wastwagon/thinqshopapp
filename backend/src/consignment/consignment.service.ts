@@ -174,14 +174,25 @@ export class ConsignmentService {
     }
 
     /** Clear escrow when order is refunded before delivery payout. */
-    async voidEscrowForOrder(orderId: number) {
-        const rows = await this.prisma.consignmentSubmission.findMany({
+    async voidEscrowForOrder(
+        orderId: number,
+        tx?: Prisma.TransactionClient,
+        options?: { note?: string },
+    ) {
+        const db = tx ?? this.prisma;
+        const rows = await db.consignmentSubmission.findMany({
             where: { sale_order_id: orderId, status: 'sold' },
-            select: { id: true, expected_payout_ghs: true },
+            select: {
+                id: true,
+                user_id: true,
+                name: true,
+                submission_number: true,
+                expected_payout_ghs: true,
+            },
         });
-        if (!rows.length) return;
+        if (!rows.length) return [];
 
-        await this.prisma.$transaction(async (tx) => {
+        const run = async (client: Prisma.TransactionClient) => {
             for (const row of rows) {
                 await this.recordEscrowEvent(
                     {
@@ -189,12 +200,12 @@ export class ConsignmentService {
                         eventType: 'voided',
                         orderId,
                         amountGhs: Number(row.expected_payout_ghs ?? 0),
-                        note: 'Order refunded before payout release',
+                        note: options?.note ?? 'Order refunded before payout release',
                     },
-                    tx,
+                    client,
                 );
             }
-            await tx.consignmentSubmission.updateMany({
+            await client.consignmentSubmission.updateMany({
                 where: { sale_order_id: orderId, status: 'sold' },
                 data: {
                     status: 'sale_voided',
@@ -205,7 +216,285 @@ export class ConsignmentService {
                     escrow_hold_reason: null,
                 },
             });
+            return rows;
+        };
+
+        return tx ? run(tx) : this.prisma.$transaction(run);
+    }
+
+    /**
+     * On order refund: void in-escrow sales and claw back post-payout credits (or queue pending clawback).
+     * Call inside the order refund transaction.
+     */
+    async handleOrderRefundConsignment(
+        orderId: number,
+        orderNumber: string,
+        tx: Prisma.TransactionClient,
+    ) {
+        const voided = await this.voidEscrowForOrder(
+            orderId,
+            tx,
+            { note: `Order ${orderNumber} refunded` },
+        );
+
+        const orderItems = await tx.order.findUnique({
+            where: { id: orderId },
+            include: { items: { include: { product: true } } },
         });
+
+        const clawbackNotices: Array<{
+            userId: number;
+            itemName: string;
+            submissionNumber: string;
+            recovered: number;
+            pending: number;
+        }> = [];
+
+        for (const item of orderItems?.items ?? []) {
+            const product = item.product;
+            if (!product?.is_consignment || !product.consignor_user_id) continue;
+
+            const submission = await tx.consignmentSubmission.findFirst({
+                where: { product_id: product.id },
+            });
+            if (!submission || submission.status !== 'paid_out') continue;
+
+            const payoutTx = await tx.walletTransaction.findFirst({
+                where: {
+                    user_id: product.consignor_user_id,
+                    source: 'consignment_payout',
+                    reference_id: submission.id,
+                },
+            });
+            if (!payoutTx) continue;
+
+            const toRecover = Number(payoutTx.amount_ghs);
+            const available = await this.walletService.getAvailableBalanceInTx(
+                product.consignor_user_id,
+                tx,
+            );
+            const debitAmount = Math.min(available, toRecover);
+            let recovered = 0;
+            let pending = toRecover;
+
+            if (debitAmount > 0) {
+                await this.walletService.debit(
+                    product.consignor_user_id,
+                    debitAmount,
+                    'other',
+                    `Clawback: refund for order ${orderNumber}`,
+                    submission.id,
+                    tx,
+                );
+                recovered = debitAmount;
+                pending = Math.max(0, toRecover - debitAmount);
+            }
+
+            if (pending > 0) {
+                await tx.consignmentClawback.create({
+                    data: {
+                        consignment_submission_id: submission.id,
+                        order_id: orderId,
+                        consignor_user_id: product.consignor_user_id,
+                        amount_ghs: pending,
+                        recovered_ghs: recovered,
+                        status: 'pending',
+                        notes: `Refund for order ${orderNumber}; ₵${pending.toFixed(2)} outstanding`,
+                    },
+                });
+                await this.recordEscrowEvent(
+                    {
+                        submissionId: submission.id,
+                        eventType: 'clawback_pending',
+                        orderId,
+                        amountGhs: pending,
+                        note: `₵${pending.toFixed(2)} clawback pending after refund`,
+                    },
+                    tx,
+                );
+            }
+
+            await tx.consignmentSubmission.update({
+                where: { id: submission.id },
+                data: { status: 'sale_voided' },
+            });
+
+            clawbackNotices.push({
+                userId: product.consignor_user_id,
+                itemName: product.name,
+                submissionNumber: submission.submission_number,
+                recovered,
+                pending,
+            });
+        }
+
+        return { voided, clawbackNotices };
+    }
+
+    /** Escrow rows linked to an order (admin order detail). */
+    async getEscrowSummaryForOrder(orderId: number) {
+        const rows = await this.prisma.consignmentSubmission.findMany({
+            where: {
+                OR: [
+                    { sale_order_id: orderId },
+                    { payout_order_id: orderId },
+                ],
+            },
+            select: {
+                id: true,
+                submission_number: true,
+                name: true,
+                status: true,
+                expected_payout_ghs: true,
+                escrow_on_hold: true,
+                escrow_hold_reason: true,
+                user: { select: { email: true, profile: { select: { first_name: true, last_name: true } } } },
+            },
+        });
+        return rows.map((r) => ({
+            id: r.id,
+            submission_number: r.submission_number,
+            name: r.name,
+            status: r.status,
+            expected_payout_ghs: r.expected_payout_ghs != null ? Number(r.expected_payout_ghs) : null,
+            escrow_on_hold: r.escrow_on_hold,
+            escrow_hold_reason: r.escrow_hold_reason,
+            consignor_email: r.user.email,
+        }));
+    }
+
+    async countPendingClawbacksForAdmin() {
+        return this.prisma.consignmentClawback.count({ where: { status: 'pending' } });
+    }
+
+    async findClawbacksForAdmin(status?: string) {
+        const where: Prisma.ConsignmentClawbackWhereInput = {};
+        if (status?.trim()) where.status = status.trim() as any;
+        return this.prisma.consignmentClawback.findMany({
+            where,
+            include: {
+                submission: { select: { submission_number: true, name: true } },
+                consignor: {
+                    select: {
+                        email: true,
+                        profile: { select: { first_name: true, last_name: true } },
+                    },
+                },
+            },
+            orderBy: { created_at: 'desc' },
+            take: 100,
+        });
+    }
+
+    async settleClawback(
+        clawbackId: number,
+        adminId: number,
+        action: 'recovered' | 'waived',
+        note?: string,
+    ) {
+        const row = await this.prisma.consignmentClawback.findUnique({ where: { id: clawbackId } });
+        if (!row) throw new NotFoundException('Clawback not found');
+        if (row.status !== 'pending') {
+            throw new BadRequestException('Clawback already settled');
+        }
+
+        if (action === 'recovered') {
+            const outstanding = Number(row.amount_ghs) - Number(row.recovered_ghs);
+            if (outstanding > 0) {
+                await this.walletService.debit(
+                    row.consignor_user_id,
+                    outstanding,
+                    'other',
+                    `Clawback settlement for order #${row.order_id}`,
+                    row.consignment_submission_id,
+                );
+            }
+        }
+
+        return this.prisma.consignmentClawback.update({
+            where: { id: clawbackId },
+            data: {
+                status: action,
+                notes: note?.trim() || row.notes,
+                settled_at: new Date(),
+                settled_by_admin_id: adminId,
+                ...(action === 'recovered'
+                    ? { recovered_ghs: row.amount_ghs }
+                    : {}),
+            },
+        });
+    }
+
+    /** Re-list a delisted submission on the shop. */
+    async relistSubmission(id: number, adminId: number) {
+        const submission = await this.findOneForAdmin(id);
+        if (submission.status !== 'delisted' || !submission.product_id) {
+            throw new BadRequestException('Only delisted submissions with a product can be re-listed');
+        }
+
+        const product = await this.prisma.product.findUnique({ where: { id: submission.product_id } });
+        if (!product) throw new NotFoundException('Product not found');
+
+        const updated = await this.prisma.$transaction(async (tx) => {
+            await tx.product.update({
+                where: { id: submission.product_id! },
+                data: { is_active: true, stock_quantity: 1 },
+            });
+            return tx.consignmentSubmission.update({
+                where: { id },
+                data: {
+                    status: 'listed',
+                    reviewed_by_admin_id: adminId,
+                    reviewed_at: new Date(),
+                    admin_notes: submission.admin_notes
+                        ? `${submission.admin_notes}\nRe-listed by admin.`
+                        : 'Re-listed by admin.',
+                },
+                include: {
+                    category: true,
+                    product: { select: { id: true, slug: true, is_active: true } },
+                },
+            });
+        });
+
+        await this.notifyListed(
+            submission.user_id,
+            product.name,
+            submission.submission_number,
+            product.slug,
+        );
+        return updated;
+    }
+
+    /** Notify consignors after refund is committed. */
+    async notifyAfterOrderRefund(
+        orderNumber: string,
+        result: {
+            voided: Array<{ user_id: number; name: string; submission_number: string }>;
+            clawbackNotices: Array<{
+                userId: number;
+                itemName: string;
+                submissionNumber: string;
+                recovered: number;
+                pending: number;
+            }>;
+        },
+    ) {
+        for (const row of result.voided) {
+            await this.notifySaleVoided(row.user_id, row.name, row.submission_number, orderNumber);
+        }
+        for (const notice of result.clawbackNotices) {
+            if (notice.recovered > 0 || notice.pending > 0) {
+                await this.notifyClawback(
+                    notice.userId,
+                    notice.itemName,
+                    notice.submissionNumber,
+                    orderNumber,
+                    notice.recovered,
+                    notice.pending,
+                );
+            }
+        }
     }
 
     private async userDisplayName(userId: number): Promise<string> {
@@ -318,6 +607,70 @@ export class ConsignmentService {
         this.smsService.sendToUser(
             userId,
             `ThinQShop: Payout for "${itemName}" is temporarily on hold. Check your wallet for details.`,
+        ).catch(() => {});
+    }
+
+    private async notifySaleVoided(
+        userId: number,
+        itemName: string,
+        submissionNumber: string,
+        orderNumber: string,
+    ) {
+        const user_name = await this.userDisplayName(userId);
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (user?.email) {
+            await this.emailTemplateService.queueFromTemplate('consignment_sale_voided', user.email, {
+                user_name,
+                item_name: itemName,
+                submission_number: submissionNumber,
+                order_number: orderNumber,
+            });
+        }
+        await this.notificationService.createNotification({
+            userId,
+            type: 'consignment',
+            title: 'Sale cancelled',
+            message: `The sale of "${itemName}" was cancelled due to a refund (order ${orderNumber}).`,
+            link: '/dashboard/sell-for-me',
+        });
+        this.smsService.sendToUser(
+            userId,
+            `ThinQShop: Sale of "${itemName}" cancelled (refund on order ${orderNumber}).`,
+        ).catch(() => {});
+    }
+
+    private async notifyClawback(
+        userId: number,
+        itemName: string,
+        submissionNumber: string,
+        orderNumber: string,
+        recovered: number,
+        pending: number,
+    ) {
+        const user_name = await this.userDisplayName(userId);
+        const clawback_message = pending > 0
+            ? `₵${recovered.toFixed(2)} was recovered from your wallet. ₵${pending.toFixed(2)} remains outstanding.`
+            : `₵${recovered.toFixed(2)} was adjusted from your wallet due to the refund.`;
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (user?.email) {
+            await this.emailTemplateService.queueFromTemplate('consignment_clawback', user.email, {
+                user_name,
+                item_name: itemName,
+                submission_number: submissionNumber,
+                order_number: orderNumber,
+                clawback_message,
+            });
+        }
+        await this.notificationService.createNotification({
+            userId,
+            type: 'consignment',
+            title: pending > 0 ? 'Payout adjustment — balance due' : 'Payout adjusted',
+            message: `"${itemName}" refund on order ${orderNumber}. ${clawback_message}`,
+            link: '/dashboard/wallet',
+        });
+        this.smsService.sendToUser(
+            userId,
+            `ThinQShop: Payout adjusted for "${itemName}" (order ${orderNumber} refunded).`,
         ).catch(() => {});
     }
 

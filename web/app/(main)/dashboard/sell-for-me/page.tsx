@@ -22,10 +22,30 @@ interface Submission {
     status: string;
     created_at: string;
     expected_payout_ghs?: number | string | null;
+    escrow_on_hold?: boolean;
+    escrow_hold_reason?: string | null;
     rejection_reason?: string;
     admin_notes?: string;
     product?: { slug: string; is_active: boolean } | null;
 }
+
+type LedgerEntry = {
+    id: number;
+    event_type: string;
+    amount_ghs?: number | string | null;
+    note?: string | null;
+    created_at: string;
+};
+
+const LEDGER_LABELS: Record<string, string> = {
+    locked: 'Escrow locked',
+    hold_placed: 'Dispute hold',
+    hold_released: 'Hold released',
+    released: 'Payout released',
+    voided: 'Sale voided',
+    auto_released: 'Auto-released',
+    clawback_pending: 'Clawback pending',
+};
 
 const CONDITION_OPTIONS = [
     { value: 'new', label: 'New' },
@@ -56,6 +76,9 @@ export default function SellForMePage() {
     const [serviceEnabled, setServiceEnabled] = useState(true);
     const [defaultCommissionPct, setDefaultCommissionPct] = useState(20);
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [ledgerModal, setLedgerModal] = useState<{ id: number; name: string } | null>(null);
+    const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([]);
+    const [ledgerLoading, setLedgerLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [form, setForm] = useState({
@@ -71,6 +94,20 @@ export default function SellForMePage() {
         pickup_details: '',
         images: [] as string[],
     });
+
+    const openLedger = async (id: number, name: string) => {
+        setLedgerModal({ id, name });
+        setLedgerLoading(true);
+        try {
+            const { data } = await api.get(`/consignment/submissions/${id}/escrow-ledger`);
+            setLedgerEntries(Array.isArray(data) ? data : []);
+        } catch {
+            toast.error('Could not load payout history');
+            setLedgerEntries([]);
+        } finally {
+            setLedgerLoading(false);
+        }
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -409,6 +446,9 @@ export default function SellForMePage() {
                                     {s.status === 'sold' && s.expected_payout_ghs != null && (
                                         <p className="text-xs text-violet-700 mt-1">
                                             ₵{Number(s.expected_payout_ghs).toFixed(2)} in escrow until delivery confirmed
+                                            {s.escrow_on_hold && (
+                                                <span className="block text-amber-700">On hold — {s.escrow_hold_reason || 'under review'}</span>
+                                            )}
                                         </p>
                                     )}
                                     {s.rejection_reason && (
@@ -436,10 +476,19 @@ export default function SellForMePage() {
                                             View on shop <ChevronRight className="h-3 w-3" />
                                         </Link>
                                     )}
-                                    {(s.status === 'paid_out' || s.status === 'sold') && (
-                                        <Link href="/dashboard/wallet" className="text-xs font-semibold text-gray-600 hover:text-brand">
-                                            Wallet
-                                        </Link>
+                                    {(s.status === 'paid_out' || s.status === 'sold' || s.status === 'sale_voided') && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => openLedger(s.id, s.name)}
+                                                className="text-xs font-semibold text-gray-600 hover:text-brand"
+                                            >
+                                                History
+                                            </button>
+                                            <Link href="/dashboard/wallet" className="text-xs font-semibold text-gray-600 hover:text-brand">
+                                                Wallet
+                                            </Link>
+                                        </>
                                     )}
                                 </div>
                             </div>
@@ -447,6 +496,34 @@ export default function SellForMePage() {
                     )}
                 </div>
             </div>
+
+            {ledgerModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/40" onClick={() => setLedgerModal(null)} aria-hidden />
+                    <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto">
+                        <h2 className="text-lg font-bold text-gray-900 mb-1">Payout history</h2>
+                        <p className="text-xs text-gray-500 mb-4">{ledgerModal.name}</p>
+                        {ledgerLoading ? (
+                            <p className="text-sm text-gray-500">Loading…</p>
+                        ) : ledgerEntries.length === 0 ? (
+                            <p className="text-sm text-gray-500">No events recorded yet.</p>
+                        ) : (
+                            <ul className="space-y-2">
+                                {ledgerEntries.map((e) => (
+                                    <li key={e.id} className="border border-gray-100 rounded-lg p-3 text-xs">
+                                        <div className="flex justify-between gap-2">
+                                            <span className="font-semibold">{LEDGER_LABELS[e.event_type] ?? e.event_type}</span>
+                                            <span className="text-gray-400">{new Date(e.created_at).toLocaleString()}</span>
+                                        </div>
+                                        {e.note && <p className="text-gray-600 mt-1">{e.note}</p>}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        <button type="button" onClick={() => setLedgerModal(null)} className="mt-4 w-full h-10 rounded-xl bg-gray-100 text-sm font-semibold">Close</button>
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 }
