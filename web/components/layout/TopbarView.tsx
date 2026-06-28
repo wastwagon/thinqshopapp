@@ -175,9 +175,12 @@ export default function TopbarView(props: TopbarViewProps) {
                                         unoptimized={user.profile_image.startsWith('http')}
                                     />
                                 ) : (
-                                    <span className="text-sm font-bold text-gray-600">
-                                        {(user?.first_name?.[0] || user?.email?.[0] || 'U').toUpperCase()}
-                                    </span>
+                                    <>
+                                        <UserIcon className="h-5 w-5 text-gray-400" aria-hidden />
+                                        <span className="absolute -bottom-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 flex items-center justify-center rounded-md bg-brand text-white text-[10px] font-bold leading-none ring-2 ring-white">
+                                            {(user?.first_name?.[0] || user?.email?.[0] || 'U').toUpperCase()}
+                                        </span>
+                                    </>
                                 )}
                             </div>
                         </button>

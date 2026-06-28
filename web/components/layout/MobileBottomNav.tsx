@@ -11,18 +11,19 @@ import {
     Store,
     Heart,
     ShoppingCart,
-    Wallet,
     Tag,
+    Send,
+    ShoppingBag,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 
 const dashboardNavItems = [
     { name: 'Home', href: '/', icon: Home },
-    { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet },
-    { name: 'Sell', href: '/dashboard/sell-for-me', icon: Tag },
     { name: 'Logistics', href: '/dashboard/logistics', icon: Truck },
-    { name: 'Account', href: '/dashboard/account', icon: User },
+    { name: 'Transfer', href: '/dashboard/transfers', icon: Send },
+    { name: 'Sell', href: '/dashboard/sell-for-me', icon: Tag },
+    { name: 'Procure', href: '/dashboard/procurement', icon: ShoppingBag },
 ];
 
 type MobileBottomNavProps = {
