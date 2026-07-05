@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useCart } from '@/context/CartContext';
@@ -37,6 +37,7 @@ export default function CheckoutClient() {
     const [publicSettings, setPublicSettings] = useState<Record<string, string>>({});
     const [checkoutQuote, setCheckoutQuote] = useState<{ subtotal: number; shipping_fee: number; total: number } | null>(null);
     const [quoteLoading, setQuoteLoading] = useState(false);
+    const orderPlacedRef = useRef(false);
 
     useEffect(() => {
         if (cart.length > 0) trackBeginCheckout(cartTotal, cart.length);
@@ -48,7 +49,7 @@ export default function CheckoutClient() {
             router.replace('/login?from=/checkout');
             return;
         }
-        if (cart.length === 0) {
+        if (cart.length === 0 && !orderPlacedRef.current) {
             router.replace('/cart');
         }
     }, [authLoading, cartLoading, user, cart.length, router]);
@@ -119,9 +120,9 @@ export default function CheckoutClient() {
             } else {
                 const orderId = data?.id ?? data?.order_number;
                 trackPurchase(String(orderId), payableTotal, 'GHS');
-                toast.success("Order placed successfully!");
+                orderPlacedRef.current = true;
+                router.replace(`/checkout/success?order=${orderId}`);
                 clearCart();
-                router.push(`/checkout/success?order=${orderId}`);
             }
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Failed to place order");
@@ -137,9 +138,9 @@ export default function CheckoutClient() {
                 paystack_reference: ref.reference,
             });
             trackPurchase(String(paystackOrder.orderId), paystackOrder.total_ghs, 'GHS');
-            toast.success("Order placed successfully!");
+            orderPlacedRef.current = true;
+            router.replace(`/checkout/success?order=${paystackOrder.orderId}`);
             clearCart();
-            router.push(`/checkout/success?order=${paystackOrder.orderId}`);
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Payment confirmation failed");
         } finally {
