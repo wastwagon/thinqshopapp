@@ -450,7 +450,7 @@ export default function AdminConsignmentsPage() {
                                                     borderRadius: '12px',
                                                     padding: '10px 12px',
                                                 }}
-                                                formatter={(value: number) => [`₵${Number(value).toFixed(2)}`, 'Commission']}
+                                                formatter={(value) => [`₵${Number(value ?? 0).toFixed(2)}`, 'Commission']}
                                                 labelFormatter={(_, payload) => {
                                                     const row = payload?.[0]?.payload;
                                                     return row?.fullDate ?? '';
