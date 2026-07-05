@@ -14,6 +14,7 @@ import {
     Phone,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getMediaUrl } from '@/lib/media';
 
 const ORDER_STATUSES = ['pending', 'processing', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'];
 
@@ -32,7 +33,21 @@ interface OrderItem {
     total: number;
     variant_details?: string | null;
     variant?: { variant_type: string; variant_value: string } | null;
-    product?: { images?: string[]; slug?: string };
+    product?: { images?: string[] | string; gallery_images?: string[]; slug?: string };
+}
+
+function orderItemImage(product?: OrderItem['product']): string | null {
+    if (!product) return null;
+    let raw = product.gallery_images?.[0] ?? product.images;
+    if (typeof raw === 'string' && raw.startsWith('[')) {
+        try {
+            raw = JSON.parse(raw)[0];
+        } catch {
+            /* use raw string */
+        }
+    }
+    const path = Array.isArray(raw) ? raw[0] : raw;
+    return path ? getMediaUrl(String(path)) : null;
 }
 
 interface Order {
@@ -308,12 +323,14 @@ export default function AdminOrderDetailPage() {
                                 <h3 className="text-sm font-semibold text-gray-900">Order items</h3>
                             </div>
                             <ul className="divide-y divide-gray-50">
-                                {order.items.map((item) => (
+                                {order.items.map((item) => {
+                                    const imageUrl = orderItemImage(item.product);
+                                    return (
                                     <li key={item.id} className="px-4 py-4 flex gap-4">
                                         <div className="h-14 w-14 flex-shrink-0 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden">
-                                            {item.product?.images?.[0] ? (
+                                            {imageUrl ? (
                                                 <img
-                                                    src={item.product.images[0]}
+                                                    src={imageUrl}
                                                     alt=""
                                                     className="w-full h-full object-contain"
                                                 />
@@ -336,7 +353,8 @@ export default function AdminOrderDetailPage() {
                                             ₵{Number(item.total).toFixed(2)}
                                         </p>
                                     </li>
-                                ))}
+                                    );
+                                })}
                             </ul>
                             <div className="px-4 py-4 border-t border-gray-100 bg-gray-50/80">
                                 <div className="flex justify-between text-sm">

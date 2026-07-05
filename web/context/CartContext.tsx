@@ -76,8 +76,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             toast.success('Added to cart');
             fetchCart();
             if (typeof window !== 'undefined' && window.innerWidth >= 768) setIsCartOpen(true);
-        } catch (error) {
-            toast.error('Failed to add to cart');
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Failed to add to cart');
         }
     };
 

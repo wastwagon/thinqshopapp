@@ -15,6 +15,7 @@ import localProducts from '@/lib/data/scraped_products.json';
 import { toSlug, parsePrice, normalizeProduct } from '@/lib/product-utils';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
+import { useAuth } from '@/context/AuthContext';
 import { trackViewItem } from '@/lib/analytics';
 import { getMediaUrl } from '@/lib/media';
 import ProductReviewForm from '@/components/product/ProductReviewForm';
@@ -40,6 +41,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const { slug } = params;
     const { addToCart } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
+    const { user } = useAuth();
     const [product, setProduct] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
@@ -179,9 +181,19 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const listUnitBeforeWholesale = basePrice + variantAdjust;
     const unitPrice = qualifiesWholesale ? listUnitBeforeWholesale * (1 - discountPct / 100) : listUnitBeforeWholesale;
     const stockToShow =
-        selectedVariant != null && (selectedVariant as { stock_quantity?: number }).stock_quantity != null
-            ? Number((selectedVariant as { stock_quantity: number }).stock_quantity)
-            : Number(product.stock_quantity ?? 0);
+        product.is_consignment
+            ? Number(product.stock_quantity ?? 0)
+            : selectedVariant != null && (selectedVariant as { stock_quantity?: number }).stock_quantity != null
+              ? Number((selectedVariant as { stock_quantity: number }).stock_quantity)
+              : Number(product.stock_quantity ?? 0);
+    const isOwnConsignment =
+        Boolean(
+            product.is_consignment &&
+                user?.id != null &&
+                product.consignor_user_id != null &&
+                Number(user.id) === Number(product.consignor_user_id),
+        );
+    const maxQuantity = product.is_consignment ? 1 : Math.max(1, stockToShow);
     const moreNeeded = hasWholesale && quantity < minQty ? minQty - quantity : 0;
 
     return (
@@ -265,7 +277,9 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                         const vid = Number(v.id);
                                         const vUnit = basePrice + Number(v.price_adjust ?? 0);
                                         const sel = selectedVariantId === vid;
-                                        const oos = Number(v.stock_quantity ?? 0) <= 0;
+                                        const oos = product.is_consignment
+                                            ? Number(product.stock_quantity ?? 0) <= 0
+                                            : Number(v.stock_quantity ?? 0) <= 0;
                                         return (
                                             <button
                                                 key={vid}
@@ -341,8 +355,9 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     <span className="w-12 text-center text-sm font-bold text-gray-900">{quantity}</span>
                                     <button
                                         type="button"
-                                        onClick={() => setQuantity((q) => q + 1)}
-                                        className="min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all"
+                                        onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
+                                        disabled={quantity >= maxQuantity}
+                                        className="min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all disabled:opacity-40"
                                         aria-label="Increase quantity"
                                     >
                                         <Plus className="h-4 w-4" />
@@ -362,20 +377,31 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 </div>
                                 <button
                                     type="button"
-                                    className="w-full sm:flex-1 min-h-[44px] bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 transition-colors flex items-center justify-center gap-2 py-2.5 px-3"
+                                    className="w-full sm:flex-1 min-h-[44px] bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 transition-colors flex items-center justify-center gap-2 py-2.5 px-3 disabled:opacity-50 disabled:cursor-not-allowed"
                                         onClick={() => {
+                                            if (isOwnConsignment) {
+                                                toast.error('You cannot purchase your own Sell for Me listing');
+                                                return;
+                                            }
                                             if (variants.length > 0 && selectedVariantId == null) {
                                                 toast.error('Please select an option');
                                                 return;
                                             }
                                             addToCart(Number(product.id), quantity, selectedVariantId ?? undefined);
                                         }}
-                                        disabled={variants.length > 0 && stockToShow <= 0}
+                                        disabled={isOwnConsignment || stockToShow <= 0}
                                     >
                                         <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" aria-hidden />
-                                        <span className="whitespace-nowrap">Add to Cart</span>
+                                        <span className="whitespace-nowrap">
+                                            {isOwnConsignment ? 'Your listing' : stockToShow <= 0 ? 'Out of stock' : 'Add to Cart'}
+                                        </span>
                                     </button>
                             </div>
+                            {isOwnConsignment && (
+                                <p className="text-xs text-violet-700 bg-violet-50 border border-violet-100 rounded-xl px-3 py-2">
+                                    This is your Sell for Me listing. Buyers can add it to cart — you cannot purchase it yourself.
+                                </p>
+                            )}
                             {hasWholesale && (
                                 <div className={`text-sm font-medium px-4 py-3 rounded-xl ${qualifiesWholesale ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-orange-50 text-orange-800 border border-orange-200'}`}>
                                     {qualifiesWholesale

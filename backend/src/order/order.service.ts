@@ -48,7 +48,7 @@ export class OrderService {
                 throw new BadRequestException('Consignment items can only be purchased one at a time');
             }
 
-            if (item.variant_id) {
+            if (item.variant_id && !product.is_consignment) {
                 const updated = await tx.productVariant.updateMany({
                     where: { id: item.variant_id, stock_quantity: { gte: item.quantity } },
                     data: { stock_quantity: { decrement: item.quantity } },
@@ -84,7 +84,7 @@ export class OrderService {
 
     private async restoreStockForOrderItems(tx: TxClient, items: OrderItemLine[]) {
         for (const item of items) {
-            if (item.variant_id) {
+            if (item.variant_id && !item.product?.is_consignment) {
                 await tx.productVariant.update({
                     where: { id: item.variant_id },
                     data: { stock_quantity: { increment: item.quantity } },

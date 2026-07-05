@@ -28,7 +28,12 @@ export class CartService {
         if (product.is_consignment && quantity > 1) {
             throw new BadRequestException('Consignment items can only be purchased one at a time');
         }
-        const stock = variant ? Number(variant.stock_quantity) : Number(product.stock_quantity);
+        // Sell for Me listings track inventory on the product row (qty 1), not per variant option.
+        const stock = product.is_consignment
+            ? Number(product.stock_quantity)
+            : variant
+              ? Number(variant.stock_quantity)
+              : Number(product.stock_quantity);
         if (quantity > stock) {
             throw new BadRequestException(
                 stock <= 0 ? 'This item is out of stock' : `Only ${stock} available`,

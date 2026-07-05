@@ -295,6 +295,7 @@ export class ProductService {
         if (variants !== undefined) {
             await this.prisma.productVariant.deleteMany({ where: { product_id: id } });
             if (variants?.length) {
+                const consignmentStock = existing.is_consignment ? Number(existing.stock_quantity) : null;
                 await this.prisma.productVariant.createMany({
                     data: variants.map((v) => ({
                         product_id: id,
@@ -302,7 +303,7 @@ export class ProductService {
                         variant_value: v.variant_value,
                         sku: v.sku ?? null,
                         price_adjust: v.price_adjust ?? 0,
-                        stock_quantity: v.stock_quantity ?? 0,
+                        stock_quantity: consignmentStock ?? v.stock_quantity ?? 0,
                         image: v.image ?? null,
                     })),
                 });
