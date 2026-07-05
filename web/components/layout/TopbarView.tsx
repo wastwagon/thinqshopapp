@@ -164,23 +164,25 @@ export default function TopbarView(props: TopbarViewProps) {
                             aria-label="Account menu"
                             aria-expanded={accountMenuOpen}
                         >
-                            <div className="relative h-10 w-10 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-white shadow-sm">
-                                {user?.profile_image ? (
-                                    <Image
-                                        src={user.profile_image}
-                                        alt=""
-                                        fill
-                                        className="object-cover"
-                                        sizes="40px"
-                                        unoptimized={user.profile_image.startsWith('http')}
-                                    />
-                                ) : (
-                                    <>
+                            <div className="relative h-10 w-10 shrink-0">
+                                <div className="relative h-10 w-10 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden ring-2 ring-white shadow-sm">
+                                    {user?.profile_image ? (
+                                        <Image
+                                            src={user.profile_image}
+                                            alt=""
+                                            fill
+                                            className="object-cover"
+                                            sizes="40px"
+                                            unoptimized={user.profile_image.startsWith('http')}
+                                        />
+                                    ) : (
                                         <UserIcon className="h-5 w-5 text-gray-400" aria-hidden />
-                                        <span className="absolute -bottom-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 flex items-center justify-center rounded-md bg-brand text-white text-[10px] font-bold leading-none ring-2 ring-white">
-                                            {(user?.first_name?.[0] || user?.email?.[0] || 'U').toUpperCase()}
-                                        </span>
-                                    </>
+                                    )}
+                                </div>
+                                {!user?.profile_image && (
+                                    <span className="absolute bottom-0 right-0 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-brand text-white text-[10px] font-bold leading-none ring-2 ring-white">
+                                        {(user?.first_name?.[0] || user?.email?.[0] || 'U').toUpperCase()}
+                                    </span>
                                 )}
                             </div>
                         </button>

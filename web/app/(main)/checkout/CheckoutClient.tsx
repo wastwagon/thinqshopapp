@@ -14,6 +14,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import { trackBeginCheckout, trackPurchase } from '@/lib/analytics';
 import { cartItemUnitGhs } from '@/lib/product-utils';
+import { getMediaUrl } from '@/lib/media';
 import LiveRegion from '@/components/ui/LiveRegion';
 import { roundGhs } from '@/lib/money';
 
@@ -292,7 +293,11 @@ export default function CheckoutClient() {
                             <div className="flat-card p-6" aria-labelledby="order-summary-heading">
                                 <ul role="list" className="divide-y divide-gray-50 mb-6">
                                     {cart.map((item) => {
-                                        const mainImage = item.product.gallery_images?.[0] || (Array.isArray(item.product.images) ? item.product.images[0] : item.product.images) || '/placeholder.svg';
+                                        const rawImg =
+                                            item.product.gallery_images?.[0] ||
+                                            (Array.isArray(item.product.images) ? item.product.images[0] : item.product.images) ||
+                                            '';
+                                        const mainImage = rawImg ? getMediaUrl(String(rawImg)) : '/placeholder.svg';
                                         return (
                                             <li key={item.id} className="flex py-4 gap-4 group">
                                                 <div className="h-20 w-20 rounded-xl bg-gray-50 flex-shrink-0 relative overflow-hidden border border-gray-200/90">
