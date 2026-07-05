@@ -70,8 +70,8 @@ export class BookShipmentDto {
     shipping_method?: string;
 
     @IsOptional()
-    @IsNumber()
-    shipping_rate_id?: number;
+    @IsString()
+    shipping_rate_id?: string;
 
     @IsOptional()
     @IsBoolean()
