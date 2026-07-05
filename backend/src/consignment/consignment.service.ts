@@ -138,6 +138,293 @@ export class ConsignmentService {
         return Math.max(0, Number((amount - commission).toFixed(2)));
     }
 
+    private parseCommissionDateRange(from?: string, to?: string): { start: Date; end: Date; fromKey: string; toKey: string } {
+        const toMatch = to?.trim().match(/^(\d{4}-\d{2}-\d{2})$/);
+        const fromMatch = from?.trim().match(/^(\d{4}-\d{2}-\d{2})$/);
+        const endBase = toMatch ? new Date(`${toMatch[1]}T00:00:00.000Z`) : new Date();
+        const end = new Date(Date.UTC(
+            endBase.getUTCFullYear(),
+            endBase.getUTCMonth(),
+            endBase.getUTCDate(),
+            23,
+            59,
+            59,
+            999,
+        ));
+        let start: Date;
+        if (fromMatch) {
+            start = new Date(`${fromMatch[1]}T00:00:00.000Z`);
+        } else {
+            const fallback = new Date(end);
+            fallback.setUTCDate(fallback.getUTCDate() - 29);
+            start = new Date(Date.UTC(
+                fallback.getUTCFullYear(),
+                fallback.getUTCMonth(),
+                fallback.getUTCDate(),
+                0,
+                0,
+                0,
+                0,
+            ));
+        }
+        const fromKey = fromMatch?.[1] ?? start.toISOString().slice(0, 10);
+        const toKey = toMatch?.[1] ?? end.toISOString().slice(0, 10);
+        return { start, end, fromKey, toKey };
+    }
+
+    private pickOrderItemForSubmission<
+        T extends { product_id: number; order_id: number; total: unknown; order: { payment_status: string } },
+    >(
+        submission: { product_id?: number | null; sale_order_id?: number | null },
+        itemsByProduct: Map<number, T[]>,
+    ): T | null {
+        if (!submission.product_id) return null;
+        const items = itemsByProduct.get(submission.product_id) ?? [];
+        if (!items.length) return null;
+        if (submission.sale_order_id) {
+            const matched = items.find((item) => item.order_id === submission.sale_order_id);
+            if (matched) return matched;
+        }
+        const paid = items.find((item) => item.order.payment_status === 'success');
+        return paid ?? items[0];
+    }
+
+    private resolveSubmissionFinancials(
+        submission: {
+            id: number;
+            commission_pct?: unknown;
+            expected_payout_ghs?: unknown;
+        },
+        context: {
+            orderItem?: { total: unknown } | null;
+            payoutAmount?: number | null;
+            defaultCommissionPct: number;
+        },
+    ) {
+        const commissionPct = Number(submission.commission_pct ?? context.defaultCommissionPct);
+        const saleAmount = context.orderItem ? Number(context.orderItem.total) : null;
+        let sellerPayout: number | null = null;
+
+        if (context.payoutAmount != null) {
+            sellerPayout = context.payoutAmount;
+        } else if (submission.expected_payout_ghs != null) {
+            sellerPayout = Number(submission.expected_payout_ghs);
+        } else if (saleAmount != null && Number.isFinite(saleAmount)) {
+            sellerPayout = this.computeExpectedPayout(saleAmount, commissionPct);
+        }
+
+        let commissionGhs: number | null = null;
+        if (saleAmount != null && sellerPayout != null && Number.isFinite(saleAmount)) {
+            commissionGhs = Number((saleAmount - sellerPayout).toFixed(2));
+        } else if (saleAmount != null && Number.isFinite(saleAmount)) {
+            commissionGhs = Number((saleAmount * (commissionPct / 100)).toFixed(2));
+        }
+
+        return {
+            sale_amount_ghs: saleAmount != null && Number.isFinite(saleAmount) ? Number(saleAmount.toFixed(2)) : null,
+            commission_pct: Number.isFinite(commissionPct) ? commissionPct : context.defaultCommissionPct,
+            commission_ghs: commissionGhs,
+            seller_payout_ghs: sellerPayout != null && Number.isFinite(sellerPayout)
+                ? Number(sellerPayout.toFixed(2))
+                : null,
+        };
+    }
+
+    private async buildFinancialContext(submissions: Array<{ id: number; product_id?: number | null }>) {
+        const productIds = [...new Set(submissions.map((s) => s.product_id).filter((id): id is number => id != null))];
+        const submissionIds = submissions.map((s) => s.id);
+        const defaultCommissionPct = await this.getDefaultCommissionPct();
+
+        const [orderItems, payoutTxs] = await Promise.all([
+            productIds.length
+                ? this.prisma.orderItem.findMany({
+                    where: { product_id: { in: productIds } },
+                    select: {
+                        product_id: true,
+                        order_id: true,
+                        total: true,
+                        order: { select: { payment_status: true } },
+                    },
+                    orderBy: { id: 'desc' },
+                })
+                : [],
+            submissionIds.length
+                ? this.prisma.walletTransaction.findMany({
+                    where: {
+                        source: 'consignment_payout',
+                        reference_id: { in: submissionIds },
+                        type: 'credit',
+                    },
+                    select: { reference_id: true, amount_ghs: true },
+                })
+                : [],
+        ]);
+
+        const payoutBySubmission = new Map<number, number>();
+        for (const tx of payoutTxs) {
+            if (tx.reference_id != null) {
+                payoutBySubmission.set(tx.reference_id, Number(tx.amount_ghs));
+            }
+        }
+
+        const itemsByProduct = new Map<number, typeof orderItems>();
+        for (const item of orderItems) {
+            const list = itemsByProduct.get(item.product_id) ?? [];
+            list.push(item);
+            itemsByProduct.set(item.product_id, list);
+        }
+
+        return { defaultCommissionPct, payoutBySubmission, itemsByProduct };
+    }
+
+    private async attachFinancialsToSubmissions<
+        T extends { id: number; product_id?: number | null; sale_order_id?: number | null; commission_pct?: unknown; expected_payout_ghs?: unknown },
+    >(submissions: T[]) {
+        if (!submissions.length) return [];
+        const context = await this.buildFinancialContext(submissions);
+        return submissions.map((submission) => ({
+            ...submission,
+            ...this.resolveSubmissionFinancials(submission, {
+                orderItem: this.pickOrderItemForSubmission(submission, context.itemsByProduct),
+                payoutAmount: context.payoutBySubmission.get(submission.id) ?? null,
+                defaultCommissionPct: context.defaultCommissionPct,
+            }),
+        }));
+    }
+
+    /** Realized commission from escrow releases in a date range, plus pending escrow totals. */
+    async getCommissionStatsForAdmin(from?: string, to?: string) {
+        const { start, end, fromKey, toKey } = this.parseCommissionDateRange(from, to);
+        const defaultCommissionPct = await this.getDefaultCommissionPct();
+
+        const releaseEvents = await this.prisma.consignmentEscrowLedger.findMany({
+            where: {
+                event_type: { in: ['released', 'auto_released'] },
+                created_at: { gte: start, lte: end },
+            },
+            include: {
+                submission: {
+                    select: {
+                        id: true,
+                        commission_pct: true,
+                        expected_payout_ghs: true,
+                        sale_order_id: true,
+                        product_id: true,
+                    },
+                },
+            },
+            orderBy: { created_at: 'asc' },
+        });
+
+        const releasedSubmissions = releaseEvents.map((event) => event.submission);
+        const releasedContext = await this.buildFinancialContext(releasedSubmissions);
+        const seenSubmissionIds = new Set<number>();
+        const dailyMap = new Map<string, { commission_ghs: number; sale_volume_ghs: number; seller_payout_ghs: number; count: number }>();
+        const totals = { commission_ghs: 0, sale_volume_ghs: 0, seller_payout_ghs: 0, transaction_count: 0 };
+
+        for (const event of releaseEvents) {
+            const submission = event.submission;
+            if (seenSubmissionIds.has(submission.id)) continue;
+            seenSubmissionIds.add(submission.id);
+
+            const financials = this.resolveSubmissionFinancials(submission, {
+                orderItem: this.pickOrderItemForSubmission(submission, releasedContext.itemsByProduct),
+                payoutAmount: Number(event.amount_ghs ?? releasedContext.payoutBySubmission.get(submission.id) ?? 0),
+                defaultCommissionPct: releasedContext.defaultCommissionPct,
+            });
+            if (financials.commission_ghs == null || financials.sale_amount_ghs == null) continue;
+
+            const dayKey = event.created_at.toISOString().slice(0, 10);
+            const day = dailyMap.get(dayKey) ?? {
+                commission_ghs: 0,
+                sale_volume_ghs: 0,
+                seller_payout_ghs: 0,
+                count: 0,
+            };
+            day.commission_ghs += financials.commission_ghs;
+            day.sale_volume_ghs += financials.sale_amount_ghs;
+            day.seller_payout_ghs += financials.seller_payout_ghs ?? 0;
+            day.count += 1;
+            dailyMap.set(dayKey, day);
+
+            totals.commission_ghs += financials.commission_ghs;
+            totals.sale_volume_ghs += financials.sale_amount_ghs;
+            totals.seller_payout_ghs += financials.seller_payout_ghs ?? 0;
+            totals.transaction_count += 1;
+        }
+
+        const pendingRows = await this.prisma.consignmentSubmission.findMany({
+            where: { status: 'sold' },
+            select: {
+                id: true,
+                commission_pct: true,
+                expected_payout_ghs: true,
+                sale_order_id: true,
+                product_id: true,
+            },
+        });
+        const pendingContext = await this.buildFinancialContext(pendingRows);
+        const pending = { commission_ghs: 0, sale_volume_ghs: 0, seller_payout_ghs: 0, count: 0 };
+        for (const submission of pendingRows) {
+            const financials = this.resolveSubmissionFinancials(submission, {
+                orderItem: this.pickOrderItemForSubmission(submission, pendingContext.itemsByProduct),
+                payoutAmount: null,
+                defaultCommissionPct: pendingContext.defaultCommissionPct,
+            });
+            if (financials.commission_ghs == null || financials.sale_amount_ghs == null) continue;
+            pending.commission_ghs += financials.commission_ghs;
+            pending.sale_volume_ghs += financials.sale_amount_ghs;
+            pending.seller_payout_ghs += financials.seller_payout_ghs ?? 0;
+            pending.count += 1;
+        }
+
+        const daily: Array<{
+            date: string;
+            commission_ghs: number;
+            sale_volume_ghs: number;
+            seller_payout_ghs: number;
+            count: number;
+        }> = [];
+        const cursor = new Date(start);
+        cursor.setUTCHours(0, 0, 0, 0);
+        while (cursor <= end) {
+            const date = cursor.toISOString().slice(0, 10);
+            const row = dailyMap.get(date) ?? {
+                commission_ghs: 0,
+                sale_volume_ghs: 0,
+                seller_payout_ghs: 0,
+                count: 0,
+            };
+            daily.push({
+                date,
+                commission_ghs: Number(row.commission_ghs.toFixed(2)),
+                sale_volume_ghs: Number(row.sale_volume_ghs.toFixed(2)),
+                seller_payout_ghs: Number(row.seller_payout_ghs.toFixed(2)),
+                count: row.count,
+            });
+            cursor.setUTCDate(cursor.getUTCDate() + 1);
+        }
+
+        return {
+            from: fromKey,
+            to: toKey,
+            default_commission_pct: defaultCommissionPct,
+            totals: {
+                commission_ghs: Number(totals.commission_ghs.toFixed(2)),
+                sale_volume_ghs: Number(totals.sale_volume_ghs.toFixed(2)),
+                seller_payout_ghs: Number(totals.seller_payout_ghs.toFixed(2)),
+                transaction_count: totals.transaction_count,
+            },
+            pending: {
+                commission_ghs: Number(pending.commission_ghs.toFixed(2)),
+                sale_volume_ghs: Number(pending.sale_volume_ghs.toFixed(2)),
+                seller_payout_ghs: Number(pending.seller_payout_ghs.toFixed(2)),
+                count: pending.count,
+            },
+            daily,
+        };
+    }
+
     /** Sum of payouts awaiting delivery confirmation (not in wallet yet). */
     async getPendingEscrowSummary(userId: number) {
         const rows = await this.prisma.consignmentSubmission.findMany({
@@ -345,18 +632,26 @@ export class ConsignmentService {
                 submission_number: true,
                 name: true,
                 status: true,
+                commission_pct: true,
                 expected_payout_ghs: true,
+                sale_order_id: true,
+                product_id: true,
                 escrow_on_hold: true,
                 escrow_hold_reason: true,
                 user: { select: { email: true, profile: { select: { first_name: true, last_name: true } } } },
             },
         });
-        return rows.map((r) => ({
+        const enriched = await this.attachFinancialsToSubmissions(rows);
+        return enriched.map((r) => ({
             id: r.id,
             submission_number: r.submission_number,
             name: r.name,
             status: r.status,
             expected_payout_ghs: r.expected_payout_ghs != null ? Number(r.expected_payout_ghs) : null,
+            sale_amount_ghs: r.sale_amount_ghs,
+            commission_pct: r.commission_pct,
+            commission_ghs: r.commission_ghs,
+            seller_payout_ghs: r.seller_payout_ghs,
             escrow_on_hold: r.escrow_on_hold,
             escrow_hold_reason: r.escrow_hold_reason,
             consignor_email: r.user.email,
@@ -872,7 +1167,7 @@ export class ConsignmentService {
     async findAllForAdmin(status?: string) {
         const where: Prisma.ConsignmentSubmissionWhereInput = {};
         if (status?.trim()) where.status = status.trim() as any;
-        return this.prisma.consignmentSubmission.findMany({
+        const rows = await this.prisma.consignmentSubmission.findMany({
             where,
             include: {
                 category: true,
@@ -888,6 +1183,7 @@ export class ConsignmentService {
             },
             orderBy: { created_at: 'desc' },
         });
+        return this.attachFinancialsToSubmissions(rows);
     }
 
     async findOneForAdmin(id: number) {
@@ -907,7 +1203,8 @@ export class ConsignmentService {
             },
         });
         if (!row) throw new NotFoundException('Submission not found');
-        return row;
+        const [enriched] = await this.attachFinancialsToSubmissions([row]);
+        return enriched;
     }
 
     async updateUserSubmission(userId: number, id: number, dto: Partial<CreateConsignmentSubmissionDto>) {

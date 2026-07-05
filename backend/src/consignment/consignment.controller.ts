@@ -163,6 +163,16 @@ export class ConsignmentController {
         return { count };
     }
 
+    @Get('admin/commission-stats')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_READ_ALL)
+    async adminCommissionStats(
+        @Query('from') from?: string,
+        @Query('to') to?: string,
+    ) {
+        return this.consignmentService.getCommissionStatsForAdmin(from, to);
+    }
+
     @Post('admin/escrow/run-auto-release')
     @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.CONSIGNMENT_MANAGE)

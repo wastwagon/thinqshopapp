@@ -79,6 +79,10 @@ interface Order {
         name: string;
         status: string;
         expected_payout_ghs: number | null;
+        sale_amount_ghs?: number | null;
+        commission_pct?: number | null;
+        commission_ghs?: number | null;
+        seller_payout_ghs?: number | null;
         escrow_on_hold: boolean;
         escrow_hold_reason?: string | null;
         consignor_email?: string;
@@ -276,11 +280,33 @@ export default function AdminOrderDetailPage() {
                                     <li key={row.id} className="text-xs bg-white/80 rounded-lg px-3 py-2 border border-violet-100">
                                         <p className="font-semibold text-gray-900">{row.name}</p>
                                         <p className="text-gray-500">{row.submission_number} · {row.consignor_email}</p>
-                                        <p className="text-violet-800 font-semibold mt-1">
-                                            {row.expected_payout_ghs != null
-                                                ? `₵${Number(row.expected_payout_ghs).toFixed(2)} pending`
-                                                : `Status: ${row.status.replace(/_/g, ' ')}`}
-                                        </p>
+                                        {row.sale_amount_ghs != null ? (
+                                            <div className="mt-2 grid grid-cols-3 gap-2 text-[10px]">
+                                                <div>
+                                                    <p className="text-gray-500">Sale price</p>
+                                                    <p className="font-semibold text-gray-900">₵{Number(row.sale_amount_ghs).toFixed(2)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500">Platform ({Number(row.commission_pct ?? 0).toFixed(1)}%)</p>
+                                                    <p className="font-semibold text-violet-800">
+                                                        ₵{Number(row.commission_ghs ?? 0).toFixed(2)}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500">Seller payout</p>
+                                                    <p className="font-semibold text-gray-900">
+                                                        ₵{Number(row.seller_payout_ghs ?? row.expected_payout_ghs ?? 0).toFixed(2)}
+                                                        {row.status === 'sold' ? ' pending' : ''}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p className="text-violet-800 font-semibold mt-1">
+                                                {row.expected_payout_ghs != null
+                                                    ? `₵${Number(row.expected_payout_ghs).toFixed(2)} pending`
+                                                    : `Status: ${row.status.replace(/_/g, ' ')}`}
+                                            </p>
+                                        )}
                                         {row.escrow_on_hold && (
                                             <p className="text-amber-700 mt-1 font-medium">
                                                 On hold — {row.escrow_hold_reason || 'dispute review'}
