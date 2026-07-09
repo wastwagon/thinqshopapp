@@ -111,7 +111,7 @@ export default function AdminLogisticsPage() {
     const deliveredCount = shipments.filter((s) => s.status === 'delivered').length;
 
     const stats = [
-        { label: 'Total', value: shipments.length, icon: FileText, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
+        { label: 'Total', value: shipments.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
         { label: 'Booked', value: bookedCount, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'In transit', value: inTransitCount, icon: Truck, ...ADMIN_STAT_PROGRESS },
         { label: 'Delivered', value: deliveredCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
@@ -120,7 +120,7 @@ export default function AdminLogisticsPage() {
     const StatusBadge = ({ status }: { status: string }) => {
         const colors: Record<string, string> = {
             booked: 'bg-orange-50 text-orange-700 border-orange-200',
-            pickup_scheduled: 'bg-brand/5 text-brand border-brand/30',
+            pickup_scheduled: 'bg-blue-50 text-blue-600 border-blue-300',
             picked_up: STATUS_PROGRESS_BADGE,
             in_transit: 'bg-purple-50 text-purple-700 border-purple-200',
             out_for_delivery: 'bg-orange-50 text-orange-700 border-orange-200',
@@ -193,7 +193,7 @@ export default function AdminLogisticsPage() {
                             {loading ? (
                                 <tr>
                                     <td colSpan={4} className="py-10 text-center">
-                                        <div className="animate-spin h-7 w-7 border-2 border-brand border-t-transparent rounded-full mx-auto mb-2" />
+                                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
                                         <p className="text-sm text-gray-500">Loading...</p>
                                     </td>
                                 </tr>
@@ -211,14 +211,14 @@ export default function AdminLogisticsPage() {
                                             <div className="flex flex-col gap-0.5">
                                                 <Link
                                                     href={`/admin/logistics/${shipment.id}`}
-                                                    className="text-xs font-semibold text-brand hover:text-brand/80 hover:underline"
+                                                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
                                                 >
                                                     {shipment.tracking_number || '—'}
                                                 </Link>
                                                 <span className="text-xs text-gray-500">{shipment.service_type || 'Standard'}</span>
                                                 {shipment.origin_warehouse && (
                                                     <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                                        <span className="text-xs font-semibold py-0.5 px-1.5 bg-brand/5 text-brand rounded border border-brand/20">{shipment.origin_warehouse.code}</span>
+                                                        <span className="text-xs font-semibold py-0.5 px-1.5 bg-blue-50 text-blue-600 rounded border border-blue-200">{shipment.origin_warehouse.code}</span>
                                                         {shipment.destination_warehouse && (
                                                             <>
                                                                 <span className="text-gray-300">→</span>
@@ -268,7 +268,7 @@ export default function AdminLogisticsPage() {
                                                     onClick={() => handleSimulateWebhook(shipment.id)}
                                                     disabled={updatingId === shipment.id || shipment.status === 'delivered'}
                                                     title="Advance status"
-                                                    className="min-w-[44px] min-h-[44px] w-10 h-10 bg-brand/5 text-brand rounded-lg flex items-center justify-center hover:bg-brand hover:text-white transition-all disabled:opacity-50 shrink-0"
+                                                    className="min-w-[44px] min-h-[44px] w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50 shrink-0"
                                                     aria-label="Advance status"
                                                 >
                                                     <Zap className="h-4 w-4" />
@@ -276,7 +276,7 @@ export default function AdminLogisticsPage() {
                                                 <div className="relative inline-block">
                                                     <select
                                                         disabled={updatingId === shipment.id}
-                                                        className="appearance-none bg-gray-50 border border-gray-100 text-gray-700 text-xs font-semibold rounded-lg min-h-[44px] py-2 pl-2.5 pr-7 hover:border-brand/40 focus:outline-none focus:ring-2 focus:ring-brand/20 cursor-pointer"
+                                                        className="appearance-none bg-gray-50 border border-gray-100 text-gray-700 text-xs font-semibold rounded-lg min-h-[44px] py-2 pl-2.5 pr-7 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
                                                         value={shipment.status}
                                                         onChange={(e) => handleStatusUpdate(shipment.id, e.target.value)}
                                                     >

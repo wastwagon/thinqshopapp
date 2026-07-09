@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
+import DashboardContent from '@/components/dashboard/DashboardContent';
 import Link from 'next/link';
-import { ArrowLeft, Download, Printer, CheckCircle, Clock, Send, ChevronRight } from 'lucide-react';
+import { Download, Printer, CheckCircle, Clock, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function downloadImage(url: string, filename: string) {
@@ -83,7 +85,7 @@ export default function TransferConfirmationPage() {
                 <div className="max-w-3xl mx-auto py-12 flex flex-col items-center justify-center min-h-[40vh] print:hidden">
                     {loading && (
                         <>
-                            <div className="animate-spin h-10 w-10 border-2 border-brand border-t-transparent rounded-full mb-4" />
+                            <div className="animate-spin h-10 w-10 border-2 border-blue-600 border-t-transparent rounded-full mb-4" />
                             <p className="text-sm text-gray-500">Loading confirmation…</p>
                         </>
                     )}
@@ -99,46 +101,27 @@ export default function TransferConfirmationPage() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-3xl mx-auto pb-6 md:pb-8">
-                {/* Breadcrumb and actions - hidden when printing */}
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-4 print:hidden">
-                    <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm">
-                        <Link href="/dashboard" className="text-gray-500 hover:text-gray-900">Dashboard</Link>
-                        <ChevronRight className="h-4 w-4 text-gray-400" />
-                        <Link href="/dashboard/transfers" className="text-gray-500 hover:text-gray-900">Transfers</Link>
-                        <ChevronRight className="h-4 w-4 text-gray-400" />
-                        <span className="font-medium text-gray-900">Payment Confirmation</span>
-                    </nav>
-                    <div className="flex items-center gap-2">
-                        <Link
-                            href="/dashboard/transfers"
-                            className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
-                        >
-                            <ArrowLeft className="h-4 w-4" /> Back
-                        </Link>
+            <DashboardContent wide>
+                <DashboardPageHeader
+                    title="Payment Confirmation"
+                    subtitle={`Reference: ${transfer.token}`}
+                    accent="purple"
+                    backHref="/dashboard/transfers"
+                    backLabel="Transfers"
+                    action={
                         <button
                             type="button"
                             onClick={handlePrint}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand/90 transition-colors"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-colors print:hidden"
                         >
                             <Printer className="h-4 w-4" /> Print / Save as PDF
                         </button>
-                    </div>
-                </div>
+                    }
+                />
 
-                {/* Printable content */}
                 <div className="dashboard-card overflow-hidden print:shadow-none print:border print:rounded-lg">
-                    <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-                        <div className="flex items-center gap-3 mb-1">
-                            <div className="w-10 h-10 rounded-xl bg-brand flex items-center justify-center">
-                                <Send className="h-5 w-5 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-xl font-bold text-gray-900">Payment Confirmation</h1>
-                                <p className="text-xs text-gray-500">Reference: {transfer.token}</p>
-                            </div>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
+                    <div className="p-6 border-b border-gray-100 bg-gray-50/50 print:hidden">
+                        <p className="text-xs text-gray-500">
                             Generated on {new Date().toLocaleDateString(undefined, { dateStyle: 'long' })}. Use this document to confirm payment to your suppliers.
                         </p>
                     </div>
@@ -269,7 +252,7 @@ export default function TransferConfirmationPage() {
                         )}
                     </div>
                 </div>
-            </div>
+            </DashboardContent>
         </DashboardLayout>
     );
 }

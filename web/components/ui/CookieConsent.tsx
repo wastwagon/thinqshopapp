@@ -35,7 +35,7 @@ export default function CookieConsent() {
             <div className="max-w-3xl mx-auto pointer-events-auto flat-card border border-gray-200/90 shadow-xl p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
                 <p className="text-sm text-gray-600 flex-1">
                     We use cookies for analytics to improve the shop experience. See our{' '}
-                    <Link href="/privacy" className="text-brand font-medium hover:underline">
+                    <Link href="/privacy" className="text-blue-600 font-medium hover:underline">
                         privacy policy
                     </Link>
                     .
@@ -51,7 +51,7 @@ export default function CookieConsent() {
                     <button
                         type="button"
                         onClick={accept}
-                        className="min-h-[44px] px-4 py-2 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand/90 transition-colors"
+                        className="min-h-[44px] px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
                     >
                         Accept
                     </button>

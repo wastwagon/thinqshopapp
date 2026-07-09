@@ -80,7 +80,7 @@ export default function Footer() {
                     <div className="sm:col-span-2 lg:col-span-1">
                         <Link href="/" className="inline-flex items-center mb-6">
                             <div className="relative h-10 w-[120px] sm:h-11 sm:w-[140px] flex-shrink-0">
-                                <Image src="/thinqshop-logo.webp" alt="ThinQShop" fill className="object-contain object-left" sizes="140px" />
+                                <Image src="/thinqshop-logo.svg" alt="ThinQShop" fill className="object-contain object-left" sizes="140px" />
                             </div>
                         </Link>
                         <p className="text-gray-600 max-w-xs mb-6 leading-relaxed text-sm font-medium">
@@ -98,7 +98,7 @@ export default function Footer() {
                                         href={href}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="min-h-[44px] min-w-[44px] h-11 w-11 rounded-full border border-gray-200/90 bg-white/90 shadow-sm flex items-center justify-center text-gray-500 hover:text-brand hover:border-brand/40 hover:shadow-md transition-all"
+                                        className="min-h-[44px] min-w-[44px] h-11 w-11 rounded-full border border-gray-200/90 bg-white/90 shadow-sm flex items-center justify-center text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:shadow-md transition-all"
                                         aria-label={`Follow us on ${label}`}
                                     >
                                         <Icon className="h-4 w-4" />
@@ -112,11 +112,11 @@ export default function Footer() {
                     <div>
                         <h4 className="section-label mb-5">Services</h4>
                         <ul className="space-y-3.5 text-sm font-medium text-gray-700">
-                            <li><Link href="/shop" className="hover:text-brand transition-colors inline-block">Shop</Link></li>
-                            <li><Link href="/dashboard/logistics" className="hover:text-brand transition-colors inline-block">Digital Logistics</Link></li>
-                            <li><Link href="/track" className="hover:text-brand transition-colors inline-block">Order Tracking</Link></li>
-                            <li><Link href="/dashboard/procurement" className="hover:text-brand transition-colors inline-block">Tech Sourcing</Link></li>
-                            <li><Link href="/dashboard/sell-for-me" className="hover:text-brand transition-colors inline-block">Sell for Me</Link></li>
+                            <li><Link href="/shop" className="hover:text-blue-600 transition-colors inline-block">Shop</Link></li>
+                            <li><Link href="/dashboard/logistics" className="hover:text-blue-600 transition-colors inline-block">Digital Logistics</Link></li>
+                            <li><Link href="/track" className="hover:text-blue-600 transition-colors inline-block">Order Tracking</Link></li>
+                            <li><Link href="/dashboard/procurement" className="hover:text-blue-600 transition-colors inline-block">Tech Sourcing</Link></li>
+                            <li><Link href="/dashboard/sell-for-me" className="hover:text-blue-600 transition-colors inline-block">Sell for Me</Link></li>
                         </ul>
                     </div>
 
@@ -124,10 +124,10 @@ export default function Footer() {
                     <div>
                         <h4 className="section-label mb-5">Company</h4>
                         <ul className="space-y-3.5 text-sm font-medium text-gray-700">
-                            <li><Link href="/about" className="hover:text-brand transition-colors inline-block">About us</Link></li>
-                            <li><Link href="/terms" className="hover:text-brand transition-colors inline-block">Terms & Conditions</Link></li>
-                            <li><Link href="/privacy" className="hover:text-brand transition-colors inline-block">Privacy Policy</Link></li>
-                            <li><Link href="/contact" className="hover:text-brand transition-colors inline-block">Contact</Link></li>
+                            <li><Link href="/about" className="hover:text-blue-600 transition-colors inline-block">About us</Link></li>
+                            <li><Link href="/terms" className="hover:text-blue-600 transition-colors inline-block">Terms & Conditions</Link></li>
+                            <li><Link href="/privacy" className="hover:text-blue-600 transition-colors inline-block">Privacy Policy</Link></li>
+                            <li><Link href="/contact" className="hover:text-blue-600 transition-colors inline-block">Contact</Link></li>
                         </ul>
                     </div>
 
@@ -139,9 +139,9 @@ export default function Footer() {
                                 <li>
                                     <a
                                         href={`tel:${supportPhone.replace(/\s/g, '')}`}
-                                        className="group flex items-start gap-3 text-sm font-medium text-gray-800 hover:text-brand transition-colors"
+                                        className="group flex items-start gap-3 text-sm font-medium text-gray-800 hover:text-blue-600 transition-colors"
                                     >
-                                        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-600 ring-1 ring-gray-200/80 group-hover:ring-brand/25 group-hover:text-brand">
+                                        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-600 ring-1 ring-gray-200/80 group-hover:ring-blue-200 group-hover:text-blue-600">
                                             <Phone className="h-4 w-4" aria-hidden />
                                         </span>
                                         <span className="leading-snug pt-1">{supportPhone}</span>
@@ -150,9 +150,9 @@ export default function Footer() {
                                 <li>
                                     <a
                                         href={`mailto:${supportEmail}`}
-                                        className="group flex items-start gap-3 text-sm font-medium text-gray-800 hover:text-brand transition-colors break-all"
+                                        className="group flex items-start gap-3 text-sm font-medium text-gray-800 hover:text-blue-600 transition-colors break-all"
                                     >
-                                        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-600 ring-1 ring-gray-200/80 group-hover:ring-brand/25 group-hover:text-brand">
+                                        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-600 ring-1 ring-gray-200/80 group-hover:ring-blue-200 group-hover:text-blue-600">
                                             <Mail className="h-4 w-4" aria-hidden />
                                         </span>
                                         <span className="leading-snug pt-1">{supportEmail}</span>
@@ -179,14 +179,14 @@ export default function Footer() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         aria-describedby="footer-newsletter-hint"
-                                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 shadow-inner focus:border-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 shadow-inner focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                     />
                                     <button
                                         type="submit"
                                         disabled={submitting}
                                         aria-busy={submitting}
                                         aria-label={submitting ? 'Subscribing, please wait' : 'Subscribe to product updates'}
-                                        className="inline-flex min-h-[44px] w-auto shrink-0 items-center justify-center gap-1.5 self-start rounded-xl bg-brand px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:opacity-60 sm:w-full sm:gap-2 sm:self-stretch sm:px-4"
+                                        className="inline-flex min-h-[44px] w-auto shrink-0 items-center justify-center gap-1.5 self-start rounded-xl bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-60 sm:w-full sm:gap-2 sm:self-stretch sm:px-4"
                                     >
                                         {submitting ? '…' : 'Subscribe'}
                                         <ArrowRight className="h-4 w-4" aria-hidden />
@@ -201,7 +201,7 @@ export default function Footer() {
                     <p className="text-xs font-medium text-gray-400 text-center md:text-left order-2 md:order-1">© 2026 ThinQShop Global. All rights reserved.</p>
                     <div className="flex justify-center md:justify-end order-1 md:order-2">
                         <div className="inline-flex items-center gap-2.5 rounded-full border border-gray-200/90 bg-white/90 px-5 py-2.5 shadow-sm">
-                            <ShieldCheck className="h-4 w-4 text-brand shrink-0" aria-hidden />
+                            <ShieldCheck className="h-4 w-4 text-blue-600 shrink-0" aria-hidden />
                             <span className="text-xs font-medium text-gray-600">Secure shop environment</span>
                         </div>
                     </div>

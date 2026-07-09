@@ -318,7 +318,7 @@ export default function AdminEscrowPage() {
                 <p className="text-xs text-gray-500 mb-4">
                     Workflow: verify shipment with buyer → mark order <strong>delivered</strong> in Orders (or below).
                     Use <strong>Hold</strong> if there is a dispute. Auto-release runs daily at 3:00 UTC when enabled in{' '}
-                    <Link href="/admin/consignments" className="text-brand font-semibold hover:underline">Sell for Me settings</Link>.
+                    <Link href="/admin/consignments" className="text-blue-600 font-semibold hover:underline">Sell for Me settings</Link>.
                 </p>
 
                 <div className="admin-table-wrap">
@@ -349,7 +349,7 @@ export default function AdminEscrowPage() {
                                             <td className="px-3 py-2.5 text-xs text-gray-600">{userName(r)}</td>
                                             <td className="px-3 py-2.5 text-xs">
                                                 {r.order ? (
-                                                    <Link href={`/admin/orders/${r.order.id}`} className="text-brand font-semibold hover:underline inline-flex items-center gap-1">
+                                                    <Link href={`/admin/orders/${r.order.id}`} className="text-blue-600 font-semibold hover:underline inline-flex items-center gap-1">
                                                         {r.order.order_number}
                                                         <ExternalLink className="h-3 w-3" />
                                                     </Link>

@@ -29,9 +29,9 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
                     {list.slice(0, 6).map((t) => (
                         <blockquote
                             key={t.id}
-                            className="p-4 sm:p-5 rounded-xl flat-card hover:border-brand/20 transition-colors min-h-[120px] flex flex-col"
+                            className="p-4 sm:p-5 rounded-xl flat-card border-l-4 border-l-blue-600 hover:border-blue-200 transition-colors min-h-[120px] flex flex-col"
                         >
-                            <Quote className="w-8 h-8 text-brand/35 mb-2 flex-shrink-0" aria-hidden />
+                            <Quote className="w-8 h-8 text-blue-200 mb-2 flex-shrink-0" aria-hidden />
                             <p className="text-sm sm:text-base text-gray-700 leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
                             <footer className="mt-3 text-xs font-semibold text-gray-900">
                                 — {t.author_name}

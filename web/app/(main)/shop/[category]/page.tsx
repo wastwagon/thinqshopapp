@@ -8,6 +8,7 @@ import ProductGrid from '@/components/ui/ProductGrid';
 import { Search, Loader2 } from 'lucide-react';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
+import ShopPageShell from '@/components/shop/ShopContent';
 import CategoryBadges from '@/components/shop/CategoryBadges';
 import CategoryNav from '@/components/shop/CategoryNav';
 import { findCategoryBySlug, type CategoryNode } from '@/lib/category-utils';
@@ -99,20 +100,22 @@ function CategoryShopContent() {
 
     return (
         <ShopLayout>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+            <div className="bg-white md:bg-transparent min-h-[60vh]">
+            <ShopPageShell wide className="py-8 sm:py-12">
                 <PageHeader
                     title={categoryName}
                     subtitle={`Browse ${categoryName} products`}
+                    accent="blue"
                     breadcrumbs={breadcrumbs}
                 />
                 <div className="flex flex-col md:flex-row justify-end mb-8 -mt-4">
                     <form onSubmit={handleSearch} className="w-full md:w-80 relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-gray-400 group-focus-within:text-brand transition-colors" />
+                            <Search className="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                         </div>
                         <input
                             type="text"
-                            className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white transition-all font-medium"
+                            className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all font-medium"
                             placeholder="Search products..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -130,8 +133,8 @@ function CategoryShopContent() {
                         <div className="sticky top-24">
                             <h3 className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-6">Categories</h3>
                             <CategoryNav categories={categories as CategoryNode[]} currentSlug={categorySlug} />
-                            <div className="mt-12 bg-brand/5 p-6 rounded-xl border border-brand/20">
-                                <p className="text-xs font-bold tracking-widest text-brand uppercase mb-2">Shipping</p>
+                            <div className="mt-12 flat-card border-l-4 border-l-blue-600 p-5">
+                                <p className="text-xs font-medium text-blue-600 mb-2">Shipping</p>
                                 <p className="text-xs font-bold text-gray-900 leading-tight">International delivery. Items ship from abroad with 7–14 day estimated delivery.</p>
                             </div>
                         </div>
@@ -144,7 +147,7 @@ function CategoryShopContent() {
                                     type="button"
                                     onClick={loadMore}
                                     disabled={loadingMore}
-                                    className="inline-flex items-center justify-center gap-2 min-h-[44px] px-8 py-4 rounded-xl bg-brand text-white font-semibold text-sm hover:bg-brand/90 disabled:opacity-50 transition-all"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[44px] px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
                                 >
                                     {loadingMore ? (
                                         <>
@@ -159,6 +162,7 @@ function CategoryShopContent() {
                         )}
                     </main>
                 </div>
+            </ShopPageShell>
             </div>
         </ShopLayout>
     );

@@ -93,7 +93,7 @@ export default function AdminDashboard() {
     const hasChartData = chartData.some((d) => d.value > 0);
 
     const statCards = [
-        { label: 'Shipments', value: loading ? '—' : stats.totalShipments, icon: Package, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
+        { label: 'Shipments', value: loading ? '—' : stats.totalShipments, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
         { label: 'Pending transfers', value: loading ? '—' : stats.pendingTransfers, icon: Send, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'Procurement requests', value: loading ? '—' : stats.pendingRequests, icon: FileText, ...ADMIN_STAT_PROGRESS },
         { label: 'Pending orders', value: loading ? '—' : stats.pendingOrders, icon: CheckCircle, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
@@ -110,7 +110,7 @@ export default function AdminDashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-4">
                     <div className="lg:col-span-8 admin-card p-5 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-brand/5 blur-[60px] pointer-events-none" />
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-50 blur-[60px] pointer-events-none" />
                         <div className="relative z-10">
                             <div className="mb-3">
                                 <p className="text-xs font-semibold text-gray-500 mb-0.5">Activity</p>
@@ -166,51 +166,51 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    <div className="lg:col-span-4 admin-card p-5 border-l-4 border-l-brand relative overflow-hidden">
+                    <div className="lg:col-span-4 admin-card p-5 border-l-4 border-l-blue-600 relative overflow-hidden">
                         <div className="flex justify-between items-center mb-3">
                             <p className="text-xs font-semibold text-gray-500">Needs attention</p>
-                            <span className="w-1.5 h-1.5 bg-brand rounded-full animate-pulse" aria-hidden />
+                            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse" aria-hidden />
                         </div>
                         <div className="space-y-2">
                             <Link
                                 href="/admin/transfers"
-                                className="block p-3 rounded-xl border border-gray-200/90 bg-gray-50/80 hover:bg-brand/5 hover:border-brand/30 transition-colors group/item"
+                                className="block p-3 rounded-xl border border-gray-200/90 bg-gray-50/80 hover:bg-blue-50 hover:border-blue-300 transition-colors group/item"
                             >
                                 <div className="flex justify-between items-start">
                                     <p className="text-2xl font-bold tracking-tight text-gray-900">{loading ? '—' : stats.pendingTransfers}</p>
-                                    <ArrowUpRight className="h-3.5 w-3.5 text-gray-300 group-hover/item:text-brand transition-colors" aria-hidden />
+                                    <ArrowUpRight className="h-3.5 w-3.5 text-gray-300 group-hover/item:text-blue-600 transition-colors" aria-hidden />
                                 </div>
-                                <p className="text-xs font-semibold text-brand mt-1">Pending transfers</p>
+                                <p className="text-xs font-semibold text-blue-600 mt-1">Pending transfers</p>
                             </Link>
                             <Link
                                 href="/admin/procurement"
-                                className="block p-3 rounded-xl border border-gray-200/90 bg-gray-50/80 hover:bg-brand/5 hover:border-brand/30 transition-colors group/item"
+                                className="block p-3 rounded-xl border border-gray-200/90 bg-gray-50/80 hover:bg-blue-50 hover:border-blue-300 transition-colors group/item"
                             >
                                 <div className="flex justify-between items-start">
                                     <p className="text-2xl font-bold tracking-tight text-gray-900">{loading ? '—' : stats.pendingRequests}</p>
-                                    <ArrowUpRight className="h-3.5 w-3.5 text-gray-300 group-hover/item:text-brand transition-colors" aria-hidden />
+                                    <ArrowUpRight className="h-3.5 w-3.5 text-gray-300 group-hover/item:text-blue-600 transition-colors" aria-hidden />
                                 </div>
-                                <p className="text-xs font-semibold text-brand mt-1">Procurement requests</p>
+                                <p className="text-xs font-semibold text-blue-600 mt-1">Procurement requests</p>
                             </Link>
                             <Link
                                 href="/admin/withdrawals"
-                                className="block p-3 rounded-xl border border-gray-200/90 bg-gray-50/80 hover:bg-brand/5 hover:border-brand/30 transition-colors group/item"
+                                className="block p-3 rounded-xl border border-gray-200/90 bg-gray-50/80 hover:bg-blue-50 hover:border-blue-300 transition-colors group/item"
                             >
                                 <div className="flex justify-between items-start">
                                     <p className="text-2xl font-bold tracking-tight text-gray-900">{loading ? '—' : stats.pendingWithdrawals}</p>
-                                    <ArrowUpRight className="h-3.5 w-3.5 text-gray-300 group-hover/item:text-brand transition-colors" aria-hidden />
+                                    <ArrowUpRight className="h-3.5 w-3.5 text-gray-300 group-hover/item:text-blue-600 transition-colors" aria-hidden />
                                 </div>
-                                <p className="text-xs font-semibold text-brand mt-1">Pending withdrawals</p>
+                                <p className="text-xs font-semibold text-blue-600 mt-1">Pending withdrawals</p>
                             </Link>
                             <Link
                                 href="/admin/consignments"
-                                className="block p-3 rounded-xl border border-gray-200/90 bg-gray-50/80 hover:bg-brand/5 hover:border-brand/30 transition-colors group/item"
+                                className="block p-3 rounded-xl border border-gray-200/90 bg-gray-50/80 hover:bg-blue-50 hover:border-blue-300 transition-colors group/item"
                             >
                                 <div className="flex justify-between items-start">
                                     <p className="text-2xl font-bold tracking-tight text-gray-900">{loading ? '—' : stats.pendingConsignments}</p>
-                                    <ArrowUpRight className="h-3.5 w-3.5 text-gray-300 group-hover/item:text-brand transition-colors" aria-hidden />
+                                    <ArrowUpRight className="h-3.5 w-3.5 text-gray-300 group-hover/item:text-blue-600 transition-colors" aria-hidden />
                                 </div>
-                                <p className="text-xs font-semibold text-brand mt-1">Sell for Me queue</p>
+                                <p className="text-xs font-semibold text-blue-600 mt-1">Sell for Me queue</p>
                             </Link>
                             <Link
                                 href="/admin/escrow"
@@ -225,7 +225,7 @@ export default function AdminDashboard() {
                         </div>
                         <Link
                             href="/admin/transfers"
-                            className="mt-3 block w-full min-h-[44px] h-10 bg-brand text-white rounded-xl font-semibold text-xs hover:bg-brand/90 transition-colors flex items-center justify-center"
+                            className="mt-3 block w-full min-h-[44px] h-10 bg-blue-600 text-white rounded-xl font-semibold text-xs hover:bg-blue-700 transition-colors flex items-center justify-center"
                         >
                             View all ({loading ? 0 : attentionTotal})
                         </Link>
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-                    <Link href="/admin/orders" className="admin-stat-card-interactive hover:border-brand/30">
+                    <Link href="/admin/orders" className="admin-stat-card-interactive hover:border-blue-300">
                         <div className="w-9 h-9 bg-amber-50 rounded-lg flex items-center justify-center border border-amber-100 mb-2">
                             <CheckCircle className="h-4 w-4 text-amber-600" aria-hidden />
                         </div>

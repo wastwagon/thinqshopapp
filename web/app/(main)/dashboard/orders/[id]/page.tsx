@@ -6,6 +6,8 @@ import api from '@/lib/axios';
 import Link from 'next/link';
 import { ArrowLeft, Package, CheckCircle } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
+import DashboardContent from '@/components/dashboard/DashboardContent';
 import toast from 'react-hot-toast';
 
 interface OrderItem {
@@ -99,18 +101,19 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
 
     return (
         <DashboardLayout>
-            <div className="pb-6 md:pb-8">
-            <div className="mb-6 flex items-center gap-3">
-                <Link href="/dashboard/orders" className="text-brand hover:text-gray-900 flex items-center text-sm font-medium transition-colors">
-                    <ArrowLeft className="h-4 w-4 mr-1.5" /> Orders
-                </Link>
-            </div>
+            <DashboardContent wide>
+            <DashboardPageHeader
+                title={`#${order.order_number}`}
+                subtitle={new Date(order.created_at).toLocaleDateString()}
+                accent="orange"
+                backHref="/dashboard/orders"
+                backLabel="Orders"
+            />
 
             <div className="flat-card overflow-hidden">
                 <div className="px-4 py-4 sm:px-5 border-b border-gray-100 flex flex-wrap justify-between items-start gap-3 bg-gray-50/50">
-                    <div>
-                        <h1 className="page-title text-lg">#{order.order_number}</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">{new Date(order.created_at).toLocaleDateString()}</p>
+                    <div className="sr-only">
+                        <h1>Order {order.order_number}</h1>
                     </div>
                     <div className="flex gap-2">
                         {canCancel && (
@@ -137,7 +140,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                             {order.payment_method.replace('_', ' ')}
                         </span>
                         <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize ${order.status === 'delivered' ? 'bg-green-50 text-green-700' :
-                            order.status === 'cancelled' ? 'bg-red-50 text-red-600' : 'bg-brand/10 text-brand'
+                            order.status === 'cancelled' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
                         }`}>
                             {order.status.replace('_', ' ')}
                         </span>
@@ -151,10 +154,10 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                             const isCompleted = statusSteps.indexOf(order.status) >= stepIdx;
                             return (
                                 <div key={step} className="relative flex flex-col items-center flex-1">
-                                    <div className={`flex h-7 w-7 items-center justify-center rounded-full border-2 bg-white z-10 ${isCompleted ? 'border-brand text-brand' : 'border-gray-200'}`}>
+                                    <div className={`flex h-7 w-7 items-center justify-center rounded-full border-2 bg-white z-10 ${isCompleted ? 'border-blue-600 text-blue-600' : 'border-gray-200'}`}>
                                         {isCompleted ? <CheckCircle className="h-4 w-4" /> : <span className="h-1.5 w-1.5 rounded-full bg-transparent" />}
                                     </div>
-                                    <p className={`text-xs font-medium mt-2 capitalize ${isCompleted ? 'text-brand' : 'text-gray-400'}`}>{step}</p>
+                                    <p className={`text-xs font-medium mt-2 capitalize ${isCompleted ? 'text-blue-600' : 'text-gray-400'}`}>{step}</p>
                                 </div>
                             );
                         })}
@@ -205,7 +208,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                     </div>
                 </div>
             </div>
-            </div>
+            </DashboardContent>
         </DashboardLayout>
     );
 }

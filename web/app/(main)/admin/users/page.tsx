@@ -112,7 +112,7 @@ export default function AdminUsers() {
     );
 
     const stats = [
-        { label: 'Total', value: users.length, icon: Users, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
+        { label: 'Total', value: users.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
         { label: 'Admins', value: users.filter((u) => u.role === 'admin' || u.role === 'superadmin').length, icon: Shield, color: 'text-orange-500', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'Active', value: users.filter((u) => u.is_active !== false).length, icon: Activity, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
     ];
@@ -166,7 +166,7 @@ export default function AdminUsers() {
                     placeholder="Quick filter within loaded users..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full h-9 bg-white border border-gray-100 rounded-lg pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                    className="w-full h-9 bg-white border border-gray-100 rounded-lg pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
             </div>
 
@@ -210,8 +210,8 @@ export default function AdminUsers() {
                                         <tr key={user.id} className="hover:bg-gray-50/50 transition-colors group">
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-100 shrink-0 group-hover:bg-brand/5 group-hover:border-brand/20 transition-colors">
-                                                        <Users className="h-4 w-4 text-gray-500 group-hover:text-brand transition-colors" />
+                                                    <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-100 shrink-0 group-hover:bg-blue-50 group-hover:border-blue-200 transition-colors">
+                                                        <Users className="h-4 w-4 text-gray-500 group-hover:text-blue-600 transition-colors" />
                                                     </div>
                                                     <div className="min-w-0">
                                                         <p className="text-sm font-semibold text-gray-900 truncate">{name || 'No name'}</p>
@@ -220,7 +220,7 @@ export default function AdminUsers() {
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3 hidden sm:table-cell">
-                                                <a href={`mailto:${user.email}`} className="text-sm text-gray-600 hover:text-brand truncate block max-w-[180px]">
+                                                <a href={`mailto:${user.email}`} className="text-sm text-gray-600 hover:text-blue-600 truncate block max-w-[180px]">
                                                     {user.email}
                                                 </a>
                                             </td>
@@ -238,7 +238,7 @@ export default function AdminUsers() {
                                                 )}
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold ${isAdminRole ? 'bg-brand/10 text-brand' : 'bg-gray-100 text-gray-600'}`}>
+                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold ${isAdminRole ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-600'}`}>
                                                     {verified && <Shield className="h-3 w-3" />}
                                                     {formatCmsLabel(user.role ?? 'user')}
                                                 </span>
@@ -254,7 +254,7 @@ export default function AdminUsers() {
                                             <td className="px-4 py-3 text-right">
                                                 <Link
                                                     href={`/admin/users/${user.id}`}
-                                                    className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand/80"
+                                                    className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
                                                 >
                                                     View <ChevronRight className="h-4 w-4" />
                                                 </Link>
@@ -285,7 +285,7 @@ export default function AdminUsers() {
                                     value={addUserForm.email}
                                     onChange={(e) => setAddUserForm((f) => ({ ...f, email: e.target.value }))}
                                     placeholder="user@example.com or +233..."
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                     required
                                 />
                             </div>
@@ -295,7 +295,7 @@ export default function AdminUsers() {
                                     type="password"
                                     value={addUserForm.password}
                                     onChange={(e) => setAddUserForm((f) => ({ ...f, password: e.target.value }))}
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                     required
                                     minLength={6}
                                 />
@@ -307,7 +307,7 @@ export default function AdminUsers() {
                                         type="text"
                                         value={addUserForm.first_name}
                                         onChange={(e) => setAddUserForm((f) => ({ ...f, first_name: e.target.value }))}
-                                        className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                        className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                         required
                                     />
                                 </div>
@@ -317,7 +317,7 @@ export default function AdminUsers() {
                                         type="text"
                                         value={addUserForm.last_name}
                                         onChange={(e) => setAddUserForm((f) => ({ ...f, last_name: e.target.value }))}
-                                        className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                        className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                         required
                                     />
                                 </div>
@@ -329,11 +329,11 @@ export default function AdminUsers() {
                                     value={addUserForm.phone}
                                     onChange={(e) => setAddUserForm((f) => ({ ...f, phone: e.target.value }))}
                                     placeholder="+233..."
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                 />
                             </div>
                             <div className="flex gap-3 pt-2">
-                                <button type="submit" disabled={submitting} className="flex-1 h-10 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 disabled:opacity-50">
+                                <button type="submit" disabled={submitting} className="flex-1 h-10 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 disabled:opacity-50">
                                     {submitting ? 'Creating...' : 'Create user'}
                                 </button>
                                 <button type="button" onClick={() => setAddUserOpen(false)} className="h-10 px-4 border border-gray-200 rounded-lg font-semibold text-sm text-gray-600 hover:bg-gray-50">

@@ -25,6 +25,7 @@ import ProductCard from '@/components/ui/ProductCard';
 import ShopLayout from '@/components/layout/ShopLayout';
 import HomeHero from '@/components/home/HomeHero';
 import TrustStrip from '@/components/home/TrustStrip';
+import HomeServicesSection from '@/components/home/HomeServicesSection';
 import SellForMeCta from '@/components/home/SellForMeCta';
 import TestimonialsBlock from '@/components/home/TestimonialsBlock';
 import { STATIC_CATEGORIES as CATEGORY_CATALOG } from '@/lib/product-utils';
@@ -80,6 +81,7 @@ const CATEGORY_CARD_COUNT = 8;
 const DEFAULT_HOME_SECTIONS = [
     'hero',
     'trust_strip',
+    'platform_services',
     'flash_sales',
     'featured',
     'categories',
@@ -154,7 +156,14 @@ export default function Home() {
                     .sort((a: { sort_order?: number }, b: { sort_order?: number }) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
                     .map((s: { section_key?: string }) => s.section_key)
                     .filter((k: string | undefined): k is string => !!k && DEFAULT_HOME_SECTIONS.includes(k));
-                if (apiSectionKeys.length > 0) setSectionOrder(apiSectionKeys);
+                if (apiSectionKeys.length > 0) {
+                    const merged = [...apiSectionKeys];
+                    if (!merged.includes('platform_services')) {
+                        const trustIdx = merged.indexOf('trust_strip');
+                        merged.splice(trustIdx >= 0 ? trustIdx + 1 : 0, 0, 'platform_services');
+                    }
+                    setSectionOrder(merged);
+                }
                 if (apiProducts.length > 0 && Array.isArray(apiProducts)) {
                     const list = apiProducts.map((p: any, i: number) => normalizeProduct(p, i));
                     setProductsList(list);
@@ -242,21 +251,22 @@ export default function Home() {
     const sectionNodes: Record<string, React.ReactNode> = {
         hero: <HomeHero slides={heroSlides} />,
         trust_strip: <TrustStrip badges={trustBadges} />,
+        platform_services: <HomeServicesSection />,
         sell_for_me: <SellForMeCta />,
         flash_sales: (
             <section className="py-8 sm:py-12 relative">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                            <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/10 border border-brand/15">
-                                <Zap className="w-5 h-5 text-brand" />
+                            <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-50 border border-amber-100">
+                                <Zap className="w-5 h-5 text-amber-600" />
                             </span>
                             <div>
                                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">Featured deals</h2>
                                 <p className="text-xs text-gray-500">Hand-picked offers</p>
                             </div>
                         </div>
-                        <Link href="/shop" className="text-xs font-semibold text-brand hover:text-brand/90 flex items-center gap-1 transition-colors">
+                        <Link href="/shop" className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
                             View all
                             <ChevronRight className="w-4 h-4" />
                         </Link>
@@ -276,15 +286,15 @@ export default function Home() {
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                            <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/10 ring-1 ring-brand/15">
-                                <Flame className="w-5 h-5 text-brand" />
+                            <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50 ring-1 ring-blue-100">
+                                <Flame className="w-5 h-5 text-blue-600" />
                             </span>
                             <div>
                                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">Featured</h2>
                                 <p className="text-xs text-gray-500">Hand-picked favorites</p>
                             </div>
                         </div>
-                        <Link href="/shop" className="text-xs font-semibold text-brand hover:text-brand/90 flex items-center gap-1 transition-colors">
+                        <Link href="/shop" className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
                             View all
                             <ChevronRight className="w-4 h-4" />
                         </Link>
@@ -312,14 +322,14 @@ export default function Home() {
                         {categoryCards.map((cat, idx) => {
                             const count = categoryProductCounts.get(cat.name) ?? 0;
                             const Icon = categoryIconForSlug(cat.slug);
-                            const accentBorder = 'border-l-brand';
-                            const iconBg = idx % 2 === 0 ? 'bg-brand/10 text-brand' : 'bg-brand/5 text-brand';
+                            const accentBorder = idx % 2 === 0 ? 'border-l-blue-600' : 'border-l-amber-500';
+                            const iconBg = idx % 2 === 0 ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600';
                             return (
                                 <Link
                                     key={`${cat.slug}-${idx}`}
                                     href={`/shop/${cat.slug}`}
                                     aria-label={`${cat.name}: ${count} ${count === 1 ? 'product' : 'products'}`}
-                                    className={`group relative flex min-h-[5.25rem] flex-col rounded-xl border border-gray-200/90 bg-white border-l-4 ${accentBorder} p-3 sm:p-3.5 lg:p-4 transition-colors hover:border-gray-300/90 hover:bg-gray-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 lg:min-h-0`}
+                                    className={`group relative flex min-h-[5.25rem] flex-col rounded-xl border border-gray-200/90 bg-white border-l-4 ${accentBorder} p-3 sm:p-3.5 lg:p-4 transition-colors hover:border-gray-300/90 hover:bg-gray-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 lg:min-h-0`}
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="min-w-0 pr-1">
@@ -332,13 +342,13 @@ export default function Home() {
                                             <Icon className="h-4 w-4" strokeWidth={2} />
                                         </span>
                                     </div>
-                                    <ChevronRight className="mt-auto pt-2 h-4 w-4 shrink-0 text-gray-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-brand" aria-hidden />
+                                    <ChevronRight className="mt-auto pt-2 h-4 w-4 shrink-0 text-gray-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-blue-600" aria-hidden />
                                 </Link>
                             );
                         })}
                     </div>
                     <div className="flex justify-center">
-                        <Link href="/shop" className="inline-flex items-center gap-2 min-h-[44px] px-6 py-3 bg-brand text-white text-sm font-semibold rounded-xl hover:bg-brand/90 transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2">
+                        <Link href="/shop" className="inline-flex items-center gap-2 min-h-[44px] px-6 py-3 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
                             Shop all products
                             <ArrowRight className="w-4 h-4" />
                         </Link>
@@ -368,7 +378,7 @@ export default function Home() {
 
     return (
         <ShopLayout>
-            <div className="min-h-screen bg-app">
+            <div className="min-h-screen bg-white md:bg-app">
                 {sectionOrder.map((key) => {
                     if (!sectionNodes[key]) return null;
                     if (productSectionKeys.has(key) && !hasProducts) return null;

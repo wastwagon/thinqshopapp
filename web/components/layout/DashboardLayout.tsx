@@ -30,8 +30,8 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
         return (
             <div className="flex h-screen items-center justify-center bg-app text-gray-500">
                 <div className="flex flex-col items-center gap-6">
-                    <div className="w-16 h-16 bg-brand/10 border border-brand/20 rounded-2xl flex items-center justify-center animate-pulse">
-                        <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center animate-spin">
+                    <div className="w-16 h-16 bg-blue-50 border border-blue-200 rounded-2xl flex items-center justify-center animate-pulse">
+                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center animate-spin">
                             <div className="w-2 h-2 bg-white rounded-full" />
                         </div>
                     </div>
@@ -46,9 +46,10 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
     }
 
     const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+    const premiumShell = !isAdmin;
 
     return (
-        <div className="app-shell flex h-screen bg-app overflow-hidden font-sans text-gray-900 relative">
+        <div className={`app-shell flex h-screen overflow-hidden font-sans text-gray-900 relative ${premiumShell ? 'bg-white' : 'bg-app'}`}>
             <Sidebar
                 isAdmin={isAdmin}
                 isOpen={isSidebarOpen}
@@ -56,10 +57,10 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
             />
 
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative safe-area-inset-top">
-                <Topbar onMenuPress={toggleSidebar} />
+                <Topbar onMenuPress={toggleSidebar} variant={premiumShell ? 'dashboard-home' : 'default'} />
 
-                <main id="main-content" className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin p-3 md:p-6 pb-[calc(10rem+env(safe-area-inset-bottom,0px))] md:pb-6 relative z-10 safe-area-inset-bottom min-w-0" tabIndex={-1} role="main">
-                    <div className="max-w-7xl mx-auto space-y-4 md:space-y-6 min-w-0 w-full">
+                <main id="main-content" className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin p-3 md:p-6 relative z-10 safe-area-inset-bottom min-w-0 md:pb-6 ${isAdmin ? 'pb-[calc(10rem+env(safe-area-inset-bottom,0px))]' : 'pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))]'} ${premiumShell ? 'bg-white' : ''}`} tabIndex={-1} role="main">
+                    <div className={`max-w-7xl mx-auto min-w-0 w-full ${premiumShell ? '' : 'space-y-4 md:space-y-6'}`}>
                         {children}
                     </div>
                 </main>
@@ -75,7 +76,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
                 />
             )}
 
-            <MobileBottomNav />
+            <MobileBottomNav variant={isAdmin ? 'dashboard' : 'home'} />
         </div>
     );
 }

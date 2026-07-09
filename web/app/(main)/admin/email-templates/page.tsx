@@ -117,7 +117,7 @@ export default function AdminEmailTemplatesPage() {
                                     ) : (
                                         <>
                                             <button type="button" onClick={cancelEdit} className="h-8 px-3 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                                            <button type="button" onClick={saveEdit} disabled={saving} className="h-8 px-3 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand/90 flex items-center gap-2 disabled:opacity-50">
+                                            <button type="button" onClick={saveEdit} disabled={saving} className="h-8 px-3 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50">
                                                 <Save className="h-3.5 w-3.5" /> Save
                                             </button>
                                         </>

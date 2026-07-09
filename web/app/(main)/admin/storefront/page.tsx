@@ -58,7 +58,7 @@ export default function AdminStorefront() {
                     type="button"
                     onClick={handleSave}
                     disabled={saving || loading}
-                    className="min-h-[44px] px-5 py-2.5 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/50 transition-all flex items-center justify-center gap-2 disabled:opacity-50 touch-manipulation"
+                    className="min-h-[44px] px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50 touch-manipulation"
                 >
                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     Save
@@ -82,7 +82,7 @@ export default function AdminStorefront() {
                                 value={settings[key] ?? ''}
                                 onChange={(e) => setSettings((s) => ({ ...s, [key]: e.target.value }))}
                                 placeholder={placeholder}
-                                className="w-full min-h-[44px] px-4 rounded-xl border border-gray-200 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent touch-manipulation"
+                                className="w-full min-h-[44px] px-4 rounded-xl border border-gray-200 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent touch-manipulation"
                             />
                         </div>
                     ))}

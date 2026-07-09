@@ -33,6 +33,7 @@ export interface Notification {
 
 export interface TopbarViewProps {
     onMenuPress?: () => void;
+    variant?: 'default' | 'dashboard-home';
     user: { first_name?: string; last_name?: string; email?: string; role?: string; profile_image?: string | null } | null;
     logout: () => void;
     notifications: Notification[];
@@ -47,9 +48,33 @@ export interface TopbarViewProps {
     handleMarkAllAsRead: () => void;
 }
 
+function DashboardHomeLogo() {
+    return (
+        <div className="flex flex-col items-center justify-center min-w-0 pointer-events-none select-none">
+            <div className="flex items-center gap-1.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-sm">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
+                        <path d="M6 8h12l-1.2 10.5a1 1 0 01-1 .8H8.2a1 1 0 01-1-.8L6 8z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                        <path d="M9 8V6a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        <circle cx="15" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M16.5 13.5l1.5 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                </span>
+                <span className="text-sm font-bold text-gray-900 tracking-tight truncate">
+                    ThinQ<span className="text-blue-600">Shopping</span>
+                </span>
+            </div>
+            <p className="text-[9px] font-medium text-gray-400 tracking-wide mt-0.5 truncate max-w-[180px]">
+                Buy Smart, Ship Anywhere
+            </p>
+        </div>
+    );
+}
+
 export default function TopbarView(props: TopbarViewProps) {
     const {
         onMenuPress,
+        variant = 'default',
         user,
         logout,
     notifications,
@@ -64,50 +89,58 @@ export default function TopbarView(props: TopbarViewProps) {
         handleMarkAllAsRead,
     } = props;
     const unreadCount = notifications.filter(n => !n.is_read).length;
+    const isDashboardHome = variant === 'dashboard-home';
 
     return (
         <div role="banner" className="min-h-14 bg-white/92 border-b border-gray-200/80 flex flex-col sticky top-0 z-30 backdrop-blur-xl">
-            <div className="h-14 flex items-center justify-between gap-3 px-3 md:px-6">
+            <div className={`h-14 flex items-center gap-2 px-3 md:px-6 ${isDashboardHome ? 'justify-between' : 'justify-between gap-3'}`}>
                 {onMenuPress && (
                     <button
                         type="button"
                         onClick={onMenuPress}
-                        className="md:hidden touch-target min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+                        className={`${isDashboardHome ? '' : 'md:hidden'} touch-target min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 shrink-0`}
                         aria-label="Open menu"
                     >
                         <Menu className="h-6 w-6" aria-hidden />
                     </button>
                 )}
-                <div className="flex-1 max-w-xs hidden md:block">
+                {isDashboardHome && (
+                    <div className="flex-1 flex justify-center min-w-0 px-1">
+                        <DashboardHomeLogo />
+                    </div>
+                )}
+                <div className={`flex-1 max-w-xs hidden md:block ${isDashboardHome ? 'md:hidden' : ''}`}>
                     <SearchWithSuggestions
                         id="topbar-search-desktop"
                         listboxId="topbar-search-desktop-suggestions"
                         className="w-full"
-                        inputClassName="h-10 pl-9 pr-3 rounded-xl text-sm border-gray-100 bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                        inputClassName="h-10 pl-9 pr-3 rounded-xl text-sm border-gray-100 bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         placeholder="Search products..."
                     />
                 </div>
 
-                <div className="flex items-center gap-2 md:gap-3 ml-auto">
-                    <button
-                        type="button"
-                        onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-                        className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
-                        aria-label={mobileSearchOpen ? 'Close search' : 'Open search'}
-                    >
-                        {mobileSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
-                    </button>
+                <div className={`flex items-center gap-1.5 md:gap-3 shrink-0 ${isDashboardHome ? '' : 'ml-auto'}`}>
+                    {!isDashboardHome && (
+                        <button
+                            type="button"
+                            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+                            className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+                            aria-label={mobileSearchOpen ? 'Close search' : 'Open search'}
+                        >
+                            {mobileSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+                        </button>
+                    )}
                     <div className="relative">
                         <button
                             onClick={() => { setShowNotifications(!showNotifications); setAccountMenuOpen(false); }}
-                            className="min-w-[44px] min-h-[44px] w-10 h-10 md:w-10 md:h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand/30 transition-all relative shadow-sm"
+                            className="min-w-[44px] min-h-[44px] w-10 h-10 md:w-10 md:h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-200 transition-all relative shadow-sm"
                             aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
                             aria-expanded={showNotifications}
                         >
                             <Bell className="h-4 w-4" />
                             {unreadCount > 0 && (
-                                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-brand text-white text-xs font-bold rounded-full border-2 border-white">
-                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                <span className={`absolute -top-0.5 -right-0.5 flex items-center justify-center bg-red-500 rounded-full border-2 border-white ${isDashboardHome ? 'w-2.5 h-2.5' : 'min-w-[18px] h-[18px] px-1 text-white text-xs font-bold'}`}>
+                                    {!isDashboardHome && (unreadCount > 9 ? '9+' : unreadCount)}
                                 </span>
                             )}
                         </button>
@@ -117,7 +150,7 @@ export default function TopbarView(props: TopbarViewProps) {
                                 <div className="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                                     <h3 className="text-xs font-semibold text-gray-900">Notifications</h3>
                                     {unreadCount > 0 && (
-                                        <button onClick={handleMarkAllAsRead} className="text-xs font-medium text-brand hover:text-brand/80 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -m-2">
+                                        <button onClick={handleMarkAllAsRead} className="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -m-2">
                                             Mark all read
                                         </button>
                                     )}
@@ -127,13 +160,13 @@ export default function TopbarView(props: TopbarViewProps) {
                                         notifications.map(notification => (
                                             <div
                                                 key={notification.id}
-                                                className={`p-4 rounded-2xl transition-all border ${notification.is_read ? 'bg-white border-transparent' : 'bg-brand/5 border-brand/20'}`}
+                                                className={`p-4 rounded-2xl transition-all border ${notification.is_read ? 'bg-white border-transparent' : 'bg-blue-50 border-blue-200'}`}
                                             >
                                                 <div className="flex justify-between items-start mb-2">
                                                     <h4 className="text-sm font-semibold text-gray-900">{notification.title}</h4>
                                                     {!notification.is_read && (
                                                         <button type="button" onClick={() => handleMarkAsRead(notification.id)} className="min-w-[44px] min-h-[44px] flex items-center justify-center -m-2">
-                                                            <CheckCircle className="h-4 w-4 text-brand hover:text-brand/80 transition-colors" aria-hidden />
+                                                            <CheckCircle className="h-4 w-4 text-blue-600 hover:text-blue-700 transition-colors" aria-hidden />
                                                         </button>
                                                     )}
                                                 </div>
@@ -154,18 +187,18 @@ export default function TopbarView(props: TopbarViewProps) {
                         )}
                     </div>
 
-                    <div className="h-8 w-px bg-gray-100 hidden sm:block" aria-hidden />
+                    {!isDashboardHome && <div className="h-8 w-px bg-gray-100 hidden sm:block" aria-hidden />}
 
                     <div className="flex items-center group relative" ref={accountMenuRef}>
                         <button
                             type="button"
                             onClick={() => { setAccountMenuOpen((v) => !v); setShowNotifications(false); }}
-                            className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-gray-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 md:p-1.5"
+                            className={`flex items-center gap-2 rounded-xl hover:bg-gray-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 min-w-[44px] min-h-[44px] ${isDashboardHome ? 'p-0.5' : 'p-1.5 md:min-w-0 md:min-h-0 md:p-1.5'}`}
                             aria-label="Account menu"
                             aria-expanded={accountMenuOpen}
                         >
-                            <div className="relative h-10 w-10 shrink-0">
-                                <div className="relative h-10 w-10 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden ring-2 ring-white shadow-sm">
+                            <div className={`relative shrink-0 ${isDashboardHome ? 'h-9 w-9' : 'h-10 w-10'}`}>
+                                <div className={`relative bg-gray-100 flex items-center justify-center overflow-hidden ring-2 ring-white shadow-sm ${isDashboardHome ? 'h-9 w-9 rounded-full' : 'h-10 w-10 rounded-xl'}`}>
                                     {user?.profile_image ? (
                                         <Image
                                             src={user.profile_image}
@@ -179,8 +212,8 @@ export default function TopbarView(props: TopbarViewProps) {
                                         <UserIcon className="h-5 w-5 text-gray-400" aria-hidden />
                                     )}
                                 </div>
-                                {!user?.profile_image && (
-                                    <span className="absolute bottom-0 right-0 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-brand text-white text-[10px] font-bold leading-none ring-2 ring-white">
+                                {!user?.profile_image && !isDashboardHome && (
+                                    <span className="absolute bottom-0 right-0 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-blue-600 text-white text-[10px] font-bold leading-none ring-2 ring-white">
                                         {(user?.first_name?.[0] || user?.email?.[0] || 'U').toUpperCase()}
                                     </span>
                                 )}
@@ -197,10 +230,10 @@ export default function TopbarView(props: TopbarViewProps) {
                                 <p className="text-xs text-gray-500 mt-0.5 capitalize">{user?.role || 'user'}</p>
                             </div>
                             <div className="p-2 space-y-0.5">
-                                <Link href="/dashboard/profile" onClick={() => setAccountMenuOpen(false)} className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-600 hover:text-brand hover:bg-brand/5 rounded-xl transition-colors min-h-[44px]">
+                                <Link href="/dashboard/profile" onClick={() => setAccountMenuOpen(false)} className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors min-h-[44px]">
                                     <UserIcon className="mr-3 h-4 w-4 text-gray-400" /> Profile
                                 </Link>
-                                <Link href="/dashboard/settings" onClick={() => setAccountMenuOpen(false)} className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-600 hover:text-brand hover:bg-brand/5 rounded-xl transition-colors min-h-[44px]">
+                                <Link href="/dashboard/settings" onClick={() => setAccountMenuOpen(false)} className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors min-h-[44px]">
                                     <Settings className="mr-3 h-4 w-4 text-gray-400" /> Settings
                                 </Link>
                                 <div className="h-px bg-gray-100 my-1 mx-2" />

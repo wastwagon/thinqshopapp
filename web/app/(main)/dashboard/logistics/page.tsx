@@ -6,6 +6,8 @@ import { Truck, CheckCircle, Plus, Copy, Camera, History as HistoryIcon, Refresh
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
+import DashboardContent from '@/components/dashboard/DashboardContent';
 import BarcodeScanner from '@/components/ui/BarcodeScanner';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -265,22 +267,25 @@ export default function LogisticsPage() {
 
     return (
         <DashboardLayout>
-            <div className="pb-20 md:pb-10">
-            <header className="mb-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                <div>
-                    <h1 className="page-title">Logistics</h1>
-                    <p className="page-subtitle flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 bg-brand rounded-full" aria-hidden />
+            <DashboardContent wide>
+            <DashboardPageHeader
+                title="Logistics"
+                subtitle={
+                    <span className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" aria-hidden />
                         Shipping & freight
-                    </p>
-                </div>
-                <button
-                    onClick={() => setIsCreating(!isCreating)}
-                    className={`min-h-[44px] h-9 px-4 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-brand text-white hover:bg-brand/90'}`}
-                >
-                    {isCreating ? 'Cancel' : <><Plus className="h-4 w-4" /> New shipment</>}
-                </button>
-            </header>
+                    </span>
+                }
+                accent="blue"
+                action={
+                    <button
+                        onClick={() => setIsCreating(!isCreating)}
+                        className={`min-h-[44px] h-9 px-4 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    >
+                        {isCreating ? 'Cancel' : <><Plus className="h-4 w-4" /> New shipment</>}
+                    </button>
+                }
+            />
 
             {isCreating && (
             <div className="max-w-3xl">
@@ -351,7 +356,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                                 key={m}
                                                 type="button"
                                                 onClick={() => setServiceType(m)}
-                                                className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold  border-2 transition-all ${serviceType === m ? 'border-brand bg-brand/10 text-brand' : 'border-gray-100 text-gray-600 hover:border-gray-200'}`}
+                                                className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold  border-2 transition-all ${serviceType === m ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 text-gray-600 hover:border-gray-200'}`}
                                             >
                                                 {m === 'air_freight' ? 'Air Freight' : 'Sea Freight'}
                                             </button>
@@ -363,7 +368,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                     <button
                                         type="button"
                                         onClick={() => setRateDropdownOpen((o) => !o)}
-                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-left flex items-center justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-left flex items-center justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                     >
                                         <span className="text-xs font-medium text-gray-700 truncate">
                                             {selectedRateId
@@ -386,10 +391,10 @@ Shipping Mark: (${customerId}) +${phone}`;
                                                 <button
                                                     type="button"
                                                     onClick={() => { setSelectedRateId(null); setRateDropdownOpen(false); }}
-                                                    className={`w-full px-3 py-2 text-left flex items-center justify-between gap-2 ${!selectedRateId ? 'bg-brand/10' : 'hover:bg-gray-50'}`}
+                                                    className={`w-full px-3 py-2 text-left flex items-center justify-between gap-2 ${!selectedRateId ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
                                                 >
                                                     <span className="text-xs text-gray-500">— Select Rate —</span>
-                                                    {!selectedRateId && <CheckCircle className="h-3.5 w-3.5 text-brand shrink-0" />}
+                                                    {!selectedRateId && <CheckCircle className="h-3.5 w-3.5 text-blue-600 shrink-0" />}
                                                 </button>
                                                 {freightRates.map((r) => {
                                                     const price = Number(r.price);
@@ -401,7 +406,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                                             key={r.id}
                                                             type="button"
                                                             onClick={() => { setSelectedRateId(r.rate_id); setRateDropdownOpen(false); }}
-                                                            className={`w-full px-3 py-2 text-left flex items-center justify-between gap-2 transition-colors ${isSelected ? 'bg-brand/10' : 'hover:bg-gray-50'}`}
+                                                            className={`w-full px-3 py-2 text-left flex items-center justify-between gap-2 transition-colors ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
                                                         >
                                                             <div className="min-w-0 flex-1">
                                                                 <p className="text-xs font-medium text-gray-900 truncate">{r.name}</p>
@@ -409,7 +414,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                                                     {r.duration ? `${r.duration} · ` : ''}{sym}{price.toFixed(0)}{unit}
                                                                 </p>
                                                             </div>
-                                                            {isSelected && <CheckCircle className="h-3.5 w-3.5 text-brand shrink-0" />}
+                                                            {isSelected && <CheckCircle className="h-3.5 w-3.5 text-blue-600 shrink-0" />}
                                                         </button>
                                                     );
                                                 })}
@@ -432,12 +437,12 @@ Shipping Mark: (${customerId}) +${phone}`;
                                             value={carrierTracking}
                                             onChange={(e) => setCarrierTracking(e.target.value)}
                                             placeholder="Carrier tracking ID"
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand pr-12"
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 pr-12"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setScannerOpen(true)}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-500 hover:text-brand hover:border-brand/20 transition-colors"
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:border-blue-200 transition-colors"
                                             title="Scan barcode from package"
                                         >
                                             <Camera className="h-4 w-4" />
@@ -456,7 +461,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                 </div>
                                 <div className="md:col-span-4 flex items-end pb-1">
                                     <label className="flex items-center gap-3 cursor-pointer">
-                                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${isCod ? 'bg-brand border-brand' : 'bg-white border-gray-300'}`}>
+                                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${isCod ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-300'}`}>
                                             {isCod && <CheckCircle className="h-3 w-3 text-white" />}
                                         </div>
                                         <input type="checkbox" checked={isCod} onChange={(e) => setIsCod(e.target.checked)} className="hidden" />
@@ -523,7 +528,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                 <button
                                     type="button"
                                     onClick={() => setDeclaredItems([...declaredItems, { description: '', quantity: '', value: '' }])}
-                                    className="mt-2 flex items-center gap-1.5 text-xs font-bold text-brand"
+                                    className="mt-2 flex items-center gap-1.5 text-xs font-bold text-blue-600"
                                 >
                                     <Plus className="h-3.5 w-3.5" /> Add item
                                 </button>
@@ -606,7 +611,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                     type="button"
                                     onClick={handleBooking}
                                     disabled={isBooking}
-                                    className="w-full md:w-auto min-h-[44px] h-12 px-8 bg-brand text-white rounded-xl font-bold text-sm hover:bg-brand/90 transition-all disabled:opacity-50 flex items-center justify-center"
+                                    className="w-full md:w-auto min-h-[44px] h-12 px-8 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center justify-center"
                                 >
                                     {isBooking ? 'Submitting…' : 'Ship Now'}
                                 </button>
@@ -620,22 +625,22 @@ Shipping Mark: (${customerId}) +${phone}`;
             {!isCreating && (
                 <div className="space-y-3">
                     <h2 className="text-xs font-semibold text-gray-600 flex items-center gap-2">
-                        <HistoryIcon className="h-4 w-4 text-brand" />
+                        <HistoryIcon className="h-4 w-4 text-blue-600" />
                         Shipments
                     </h2>
                     <div className="dashboard-table-wrap">
                         <div className="px-4 py-4 md:px-8 md:py-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                             <h3 className="text-xs font-bold tracking-wider text-gray-400 flex items-center gap-2">
-                                <Package className="h-4 w-4 text-brand" />
+                                <Package className="h-4 w-4 text-blue-600" />
                                 All shipments
                             </h3>
-                            <button type="button" onClick={fetchShipments} className="min-w-[44px] min-h-[44px] w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-brand" aria-label="Refresh">
+                            <button type="button" onClick={fetchShipments} className="min-w-[44px] min-h-[44px] w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-blue-600" aria-label="Refresh">
                                 <RefreshCw className="h-3 w-3" />
                             </button>
                         </div>
                         {historyLoading ? (
                             <div className="p-12 text-center">
-                                <div className="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full mx-auto" />
+                                <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto" />
                             </div>
                         ) : shipments.length === 0 ? (
                             <div className="p-12 md:p-16 text-center">
@@ -643,7 +648,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                 <p className="text-sm text-gray-500 mb-4">No shipments yet</p>
                                 <button
                                     onClick={() => setIsCreating(true)}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-xl text-sm font-semibold hover:bg-brand/90 transition-colors"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
                                 >
                                     Create your first shipment
                                 </button>
@@ -654,11 +659,11 @@ Shipping Mark: (${customerId}) +${phone}`;
                                     <li key={shipment.id} className="px-4 py-4 md:px-8 md:py-6 hover:bg-gray-50 transition-all group">
                                         <div className="flex justify-between items-start">
                                             <div className="space-y-1">
-                                                <p className="text-sm font-bold text-gray-900 tracking-tight group-hover:text-brand transition-colors">
+                                                <p className="text-sm font-bold text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors">
                                                     {shipment.tracking_number || 'PENDING_ID'}
                                                 </p>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-brand" />
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
                                                     <p className="text-sm font-medium text-gray-500">
                                                         {new Date(shipment.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                                     </p>
@@ -666,7 +671,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                             </div>
                                             <div className="text-right flex flex-col items-end gap-2">
                                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                                                    shipment.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-brand/10 text-brand'
+                                                    shipment.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-50 text-blue-600'
                                                 }`}>
                                                     {shipment.status?.replace(/_/g, ' ') || 'Pending'}
                                                 </span>
@@ -677,9 +682,9 @@ Shipping Mark: (${customerId}) +${phone}`;
                                             <div className="flex justify-between items-center relative px-2">
                                                 <div className="absolute left-4 right-4 h-0.5 bg-gray-100 top-1/2 -translate-y-1/2" />
                                                 {[
-                                                    { label: 'Origin', color: 'bg-brand' },
-                                                    { label: 'Transit', color: shipment.status !== 'booked' ? 'bg-brand' : 'bg-gray-200' },
-                                                    { label: 'Customs', color: ['in_transit', 'out_for_delivery', 'delivered'].includes(shipment.status) ? 'bg-brand' : 'bg-gray-200' },
+                                                    { label: 'Origin', color: 'bg-blue-600' },
+                                                    { label: 'Transit', color: shipment.status !== 'booked' ? 'bg-blue-600' : 'bg-gray-200' },
+                                                    { label: 'Customs', color: ['in_transit', 'out_for_delivery', 'delivered'].includes(shipment.status) ? 'bg-blue-600' : 'bg-gray-200' },
                                                     { label: 'Final Hub', color: shipment.status === 'delivered' ? 'bg-emerald-500' : 'bg-gray-200' }
                                                 ].map((point, idx) => (
                                                     <div key={idx} className="relative z-10 flex flex-col items-center">
@@ -691,7 +696,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                             <div className="mt-4">
                                                 <Link
                                                     href={`/dashboard/logistics/${shipment.id}`}
-                                                    className="inline-flex items-center gap-2 text-xs font-semibold text-brand hover:text-brand/90"
+                                                    className="inline-flex items-center gap-2 text-xs font-semibold text-blue-600 hover:text-blue-700"
                                                 >
                                                     View details
                                                 </Link>
@@ -704,7 +709,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                     </div>
                 </div>
             )}
-            </div>
+            </DashboardContent>
 
             <BarcodeScanner
                 open={scannerOpen}

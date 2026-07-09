@@ -2,6 +2,8 @@
 
 import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
+import DashboardContent from '@/components/dashboard/DashboardContent';
 import { GroupedListSection, GroupedListItem } from '@/components/ui/GroupedList';
 import {
     User,
@@ -16,11 +18,11 @@ import {
 export default function SettingsPage() {
     return (
         <DashboardLayout>
-            <div className="pb-6 md:pb-8 max-w-lg md:max-w-none">
-                <header className="mb-5 px-1">
-                    <h1 className="page-title">Settings</h1>
-                    <p className="page-subtitle">Manage your account and dashboard preferences.</p>
-                </header>
+            <DashboardContent>
+                <DashboardPageHeader
+                    title="Settings"
+                    subtitle="Manage your account and dashboard preferences"
+                />
 
                 <GroupedListSection title="Account">
                     <GroupedListItem href="/dashboard/profile" icon={User} title="Profile details" subtitle="Name, phone, and profile photo" />
@@ -43,7 +45,7 @@ export default function SettingsPage() {
                         destructive
                     />
                 </GroupedListSection>
-            </div>
+            </DashboardContent>
         </DashboardLayout>
     );
 }

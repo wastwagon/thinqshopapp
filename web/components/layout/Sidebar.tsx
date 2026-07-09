@@ -119,13 +119,13 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
                     <div className="flex items-center justify-between min-h-16 h-16 px-4 border-b border-gray-50 safe-area-inset-top flex-shrink-0">
                         <Link href="/" className="flex items-center justify-center min-w-0 flex-1 md:flex-initial" aria-label="ThinQShop home">
                             <div className="relative h-10 w-[120px] sm:h-11 sm:w-[140px] md:h-12 md:w-[160px] rounded-lg overflow-hidden shrink-0 bg-white border border-gray-100 shadow-sm">
-                                <Image src="/thinqshop-logo.webp" alt="ThinQShop" fill className="object-contain object-left" priority sizes="160px" />
+                                <Image src="/thinqshop-logo.svg" alt="ThinQShop" fill className="object-contain object-left" priority sizes="160px" />
                             </div>
                         </Link>
                         <button
                             type="button"
                             onClick={toggleSidebar}
-                            className="md:hidden touch-target min-w-[44px] min-h-[44px] p-3 rounded-xl bg-gray-50 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 transition-colors"
+                            className="md:hidden touch-target min-w-[44px] min-h-[44px] p-3 rounded-xl bg-gray-50 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors"
                             aria-label="Close navigation menu"
                         >
                             <ChevronLeft className="h-5 w-5 text-gray-400" aria-hidden />
@@ -143,11 +143,11 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
                                     href={link.href}
                                     onClick={() => toggleSidebar()}
                                     className={`flex items-center min-h-[44px] px-3 py-3 text-sm font-semibold rounded-xl transition-all group ${isActive
-                                        ? 'bg-brand text-white shadow-sm'
+                                        ? 'bg-blue-600 text-white shadow-sm'
                                         : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                                         }`}
                                 >
-                                    <Icon className={`mr-3 h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-brand'}`} />
+                                    <Icon className={`mr-3 h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-blue-600'}`} />
                                     <span className="flex-1">{link.name}</span>
                                     {isAdmin && adminBadges[link.href] > 0 && (
                                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center ${isActive ? 'bg-white/20 text-white' : 'bg-violet-100 text-violet-800'}`}>

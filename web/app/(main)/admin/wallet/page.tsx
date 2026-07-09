@@ -81,7 +81,7 @@ export default function AdminWalletPage() {
     const withBalanceCount = wallets.filter((w) => (w.balance_ghs || 0) > 0).length;
 
     const stats = [
-        { label: 'Total wallets', value: wallets.length, icon: Users, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
+        { label: 'Total wallets', value: wallets.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
         { label: 'Total balance', value: `₵${totalBalance.toFixed(2)}`, icon: Wallet, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
         { label: 'With balance', value: withBalanceCount, icon: Plus, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
         { label: 'Zero balance', value: zeroBalanceCount, icon: FileText, color: 'text-gray-600', bg: 'bg-gray-50', border: 'border-gray-100' },
@@ -136,7 +136,7 @@ export default function AdminWalletPage() {
                             {loading ? (
                                 <tr>
                                     <td colSpan={5} className="py-10 text-center">
-                                        <div className="animate-spin h-7 w-7 border-2 border-brand border-t-transparent rounded-full mx-auto mb-2" />
+                                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
                                         <p className="text-sm text-gray-500">Loading...</p>
                                     </td>
                                 </tr>
@@ -206,7 +206,7 @@ export default function AdminWalletPage() {
                                     step="0.01"
                                     min="0"
                                     placeholder="0.00"
-                                    className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                    className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                     value={adjustAmount}
                                     onChange={(e) => setAdjustAmount(e.target.value)}
                                 />

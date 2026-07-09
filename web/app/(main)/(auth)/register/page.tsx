@@ -8,7 +8,7 @@ import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import AuthScreen, { authInputClass, authLabelClass, authPrimaryBtnClass } from '@/components/auth/AuthScreen';
+import AuthScreen, { authInputClass, authLabelClass, authPrimaryBtnClass, authLinkClass } from '@/components/auth/AuthScreen';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 
 const emailOrPhone = z.string().min(1, 'Enter your email or phone number').refine(
@@ -71,8 +71,8 @@ export default function RegisterPage() {
             }
             const payload = { ...rest, email: emailOrPhoneVal, phone: data.phone?.trim() || undefined };
             await api.post('/auth/register', payload);
-            toast.success('Registration successful! Please login.');
-            router.push('/login');
+            toast.success('Registration successful! Please sign in.');
+            router.push('/login?from=/dashboard');
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Registration failed');
         }
@@ -87,7 +87,7 @@ export default function RegisterPage() {
                     <p className="text-gray-500 text-sm mb-2">Already have an account?</p>
                     <Link
                         href="/login"
-                        className="inline-flex items-center gap-2 text-brand hover:text-brand/90 font-medium text-sm"
+                        className={`inline-flex items-center gap-2 text-sm ${authLinkClass}`}
                     >
                         Sign in
                         <ArrowRight className="h-4 w-4" />

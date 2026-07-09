@@ -2,6 +2,8 @@
 
 import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
+import DashboardContent from '@/components/dashboard/DashboardContent';
 import { GroupedList, GroupedListItem } from '@/components/ui/GroupedList';
 import {
     Wallet,
@@ -24,11 +26,11 @@ const accountLinks = [
 export default function AccountHubPage() {
     return (
         <DashboardLayout>
-            <div className="pb-20 md:pb-10">
-                <header className="mb-5 px-1">
-                    <h1 className="page-title">Account</h1>
-                    <p className="page-subtitle">Quick access to your account areas</p>
-                </header>
+            <DashboardContent>
+                <DashboardPageHeader
+                    title="Account"
+                    subtitle="Quick access to your account areas"
+                />
                 <GroupedList aria-label="Account sections">
                     {accountLinks.map((item) => (
                         <GroupedListItem
@@ -43,7 +45,7 @@ export default function AccountHubPage() {
                 <p className="text-xs text-gray-400 mt-5 px-1 text-center">
                     Use the menu (top left) for Logistics, Procurement, Transfers & more.
                 </p>
-            </div>
+            </DashboardContent>
         </DashboardLayout>
     );
 }

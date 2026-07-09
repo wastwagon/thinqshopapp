@@ -30,7 +30,7 @@ export default function SubcategoryLinks({
                         <Link
                             key={cat.id ?? slug}
                             href={`/shop/${slug}`}
-                            className={`shrink-0 min-h-[40px] flex items-center px-3.5 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${isActive ? 'bg-brand/10 text-brand border-brand/30' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
+                            className={`shrink-0 min-h-[40px] flex items-center px-3.5 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${isActive ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
                             aria-current={isActive ? 'page' : undefined}
                         >
                             {cat.name}
@@ -42,7 +42,7 @@ export default function SubcategoryLinks({
     }
 
     return (
-        <div className="space-y-1 pl-3 border-l-2 border-brand/20 ml-2">
+        <div className="space-y-1 pl-3 border-l-2 border-blue-200 ml-2">
             {subcategories.map((cat) => {
                 const slug = getSlug(cat);
                 const isActive = currentSlug === slug;
@@ -50,7 +50,7 @@ export default function SubcategoryLinks({
                     <Link
                         key={cat.id ?? slug}
                         href={`/shop/${slug}`}
-                        className={`block w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive ? 'bg-brand text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                        className={`block w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
                         aria-current={isActive ? 'page' : undefined}
                     >
                         {cat.name}

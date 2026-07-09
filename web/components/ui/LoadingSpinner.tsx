@@ -15,7 +15,7 @@ export default function LoadingSpinner({ size = 'md', label = 'Loading' }: Loadi
     return (
         <div className="flex flex-col items-center justify-center gap-4" role="status" aria-label={label}>
             <div
-                className={`${sizeClasses[size]} border-brand/20 border-t-brand rounded-full animate-spin`}
+                className={`${sizeClasses[size]} border-blue-200 border-t-blue-600 rounded-full animate-spin`}
                 aria-hidden
             />
             {label && (

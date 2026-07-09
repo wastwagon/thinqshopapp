@@ -110,7 +110,7 @@ export default function AdminProcurementPage() {
     const StatusBadge = ({ status }: { status: string }) => {
         const colors: Record<string, string> = {
             submitted: 'bg-orange-50 text-orange-700 border-orange-200',
-            quote_provided: 'bg-brand/5 text-brand border-brand/30',
+            quote_provided: 'bg-blue-50 text-blue-600 border-blue-300',
             accepted: 'bg-green-50 text-green-700 border-green-200',
             payment_received: STATUS_PROGRESS_BADGE,
             processing: 'bg-purple-50 text-purple-700 border-purple-200',
@@ -125,7 +125,7 @@ export default function AdminProcurementPage() {
     };
 
     const stats = [
-        { label: 'Total', value: requests.length, icon: FileText, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
+        { label: 'Total', value: requests.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
         { label: 'Pending', value: pending, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'In progress', value: inProgress, icon: Package, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
         { label: 'Delivered', value: delivered, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' }
@@ -167,7 +167,7 @@ export default function AdminProcurementPage() {
             <div className="space-y-3">
                 {loading ? (
                     <div className="py-10 text-center admin-card">
-                        <div className="animate-spin h-7 w-7 border-2 border-brand border-t-transparent rounded-full mx-auto mb-2" />
+                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
                         <p className="text-sm text-gray-500">Loading...</p>
                     </div>
                 ) : filteredRequests.length === 0 ? (
@@ -190,13 +190,13 @@ export default function AdminProcurementPage() {
                                             <span>{new Date(req.created_at).toLocaleDateString()}</span>
                                             <span className="font-medium text-gray-600">{req.request_number}</span>
                                             {Array.isArray(req.reference_images) && req.reference_images.length > 0 && (
-                                                <span className="text-xs bg-brand/5 text-brand px-1.5 py-0.5 rounded">
+                                                <span className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
                                                     {req.reference_images.length} image{req.reference_images.length !== 1 ? 's' : ''}
                                                 </span>
                                             )}
                                             <Link
                                                 href={`/admin/procurement/${req.id}`}
-                                                className="text-brand hover:text-brand/80 flex items-center gap-1 font-medium"
+                                                className="text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium"
                                             >
                                                 <Eye className="h-3.5 w-3.5" /> View details & images
                                             </Link>
@@ -226,7 +226,7 @@ export default function AdminProcurementPage() {
                                             <div className="relative">
                                                 <select
                                                     disabled={updatingId === req.id}
-                                                    className="w-full h-9 bg-gray-50 border border-gray-100 text-xs font-semibold text-gray-700 rounded-lg pl-3 pr-8 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                                    className="w-full h-9 bg-gray-50 border border-gray-100 text-xs font-semibold text-gray-700 rounded-lg pl-3 pr-8 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                                     value={req.status}
                                                     onChange={(e) => handleStatusUpdate(req.id, e.target.value)}
                                                 >
@@ -246,14 +246,14 @@ export default function AdminProcurementPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => setQuoteDraft({ requestId: req.id, amount: '', details: '' })}
-                                                className="w-full h-9 bg-brand text-white rounded-lg font-semibold text-xs hover:bg-brand/90 transition-all flex items-center justify-center gap-1.5"
+                                                className="w-full h-9 bg-blue-600 text-white rounded-lg font-semibold text-xs hover:bg-blue-700 transition-all flex items-center justify-center gap-1.5"
                                             >
                                                 <Plus className="h-3.5 w-3.5" /> Add quote
                                             </button>
                                         )}
 
                                         {quoteDraft.requestId === req.id && (
-                                            <div className="bg-brand rounded-xl p-4 text-white relative">
+                                            <div className="bg-blue-600 rounded-xl p-4 text-white relative">
                                                 <form onSubmit={handleAddQuote} className="space-y-3">
                                                     <div>
                                                         <label className="text-xs font-semibold text-white/90 block mb-1">Amount (GHS)</label>
@@ -281,7 +281,7 @@ export default function AdminProcurementPage() {
                                                         <button
                                                             type="submit"
                                                             disabled={updatingId === req.id}
-                                                            className="flex-1 h-9 bg-white text-brand rounded-lg font-semibold text-xs hover:bg-brand/5 transition-all"
+                                                            className="flex-1 h-9 bg-white text-blue-600 rounded-lg font-semibold text-xs hover:bg-blue-50 transition-all"
                                                         >
                                                             Submit
                                                         </button>
@@ -298,13 +298,13 @@ export default function AdminProcurementPage() {
                                         )}
 
                                         {req.quotes?.length > 0 && (
-                                            <div className="bg-brand/5 rounded-lg p-3 border border-brand/20">
-                                                <p className="text-xs font-semibold text-brand mb-1">Quote</p>
+                                            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                                                <p className="text-xs font-semibold text-blue-600 mb-1">Quote</p>
                                                 <p className="text-lg font-bold text-gray-900">
                                                     ₵{Number(req.quotes[0].quote_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                 </p>
                                                 {req.quotes[0].quote_details && (
-                                                    <p className="mt-2 pt-2 border-t border-brand/20 text-xs text-gray-600 line-clamp-2">{req.quotes[0].quote_details}</p>
+                                                    <p className="mt-2 pt-2 border-t border-blue-200 text-xs text-gray-600 line-clamp-2">{req.quotes[0].quote_details}</p>
                                                 )}
                                             </div>
                                         )}

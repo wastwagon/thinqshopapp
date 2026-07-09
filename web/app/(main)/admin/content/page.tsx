@@ -107,7 +107,7 @@ export default function AdminContent() {
         return (
             <DashboardLayout isAdmin={true}>
                 <div className="min-h-[40vh] flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-brand" />
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                 </div>
             </DashboardLayout>
         );
@@ -486,7 +486,7 @@ function SectionsList({
                             type="button"
                             role="switch"
                             aria-checked={s.is_enabled}
-                            className={`min-w-[44px] min-h-[24px] rounded-full transition-colors touch-manipulation ${s.is_enabled ? 'bg-brand' : 'bg-gray-200'}`}
+                            className={`min-w-[44px] min-h-[24px] rounded-full transition-colors touch-manipulation ${s.is_enabled ? 'bg-blue-600' : 'bg-gray-200'}`}
                             onClick={() => onToggle(s.section_key, !s.is_enabled)}
                             disabled={!!saving}
                         />

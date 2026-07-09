@@ -91,7 +91,7 @@ export default function AdminReviewsPage() {
 
             {loading ? (
                 <div className="min-h-[200px] flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-brand" />
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                 </div>
             ) : (
                 <div className="space-y-3">
@@ -116,7 +116,7 @@ export default function AdminReviewsPage() {
                                             </span>
                                         </div>
                                         {r.product && (
-                                            <Link href={`/products/${r.product.slug}`} className="text-sm font-medium text-brand hover:underline flex items-center gap-1">
+                                            <Link href={`/products/${r.product.slug}`} className="text-sm font-medium text-blue-600 hover:underline flex items-center gap-1">
                                                 <Package className="h-3.5 w-3.5" />
                                                 {r.product.name}
                                             </Link>

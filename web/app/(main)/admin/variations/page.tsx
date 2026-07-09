@@ -176,7 +176,7 @@ export default function AdminVariationsPage() {
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
                     <div className="admin-stat-card">
-                        <div className="w-9 h-9 rounded-lg bg-brand/5 border border-brand/20 flex items-center justify-center text-brand mb-2">
+                        <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 mb-2">
                             <FileText className="h-4 w-4" />
                         </div>
                         <p className="text-xs font-semibold text-gray-500 mb-0.5">Options</p>
@@ -187,7 +187,7 @@ export default function AdminVariationsPage() {
                 <div className="admin-table-wrap">
                     {loading ? (
                         <div className="py-12 flex justify-center">
-                            <Loader2 className="h-8 w-8 animate-spin text-brand" />
+                            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                         </div>
                     ) : options.length === 0 ? (
                         <div className="py-12 text-center text-gray-500">
@@ -197,7 +197,7 @@ export default function AdminVariationsPage() {
                             <button
                                 type="button"
                                 onClick={() => openOptionModal(null)}
-                                className="mt-4 min-h-[44px] px-4 rounded-lg bg-brand text-white text-sm font-semibold"
+                                className="mt-4 min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold"
                             >
                                 Add first option
                             </button>
@@ -258,7 +258,7 @@ export default function AdminVariationsPage() {
                                         <button
                                             type="button"
                                             onClick={() => openValueModal(opt, null)}
-                                            className="inline-flex items-center gap-1 min-h-[32px] px-2 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm hover:border-brand/40 hover:text-brand"
+                                            className="inline-flex items-center gap-1 min-h-[32px] px-2 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm hover:border-blue-300 hover:text-blue-600"
                                         >
                                             <Plus className="h-3.5 w-3.5" /> Add value
                                         </button>
@@ -307,7 +307,7 @@ export default function AdminVariationsPage() {
                                 />
                             </div>
                             <div className="flex gap-2 pt-2">
-                                <button type="submit" disabled={saving} className="min-h-[44px] px-4 rounded-lg bg-brand text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-60">
+                                <button type="submit" disabled={saving} className="min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-60">
                                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Save
                                 </button>
                                 <button type="button" onClick={() => setOptionModalOpen(false)} className="min-h-[44px] px-4 rounded-lg border border-gray-200 text-sm">
@@ -348,7 +348,7 @@ export default function AdminVariationsPage() {
                                 />
                             </div>
                             <div className="flex gap-2 pt-2">
-                                <button type="submit" disabled={saving} className="min-h-[44px] px-4 rounded-lg bg-brand text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-60">
+                                <button type="submit" disabled={saving} className="min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-60">
                                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Save
                                 </button>
                                 <button type="button" onClick={() => setValueModalOpen(false)} className="min-h-[44px] px-4 rounded-lg border border-gray-200 text-sm">

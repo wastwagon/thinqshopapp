@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
+import DashboardContent from '@/components/dashboard/DashboardContent';
 import Link from 'next/link';
 import { ArrowLeft, Package, Truck, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -50,7 +52,7 @@ export default function ShipmentDetailPage() {
         return (
             <DashboardLayout>
                 <div className="pb-20 md:pb-10 flex items-center justify-center min-h-[40vh]">
-                    <div className="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full" />
+                    <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full" />
                 </div>
             </DashboardLayout>
         );
@@ -61,27 +63,25 @@ export default function ShipmentDetailPage() {
 
     return (
         <DashboardLayout>
-            <div className="pb-20 md:pb-10">
-                <Link
-                    href="/dashboard/logistics"
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-brand mb-6"
-                >
-                    <ArrowLeft className="h-4 w-4" /> Back to shipments
-                </Link>
+            <DashboardContent wide>
+                <DashboardPageHeader
+                    title={shipment.tracking_number}
+                    subtitle={new Date(shipment.created_at).toLocaleDateString(undefined, { dateStyle: 'full' })}
+                    accent="blue"
+                    backHref="/dashboard/logistics"
+                    backLabel="Logistics"
+                />
 
                 <div className="max-w-2xl space-y-6">
                     <div className="dashboard-card overflow-hidden">
                         <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
                             <div className="flex flex-wrap justify-between items-start gap-4">
-                                <div>
-                                    <h1 className="text-xl font-bold text-gray-900">{shipment.tracking_number}</h1>
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        {new Date(shipment.created_at).toLocaleDateString(undefined, { dateStyle: 'full' })}
-                                    </p>
+                                <div className="sr-only">
+                                    <h1>{shipment.tracking_number}</h1>
                                 </div>
                                 <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
                                     shipment.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                                    shipment.status === 'cancelled' ? 'bg-red-50 text-red-700' : 'bg-brand/5 text-brand'
+                                    shipment.status === 'cancelled' ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-600'
                                 }`}>
                                     {shipment.status?.replace(/_/g, ' ')}
                                 </span>
@@ -162,7 +162,7 @@ export default function ShipmentDetailPage() {
                                     <ul className="space-y-3">
                                         {trackingList.map((t, i) => (
                                             <li key={i} className="flex gap-3">
-                                                <div className="w-2 h-2 rounded-full bg-brand mt-1.5 shrink-0" />
+                                                <div className="w-2 h-2 rounded-full bg-blue-600 mt-1.5 shrink-0" />
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-900">{t.status?.replace(/_/g, ' ')}</p>
                                                     {t.notes && <p className="text-xs text-gray-500 mt-0.5">{t.notes}</p>}
@@ -176,7 +176,7 @@ export default function ShipmentDetailPage() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </DashboardContent>
         </DashboardLayout>
     );
 }

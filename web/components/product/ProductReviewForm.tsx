@@ -26,7 +26,7 @@ export default function ProductReviewForm({ productId, productSlug, onSubmitted 
             <p className="text-sm text-gray-600">
                 <Link
                     href={`/login?redirect=${encodeURIComponent(productSlug ? `/products/${productSlug}` : '/shop')}`}
-                    className="text-brand font-medium hover:underline"
+                    className="text-blue-600 font-medium hover:underline"
                 >
                     Sign in
                 </Link>{' '}
@@ -37,7 +37,7 @@ export default function ProductReviewForm({ productId, productSlug, onSubmitted 
 
     if (submitted) {
         return (
-            <p className="text-sm text-gray-600 bg-brand/5 border border-brand/20 rounded-xl px-4 py-3">
+            <p className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
                 Thanks for your review. It will appear after our team approves it.
             </p>
         );
@@ -97,13 +97,13 @@ export default function ProductReviewForm({ productId, productSlug, onSubmitted 
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
                     placeholder="Share your experience with this product (optional)"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-y min-h-[88px]"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y min-h-[88px]"
                 />
             </div>
             <button
                 type="submit"
                 disabled={submitting}
-                className="min-h-[44px] px-5 py-2.5 bg-brand text-white rounded-xl text-sm font-semibold hover:bg-brand/90 transition-colors disabled:opacity-50"
+                className="min-h-[44px] px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
                 {submitting ? 'Submitting…' : 'Submit review'}
             </button>

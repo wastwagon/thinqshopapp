@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
+import DashboardContent from '@/components/dashboard/DashboardContent';
 import Link from 'next/link';
-import { ArrowLeft, Printer, ShoppingBag, FileText, DollarSign, Package } from 'lucide-react';
+import { Printer, ShoppingBag, FileText, DollarSign, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Quote {
@@ -68,7 +70,7 @@ export default function ProcurementResponsePage() {
                 <div className="max-w-3xl mx-auto py-12 flex flex-col items-center justify-center min-h-[40vh] print:hidden">
                     {loading && (
                         <>
-                            <div className="animate-spin h-10 w-10 border-2 border-brand border-t-transparent rounded-full mb-4" />
+                            <div className="animate-spin h-10 w-10 border-2 border-blue-600 border-t-transparent rounded-full mb-4" />
                             <p className="text-sm text-gray-500">Loading response…</p>
                         </>
                     )}
@@ -83,35 +85,27 @@ export default function ProcurementResponsePage() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-3xl mx-auto pb-6 md:pb-8">
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-8 print:hidden">
-                    <Link
-                        href="/dashboard/procurement"
-                        className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900"
-                    >
-                        <ArrowLeft className="h-4 w-4" /> Back to procurement
-                    </Link>
-                    <button
-                        type="button"
-                        onClick={handlePrint}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand/90 transition-colors"
-                    >
-                        <Printer className="h-4 w-4" /> Print / Save as PDF
-                    </button>
-                </div>
+            <DashboardContent wide>
+                <DashboardPageHeader
+                    title="Procurement response"
+                    subtitle={request.request_number}
+                    accent="green"
+                    backHref="/dashboard/procurement"
+                    backLabel="Procurement"
+                    action={
+                        <button
+                            type="button"
+                            onClick={handlePrint}
+                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors print:hidden"
+                        >
+                            <Printer className="h-4 w-4" /> Print / Save as PDF
+                        </button>
+                    }
+                />
 
                 <div className="dashboard-card overflow-hidden print:shadow-none print:border print:rounded-lg">
-                    <div className="p-8 md:p-10 border-b border-gray-100 bg-gray-50/50">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-12 h-12 rounded-xl bg-brand flex items-center justify-center">
-                                <ShoppingBag className="h-6 w-6 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Procurement response</h1>
-                                <p className="text-sm text-gray-500">{request.request_number}</p>
-                            </div>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-2">
+                    <div className="p-6 md:p-8 border-b border-gray-100 bg-gray-50/50 print:block">
+                        <p className="text-xs text-gray-500">
                             Generated on {new Date().toLocaleDateString(undefined, { dateStyle: 'long' })}. Share this with your team or suppliers.
                         </p>
                     </div>
@@ -167,7 +161,7 @@ export default function ProcurementResponsePage() {
                                         <p className="text-2xl font-bold text-gray-900">₵{Number(quote.quote_amount).toFixed(2)}</p>
                                         <p className="text-xs text-gray-500 mt-1">Quote date: {new Date(quote.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
                                     </div>
-                                    <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand/10 text-brand border border-brand/20">
+                                    <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-200">
                                         {quote.status.toUpperCase()}
                                     </span>
                                 </div>
@@ -202,7 +196,7 @@ export default function ProcurementResponsePage() {
                         )}
                     </div>
                 </div>
-            </div>
+            </DashboardContent>
         </DashboardLayout>
     );
 }

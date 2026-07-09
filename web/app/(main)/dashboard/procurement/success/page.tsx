@@ -5,8 +5,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import ThankYouCard from '@/components/thank-you/ThankYouCard';
-import { ShoppingBag, ChevronRight, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import DashboardSuccessShell, { DashboardLoadingState, DashboardEmptyState } from '@/components/dashboard/DashboardSuccessShell';
+import { ShoppingBag, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Request {
@@ -42,12 +42,11 @@ export default function ProcurementSuccessPage() {
     if (!id) {
         return (
             <DashboardLayout>
-                <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 px-4 py-6 pb-6 md:pb-8">
-                    <p className="text-gray-500 text-sm">No request ID provided.</p>
-                    <Link href="/dashboard/procurement" className="text-brand font-semibold text-sm hover:underline">
-                        Back to Procurement
-                    </Link>
-                </div>
+                <DashboardEmptyState
+                    message="No request ID provided."
+                    backHref="/dashboard/procurement"
+                    backLabel="Back to Procurement"
+                />
             </DashboardLayout>
         );
     }
@@ -55,9 +54,7 @@ export default function ProcurementSuccessPage() {
     if (loading || !request) {
         return (
             <DashboardLayout>
-                <div className="min-h-[60vh] flex items-center justify-center pb-6 md:pb-8">
-                    <div className="animate-spin h-10 w-10 border-2 border-brand border-t-transparent rounded-full" />
-                </div>
+                <DashboardLoadingState message="Loading request…" />
             </DashboardLayout>
         );
     }
@@ -67,7 +64,7 @@ export default function ProcurementSuccessPage() {
 
     return (
         <DashboardLayout>
-            <div className="min-h-[80vh] flex items-center justify-center px-4 py-6 sm:py-10 pb-6 md:pb-8 safe-area-inset-bottom bg-app">
+            <DashboardSuccessShell>
                 <ThankYouCard
                     title="Request submitted successfully"
                     subtitle="Our team will review your request and send you a quote. You will be notified when a quote is ready."
@@ -80,9 +77,9 @@ export default function ProcurementSuccessPage() {
                     ]}
                     primaryAction={{ label: 'View request', href: `/dashboard/procurement/${request.id}/response`, icon: ChevronRight }}
                     secondaryAction={{ label: 'New request', href: '/dashboard/procurement', icon: ShoppingBag }}
-                    accentColor="violet"
+                    accentColor="emerald"
                 />
-            </div>
+            </DashboardSuccessShell>
         </DashboardLayout>
     );
 }

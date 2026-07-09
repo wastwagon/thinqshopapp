@@ -19,7 +19,7 @@ interface Order {
 function statusClass(status: string) {
     if (status === 'delivered') return 'bg-green-50 text-green-700';
     if (status === 'cancelled') return 'bg-red-50 text-red-600';
-    return 'bg-brand/10 text-brand';
+    return 'bg-blue-50 text-blue-600';
 }
 
 export default function OrderHistory() {
@@ -55,7 +55,7 @@ export default function OrderHistory() {
                     action={
                         <Link
                             href="/shop"
-                            className="inline-flex items-center px-5 py-2.5 text-sm font-semibold rounded-xl text-white bg-brand hover:bg-brand/90 transition-colors min-h-[44px]"
+                            className="inline-flex items-center px-5 py-2.5 text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors min-h-[44px]"
                         >
                             Browse products
                         </Link>

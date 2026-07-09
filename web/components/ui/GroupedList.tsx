@@ -42,7 +42,7 @@ export function GroupedListHeader({
     return (
         <div className={cn('px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50/50', className)}>
             <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                {Icon && <Icon className="h-4 w-4 text-brand shrink-0" aria-hidden />}
+                {Icon && <Icon className="h-4 w-4 text-blue-600 shrink-0" aria-hidden />}
                 {title}
             </h3>
             {action}

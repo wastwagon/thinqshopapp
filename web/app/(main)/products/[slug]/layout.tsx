@@ -16,7 +16,7 @@ async function getProduct(slug: string) {
 }
 
 function productImageUrl(path: string | undefined, forOg = false): string {
-    if (!path) return `${siteUrl}/thinqshop-logo.webp`;
+    if (!path) return `${siteUrl}/thinqshop-logo.svg`;
     if (path.startsWith('http')) return path;
     const pathClean = path.replace(/^\//, '');
     if (forOg) return `${siteUrl}/api/${pathClean.startsWith('media/') ? pathClean : `media/${pathClean}`}`;
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             : `Buy ${name} at ThinQShop. Electronics and imaging systems delivered to Ghana.`;
     const image = product.images?.[0] || product.image || product.images;
     const imageUrl = Array.isArray(image) ? image[0] : image;
-    const ogImage = imageUrl ? productImageUrl(imageUrl, true) : `${siteUrl}/thinqshop-logo.webp`;
+    const ogImage = imageUrl ? productImageUrl(imageUrl, true) : `${siteUrl}/thinqshop-logo.svg`;
 
     return {
         title: name,

@@ -89,7 +89,7 @@ export const metadata: Metadata = {
         siteName: "ThinQShop",
         title: "ThinQShop | E-Commerce & Services",
         description: "Shop electronics and imaging systems delivered to Ghana. Order online, pay in GHS.",
-        images: [{ url: `${siteUrl}/thinqshop-logo.webp`, width: 1200, height: 630, alt: "ThinQShop" }],
+        images: [{ url: `${siteUrl}/thinqshop-logo.svg`, width: 1200, height: 630, alt: "ThinQShop" }],
     },
     twitter: {
         card: "summary_large_image",
@@ -97,9 +97,12 @@ export const metadata: Metadata = {
         description: "Shop electronics and imaging systems delivered to Ghana. Order online, pay in GHS.",
     },
     icons: {
-        icon: "/favicon.png",
-        shortcut: "/favicon.png",
-        apple: "/favicon.png",
+        icon: [
+            { url: "/favicon.svg", type: "image/svg+xml" },
+            { url: "/favicon.svg", sizes: "32x32", type: "image/svg+xml" },
+        ],
+        shortcut: "/favicon.svg",
+        apple: "/thinqshop-logo.svg",
     },
 };
 

@@ -8,6 +8,9 @@ import { Plus, ArrowUpRight, ArrowDownLeft, Wallet, RefreshCw, History as Histor
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { GroupedList, GroupedListHeader, GroupedListEmpty, GroupedListRow } from '@/components/ui/GroupedList';
+import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
+import DashboardContent from '@/components/dashboard/DashboardContent';
+import DashboardWalletBalancePanel from '@/components/dashboard/DashboardWalletBalancePanel';
 import { useAuth } from '@/context/AuthContext';
 
 const PaystackTrigger = dynamic(
@@ -60,6 +63,7 @@ interface WithdrawalRow {
 
 export default function WalletPage() {
     const { user } = useAuth();
+    const [balanceHidden, setBalanceHidden] = useState(false);
     const [balance, setBalance] = useState<number | null>(null);
     const [availableBalance, setAvailableBalance] = useState<number | null>(null);
     const [pendingWithdrawal, setPendingWithdrawal] = useState(0);
@@ -248,7 +252,7 @@ export default function WalletPage() {
 
     return (
         <DashboardLayout>
-            <div className="pb-20 md:pb-10">
+            <DashboardContent wide>
                 {paystackTopUpConfig && (
                     <PaystackTrigger
                         config={{ reference: paystackTopUpConfig.reference, amount: paystackTopUpConfig.amount_pesewas }}
@@ -261,67 +265,70 @@ export default function WalletPage() {
                     />
                 )}
 
-                <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                    <div>
-                        <h1 className="page-title">Wallet</h1>
-                        <p className="page-subtitle">Unified balance for shop, services, Sell for Me payouts, and order refunds</p>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => document.getElementById('wallet-transaction-history')?.scrollIntoView({ behavior: 'smooth' })}
-                        className="h-9 px-4 rounded-lg text-xs font-medium border border-gray-200/90 text-gray-600 hover:border-brand/30 flex items-center gap-2"
-                    >
-                        <Activity className="h-3.5 w-3.5" />
-                        Activity
-                    </button>
-                </div>
+                <DashboardPageHeader
+                    title="Wallet"
+                    subtitle="Unified balance for shop, services, Sell for Me payouts, and order refunds"
+                    accent="navy"
+                    action={
+                        <button
+                            type="button"
+                            onClick={() => document.getElementById('wallet-transaction-history')?.scrollIntoView({ behavior: 'smooth' })}
+                            className="h-9 px-4 rounded-xl text-xs font-semibold border border-gray-200/90 text-gray-600 hover:border-blue-500/30 hover:text-blue-600 flex items-center gap-2 transition-colors"
+                        >
+                            <Activity className="h-3.5 w-3.5" />
+                            Activity
+                        </button>
+                    }
+                />
 
-                <div className="flat-card border-l-4 border-l-brand p-4 md:p-6 mb-4">
-                    <p className="text-brand text-xs font-medium mb-2">Available to withdraw</p>
-                    <div className="flex items-baseline gap-1 mb-1">
-                        <span className="text-4xl font-semibold tracking-tight text-gray-900">
-                            ₵{availableBalance !== null ? availableBalance.toFixed(2) : '0.00'}
-                        </span>
-                    </div>
-                    <p className="text-xs text-gray-500 mb-2">
-                        In your wallet now · Min withdrawal ₵50 · Approved order refunds are credited here (not to card/MoMo)
-                    </p>
-                    {balance !== null && (
-                        <p className="text-xs text-gray-500 mb-1">
-                            Wallet balance ₵{balance.toFixed(2)}
-                            {pendingWithdrawal > 0 && ` · ₵${pendingWithdrawal.toFixed(2)} reserved for pending withdrawals`}
-                        </p>
-                    )}
-                    {pendingConsignmentPayout > 0 && (
-                        <p className="text-xs text-violet-700 mb-1">
-                            ₵{pendingConsignmentPayout.toFixed(2)} pending from Sell for Me sales (released when buyer delivery is confirmed)
-                        </p>
-                    )}
-                    {pendingClawback > 0 && (
-                        <p className="text-xs text-amber-700 mb-3">
-                            ₵{pendingClawback.toFixed(2)} reserved — Sell for Me payout adjustment after buyer refund
-                        </p>
-                    )}
-                    <div className="flex flex-wrap gap-2 mt-4">
-                        <button
-                            type="button"
-                            onClick={() => setShowTopUpModal(true)}
-                            className="h-10 px-5 bg-brand text-white rounded-xl font-semibold text-xs hover:bg-brand/90 transition-colors flex items-center gap-2"
-                        >
-                            <Plus className="h-4 w-4" />
-                            Top-up
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setShowWithdrawModal(true)}
-                            disabled={availableBalance === null || availableBalance < 50}
-                            className="h-10 px-5 bg-white border border-gray-200 text-gray-800 rounded-xl font-semibold text-xs hover:border-brand/30 transition-colors flex items-center gap-2 disabled:opacity-50"
-                        >
-                            <Banknote className="h-4 w-4" />
-                            Withdraw
-                        </button>
-                    </div>
-                </div>
+                <DashboardWalletBalancePanel
+                    label="Available to withdraw"
+                    amount={availableBalance !== null ? availableBalance.toFixed(2) : '0.00'}
+                    hidden={balanceHidden}
+                    onToggleHidden={() => setBalanceHidden((v) => !v)}
+                    footer={
+                        <>
+                            <p>In your wallet now · Min withdrawal ₵50 · Approved order refunds are credited here (not to card/MoMo)</p>
+                            {balance !== null && (
+                                <p>
+                                    Wallet balance ₵{balance.toFixed(2)}
+                                    {pendingWithdrawal > 0 && ` · ₵${pendingWithdrawal.toFixed(2)} reserved for pending withdrawals`}
+                                </p>
+                            )}
+                            {pendingConsignmentPayout > 0 && (
+                                <p className="text-violet-200">
+                                    ₵{pendingConsignmentPayout.toFixed(2)} pending from Sell for Me sales (released when buyer delivery is confirmed)
+                                </p>
+                            )}
+                            {pendingClawback > 0 && (
+                                <p className="text-amber-200">
+                                    ₵{pendingClawback.toFixed(2)} reserved — Sell for Me payout adjustment after buyer refund
+                                </p>
+                            )}
+                        </>
+                    }
+                    actions={
+                        <>
+                            <button
+                                type="button"
+                                onClick={() => setShowTopUpModal(true)}
+                                className="h-10 px-5 bg-white text-blue-950 rounded-xl font-semibold text-xs hover:bg-blue-50 transition-colors flex items-center gap-2"
+                            >
+                                <Plus className="h-4 w-4" />
+                                Top-up
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowWithdrawModal(true)}
+                                disabled={availableBalance === null || availableBalance < 50}
+                                className="h-10 px-5 bg-white/10 border border-white/25 text-white rounded-xl font-semibold text-xs hover:bg-white/15 transition-colors flex items-center gap-2 disabled:opacity-50"
+                            >
+                                <Banknote className="h-4 w-4" />
+                                Withdraw
+                            </button>
+                        </>
+                    }
+                />
 
                 {pendingConsignmentSales.length > 0 && (
                     <div className="flat-card p-4 mb-4 border border-violet-100 bg-violet-50/40">
@@ -342,7 +349,7 @@ export default function WalletPage() {
                                         <button
                                             type="button"
                                             onClick={() => openEscrowLedger(sale.id, sale.name)}
-                                            className="text-[10px] font-semibold text-brand hover:underline"
+                                            className="text-[10px] font-semibold text-blue-600 hover:underline"
                                         >
                                             History
                                         </button>
@@ -353,7 +360,7 @@ export default function WalletPage() {
                                 </li>
                             ))}
                         </ul>
-                        <Link href="/dashboard/sell-for-me" className="inline-block mt-3 text-xs font-semibold text-brand hover:underline">
+                        <Link href="/dashboard/sell-for-me" className="inline-block mt-3 text-xs font-semibold text-blue-600 hover:underline">
                             View Sell for Me listings
                         </Link>
                     </div>
@@ -378,7 +385,7 @@ export default function WalletPage() {
                                 </li>
                             ))}
                         </ul>
-                        <Link href="/dashboard/sell-for-me" className="inline-block mt-3 text-xs font-semibold text-brand hover:underline">
+                        <Link href="/dashboard/sell-for-me" className="inline-block mt-3 text-xs font-semibold text-blue-600 hover:underline">
                             View Sell for Me listings
                         </Link>
                     </div>
@@ -445,7 +452,7 @@ export default function WalletPage() {
                                 />
                                 <div className="flex gap-2">
                                     <button type="button" onClick={() => setShowTopUpModal(false)} className="flex-1 py-3 rounded-xl text-sm font-semibold bg-gray-100">Cancel</button>
-                                    <button type="submit" disabled={isToppingUp} className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-brand disabled:opacity-50">
+                                    <button type="submit" disabled={isToppingUp} className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-blue-600 disabled:opacity-50">
                                         {isToppingUp ? '…' : 'Deposit'}
                                     </button>
                                 </div>
@@ -524,7 +531,7 @@ export default function WalletPage() {
                                 )}
                                 <div className="flex gap-2 pt-2">
                                     <button type="button" onClick={() => setShowWithdrawModal(false)} className="flex-1 py-3 rounded-xl text-sm font-semibold bg-gray-100">Cancel</button>
-                                    <button type="submit" disabled={withdrawing} className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-brand disabled:opacity-50">
+                                    <button type="submit" disabled={withdrawing} className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-blue-600 disabled:opacity-50">
                                         {withdrawing ? 'Submitting…' : 'Submit request'}
                                     </button>
                                 </div>
@@ -539,7 +546,7 @@ export default function WalletPage() {
                             title="Transaction history"
                             icon={HistoryIcon}
                             action={
-                                <button type="button" onClick={fetchData} className="min-w-[44px] min-h-[44px] rounded-xl border border-gray-200/90 bg-white flex items-center justify-center text-gray-400 hover:text-brand" aria-label="Refresh">
+                                <button type="button" onClick={fetchData} className="min-w-[44px] min-h-[44px] rounded-xl border border-gray-200/90 bg-white flex items-center justify-center text-gray-400 hover:text-blue-600" aria-label="Refresh">
                                     <RefreshCw className="h-4 w-4" />
                                 </button>
                             }
@@ -555,7 +562,7 @@ export default function WalletPage() {
                                     <GroupedListRow
                                         key={tx.id}
                                         icon={isCredit ? ArrowDownLeft : ArrowUpRight}
-                                        iconClassName={isCredit ? 'bg-green-50 text-green-600' : 'bg-brand/10 text-brand'}
+                                        iconClassName={isCredit ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}
                                         title={tx.description || SOURCE_LABELS[tx.source] || tx.source}
                                         subtitle={new Date(tx.created_at).toLocaleString()}
                                         trailing={
@@ -569,7 +576,7 @@ export default function WalletPage() {
                         )}
                     </GroupedList>
                 </div>
-            </div>
+            </DashboardContent>
 
             {escrowLedgerModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">

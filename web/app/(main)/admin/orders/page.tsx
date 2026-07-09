@@ -68,7 +68,7 @@ export default function AdminOrdersPage() {
     const cancelledCount = orders.filter((o) => o.status === 'cancelled').length;
 
     const stats = [
-        { label: 'Total', value: orders.length, icon: FileText, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
+        { label: 'Total', value: orders.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
         { label: 'Pending', value: pendingCount, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'In progress', value: processingCount, icon: Truck, ...ADMIN_STAT_PROGRESS },
         { label: 'Delivered', value: deliveredCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
@@ -78,7 +78,7 @@ export default function AdminOrdersPage() {
     const StatusBadge = ({ status }: { status: string }) => {
         const colors: Record<string, string> = {
             pending: 'bg-orange-50 text-orange-700 border-orange-200',
-            processing: 'bg-brand/5 text-brand border-brand/30',
+            processing: 'bg-blue-50 text-blue-600 border-blue-300',
             packed: STATUS_PROGRESS_BADGE,
             shipped: 'bg-purple-50 text-purple-700 border-purple-200',
             out_for_delivery: 'bg-orange-50 text-orange-700 border-orange-200',
@@ -150,7 +150,7 @@ export default function AdminOrdersPage() {
                             {loading ? (
                                 <tr>
                                     <td colSpan={7} className="py-10 text-center">
-                                        <div className="animate-spin h-7 w-7 border-2 border-brand border-t-transparent rounded-full mx-auto mb-2" />
+                                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
                                         <p className="text-sm text-gray-500">Loading...</p>
                                     </td>
                                 </tr>
@@ -167,7 +167,7 @@ export default function AdminOrdersPage() {
                                         <td className="px-3 py-2.5">
                                             <Link
                                                 href={`/admin/orders/${o.id}`}
-                                                className="text-xs font-semibold text-brand hover:text-brand/80 hover:underline"
+                                                className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
                                             >
                                                 {o.order_number}
                                             </Link>
@@ -181,7 +181,7 @@ export default function AdminOrdersPage() {
                                             <div className="flex items-center gap-2 justify-end">
                                                 <Link
                                                     href={`/admin/orders/${o.id}`}
-                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-brand hover:bg-brand/5 border border-brand/20"
+                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-blue-600 hover:bg-blue-50 border border-blue-200"
                                                 >
                                                     <Eye className="h-3 w-3" /> View
                                                 </Link>
@@ -190,7 +190,7 @@ export default function AdminOrdersPage() {
                                                         value={o.status}
                                                         onChange={(e) => handleStatusUpdate(o.id, e.target.value)}
                                                         disabled={updatingId === o.id}
-                                                        className="text-xs font-semibold border border-gray-100 rounded-lg pl-2 pr-6 py-1.5 bg-gray-50 focus:ring-2 focus:ring-brand/20 focus:border-brand appearance-none cursor-pointer"
+                                                        className="text-xs font-semibold border border-gray-100 rounded-lg pl-2 pr-6 py-1.5 bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer"
                                                     >
                                                         {ORDER_STATUSES.map((s) => (
                                                             <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>

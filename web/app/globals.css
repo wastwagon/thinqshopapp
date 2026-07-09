@@ -27,11 +27,11 @@
 
     /* Brand-specific colors */
     --blueblack: 222 47% 11%;
-    /* Bright accent: orange — warm contrast with blue-black; strong on CTAs & highlights */
-    --brand: 24 95% 53%;
-    --brand-foreground: 20 90% 9%;
-    --brand-muted: 24 55% 94%;
-    --brand-subtle: 24 70% 97%;
+    /* Brand accent — navy blue (matches theme blue-600 #02274f) */
+    --brand: 210 94% 16%;
+    --brand-foreground: 210 40% 98%;
+    --brand-muted: 210 40% 96%;
+    --brand-subtle: 210 50% 98%;
     --sale: 0 84.2% 60.2%;
     /* Star / rating tint (distinct from brand orange) */
     --rating: 43 96% 56%;

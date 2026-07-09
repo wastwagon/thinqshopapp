@@ -36,8 +36,8 @@ export default function CategoryNav({ categories, currentSlug = '', variant = 's
                 href="/shop"
                 className={
                     isSidebar
-                        ? `block w-full text-left px-5 py-3.5 rounded-xl text-sm font-medium transition-all ${!currentSlug ? 'bg-brand text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`
-                        : `px-4 py-2 rounded-full text-sm font-semibold ${!currentSlug ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600'}`
+                        ? `block w-full text-left px-5 py-3.5 rounded-xl text-sm font-medium transition-all ${!currentSlug ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`
+                        : `px-4 py-2 rounded-full text-sm font-semibold ${!currentSlug ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`
                 }
             >
                 All Products
@@ -51,7 +51,7 @@ export default function CategoryNav({ categories, currentSlug = '', variant = 's
                         <div key={cat.id ?? slug} className="space-y-1">
                             <Link
                                 href={`/shop/${slug}`}
-                                className={`block w-full text-left px-5 py-3.5 rounded-xl text-sm font-medium transition-all ${isActive ? 'bg-brand text-white' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`}
+                                className={`block w-full text-left px-5 py-3.5 rounded-xl text-sm font-medium transition-all ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`}
                                 aria-current={isActive && subcategories.length === 0 ? 'page' : undefined}
                             >
                                 {cat.name}
@@ -70,7 +70,7 @@ export default function CategoryNav({ categories, currentSlug = '', variant = 's
                     <Link
                         key={cat.id ?? slug}
                         href={`/shop/${slug}`}
-                        className={`px-4 py-2 rounded-full text-sm font-semibold ${isActive ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600'}`}
+                        className={`px-4 py-2 rounded-full text-sm font-semibold ${isActive ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
                     >
                         {cat.name}
                     </Link>

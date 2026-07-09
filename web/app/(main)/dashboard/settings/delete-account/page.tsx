@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Trash2, AlertTriangle } from 'lucide-react';
+import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
+import DashboardContent from '@/components/dashboard/DashboardContent';
+import { Trash2 } from 'lucide-react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -25,30 +27,23 @@ export default function DeleteAccountPage() {
             localStorage.removeItem('token');
             toast.success('Your account has been deleted.');
             router.push('/');
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to delete account');
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            toast.error(err?.response?.data?.message || 'Failed to delete account');
             setIsDeleting(false);
         }
     };
 
     return (
         <DashboardLayout>
-            <div className="max-w-xl mx-auto pb-6 md:pb-8">
-                <div className="mb-6">
-                    <Link href="/dashboard/settings" className="text-sm text-gray-500 hover:text-gray-700">
-                        ← Back to Settings
-                    </Link>
-                </div>
-                <div className="dashboard-card p-8 border-red-100">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center border border-red-100">
-                            <AlertTriangle className="h-6 w-6 text-red-600" />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-gray-900">Delete account</h1>
-                            <p className="text-sm text-gray-500">This action is permanent and cannot be undone.</p>
-                        </div>
-                    </div>
+            <DashboardContent>
+                <DashboardPageHeader
+                    title="Delete account"
+                    subtitle="This action is permanent and cannot be undone"
+                    backHref="/dashboard/settings"
+                    backLabel="Settings"
+                />
+                <div className="dashboard-card p-6 md:p-8 border-red-100">
                     <p className="text-sm text-gray-600 mb-6">
                         Deleting your account will permanently remove your profile, orders, wallet balance, and all associated data. You will not be able to recover this account.
                     </p>
@@ -83,7 +78,7 @@ export default function DeleteAccountPage() {
                         </Link>
                     </div>
                 </div>
-            </div>
+            </DashboardContent>
         </DashboardLayout>
     );
 }

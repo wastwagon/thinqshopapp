@@ -7,7 +7,7 @@ import { z } from 'zod';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
-import AuthScreen, { authInputClass, authLabelClass, authPrimaryBtnClass } from '@/components/auth/AuthScreen';
+import AuthScreen, { authInputClass, authLabelClass, authPrimaryBtnClass, authLinkClass } from '@/components/auth/AuthScreen';
 import { Mail, ArrowLeft } from 'lucide-react';
 
 const forgotSchema = z.object({
@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
                     </div>
                     <Link
                         href="/login"
-                        className="inline-flex items-center gap-2 text-brand hover:text-brand/90 font-medium text-sm"
+                        className={`inline-flex items-center gap-2 text-sm ${authLinkClass}`}
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Back to sign in

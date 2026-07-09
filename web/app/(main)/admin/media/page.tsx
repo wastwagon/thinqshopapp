@@ -133,7 +133,7 @@ export default function AdminMediaPage() {
             <div className="admin-table-wrap">
                 {loading ? (
                     <div className="py-20 flex justify-center">
-                        <Loader2 className="h-10 w-10 text-brand animate-spin" />
+                        <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
                     </div>
                 ) : items.length === 0 ? (
                     <div className="py-20 text-center">
@@ -143,7 +143,7 @@ export default function AdminMediaPage() {
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="mt-4 h-10 px-5 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90"
+                            className="mt-4 h-10 px-5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700"
                         >
                             Upload image
                         </button>

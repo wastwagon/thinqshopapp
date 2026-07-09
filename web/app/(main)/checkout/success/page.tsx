@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ShoppingBag, ArrowRight, Package, Truck, CheckCircle, Clock } from 'lucide-react';
+import { motion } from 'framer-motion';
 import ShopLayout from '@/components/layout/ShopLayout';
 import ThankYouCard from '@/components/thank-you/ThankYouCard';
+import ShopSuccessShell, { ShopLoadingState, ShopEmptyState } from '@/components/shop/ShopSuccessShell';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import api from '@/lib/axios';
 import { useCart } from '@/context/CartContext';
@@ -96,12 +98,7 @@ export default function OrderSuccessPage() {
     if (!orderParam) {
         return (
             <ShopLayout>
-                <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 px-4 py-10">
-                    <p className="text-sm text-gray-500">No order reference provided.</p>
-                    <Link href="/shop" className="text-brand font-semibold text-sm hover:underline">
-                        Continue shopping
-                    </Link>
-                </div>
+                <ShopEmptyState message="No order reference provided." href="/shop" linkLabel="Continue shopping" />
             </ShopLayout>
         );
     }
@@ -109,10 +106,7 @@ export default function OrderSuccessPage() {
     if (loading || !order) {
         return (
             <ShopLayout>
-                <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 py-10">
-                    <div className="animate-spin h-10 w-10 border-2 border-brand border-t-transparent rounded-full mb-4" />
-                    <p className="text-sm text-gray-500">Loading your confirmation…</p>
-                </div>
+                <ShopLoadingState message="Loading your confirmation…" />
             </ShopLayout>
         );
     }
@@ -123,8 +117,8 @@ export default function OrderSuccessPage() {
 
     return (
         <ShopLayout>
-            <div className="min-h-[80vh] px-4 py-6 sm:py-10 pb-10 safe-area-inset-bottom bg-app">
-                <div className="max-w-lg mx-auto space-y-6">
+            <div className="bg-white min-h-full pb-8">
+                <ShopSuccessShell>
                     <ThankYouCard
                         title="Order confirmed"
                         subtitle="Thank you for your purchase. Your order has been received and is being processed for shipment. We will notify you when it ships."
@@ -147,11 +141,16 @@ export default function OrderSuccessPage() {
                             icon: ShoppingBag,
                         }}
                         secondaryAction={{ label: 'Continue shopping', href: '/shop', icon: ArrowRight }}
-                        accentColor="emerald"
+                        accentColor="amber"
                     />
 
-                    <div className="rounded-2xl bg-white border border-gray-200/90 p-5 sm:p-6">
-                        <h2 className="text-sm font-semibold text-gray-900 mb-4">What happens next</h2>
+                    <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.45, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                        className="rounded-2xl bg-white border border-gray-100 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.08)] p-5 sm:p-6"
+                    >
+                        <h2 className="text-sm font-bold text-gray-900 mb-4">What happens next</h2>
                         <ol className="space-y-4">
                             {fulfillmentSteps.map((step, index) => {
                                 const done = index <= activeStep;
@@ -160,9 +159,9 @@ export default function OrderSuccessPage() {
                                 return (
                                     <li key={step.key} className="flex items-start gap-3">
                                         <div
-                                            className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
+                                            className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border ${
                                                 done
-                                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                                                    ? 'bg-orange-50 border-orange-200 text-orange-600'
                                                     : 'bg-gray-50 border-gray-200 text-gray-400'
                                             }`}
                                         >
@@ -183,12 +182,17 @@ export default function OrderSuccessPage() {
                                 );
                             })}
                         </ol>
-                    </div>
+                    </motion.div>
 
                     {order.items && order.items.length > 0 && (
-                        <div className="rounded-2xl bg-white border border-gray-200/90 overflow-hidden">
+                        <motion.div
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.45, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                            className="rounded-2xl bg-white border border-gray-100 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.08)] overflow-hidden"
+                        >
                             <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
-                                <h2 className="text-sm font-semibold text-gray-900">Order summary</h2>
+                                <h2 className="text-sm font-bold text-gray-900">Order summary</h2>
                             </div>
                             <ul className="divide-y divide-gray-50">
                                 {order.items.map((item) => (
@@ -233,17 +237,17 @@ export default function OrderSuccessPage() {
                                     </div>
                                 </div>
                             )}
-                        </div>
+                        </motion.div>
                     )}
 
-                    <p className="text-center text-xs text-gray-500">
+                    <p className="text-center text-xs text-gray-500 pb-2">
                         Track your order anytime from{' '}
-                        <Link href="/dashboard/orders" className="text-brand font-semibold hover:underline">
+                        <Link href="/dashboard/orders" className="text-blue-600 font-semibold hover:underline">
                             Order history
                         </Link>
                         .
                     </p>
-                </div>
+                </ShopSuccessShell>
             </div>
         </ShopLayout>
     );

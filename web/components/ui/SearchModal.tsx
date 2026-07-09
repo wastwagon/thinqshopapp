@@ -47,7 +47,7 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
             >
                 {/* Header */}
                 <div className="flex items-center gap-4 px-6 py-5 border-b border-gray-100 bg-gray-50/80">
-                    <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-brand text-white shrink-0">
+                    <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-blue-600 text-white shrink-0">
                         <Search className="h-6 w-6" />
                     </div>
                     <div className="flex-1 min-w-0">

@@ -414,7 +414,7 @@ export default function ShippingCalculatorPage() {
                                     onChange={(e) => setCustomerSearch(e.target.value)}
                                     onFocus={() => customerSearchResults.length > 0 && setCustomerSearchOpen(true)}
                                     placeholder="Type email or phone to search users..."
-                                    className="w-full min-h-[44px] h-10 pl-9 pr-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                    className="w-full min-h-[44px] h-10 pl-9 pr-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                 />
                                 {customerSearching && (
                                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">Searching...</span>
@@ -447,7 +447,7 @@ export default function ShippingCalculatorPage() {
                                 <input
                                     value={form.customer_name}
                                     onChange={(e) => setForm((f) => ({ ...f, customer_name: e.target.value }))}
-                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand transition-shadow"
+                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow"
                                     required
                                 />
                             </div>
@@ -457,7 +457,7 @@ export default function ShippingCalculatorPage() {
                                     type="email"
                                     value={form.customer_email}
                                     onChange={(e) => setForm((f) => ({ ...f, customer_email: e.target.value }))}
-                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand transition-shadow"
+                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow"
                                     required
                                 />
                             </div>
@@ -466,7 +466,7 @@ export default function ShippingCalculatorPage() {
                                 <input
                                     value={form.customer_phone}
                                     onChange={(e) => setForm((f) => ({ ...f, customer_phone: e.target.value }))}
-                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand transition-shadow"
+                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow"
                                 />
                             </div>
                             <div className="sm:col-span-2">
@@ -474,7 +474,7 @@ export default function ShippingCalculatorPage() {
                                 <input
                                     value={form.customer_address}
                                     onChange={(e) => setForm((f) => ({ ...f, customer_address: e.target.value }))}
-                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand transition-shadow"
+                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow"
                                 />
                             </div>
                         </div>
@@ -485,7 +485,7 @@ export default function ShippingCalculatorPage() {
                                     type="date"
                                     value={form.issue_date}
                                     onChange={(e) => setForm((f) => ({ ...f, issue_date: e.target.value }))}
-                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand transition-shadow"
+                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow"
                                 />
                             </div>
                             <div>
@@ -494,7 +494,7 @@ export default function ShippingCalculatorPage() {
                                     type="date"
                                     value={form.due_date}
                                     onChange={(e) => setForm((f) => ({ ...f, due_date: e.target.value }))}
-                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand transition-shadow"
+                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow"
                                 />
                             </div>
                         </div>
@@ -521,7 +521,7 @@ export default function ShippingCalculatorPage() {
                                     }}
                                     className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
                                         mode === 'sea'
-                                            ? 'bg-white text-brand border border-brand/30'
+                                            ? 'bg-white text-blue-600 border border-blue-300'
                                             : 'text-gray-500 hover:text-gray-700'
                                     }`}
                                 >
@@ -539,7 +539,7 @@ export default function ShippingCalculatorPage() {
                                     }}
                                     className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
                                         mode === 'air'
-                                            ? 'bg-white text-brand border border-brand/30'
+                                            ? 'bg-white text-blue-600 border border-blue-300'
                                             : 'text-gray-500 hover:text-gray-700'
                                     }`}
                                 >
@@ -552,7 +552,7 @@ export default function ShippingCalculatorPage() {
                                 <select
                                     value={categoryId}
                                     onChange={(e) => setCategoryId(e.target.value)}
-                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand bg-white transition-shadow"
+                                    className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-shadow"
                                 >
                                     <option value="">Select category…</option>
                                     {shopCategories.map((c) => (
@@ -571,7 +571,7 @@ export default function ShippingCalculatorPage() {
                                         data-testid="invoice-currency"
                                         value={form.currency}
                                         onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value }))}
-                                        className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand bg-white transition-shadow"
+                                        className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-shadow"
                                     >
                                         {INVOICE_CURRENCY_OPTIONS.map((c) => (
                                             <option key={c} value={c}>
@@ -595,7 +595,7 @@ export default function ShippingCalculatorPage() {
                                             value={fxInvoicePerNative}
                                             onChange={(e) => setFxInvoicePerNative(e.target.value)}
                                             placeholder="e.g. 15.5"
-                                            className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                            className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                             aria-label={formatFxHint(nativeQuoteCurrency, form.currency)}
                                         />
                                         {invoiceLineResult.error && (
@@ -618,7 +618,7 @@ export default function ShippingCalculatorPage() {
                                                 setNativeQuoteCurrency(null);
                                                 setFxInvoicePerNative('');
                                             }}
-                                            className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand bg-white transition-shadow"
+                                            className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-shadow"
                                         >
                                             <option value="">Select item type…</option>
                                             {unifiedRatesForMode.map((u) => (
@@ -628,7 +628,7 @@ export default function ShippingCalculatorPage() {
                                             ))}
                                         </select>
                                         {unifiedRatesForMode.length === 0 && (
-                                            <p className="text-xs text-brand">
+                                            <p className="text-xs text-blue-600">
                                                 No air rates yet. Add rows under{' '}
                                                 <Link href="/admin/shipping-rates" className="underline font-medium">
                                                     Shipping Rates
@@ -650,7 +650,7 @@ export default function ShippingCalculatorPage() {
                                                 step={0.1}
                                                 value={weightKg}
                                                 onChange={(e) => setWeightKg(e.target.value)}
-                                                className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand transition-shadow"
+                                                className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow"
                                             />
                                         </div>
                                         <div>
@@ -661,7 +661,7 @@ export default function ShippingCalculatorPage() {
                                                 step={1}
                                                 value={quantity}
                                                 onChange={(e) => setQuantity(e.target.value)}
-                                                className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand transition-shadow"
+                                                className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow"
                                             />
                                         </div>
                                     </div>
@@ -681,7 +681,7 @@ export default function ShippingCalculatorPage() {
                                                 setNativeQuoteCurrency(null);
                                                 setFxInvoicePerNative('');
                                             }}
-                                            className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand bg-white transition-shadow"
+                                            className="w-full min-h-[44px] h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-shadow"
                                         >
                                             <option value="">Select rate…</option>
                                             {unifiedRatesForMode.map((u) => (
@@ -691,7 +691,7 @@ export default function ShippingCalculatorPage() {
                                             ))}
                                         </select>
                                         {unifiedRatesForMode.length === 0 && (
-                                            <p className="text-xs text-brand">
+                                            <p className="text-xs text-blue-600">
                                                 No sea rates yet. Add CBM rows under{' '}
                                                 <Link href="/admin/shipping-rates" className="underline font-medium">
                                                     Shipping Rates
@@ -717,7 +717,7 @@ export default function ShippingCalculatorPage() {
                                                     step={0.1}
                                                     value={length}
                                                     onChange={(e) => setLength(e.target.value)}
-                                                    className="w-full min-h-[44px] h-9 px-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                                    className="w-full min-h-[44px] h-9 px-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                                 />
                                             </div>
                                             <div>
@@ -728,7 +728,7 @@ export default function ShippingCalculatorPage() {
                                                     step={0.1}
                                                     value={width}
                                                     onChange={(e) => setWidth(e.target.value)}
-                                                    className="w-full min-h-[44px] h-9 px-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                                    className="w-full min-h-[44px] h-9 px-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                                 />
                                             </div>
                                             <div>
@@ -739,7 +739,7 @@ export default function ShippingCalculatorPage() {
                                                     step={0.1}
                                                     value={height}
                                                     onChange={(e) => setHeight(e.target.value)}
-                                                    className="w-full min-h-[44px] h-9 px-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                                    className="w-full min-h-[44px] h-9 px-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                                 />
                                             </div>
                                         </div>
@@ -748,7 +748,7 @@ export default function ShippingCalculatorPage() {
                                             <select
                                                 value={dimensionUnit}
                                                 onChange={(e) => setDimensionUnit(e.target.value as DimensionUnit)}
-                                                className="w-full h-9 px-2 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                                className="w-full h-9 px-2 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                             >
                                                 <option value="cm">Centimeters (cm)</option>
                                                 <option value="m">Meters (m)</option>
@@ -763,7 +763,7 @@ export default function ShippingCalculatorPage() {
                                                 step={1}
                                                 value={quantity}
                                                 onChange={(e) => setQuantity(e.target.value)}
-                                                className="w-full h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand max-w-[120px]"
+                                                className="w-full h-10 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 max-w-[120px]"
                                             />
                                         </div>
                                     </div>
@@ -776,7 +776,7 @@ export default function ShippingCalculatorPage() {
                                     type="button"
                                     data-testid="calculate-btn"
                                     onClick={handleCalculate}
-                                    className="min-h-[44px] px-6 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2transition-colors"
+                                    className="min-h-[44px] px-6 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2transition-colors"
                                 >
                                     Calculate
                                 </button>
@@ -812,7 +812,7 @@ export default function ShippingCalculatorPage() {
                                         </p>
                                     )}
                                     {nativeQuoteTotal != null && (
-                                        <p className="text-xl font-bold text-brand pt-2 border-t border-orange-100/80 mt-2">
+                                        <p className="text-xl font-bold text-blue-600 pt-2 border-t border-orange-100/80 mt-2">
                                             {invoiceLineAmount != null ? (
                                                 <>
                                                     Invoice line: {form.currency} {invoiceLineAmount.toFixed(2)}
@@ -838,7 +838,7 @@ export default function ShippingCalculatorPage() {
                                     step={0.01}
                                     value={form.discount_amount}
                                     onChange={(e) => setForm((f) => ({ ...f, discount_amount: e.target.value }))}
-                                    className="w-full h-9 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                    className="w-full h-9 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                 />
                             </div>
                             <div>
@@ -850,7 +850,7 @@ export default function ShippingCalculatorPage() {
                                     step={0.5}
                                     value={form.discount_percent}
                                     onChange={(e) => setForm((f) => ({ ...f, discount_percent: e.target.value }))}
-                                    className="w-full h-9 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                    className="w-full h-9 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                 />
                             </div>
                             <div>
@@ -861,7 +861,7 @@ export default function ShippingCalculatorPage() {
                                     step={0.5}
                                     value={form.tax_rate}
                                     onChange={(e) => setForm((f) => ({ ...f, tax_rate: e.target.value }))}
-                                    className="w-full h-9 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                    className="w-full h-9 px-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                 />
                             </div>
                         </div>
@@ -880,7 +880,7 @@ export default function ShippingCalculatorPage() {
                                 value={form.notes}
                                 onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
                                 rows={2}
-                                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand resize-y"
+                                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y"
                             />
                         </div>
                     </div>
@@ -890,7 +890,7 @@ export default function ShippingCalculatorPage() {
                             type="submit"
                             disabled={submitting || nativeQuoteTotal == null || invoiceLineAmount == null}
                             data-testid="create-invoice"
-                            className="min-h-[44px] px-6 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-nonetransition-colors"
+                            className="min-h-[44px] px-6 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-nonetransition-colors"
                         >
                             {submitting ? 'Saving…' : 'Create invoice from quote'}
                         </button>

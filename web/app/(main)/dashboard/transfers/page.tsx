@@ -6,6 +6,8 @@ import { ArrowRight, Send, AlertCircle, Plus, CreditCard, Wallet, Upload, X, His
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
+import DashboardContent from '@/components/dashboard/DashboardContent';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -212,7 +214,7 @@ export default function TransferPage() {
 
     return (
         <DashboardLayout>
-            <div className="pb-20 md:pb-10">
+            <DashboardContent wide>
             {paystackConfig && (
                 <PaystackTrigger
                     config={{ reference: paystackConfig.reference, amount: paystackConfig.amount }}
@@ -221,21 +223,24 @@ export default function TransferPage() {
                     userEmail={user?.email}
                 />
             )}
-            <header className="mb-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                <div>
-                    <h1 className="page-title">Transfers</h1>
-                    <p className="page-subtitle flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 bg-brand rounded-full" aria-hidden />
+            <DashboardPageHeader
+                title="Transfers"
+                subtitle={
+                    <span className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 bg-violet-500 rounded-full" aria-hidden />
                         Rate: 1 GHS = {rate.toFixed(4)} CNY
-                    </p>
-                </div>
-                <button
-                    onClick={() => setIsCreating(!isCreating)}
-                    className={`h-9 px-4 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-brand text-white hover:bg-brand/90'}`}
-                >
-                    {isCreating ? 'Cancel' : <><Plus className="h-4 w-4" /> New transfer</>}
-                </button>
-            </header>
+                    </span>
+                }
+                accent="purple"
+                action={
+                    <button
+                        onClick={() => setIsCreating(!isCreating)}
+                        className={`h-9 px-4 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-violet-600 text-white hover:bg-violet-700'}`}
+                    >
+                        {isCreating ? 'Cancel' : <><Plus className="h-4 w-4" /> New transfer</>}
+                    </button>
+                }
+            />
 
             {isCreating && (
             <div className="max-w-2xl">
@@ -248,20 +253,20 @@ export default function TransferPage() {
                                 <button
                                     type="button"
                                     onClick={() => setTransferDirection('send_to_china')}
-                                    className={`relative py-2.5 px-3 rounded-lg border-2 transition-all text-left ${transferDirection === 'send_to_china' ? 'border-brand bg-brand/10' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
+                                    className={`relative py-2.5 px-3 rounded-lg border-2 transition-all text-left ${transferDirection === 'send_to_china' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
                                 >
-                                    <p className={`text-xs font-semibold mb-0.5 ${transferDirection === 'send_to_china' ? 'text-brand' : 'text-gray-400'}`}>Send</p>
+                                    <p className={`text-xs font-semibold mb-0.5 ${transferDirection === 'send_to_china' ? 'text-blue-600' : 'text-gray-400'}`}>Send</p>
                                     <p className="text-xs font-bold text-gray-900">GHS → CNY</p>
-                                    {transferDirection === 'send_to_china' && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-brand rounded-full" />}
+                                    {transferDirection === 'send_to_china' && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-600 rounded-full" />}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setTransferDirection('receive_from_china')}
-                                    className={`relative py-2.5 px-3 rounded-lg border-2 transition-all text-left ${transferDirection === 'receive_from_china' ? 'border-brand bg-brand/10' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
+                                    className={`relative py-2.5 px-3 rounded-lg border-2 transition-all text-left ${transferDirection === 'receive_from_china' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
                                 >
-                                    <p className={`text-xs font-semibold mb-0.5 ${transferDirection === 'receive_from_china' ? 'text-brand' : 'text-gray-400'}`}>Receive</p>
+                                    <p className={`text-xs font-semibold mb-0.5 ${transferDirection === 'receive_from_china' ? 'text-blue-600' : 'text-gray-400'}`}>Receive</p>
                                     <p className="text-xs font-bold text-gray-900">CNY → GHS</p>
-                                    {transferDirection === 'receive_from_china' && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-brand rounded-full" />}
+                                    {transferDirection === 'receive_from_china' && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-600 rounded-full" />}
                                 </button>
                             </div>
 
@@ -276,7 +281,7 @@ export default function TransferPage() {
                                             type="number"
                                             value={amountGhs}
                                             onChange={(e) => setAmountGhs(e.target.value)}
-                                            className="block w-full pl-7 pr-3 py-2.5 bg-gray-50 border border-gray-100 rounded-lg text-sm font-semibold text-gray-900 focus:bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand outline-none"
+                                            className="block w-full pl-7 pr-3 py-2.5 bg-gray-50 border border-gray-100 rounded-lg text-sm font-semibold text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
                                             placeholder="0.00"
                                         />
                                     </div>
@@ -303,22 +308,22 @@ export default function TransferPage() {
                                     <button
                                         type="button"
                                         onClick={() => setPaymentMethod('wallet')}
-                                        className={`flex items-center gap-2 py-2.5 px-3 rounded-lg border-2 transition-all text-left ${paymentMethod === 'wallet' ? 'border-brand bg-brand/10' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
+                                        className={`flex items-center gap-2 py-2.5 px-3 rounded-lg border-2 transition-all text-left ${paymentMethod === 'wallet' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
                                     >
-                                        <Wallet className={`h-5 w-5 shrink-0 ${paymentMethod === 'wallet' ? 'text-brand' : 'text-gray-400'}`} />
+                                        <Wallet className={`h-5 w-5 shrink-0 ${paymentMethod === 'wallet' ? 'text-blue-600' : 'text-gray-400'}`} />
                                         <div className="min-w-0">
-                                            <p className={`text-xs font-semibold ${paymentMethod === 'wallet' ? 'text-brand' : 'text-gray-700'}`}>Wallet</p>
+                                            <p className={`text-xs font-semibold ${paymentMethod === 'wallet' ? 'text-blue-600' : 'text-gray-700'}`}>Wallet</p>
                                             <p className="text-xs text-gray-500 truncate">Use balance</p>
                                         </div>
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setPaymentMethod('card')}
-                                        className={`flex items-center gap-2 py-2.5 px-3 rounded-lg border-2 transition-all text-left ${paymentMethod === 'card' ? 'border-brand bg-brand/10' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
+                                        className={`flex items-center gap-2 py-2.5 px-3 rounded-lg border-2 transition-all text-left ${paymentMethod === 'card' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
                                     >
-                                        <CreditCard className={`h-5 w-5 shrink-0 ${paymentMethod === 'card' ? 'text-brand' : 'text-gray-400'}`} />
+                                        <CreditCard className={`h-5 w-5 shrink-0 ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-400'}`} />
                                         <div className="min-w-0">
-                                            <p className={`text-xs font-semibold ${paymentMethod === 'card' ? 'text-brand' : 'text-gray-700'}`}>Paystack</p>
+                                            <p className={`text-xs font-semibold ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-700'}`}>Paystack</p>
                                             <p className="text-xs text-gray-500 truncate">Card / mobile money</p>
                                         </div>
                                     </button>
@@ -333,7 +338,7 @@ export default function TransferPage() {
                                             key={type}
                                             type="button"
                                             onClick={() => setRecipientType(type)}
-                                            className={`px-3 py-2 rounded-lg border-2 font-semibold text-xs transition-all min-h-[44px] ${recipientType === type ? 'border-brand bg-brand text-white' : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'}`}
+                                            className={`px-3 py-2 rounded-lg border-2 font-semibold text-xs transition-all min-h-[44px] ${recipientType === type ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'}`}
                                         >
                                             {type.replace('_', ' ')}
                                         </button>
@@ -425,7 +430,7 @@ export default function TransferPage() {
                                                             )}
                                                         </div>
                                                     ))}
-                                                    <button type="button" onClick={addQrEntry} className="text-xs font-semibold text-brand hover:text-gray-900 flex items-center gap-1 bg-brand/10 px-3 py-2 rounded-lg border border-brand/20 min-h-[44px]">
+                                                    <button type="button" onClick={addQrEntry} className="text-xs font-semibold text-blue-600 hover:text-gray-900 flex items-center gap-1 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200 min-h-[44px]">
                                                         <Plus className="h-3 w-3" /> Upload new code
                                                     </button>
                                                 </div>
@@ -448,7 +453,7 @@ export default function TransferPage() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full h-11 bg-brand text-white rounded-lg font-semibold text-sm hover:bg-brand/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="w-full h-11 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {isSubmitting ? 'Processing...' : 'Send transfer'}
                             </button>
@@ -461,19 +466,19 @@ export default function TransferPage() {
             {!isCreating && (
                 <div className="space-y-3">
                     <h2 className="text-xs font-semibold text-gray-600 flex items-center gap-2">
-                        <HistoryIcon className="h-4 w-4 text-brand" />
+                        <HistoryIcon className="h-4 w-4 text-blue-600" />
                         Transfers
                     </h2>
                     <div className="dashboard-table-wrap">
                         <div className="px-4 py-4 md:px-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                             <p className="text-xs font-semibold capitalize text-gray-500">All transfers</p>
-                            <button onClick={fetchTransfers} className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-brand" aria-label="Refresh">
+                            <button onClick={fetchTransfers} className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-blue-600" aria-label="Refresh">
                                 <RefreshCw className="h-4 w-4" />
                             </button>
                         </div>
                         {loading ? (
                             <div className="p-12 text-center">
-                                <div className="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full mx-auto" />
+                                <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto" />
                             </div>
                         ) : transfers.length === 0 ? (
                             <div className="p-12 md:p-16 text-center">
@@ -481,7 +486,7 @@ export default function TransferPage() {
                                 <p className="text-sm text-gray-500 mb-4">No transfers yet</p>
                                 <button
                                     onClick={() => setIsCreating(true)}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-xl text-sm font-semibold hover:bg-brand/90 transition-colors"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
                                 >
                                     Send your first transfer
                                 </button>
@@ -492,7 +497,7 @@ export default function TransferPage() {
                                     <li key={tx.id} className="px-4 py-4 md:px-6 hover:bg-gray-50 transition-all group">
                                         <div className="flex justify-between items-start gap-4">
                                             <div className="min-w-0 space-y-0.5">
-                                                <p className="text-sm font-semibold text-gray-900 group-hover:text-brand truncate">{tx.recipient_name}</p>
+                                                <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 truncate">{tx.recipient_name}</p>
                                                 <p className="text-xs text-gray-500">{new Date(tx.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                                                 <p className="text-xs text-gray-400 font-mono">Ref: {tx.token.slice(0, 12)}</p>
                                             </div>
@@ -522,7 +527,7 @@ export default function TransferPage() {
                                         <div className="mt-4">
                                             <Link
                                                 href={`/dashboard/transfers/${tx.id}/confirmation`}
-                                                className="inline-flex items-center gap-2 text-xs font-semibold text-brand hover:text-brand/90"
+                                                className="inline-flex items-center gap-2 text-xs font-semibold text-blue-600 hover:text-blue-700"
                                             >
                                                 <FileDown className="h-3.5 w-3.5" /> View details
                                             </Link>
@@ -534,7 +539,7 @@ export default function TransferPage() {
                     </div>
                 </div>
             )}
-            </div>
+            </DashboardContent>
         </DashboardLayout>
     );
 }

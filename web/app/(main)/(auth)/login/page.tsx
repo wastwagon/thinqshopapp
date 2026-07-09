@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
-import AuthScreen, { authInputClass, authLabelClass, authPrimaryBtnClass } from '@/components/auth/AuthScreen';
+import AuthScreen, { authInputClass, authLabelClass, authPrimaryBtnClass, authLinkClass } from '@/components/auth/AuthScreen';
 import { Mail, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 const emailOrPhone = z.string().min(1, 'Enter your email or phone number').refine(
@@ -31,7 +31,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const searchParams = useSearchParams();
-    const from = searchParams.get('from') || undefined;
+    const from = searchParams.get('from') || '/dashboard';
     const { login } = useAuth();
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
@@ -61,7 +61,7 @@ export default function LoginPage() {
             footer={
                 <div className="pt-6 mt-6 border-t border-gray-100 text-center">
                     <p className="text-gray-500 text-sm mb-2">Don&apos;t have an account?</p>
-                    <Link href="/register" className="inline-flex items-center gap-2 text-brand hover:text-brand/90 font-medium text-sm">
+                    <Link href="/register" className={`inline-flex items-center gap-2 text-sm ${authLinkClass}`}>
                         Create account
                         <ArrowRight className="h-4 w-4" />
                     </Link>
@@ -87,7 +87,7 @@ export default function LoginPage() {
                 <div>
                     <div className="flex justify-between items-center mb-1.5">
                         <label className={authLabelClass}>Password</label>
-                        <Link href="/forgot-password" className="text-xs font-medium text-brand hover:text-brand/80">
+                        <Link href="/forgot-password" className={`text-xs font-medium ${authLinkClass}`}>
                             Forgot password?
                         </Link>
                     </div>

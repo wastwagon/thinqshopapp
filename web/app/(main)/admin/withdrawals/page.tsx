@@ -153,8 +153,8 @@ export default function AdminWithdrawalsPage() {
                             onClick={() => setStatusFilter(tab)}
                             className={`h-8 px-3 rounded-lg text-xs font-semibold border transition-colors ${
                                 statusFilter === tab
-                                    ? 'bg-brand text-white border-brand'
-                                    : 'bg-white text-gray-600 border-gray-200 hover:border-brand/30'
+                                    ? 'bg-blue-600 text-white border-blue-600'
+                                    : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
                             }`}
                         >
                             {tab === '' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -195,8 +195,8 @@ export default function AdminWithdrawalsPage() {
                                         <tr key={w.id} className="hover:bg-gray-50/50">
                                             <td className="px-3 py-2.5">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-7 h-7 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
-                                                        <User className="h-3.5 w-3.5 text-brand" />
+                                                    <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                                                        <User className="h-3.5 w-3.5 text-blue-600" />
                                                     </div>
                                                     <div className="min-w-0">
                                                         <p className="text-xs font-semibold text-gray-900 truncate">{userLabel(w)}</p>
@@ -282,7 +282,7 @@ export default function AdminWithdrawalsPage() {
                                 {modal.action === 'approve' ? 'Payment note (optional)' : 'Rejection reason'}
                             </label>
                             <textarea
-                                className="w-full min-h-[80px] bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                className="w-full min-h-[80px] bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
                                 placeholder={modal.action === 'approve' ? 'e.g. Paid via MTN ref 12345' : 'Reason for rejection'}

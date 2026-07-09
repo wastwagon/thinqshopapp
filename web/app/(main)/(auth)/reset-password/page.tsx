@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
-import AuthScreen, { authInputClass, authLabelClass, authPrimaryBtnClass } from '@/components/auth/AuthScreen';
+import AuthScreen, { authInputClass, authLabelClass, authPrimaryBtnClass, authLinkClass } from '@/components/auth/AuthScreen';
 import { ArrowLeft, Lock } from 'lucide-react';
 
 const resetSchema = z
@@ -40,7 +40,7 @@ function ResetPasswordForm() {
                 subtitle="This link is missing or expired. Request a new one from the sign-in page."
             >
                 <div className="text-center pt-2">
-                    <Link href="/forgot-password" className="text-brand font-medium text-sm hover:text-brand/90">
+                    <Link href="/forgot-password" className={`text-sm ${authLinkClass}`}>
                         Request new link
                     </Link>
                 </div>
@@ -65,7 +65,7 @@ function ResetPasswordForm() {
     if (done) {
         return (
             <AuthScreen title="Password updated" subtitle="Redirecting you to sign in…">
-                <Link href="/login" className="inline-flex items-center gap-2 text-brand font-medium text-sm">
+                <Link href="/login" className={`inline-flex items-center gap-2 text-sm ${authLinkClass}`}>
                     <ArrowLeft className="h-4 w-4" />
                     Sign in now
                 </Link>

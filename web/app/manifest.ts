@@ -11,11 +11,11 @@ export default function manifest(): MetadataRoute.Manifest {
         scope: '/',
         display: 'standalone',
         background_color: '#f8fafc',
-        theme_color: '#2563eb',
+        theme_color: '#02274f',
         orientation: 'portrait-primary',
         icons: [
-            { src: '/thinqshop-logo.webp', sizes: 'any', type: 'image/webp', purpose: 'any' },
-            { src: '/favicon.png', sizes: 'any', type: 'image/png', purpose: 'any' },
+            { src: '/thinqshop-logo.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+            { src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
         ],
     };
 }

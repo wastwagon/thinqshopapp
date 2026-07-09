@@ -164,7 +164,7 @@ export default function AdminTransfersPage() {
     const StatusBadge = ({ status }: { status: string }) => {
         const colors: Record<string, string> = {
             pending: 'bg-orange-50 text-orange-700 border-orange-200',
-            payment_received: 'bg-brand/5 text-brand border-brand/30',
+            payment_received: 'bg-blue-50 text-blue-600 border-blue-300',
             processing: STATUS_PROGRESS_BADGE,
             sent_to_partner: 'bg-purple-50 text-purple-700 border-purple-200',
             completed: 'bg-green-50 text-green-700 border-green-200',
@@ -179,7 +179,7 @@ export default function AdminTransfersPage() {
     };
 
     const stats = [
-        { label: 'Total', value: transfers.length, icon: FileText, color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20' },
+        { label: 'Total', value: transfers.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
         { label: 'Pending', value: pendingCount, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
         { label: 'In progress', value: inProgressCount, icon: Package, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
         { label: 'Completed', value: completedCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' }
@@ -236,7 +236,7 @@ export default function AdminTransfersPage() {
                             {loading ? (
                                 <tr>
                                     <td colSpan={6} className="py-10 text-center">
-                                        <div className="animate-spin h-7 w-7 border-2 border-brand border-t-transparent rounded-full mx-auto mb-2" />
+                                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
                                         <p className="text-sm text-gray-500">Loading...</p>
                                     </td>
                                 </tr>
@@ -252,7 +252,7 @@ export default function AdminTransfersPage() {
                                     <tr key={transfer.id} className="hover:bg-gray-50/50 transition-all group">
                                         <td className="px-3 py-2.5">
                                             <div className="flex flex-col gap-0.5">
-                                                <span className="text-sm font-semibold text-gray-900 group-hover:text-brand transition-colors truncate max-w-[120px]">{transfer.token}</span>
+                                                <span className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate max-w-[120px]">{transfer.token}</span>
                                                 <span className="text-xs text-gray-500 flex items-center gap-1">
                                                     <Calendar className="h-3 w-3" />
                                                     {new Date(transfer.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -263,7 +263,7 @@ export default function AdminTransfersPage() {
                                             <div className="flex items-center justify-center gap-1.5">
                                                 <span className="text-xs font-semibold text-gray-900">₵{Number(transfer.amount_ghs).toFixed(2)}</span>
                                                 <ArrowRight className="h-3 w-3 text-gray-300" />
-                                                <span className="text-xs font-semibold text-brand">¥{Number(transfer.amount_cny).toFixed(2)}</span>
+                                                <span className="text-xs font-semibold text-blue-600">¥{Number(transfer.amount_cny).toFixed(2)}</span>
                                             </div>
                                         </td>
                                         <td className="px-3 py-2.5">
@@ -271,7 +271,7 @@ export default function AdminTransfersPage() {
                                                 <p className="text-xs font-medium text-gray-700 truncate max-w-[140px]">
                                                     {`${transfer.user.profile?.first_name || ''} ${transfer.user.profile?.last_name || ''}`.trim() || transfer.user.email}
                                                 </p>
-                                                <p className="text-xs text-brand truncate max-w-[140px]">
+                                                <p className="text-xs text-blue-600 truncate max-w-[140px]">
                                                     Recipient: {transfer.recipient_name}
                                                 </p>
                                             </div>
@@ -282,7 +282,7 @@ export default function AdminTransfersPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setQrModalTransferId(transfer.id)}
-                                                    className="mt-1 inline-flex items-center text-xs font-semibold text-brand bg-brand/5 hover:bg-brand/10 py-0.5 rounded px-1.5"
+                                                    className="mt-1 inline-flex items-center text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-50 py-0.5 rounded px-1.5"
                                                 >
                                                     <QrCode className="h-2.5 w-2.5 mr-1" /> QR ({transfer.qr_codes.length})
                                                 </button>
@@ -293,7 +293,7 @@ export default function AdminTransfersPage() {
                                                 {transfer.admin_reply_images && transfer.admin_reply_images.length > 0 && (
                                                     <div className="flex gap-1.5 flex-wrap">
                                                             {transfer.admin_reply_images.map((img, i) => (
-                                                            <a key={i} href={img} target="_blank" rel="noopener noreferrer" className="block w-10 h-10 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 hover:ring-2 hover:ring-brand/30">
+                                                            <a key={i} href={img} target="_blank" rel="noopener noreferrer" className="block w-10 h-10 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 hover:ring-2 hover:ring-blue-300">
                                                                 <img src={img} alt="Proof" className="w-full h-full object-cover" />
                                                             </a>
                                                         ))}
@@ -302,7 +302,7 @@ export default function AdminTransfersPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setExpandedId(expandedId === transfer.id ? null : transfer.id)}
-                                                    className="flex items-center gap-1.5 text-xs font-semibold text-brand hover:text-brand/80"
+                                                    className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700"
                                                 >
                                                     <ImagePlus className="h-3 w-3" />
                                                     {transfer.admin_reply_images?.length ? 'Add more' : 'Add proof'}
@@ -314,13 +314,13 @@ export default function AdminTransfersPage() {
                                                             value={feedbackUrl[transfer.id] || ''}
                                                             onChange={(e) => setFeedbackUrl((prev) => ({ ...prev, [transfer.id]: e.target.value }))}
                                                             placeholder="Image URL"
-                                                            className="flex-1 min-w-0 px-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                                            className="flex-1 min-w-0 px-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                                         />
                                                         <button
                                                             type="button"
                                                             onClick={() => handleAddFeedbackImage(transfer.id)}
                                                             disabled={uploadingId === transfer.id || !feedbackUrl[transfer.id]?.trim()}
-                                                            className="px-3 py-1.5 bg-brand text-white text-xs font-semibold rounded-lg hover:bg-brand/90 disabled:opacity-50 flex items-center gap-1 shrink-0"
+                                                            className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1 shrink-0"
                                                         >
                                                             {uploadingId === transfer.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Upload className="h-3 w-3" /> Add</>}
                                                         </button>
@@ -335,7 +335,7 @@ export default function AdminTransfersPage() {
                                                         type="button"
                                                         disabled={updatingId === transfer.id}
                                                         onClick={() => handleStatusUpdate(transfer.id, 'payment_received')}
-                                                        className="h-8 px-3 bg-brand text-white rounded-lg font-semibold text-xs hover:bg-brand/90 transition-all"
+                                                        className="h-8 px-3 bg-blue-600 text-white rounded-lg font-semibold text-xs hover:bg-blue-700 transition-all"
                                                     >
                                                         Approve
                                                     </button>
@@ -352,7 +352,7 @@ export default function AdminTransfersPage() {
                                                 <div className="relative inline-block">
                                                     <select
                                                         disabled={updatingId === transfer.id}
-                                                        className="appearance-none bg-gray-50 border border-gray-100 text-gray-700 text-xs font-semibold rounded-lg py-2 pl-2.5 pr-8 hover:border-brand/40 focus:outline-none focus:ring-2 focus:ring-brand/20 cursor-pointer"
+                                                        className="appearance-none bg-gray-50 border border-gray-100 text-gray-700 text-xs font-semibold rounded-lg py-2 pl-2.5 pr-8 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
                                                         value={transfer.status}
                                                         onChange={(e) => handleStatusUpdate(transfer.id, e.target.value)}
                                                     >
@@ -377,7 +377,7 @@ export default function AdminTransfersPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-                <div className="bg-brand rounded-xl p-4 text-white">
+                <div className="bg-blue-600 rounded-xl p-4 text-white">
                     <h4 className="text-xs font-semibold text-white/90 mb-1">Amount in progress</h4>
                     <p className="text-xl font-bold tracking-tight">₵{inProgressAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     <p className="text-white/90/80 text-xs mt-2 pt-2 border-t border-white/10">Total GHS not yet completed</p>
@@ -388,7 +388,7 @@ export default function AdminTransfersPage() {
                         <div className="relative w-14 h-14 shrink-0">
                             <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                                 <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="3" className="text-gray-100" />
-                                <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="3" className="text-brand" strokeDasharray={94.25} strokeDashoffset={94.25 * (1 - completionRate / 100)} />
+                                <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="3" className="text-blue-600" strokeDasharray={94.25} strokeDashoffset={94.25 * (1 - completionRate / 100)} />
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-sm font-bold text-gray-900">{completionRate}%</span>
@@ -428,7 +428,7 @@ export default function AdminTransfersPage() {
                                                         <a
                                                             href={entry.image}
                                                             download={`${transfer?.token}-qr-${i + 1}.png`}
-                                                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lgbg-brand text-white text-xs font-semiboldhover:bg-brand/90"
+                                                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lgbg-blue-600 text-white text-xs font-semiboldhover:bg-blue-700"
                                                         >
                                                             <Download className="h-3 w-3" /> Download
                                                         </a>
@@ -459,7 +459,7 @@ export default function AdminTransfersPage() {
                                                     {(!fulfillment || fulfillment.status !== 'fulfilled') && (
                                                         <>
                                                             <div className="flex flex-wrap gap-2">
-                                                                <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-brand/30 bg-brand/5/50 text-brand text-xs font-semibold hover:bg-brand/10">
+                                                                <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 text-blue-600 text-xs font-semibold hover:bg-blue-50">
                                                                     <Upload className="h-3 w-3" /> Upload
                                                                     <input
                                                                         type="file"
@@ -473,7 +473,7 @@ export default function AdminTransfersPage() {
                                                                     value={draft.image?.startsWith('data:') ? '' : draft.image}
                                                                     onChange={(e) => setFulfillmentDraft((p) => ({ ...p, [key]: { ...p[key], image: e.target.value } }))}
                                                                     placeholder="Or image URL"
-                                                                    className="flex-1 min-w-[120px] px-2.5 py-2 rounded-lg border border-gray-200 text-xs focus:ring-2 focus:ring-brand/20 focus:border-brand outline-none"
+                                                                    className="flex-1 min-w-[120px] px-2.5 py-2 rounded-lg border border-gray-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
                                                                 />
                                                             </div>
                                                             <textarea
@@ -481,13 +481,13 @@ export default function AdminTransfersPage() {
                                                                 onChange={(e) => setFulfillmentDraft((p) => ({ ...p, [key]: { ...p[key], notes: e.target.value } }))}
                                                                 placeholder="Notes (optional)"
                                                                 rows={2}
-                                                                className="w-full px-2.5 py-2 rounded-lg border border-gray-200 text-xs focus:ring-2 focus:ring-brand/20 outline-none resize-none"
+                                                                className="w-full px-2.5 py-2 rounded-lg border border-gray-200 text-xs focus:ring-2 focus:ring-blue-500/20 outline-none resize-none"
                                                             />
                                                             <button
                                                                 type="button"
                                                                 disabled={fulfillingKey === key || !(draft.image.trim())}
                                                                 onClick={() => handleSaveFulfillment(transfer!.id, i, draft.image, draft.notes)}
-                                                                className="w-full sm:w-auto px-4 py-2 rounded-lgbg-brand text-white text-xs font-semibold hover:bg-brand disabled:opacity-50 flex items-center justify-center gap-1.5"
+                                                                className="w-full sm:w-auto px-4 py-2 rounded-lgbg-blue-600 text-white text-xs font-semibold hover:bg-blue-600 disabled:opacity-50 flex items-center justify-center gap-1.5"
                                                             >
                                                                 {fulfillingKey === key ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
                                                                 {fulfillingKey === key ? 'Saving…' : 'Mark fulfilled'}

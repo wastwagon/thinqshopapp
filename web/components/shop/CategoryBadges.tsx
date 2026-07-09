@@ -34,7 +34,7 @@ export default function CategoryBadges({ categories, currentSlug = '' }: Categor
                 <div className="flex flex-nowrap gap-2 min-w-max items-stretch">
                     <Link
                         href="/shop"
-                        className={`shrink-0 min-h-[44px] flex items-center px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${isAll ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'}`}
+                        className={`shrink-0 min-h-[44px] flex items-center px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${isAll ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'}`}
                         aria-current={isAll ? 'page' : undefined}
                     >
                         All products
@@ -48,7 +48,7 @@ export default function CategoryBadges({ categories, currentSlug = '' }: Categor
                             <Link
                                 key={cat.id ?? cat.slug ?? cat.name}
                                 href={`/shop/${slug}`}
-                                className={`shrink-0 min-h-[44px] flex items-center px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${isActive ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'}`}
+                                className={`shrink-0 min-h-[44px] flex items-center px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${isActive ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'}`}
                                 aria-current={isActive ? 'page' : undefined}
                             >
                                 {cat.name}

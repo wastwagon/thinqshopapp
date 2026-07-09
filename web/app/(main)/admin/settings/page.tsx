@@ -84,7 +84,7 @@ export default function AdminSettings() {
     const toggles = [
         { id: 'maintenanceMode', label: 'Maintenance mode', desc: 'When on, users cannot place orders or use the dashboard.', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100', icon: Lock },
         { id: 'allowAutomaticPayouts', label: 'Auto-approve small payouts', desc: 'Automatically approve transfer payouts under ₵5,000.', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', icon: Database },
-        { id: 'debugLogs', label: 'Debug logging', desc: 'Save detailed logs for troubleshooting.', color: 'text-brand', bg: 'bg-brand/5', border: 'border-brand/20', icon: Settings },
+        { id: 'debugLogs', label: 'Debug logging', desc: 'Save detailed logs for troubleshooting.', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', icon: Settings },
     ];
 
     return (
@@ -106,7 +106,7 @@ export default function AdminSettings() {
                 <div className="lg:col-span-2 space-y-4 min-w-0">
                     <div className="admin-card p-5">
                         <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2.5 mb-4">
-                            <div className="w-9 h-9 rounded-lg bg-brand/5 flex items-center justify-center text-brand border border-brand/20">
+                            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-200">
                                 <Globe className="h-4 w-4" />
                             </div>
                             Exchange rates
@@ -120,13 +120,13 @@ export default function AdminSettings() {
                                         step="0.0001"
                                         min="0"
                                         placeholder="e.g. 0.65"
-                                        className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 pr-12 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                        className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 pr-12 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                         value={settings.ghsCnyRate}
                                         onChange={(e) => setSettings({ ...settings, ghsCnyRate: e.target.value })}
                                         disabled={rateLoading}
                                     />
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                        {rateLoading ? <RefreshCw className="h-3.5 w-3.5 text-brand animate-spin" /> : <span className="text-xs font-semibold text-brand bg-brand/5 px-1.5 py-0.5 rounded">Live</span>}
+                                        {rateLoading ? <RefreshCw className="h-3.5 w-3.5 text-blue-600 animate-spin" /> : <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">Live</span>}
                                     </div>
                                 </div>
                                 <p className="text-xs text-gray-400">Used to convert customer transfer amounts.</p>
@@ -137,7 +137,7 @@ export default function AdminSettings() {
                                     <input
                                         type="number"
                                         step="0.1"
-                                        className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 pr-10 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                        className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 pr-10 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                         value={settings.procurementFee}
                                         onChange={(e) => setSettings({ ...settings, procurementFee: e.target.value })}
                                     />
@@ -170,7 +170,7 @@ export default function AdminSettings() {
                                     <button
                                         type="button"
                                         onClick={() => setSettings({ ...settings, [t.id]: !settings[t.id as keyof typeof settings] })}
-                                        className={`w-12 h-6 rounded-full transition-all relative shrink-0 ${settings[t.id as keyof typeof settings] ? 'bg-brand' : 'bg-gray-200'}`}
+                                        className={`w-12 h-6 rounded-full transition-all relative shrink-0 ${settings[t.id as keyof typeof settings] ? 'bg-blue-600' : 'bg-gray-200'}`}
                                     >
                                         <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${settings[t.id as keyof typeof settings] ? 'left-6' : 'left-0.5'}`} />
                                     </button>
@@ -184,7 +184,7 @@ export default function AdminSettings() {
                 <div className="lg:sticky lg:top-6 flex flex-col gap-5 min-w-0">
                     <section className="admin-card p-5" aria-label="System status">
                         <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-4">
-                            <span className="w-1.5 h-1.5 bg-brand/50 rounded-full animate-pulse" aria-hidden />
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" aria-hidden />
                             System status
                         </h3>
                         <div className="space-y-4">
@@ -197,7 +197,7 @@ export default function AdminSettings() {
                                 <div className="flex gap-1.5">
                                     {[1, 2, 3, 4, 5].map((n) => (
                                         <div key={n} className="flex-1 h-8 bg-gray-100 rounded-md overflow-hidden relative">
-                                            <div className="absolute bottom-0 left-0 w-full h-2/3 bg-brand/50 rounded-b-md" />
+                                            <div className="absolute bottom-0 left-0 w-full h-2/3 bg-blue-500 rounded-b-md" />
                                         </div>
                                     ))}
                                 </div>
@@ -210,7 +210,7 @@ export default function AdminSettings() {
                                     type="button"
                                     onClick={() => runDbAction('migrate')}
                                     disabled={dbAction !== 'idle'}
-                                    className="w-full h-9 border border-brand/30 text-brand rounded-lg text-xs font-semibold hover:bg-brand/5 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="w-full h-9 border border-blue-300 text-blue-600 rounded-lg text-xs font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
                                     {dbAction === 'migrate' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <DatabaseIcon className="h-3.5 w-3.5" />}
                                     Run migrations
@@ -244,11 +244,11 @@ export default function AdminSettings() {
 
                     <section className="bg-gray-900 rounded-xl p-5 text-white" aria-label="Audit log">
                         <div className="flex items-center gap-2 mb-2">
-                            <Shield className="h-4 w-4 text-brand/70" />
+                            <Shield className="h-4 w-4 text-blue-600/70" />
                             <h4 className="text-sm font-bold">Audit log</h4>
                         </div>
                         <p className="text-xs text-gray-400 leading-relaxed">Changes to settings are logged for security and compliance.</p>
-                        <Link href="/admin/audit-logs" className="inline-flex mt-3 text-xs font-semibold text-brand/70 hover:text-white/90">
+                        <Link href="/admin/audit-logs" className="inline-flex mt-3 text-xs font-semibold text-blue-600/70 hover:text-white/90">
                             View audit logs {'->'}
                         </Link>
                     </section>
