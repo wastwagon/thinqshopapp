@@ -1,7 +1,11 @@
+'use client';
+
 import type { MouseEvent } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Heart, ShoppingCart, Star, Eye, ArrowRight } from 'lucide-react';
 import ProductImage from './ProductImage';
+import ProductImageLightbox, { ProductImageTapHint } from './ProductImageLightbox';
 import PriceDisplay from './PriceDisplay';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -36,9 +40,27 @@ interface ProductCardProps {
     product: Product;
 }
 
+function collectGalleryImages(product: Product, imagesList: string[], fallback: string): string[] {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    const add = (raw?: string | null) => {
+        if (!raw) return;
+        const s = String(raw).trim();
+        if (!s || seen.has(s)) return;
+        seen.add(s);
+        out.push(s);
+    };
+    for (const src of imagesList) add(src);
+    for (const src of product.gallery_images ?? []) add(src);
+    add(product.image);
+    add(fallback);
+    return out;
+}
+
 export default function ProductCard({ product }: ProductCardProps) {
     const { addToCart } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
+    const [lightboxOpen, setLightboxOpen] = useState(false);
 
     const basePrice = typeof product.price === 'string'
         ? parseFloat(String(product.price).replace(/[^0-9.]/g, ''))
@@ -65,6 +87,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     const productSlug = product.slug || (typeof product.id !== 'undefined' ? String(product.id) : null) || product.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '');
     const productId = typeof product.id === 'number' ? product.id : Number(product.id) || 0;
+    const productHref = `/products/${productSlug}`;
+
+    const galleryImages = useMemo(
+        () => collectGalleryImages(product, imagesList, productImage),
+        [product, imagesList, productImage],
+    );
 
     const desc = product.short_description || product.description;
     const descPreview = desc ? (desc.length > 80 ? desc.slice(0, 80).trim() + '…' : desc) : null;
@@ -89,10 +117,16 @@ export default function ProductCard({ product }: ProductCardProps) {
         });
     };
 
+    const openLightbox = (e?: MouseEvent) => {
+        e?.preventDefault();
+        e?.stopPropagation();
+        if (galleryImages.length > 0) setLightboxOpen(true);
+    };
+
     const inWishlist = isInWishlist(Number(productId));
     const wishlistBtnClass = inWishlist
         ? 'border-red-200 text-red-500'
-        : 'border-gray-100 text-gray-600 hover:bg-brand hover:text-white hover:border-brand';
+        : 'border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white hover:border-blue-600';
     const actionBtnBase =
         'bg-white shadow-sm border rounded-full flex items-center justify-center transition-all';
     const actionBtnCompact = `${actionBtnBase} w-8 h-8`;
@@ -112,8 +146,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <Heart className={`${compact ? iconCompact : iconDesktop} ${inWishlist ? 'fill-current' : ''}`} aria-hidden />
             </button>
             <Link
-                href={`/products/${productSlug}`}
-                className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-brand hover:text-white`}
+                href={productHref}
+                className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white`}
                 title="Quick View"
                 aria-label="Quick view product"
             >
@@ -121,8 +155,11 @@ export default function ProductCard({ product }: ProductCardProps) {
             </Link>
             <button
                 type="button"
-                onClick={() => productId && addToCart(productId, 1, firstVariantId)}
-                className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-brand hover:text-white`}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    productId && addToCart(productId, 1, firstVariantId);
+                }}
+                className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white`}
                 title={hasVariants ? 'Add first option to cart (choose options on product page)' : 'Add to Cart'}
                 aria-label="Add to cart"
             >
@@ -132,43 +169,53 @@ export default function ProductCard({ product }: ProductCardProps) {
     );
 
     return (
-        <div className="group flat-card-interactive overflow-hidden relative flex flex-col h-full">
-            <div className="flex md:hidden items-center justify-end gap-1 px-2 pt-2 pb-1 shrink-0">
-                {quickActions(true)}
-            </div>
-
-            {/* Image Container */}
-            <div className="aspect-square relative overflow-hidden bg-gray-50/80 flex items-center justify-center">
-                <ProductImage
-                    src={productImage}
-                    alt={product.name}
-                    width={400}
-                    height={400}
-                    className="object-contain p-5 group-hover:scale-105 transition-transform duration-500"
-                />
-
-                {/* Sale Badge */}
-                {product.compare_price && (
-                    <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded z-10">
-                        OFFER
-                    </div>
-                )}
-                {product.is_consignment && (
-                    <div className={`absolute top-3 ${product.compare_price ? 'left-[4.5rem]' : 'left-3'} bg-violet-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10`}>
-                        CONSIGNMENT
-                    </div>
-                )}
-
-                {/* Desktop: hover overlay on image */}
-                <div className="hidden md:flex absolute top-3 right-3 flex-row gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                    {quickActions(false)}
+        <>
+            <div className="group flat-card-interactive overflow-hidden relative flex flex-col h-full">
+                <div className="flex md:hidden items-center justify-end gap-1 px-2 pt-2 pb-1 shrink-0">
+                    {quickActions(true)}
                 </div>
-            </div>
+
+                <button
+                    type="button"
+                    onClick={openLightbox}
+                    disabled={galleryImages.length === 0}
+                    aria-label={`Expand image: ${product.name}`}
+                    className="group/image aspect-square relative overflow-hidden bg-gray-50/80 flex items-center justify-center w-full text-left cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-default"
+                >
+                    <ProductImage
+                        src={productImage}
+                        alt={product.name}
+                        width={400}
+                        height={400}
+                        className="object-contain p-5 group-hover/image:scale-105 transition-transform duration-500 pointer-events-none"
+                    />
+
+                    {product.compare_price && (
+                        <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded z-10 pointer-events-none">
+                            OFFER
+                        </div>
+                    )}
+                    {product.is_consignment && (
+                        <div className={`absolute top-3 ${product.compare_price ? 'left-[4.5rem]' : 'left-3'} bg-violet-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10 pointer-events-none`}>
+                            CONSIGNMENT
+                        </div>
+                    )}
+
+                    <ProductImageTapHint />
+
+                    <div
+                        className="hidden md:flex absolute top-3 right-3 flex-row gap-1.5 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 z-20"
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                    >
+                        {quickActions(false)}
+                    </div>
+                </button>
 
             {/* Content */}
             <div className="p-4 flex flex-col flex-1">
                 <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-xs font-medium text-brand truncate">
+                    <span className="text-xs font-medium text-blue-600 truncate">
                         {typeof product.category === 'string' ? product.category : product.category?.name || 'Vetted Asset'}
                     </span>
                     <div className="flex items-center gap-0.5 shrink-0">
@@ -177,8 +224,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </div>
                 </div>
 
-                <Link href={`/products/${productSlug}`}>
-                    <h3 className="text-xs font-semibold text-gray-900 group-hover:text-brand transition-colors line-clamp-2 leading-snug">
+                <Link href={productHref}>
+                    <h3 className="text-xs font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug">
                         {product.name}
                     </h3>
                 </Link>
@@ -204,14 +251,23 @@ export default function ProductCard({ product }: ProductCardProps) {
                         </div>
                     </div>
                     <Link
-                        href={`/products/${productSlug}`}
-                        className="w-9 h-9 min-w-[36px] min-h-[36px] p-1.5 bg-gray-50 border border-gray-200/80 text-gray-700 rounded-lg flex items-center justify-center hover:bg-brand/10 hover:text-brand hover:border-brand/30 transition-colors group/btn"
+                        href={productHref}
+                        className="w-9 h-9 min-w-[36px] min-h-[36px] p-1.5 bg-gray-50 border border-gray-200/80 text-gray-700 rounded-lg flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors group/btn"
                         aria-label="View product"
                     >
                         <ArrowRight className="h-4 w-4 shrink-0 group-hover/btn:scale-110 transition-transform" aria-hidden />
                     </Link>
                 </div>
             </div>
-        </div>
+            </div>
+
+            <ProductImageLightbox
+                open={lightboxOpen}
+                onClose={() => setLightboxOpen(false)}
+                images={galleryImages}
+                title={product.name}
+                productHref={productHref}
+            />
+        </>
     );
 }

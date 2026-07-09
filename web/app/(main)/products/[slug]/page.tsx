@@ -4,11 +4,14 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Star, Heart, Plus, Minus, Truck, RotateCcw } from 'lucide-react';
+import { ShoppingCart, Star, Heart, Plus, Minus, Truck, RotateCcw, ZoomIn } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
+import ShopContent from '@/components/shop/ShopContent';
+import ShopTrustRow from '@/components/shop/ShopTrustRow';
+import { ShopLoadingState } from '@/components/shop/ShopSuccessShell';
 import ProductCard from '@/components/ui/ProductCard';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import localProducts from '@/lib/data/scraped_products.json';
@@ -19,6 +22,7 @@ import { useAuth } from '@/context/AuthContext';
 import { trackViewItem } from '@/lib/analytics';
 import { getMediaUrl } from '@/lib/media';
 import ProductReviewForm from '@/components/product/ProductReviewForm';
+import ProductImageLightbox from '@/components/ui/ProductImageLightbox';
 
 function normalizeProductImages(product: any): string[] {
     let raw = product?.images ?? product?.gallery_images;
@@ -45,6 +49,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const [product, setProduct] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
     const [quantity, setQuantity] = useState(1);
     const [reviews, setReviews] = useState<{ data: ReviewRow[]; meta: { total: number; totalPages: number } }>({ data: [], meta: { total: 0, totalPages: 0 } });
     const [policies, setPolicies] = useState<PolicyRow[]>([]);
@@ -144,21 +149,21 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
 
     if (loading) return (
         <ShopLayout>
-            <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="text-gray-300 font-bold tracking-widest uppercase animate-pulse">Loading Product...</div>
-            </div>
+            <ShopLoadingState message="Loading product…" />
         </ShopLayout>
     );
 
     if (!product) return (
         <ShopLayout>
-            <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="text-gray-900 font-bold tracking-widest uppercase">Product Not Found</div>
+            <div className="min-h-[60vh] flex items-center justify-center bg-white">
+                <div className="text-gray-900 font-bold tracking-tight">Product not found</div>
             </div>
         </ShopLayout>
     );
 
     const images = normalizeProductImages(product);
+    const galleryImages = images.filter((img) => img && img !== '/placeholder.svg');
+    const canExpandGallery = galleryImages.length > 0;
     const variants = Array.isArray(product.variants) ? product.variants : [];
     const selectedVariant =
         variants.find((v: { id: number }) => Number(v.id) === selectedVariantId) ?? (variants[0] as { id?: number } | undefined) ?? null;
@@ -198,8 +203,10 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
 
     return (
         <ShopLayout>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-                <PageHeader breadcrumbs={breadcrumbs} />
+            <div className="bg-white min-h-full pb-8">
+            <ShopContent wide className="py-8 sm:py-12">
+                <PageHeader breadcrumbs={breadcrumbs} accent="amber" />
+                <ShopTrustRow compact />
                 <div className="lg:grid lg:grid-cols-2 lg:gap-x-16 lg:items-start">
                     {/* Image Gallery */}
                     <div className="flex flex-col-reverse">
@@ -211,7 +218,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                             key={idx}
                                             type="button"
                                             aria-label={`View image ${idx + 1} of ${images.length}`}
-                                            className={`relative h-20 w-20 sm:h-24 sm:w-auto shrink-0 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden border transition-all ${selectedImage === idx ? 'border-brand ring-1 ring-brand/15' : 'border-gray-100 hover:border-gray-200'}`}
+                                            className={`relative h-20 w-20 sm:h-24 sm:w-auto shrink-0 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden border transition-all ${selectedImage === idx ? 'border-blue-500 ring-1 ring-blue-100' : 'border-gray-100 hover:border-gray-200'}`}
                                             onClick={() => setSelectedImage(idx)}
                                         >
                                             <Image src={img} alt="" fill className="object-contain p-2" sizes="96px" unoptimized={imgUnoptimized(img)} />
@@ -221,16 +228,28 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             </div>
                         )}
 
-                        <div className="w-full aspect-square relative rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
+                        <button
+                            type="button"
+                            onClick={() => canExpandGallery && setLightboxOpen(true)}
+                            disabled={!canExpandGallery}
+                            aria-label={`Expand image: ${product.name}`}
+                            className="group/image w-full aspect-square relative rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-default"
+                        >
                             <Image
                                 src={images[selectedImage] || '/placeholder.svg'}
                                 alt={product.name}
                                 fill
-                                className="object-contain p-8 transition-transform duration-700"
+                                className="object-contain p-8 transition-transform duration-700 group-hover/image:scale-[1.02] pointer-events-none"
                                 sizes="(max-width: 1024px) 100vw, 50vw"
                                 unoptimized={imgUnoptimized(images[selectedImage] || '')}
                             />
-                        </div>
+                            {canExpandGallery && (
+                                <span className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-xl bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
+                                    <ZoomIn className="h-3.5 w-3.5" aria-hidden />
+                                    Tap to expand
+                                </span>
+                            )}
+                        </button>
                     </div>
 
                     {/* Product Info */}
@@ -246,12 +265,12 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     </span>
                                 )}
                             </div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 border border-brand/15 text-xs font-medium text-brand mb-4">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-xs font-medium text-blue-700 mb-4">
                                 {product.is_consignment
                                     ? 'Sell for Me · Local pickup & handover'
                                     : 'Ships from abroad · 7–14 day delivery'}
                             </div>
-                            <h1 className="page-title text-base sm:text-lg md:text-xl leading-snug">{product.name}</h1>
+                            <h1 className="text-xl font-bold text-gray-900 tracking-tight leading-snug">{product.name}</h1>
                         </div>
 
                         <div className="flex flex-wrap items-baseline gap-2 sm:gap-4 mb-6 sm:mb-8">
@@ -286,7 +305,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                                 type="button"
                                                 disabled={oos}
                                                 onClick={() => setSelectedVariantId(vid)}
-                                                className={`flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-all ${sel ? 'border-brand bg-white ring-1 ring-brand/15' : 'border-gray-200 bg-white hover:border-gray-300'} ${oos ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                className={`flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-all ${sel ? 'border-blue-500 bg-white ring-1 ring-blue-100' : 'border-gray-200 bg-white hover:border-gray-300'} ${oos ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             >
                                                 <span className="font-semibold text-gray-900 capitalize">
                                                     {String(v.variant_type).replace(/_/g, ' ')}: <span className="text-gray-600">{v.variant_value}</span>
@@ -377,7 +396,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 </div>
                                 <button
                                     type="button"
-                                    className="w-full sm:flex-1 min-h-[44px] bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 transition-colors flex items-center justify-center gap-2 py-2.5 px-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full sm:flex-1 min-h-[44px] bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 py-2.5 px-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_8px_24px_-8px_rgba(2,39,79,0.35)]"
                                         onClick={() => {
                                             if (isOwnConsignment) {
                                                 toast.error('You cannot purchase your own Sell for Me listing');
@@ -420,7 +439,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     </p>
                                     <p className="text-xs sm:text-sm font-medium text-gray-900">{p.short_text || '7–14 days (international)'}</p>
                                     {p.full_text && (
-                                        <Link href="/privacy" className="text-xs font-semibold text-brand mt-2 inline-block touch-manipulation">Full delivery info</Link>
+                                        <Link href="/privacy" className="text-xs font-semibold text-blue-600 mt-2 inline-block touch-manipulation">Full delivery info</Link>
                                     )}
                                 </div>
                             ))}
@@ -431,7 +450,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     </p>
                                     <p className="text-xs sm:text-sm font-medium text-gray-900">{p.short_text || '14-day returns on unused items'}</p>
                                     {p.full_text && (
-                                        <Link href="/terms" className="text-xs font-semibold text-brand mt-2 inline-block touch-manipulation">Returns policy</Link>
+                                        <Link href="/terms" className="text-xs font-semibold text-blue-600 mt-2 inline-block touch-manipulation">Returns policy</Link>
                                     )}
                                 </div>
                             ))}
@@ -509,6 +528,16 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                         </div>
                     </div>
                 )}
+            </ShopContent>
+
+            <ProductImageLightbox
+                open={lightboxOpen}
+                onClose={() => setLightboxOpen(false)}
+                images={canExpandGallery ? galleryImages : images}
+                title={product.name}
+                initialIndex={selectedImage}
+                onIndexChange={setSelectedImage}
+            />
             </div>
         </ShopLayout>
     );
