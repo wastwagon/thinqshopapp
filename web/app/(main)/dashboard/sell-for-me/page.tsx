@@ -3,10 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/axios';
 import { getMediaUrl } from '@/lib/media';
-import { Tag, Plus, Upload, Trash2, ChevronRight, Store, ImageIcon } from 'lucide-react';
+import { Tag, Plus, Upload, Trash2, ChevronRight, Store, ImageIcon, Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
+import DashboardContent from '@/components/dashboard/DashboardContent';
 
 interface Category {
     id: number;
@@ -19,6 +21,7 @@ interface Submission {
     submission_number: string;
     name: string;
     asking_price: number | string;
+    stock_quantity?: number;
     status: string;
     created_at: string;
     expected_payout_ghs?: number | string | null;
@@ -66,6 +69,9 @@ const STATUS_LABELS: Record<string, string> = {
     sale_voided: 'Sale cancelled',
 };
 
+const USER_EDITABLE_STATUSES = new Set(['submitted', 'changes_requested', 'rejected', 'delisted', 'listed']);
+const USER_DELETABLE_STATUSES = new Set(['submitted', 'under_review', 'changes_requested', 'rejected', 'delisted', 'listed']);
+
 export default function SellForMePage() {
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
@@ -88,6 +94,7 @@ export default function SellForMePage() {
         description: '',
         short_description: '',
         asking_price: '',
+        stock_quantity: '1',
         condition: 'good',
         brand: '',
         model: '',
@@ -169,6 +176,7 @@ export default function SellForMePage() {
             description: '',
             short_description: '',
             asking_price: '',
+            stock_quantity: '1',
             condition: 'good',
             brand: '',
             model: '',
@@ -190,6 +198,7 @@ export default function SellForMePage() {
                 description: data.description || '',
                 short_description: data.short_description || '',
                 asking_price: String(data.asking_price ?? ''),
+                stock_quantity: String(data.stock_quantity ?? 1),
                 condition: data.condition || 'good',
                 brand: specs.brand || '',
                 model: specs.model || '',
@@ -208,12 +217,17 @@ export default function SellForMePage() {
         e.preventDefault();
         const categoryId = parseInt(form.category_id, 10);
         const price = parseFloat(form.asking_price);
+        const stockQty = parseInt(form.stock_quantity, 10);
         if (!form.name.trim() || !categoryId || !form.description.trim()) {
             toast.error('Title, category, and description are required');
             return;
         }
         if (!Number.isFinite(price) || price < 1) {
             toast.error('Enter a valid asking price');
+            return;
+        }
+        if (!Number.isFinite(stockQty) || stockQty < 1) {
+            toast.error('Stock quantity must be at least 1');
             return;
         }
         if (form.images.length < 1) {
@@ -233,6 +247,7 @@ export default function SellForMePage() {
                 description: form.description.trim(),
                 short_description: form.short_description.trim() || undefined,
                 asking_price: price,
+                stock_quantity: stockQty,
                 condition: form.condition,
                 images: form.images,
                 pickup_details: form.pickup_details.trim(),
@@ -242,7 +257,12 @@ export default function SellForMePage() {
             };
             if (editingId) {
                 await api.patch(`/consignment/submissions/${editingId}`, payload);
-                toast.success('Listing updated and resubmitted');
+                const editingRow = submissions.find((s) => s.id === editingId);
+                toast.success(
+                    editingRow && editingRow.status === 'listed'
+                        ? 'Listing updated on shop'
+                        : 'Listing updated and resubmitted',
+                );
             } else {
                 await api.post('/consignment/submissions', payload);
                 toast.success('Listing submitted for review');
@@ -256,27 +276,41 @@ export default function SellForMePage() {
         }
     };
 
+    const handleDelete = async (s: Submission) => {
+        if (!USER_DELETABLE_STATUSES.has(s.status)) {
+            toast.error('This listing cannot be deleted');
+            return;
+        }
+        if (!window.confirm(`Delete "${s.name}"? This cannot be undone.`)) return;
+        try {
+            await api.delete(`/consignment/submissions/${s.id}`);
+            toast.success('Listing deleted');
+            if (editingId === s.id) resetForm();
+            fetchData();
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Delete failed');
+        }
+    };
+
     return (
         <DashboardLayout>
-            <div className="pb-20 md:pb-10">
-                <header className="mb-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                    <div>
-                        <h1 className="page-title flex items-center gap-2">
-                            <Tag className="h-6 w-6 text-brand" />
-                            Sell for Me
-                        </h1>
-                        <p className="page-subtitle">List items for ThinQShop to sell — earnings go to your wallet</p>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => setIsCreating(true)}
-                        disabled={!serviceEnabled}
-                        className="h-10 px-4 bg-brand text-white rounded-xl font-semibold text-xs flex items-center gap-2 hover:bg-brand/90 disabled:opacity-50"
-                    >
-                        <Plus className="h-4 w-4" />
-                        New listing
-                    </button>
-                </header>
+            <DashboardContent wide>
+                <DashboardPageHeader
+                    title="Sell for Me"
+                    subtitle="List items for ThinQShop to sell — earnings go to your wallet"
+                    accent="orange"
+                    action={
+                        <button
+                            type="button"
+                            onClick={() => setIsCreating(true)}
+                            disabled={!serviceEnabled}
+                            className="h-10 px-4 bg-blue-600 text-white rounded-xl font-semibold text-xs flex items-center gap-2 hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                        >
+                            <Plus className="h-4 w-4" />
+                            New listing
+                        </button>
+                    }
+                />
 
                 {!serviceEnabled && (
                     <div className="flat-card p-4 mb-4 border border-amber-200 bg-amber-50 text-sm text-amber-800">
@@ -289,13 +323,13 @@ export default function SellForMePage() {
                         <p className="font-semibold">Payout adjustment due: ₵{pendingClawback.toFixed(2)}</p>
                         <p className="text-xs text-amber-800 mt-1">
                             A buyer refund occurred after a payout was credited. This reduces your withdrawable wallet balance.{' '}
-                            <Link href="/dashboard/wallet" className="text-brand font-semibold hover:underline">View wallet</Link>
+                            <Link href="/dashboard/wallet" className="text-blue-600 font-semibold hover:underline">View wallet</Link>
                         </p>
                     </div>
                 )}
 
                 {isCreating && serviceEnabled && (
-                    <div className="flat-card p-4 md:p-6 mb-6 border border-brand/20">
+                    <div className="flat-card p-4 md:p-6 mb-6 border border-blue-200">
                         <h2 className="text-sm font-semibold text-gray-900 mb-1">
                             {editingId ? 'Update your listing' : 'Submit a product listing'}
                         </h2>
@@ -341,6 +375,19 @@ export default function SellForMePage() {
                                         onChange={(e) => setForm({ ...form, asking_price: e.target.value })}
                                         required
                                     />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 block mb-1">Stock (quantity) *</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        step="1"
+                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm"
+                                        value={form.stock_quantity}
+                                        onChange={(e) => setForm({ ...form, stock_quantity: e.target.value })}
+                                        required
+                                    />
+                                    <p className="text-[10px] text-gray-400 mt-1">How many units you are listing for sale</p>
                                 </div>
                                 <div>
                                     <label className="text-xs font-medium text-gray-600 block mb-1">Condition *</label>
@@ -421,7 +468,7 @@ export default function SellForMePage() {
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
                                     disabled={uploading}
-                                    className="h-9 px-4 border border-dashed border-gray-300 rounded-xl text-xs font-medium text-gray-600 flex items-center gap-2 hover:border-brand/40"
+                                    className="h-9 px-4 border border-dashed border-gray-300 rounded-xl text-xs font-medium text-gray-600 flex items-center gap-2 hover:border-blue-300"
                                 >
                                     {uploading ? <Upload className="h-4 w-4 animate-pulse" /> : <ImageIcon className="h-4 w-4" />}
                                     {uploading ? 'Uploading…' : 'Add images'}
@@ -429,8 +476,14 @@ export default function SellForMePage() {
                             </div>
 
                             <div className="flex gap-2 pt-2">
-                                <button type="submit" disabled={submitting} className="h-10 px-5 bg-brand text-white rounded-xl text-xs font-semibold disabled:opacity-50">
-                                    {submitting ? 'Saving…' : editingId ? 'Resubmit for review' : 'Submit for review'}
+                                <button type="submit" disabled={submitting} className="h-10 px-5 bg-blue-600 text-white rounded-xl text-xs font-semibold disabled:opacity-50">
+                                    {submitting
+                                        ? 'Saving…'
+                                        : editingId
+                                          ? submissions.find((s) => s.id === editingId)?.status === 'listed'
+                                              ? 'Save changes'
+                                              : 'Resubmit for review'
+                                          : 'Submit for review'}
                                 </button>
                                 <button type="button" onClick={resetForm} className="h-10 px-5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600">
                                     Cancel
@@ -454,8 +507,10 @@ export default function SellForMePage() {
                             <div key={s.id} className="flat-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div className="min-w-0">
                                     <p className="text-sm font-semibold text-gray-900 truncate">{s.name}</p>
-                                    <p className="text-xs text-gray-500">{s.submission_number} · ₵{Number(s.asking_price).toFixed(2)}</p>
-                                    <p className="text-xs text-brand font-medium mt-1">{STATUS_LABELS[s.status] || s.status}</p>
+                                    <p className="text-xs text-gray-500">
+                                        {s.submission_number} · ₵{Number(s.asking_price).toFixed(2)} · Qty {s.stock_quantity ?? 1}
+                                    </p>
+                                    <p className="text-xs text-blue-600 font-medium mt-1">{STATUS_LABELS[s.status] || s.status}</p>
                                     {s.status === 'sold' && s.expected_payout_ghs != null && (
                                         <p className="text-xs text-violet-700 mt-1">
                                             ₵{Number(s.expected_payout_ghs).toFixed(2)} in escrow until delivery confirmed
@@ -471,20 +526,29 @@ export default function SellForMePage() {
                                         <p className="text-xs text-amber-700 mt-1">Admin: {s.admin_notes}</p>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-2 shrink-0">
-                                    {s.status === 'changes_requested' && (
+                                <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                                    {USER_EDITABLE_STATUSES.has(s.status) && (
                                         <button
                                             type="button"
                                             onClick={() => startEditing(s.id)}
-                                            className="text-xs font-semibold text-brand hover:underline"
+                                            className="text-xs font-semibold text-blue-600 hover:underline inline-flex items-center gap-1"
                                         >
-                                            Update & resubmit
+                                            <Pencil className="h-3 w-3" /> Edit
+                                        </button>
+                                    )}
+                                    {USER_DELETABLE_STATUSES.has(s.status) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDelete(s)}
+                                            className="text-xs font-semibold text-red-600 hover:underline inline-flex items-center gap-1"
+                                        >
+                                            <Trash2 className="h-3 w-3" /> Delete
                                         </button>
                                     )}
                                     {s.product?.slug && s.status === 'listed' && (
                                         <Link
                                             href={`/products/${s.product.slug}`}
-                                            className="text-xs font-semibold text-brand flex items-center gap-1 hover:underline"
+                                            className="text-xs font-semibold text-blue-600 flex items-center gap-1 hover:underline"
                                         >
                                             View on shop <ChevronRight className="h-3 w-3" />
                                         </Link>
@@ -494,11 +558,11 @@ export default function SellForMePage() {
                                             <button
                                                 type="button"
                                                 onClick={() => openLedger(s.id, s.name)}
-                                                className="text-xs font-semibold text-gray-600 hover:text-brand"
+                                                className="text-xs font-semibold text-gray-600 hover:text-blue-600"
                                             >
                                                 History
                                             </button>
-                                            <Link href="/dashboard/wallet" className="text-xs font-semibold text-gray-600 hover:text-brand">
+                                            <Link href="/dashboard/wallet" className="text-xs font-semibold text-gray-600 hover:text-blue-600">
                                                 Wallet
                                             </Link>
                                         </>
@@ -508,7 +572,7 @@ export default function SellForMePage() {
                         ))
                     )}
                 </div>
-            </div>
+            </DashboardContent>
 
             {ledgerModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">

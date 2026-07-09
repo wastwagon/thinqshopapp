@@ -276,6 +276,7 @@ model ConsignmentSubmission {
   description          String?
   category_id          Int
   asking_price         Decimal               @db.Decimal(10, 2)
+  stock_quantity       Int                   @default(1)
   approved_price       Decimal?              @db.Decimal(10, 2)
   compare_price        Decimal?              @db.Decimal(10, 2)
   commission_pct       Decimal?              @db.Decimal(5, 2)

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import { Prisma, ConsignmentEscrowEvent } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { WalletService } from '../finance/wallet.service';
@@ -809,7 +809,7 @@ export class ConsignmentService {
         const updated = await this.prisma.$transaction(async (tx) => {
             await tx.product.update({
                 where: { id: submission.product_id! },
-                data: { is_active: true, stock_quantity: 1 },
+                data: { is_active: true, stock_quantity: Math.max(1, submission.stock_quantity ?? 1) },
             });
             return tx.consignmentSubmission.update({
                 where: { id },
@@ -1137,6 +1137,7 @@ export class ConsignmentService {
                 description: dto.description.trim(),
                 category_id: dto.category_id,
                 asking_price: dto.asking_price,
+                stock_quantity: Math.max(1, Math.floor(Number(dto.stock_quantity ?? 1))),
                 condition: dto.condition,
                 images: dto.images,
                 specifications: specs as Prisma.InputJsonValue,
@@ -1209,8 +1210,9 @@ export class ConsignmentService {
 
     async updateUserSubmission(userId: number, id: number, dto: Partial<CreateConsignmentSubmissionDto>) {
         const row = await this.findUserSubmission(userId, id);
-        if (row.status !== 'changes_requested') {
-            throw new BadRequestException('Only submissions awaiting changes can be updated');
+        const editableStatuses = ['submitted', 'changes_requested', 'rejected', 'delisted', 'listed'];
+        if (!editableStatuses.includes(row.status)) {
+            throw new BadRequestException('This listing cannot be edited in its current status');
         }
 
         if (dto.category_id !== undefined) {
@@ -1229,23 +1231,98 @@ export class ConsignmentService {
         if (dto.model?.trim()) specs.model = dto.model.trim();
         if (dto.serial_number?.trim()) specs.serial_number = dto.serial_number.trim();
 
-        return this.prisma.consignmentSubmission.update({
-            where: { id },
-            data: {
-                ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
-                ...(dto.category_id !== undefined ? { category_id: dto.category_id } : {}),
-                ...(dto.description !== undefined ? { description: dto.description.trim() } : {}),
-                ...(dto.short_description !== undefined ? { short_description: dto.short_description?.trim() || null } : {}),
-                ...(dto.asking_price !== undefined ? { asking_price: dto.asking_price } : {}),
-                ...(dto.condition !== undefined ? { condition: dto.condition } : {}),
-                ...(dto.images !== undefined ? { images: dto.images } : {}),
-                ...(dto.pickup_details !== undefined ? { pickup_details: dto.pickup_details.trim() } : {}),
-                specifications: specs as Prisma.InputJsonValue,
-                status: 'submitted',
-                admin_notes: null,
-            },
-            include: { category: true, product: { select: { id: true, slug: true, is_active: true } } },
+        const stockQty = dto.stock_quantity !== undefined
+            ? Math.max(1, Math.floor(Number(dto.stock_quantity)))
+            : undefined;
+
+        const resubmitStatuses = ['submitted', 'changes_requested', 'rejected', 'delisted'];
+        const shouldResubmit = resubmitStatuses.includes(row.status);
+
+        return this.prisma.$transaction(async (tx) => {
+            const updated = await tx.consignmentSubmission.update({
+                where: { id },
+                data: {
+                    ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
+                    ...(dto.category_id !== undefined ? { category_id: dto.category_id } : {}),
+                    ...(dto.description !== undefined ? { description: dto.description.trim() } : {}),
+                    ...(dto.short_description !== undefined ? { short_description: dto.short_description?.trim() || null } : {}),
+                    ...(dto.asking_price !== undefined ? { asking_price: dto.asking_price } : {}),
+                    ...(stockQty !== undefined ? { stock_quantity: stockQty } : {}),
+                    ...(dto.condition !== undefined ? { condition: dto.condition } : {}),
+                    ...(dto.images !== undefined ? { images: dto.images } : {}),
+                    ...(dto.pickup_details !== undefined ? { pickup_details: dto.pickup_details.trim() } : {}),
+                    specifications: specs as Prisma.InputJsonValue,
+                    ...(shouldResubmit
+                        ? { status: 'submitted' as const, admin_notes: null, rejection_reason: null }
+                        : {}),
+                },
+                include: { category: true, product: { select: { id: true, slug: true, is_active: true } } },
+            });
+
+            if (row.status === 'listed' && row.product_id) {
+                const productUpdate: Prisma.ProductUpdateInput = {};
+                if (dto.name !== undefined) productUpdate.name = dto.name.trim();
+                if (dto.description !== undefined) productUpdate.description = dto.description.trim();
+                if (dto.short_description !== undefined) {
+                    productUpdate.short_description = dto.short_description?.trim() || null;
+                }
+                if (dto.asking_price !== undefined) productUpdate.price = dto.asking_price;
+                if (stockQty !== undefined) productUpdate.stock_quantity = stockQty;
+                if (dto.images !== undefined) productUpdate.images = dto.images as Prisma.InputJsonValue;
+                if (dto.category_id !== undefined) {
+                    productUpdate.category = { connect: { id: dto.category_id } };
+                }
+                if (Object.keys(productUpdate).length > 0) {
+                    await tx.product.update({
+                        where: { id: row.product_id },
+                        data: productUpdate,
+                    });
+                }
+            }
+
+            return updated;
         });
+    }
+
+    /** Permanently remove a Sell for Me submission (and shop product if safe). */
+    async deleteSubmission(id: number, options: { userId?: number; adminId?: number }) {
+        const submission = await this.prisma.consignmentSubmission.findUnique({
+            where: { id },
+            include: { product: { select: { id: true } } },
+        });
+        if (!submission) throw new NotFoundException('Submission not found');
+
+        if (options.userId != null && submission.user_id !== options.userId) {
+            throw new ForbiddenException('You can only delete your own listings');
+        }
+
+        if (['sold', 'paid_out'].includes(submission.status)) {
+            throw new BadRequestException('Cannot delete a listing with sales or payout history');
+        }
+
+        await this.prisma.$transaction(async (tx) => {
+            if (submission.product_id) {
+                const productId = submission.product_id;
+                const orderCount = await tx.orderItem.count({ where: { product_id: productId } });
+                if (orderCount > 0) {
+                    throw new BadRequestException(
+                        'Cannot delete — this product has order history. Delist it instead.',
+                    );
+                }
+                await tx.cartItem.deleteMany({ where: { product_id: productId } });
+                await tx.wishlist.deleteMany({ where: { product_id: productId } });
+                await tx.productReview.deleteMany({ where: { product_id: productId } });
+                await tx.productVariant.deleteMany({ where: { product_id: productId } });
+                await tx.consignmentSubmission.update({
+                    where: { id },
+                    data: { product_id: null },
+                });
+                await tx.product.delete({ where: { id: productId } });
+            }
+            await tx.consignmentSubmission.delete({ where: { id } });
+        });
+
+        return { deleted: true, id };
     }
 
     async markUnderReview(id: number, adminId: number) {
@@ -1270,6 +1347,10 @@ export class ConsignmentService {
 
         const approvedPrice = dto.approved_price ?? Number(submission.asking_price);
         const commissionPct = dto.commission_pct ?? await this.getDefaultCommissionPct();
+        const stockQuantity = Math.max(
+            1,
+            Math.floor(Number(dto.stock_quantity ?? submission.stock_quantity ?? 1)),
+        );
         const name = dto.name?.trim() || submission.name;
         const description = dto.description?.trim() || submission.description;
         const shortDescription = dto.short_description?.trim() || submission.short_description;
@@ -1286,7 +1367,7 @@ export class ConsignmentService {
                     short_description: shortDescription,
                     price: approvedPrice,
                     compare_price: dto.compare_price ?? null,
-                    stock_quantity: 1,
+                    stock_quantity: stockQuantity,
                     category_id: submission.category_id,
                     images: images as Prisma.InputJsonValue,
                     specifications: submission.specifications ?? Prisma.JsonNull,
@@ -1305,6 +1386,7 @@ export class ConsignmentService {
                     approved_price: approvedPrice,
                     compare_price: dto.compare_price ?? null,
                     commission_pct: commissionPct,
+                    stock_quantity: stockQuantity,
                     name,
                     description,
                     short_description: shortDescription,
@@ -1670,11 +1752,18 @@ export class ConsignmentService {
                 submission.commission_pct ?? product.commission_pct ?? FALLBACK_COMMISSION_PCT,
             );
             const expectedPayout = this.computeExpectedPayout(Number(item.total), commissionPct);
+            const qtySold = Math.max(1, Number(item.quantity ?? 1));
+            const newStock = Math.max(0, product.stock_quantity - qtySold);
 
-            await this.prisma.product.updateMany({
+            await this.prisma.product.update({
                 where: { id: product.id },
-                data: { stock_quantity: 0, is_active: false },
+                data: {
+                    stock_quantity: newStock,
+                    ...(newStock === 0 ? { is_active: false } : {}),
+                },
             });
+
+            if (newStock > 0) continue;
 
             const sold = await this.prisma.consignmentSubmission.updateMany({
                 where: { id: submission.id, status: 'listed' },

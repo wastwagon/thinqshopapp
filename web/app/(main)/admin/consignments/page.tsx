@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import Link from 'next/link';
-import { Tag, Search, CheckCircle, XCircle, Eye, ExternalLink, TrendingUp, Calendar } from 'lucide-react';
+import { Tag, Search, CheckCircle, XCircle, Eye, ExternalLink, TrendingUp, Calendar, Trash2 } from 'lucide-react';
 import {
     AreaChart,
     Area,
@@ -24,6 +24,7 @@ interface Submission {
     name: string;
     description?: string;
     asking_price: number | string;
+    stock_quantity?: number;
     approved_price?: number | string;
     commission_pct?: number | string;
     sale_amount_ghs?: number | null;
@@ -86,6 +87,7 @@ function formatMoney(value: number | null | undefined): string {
 
 const TABS = ['', 'submitted', 'under_review', 'changes_requested', 'listed', 'delisted', 'sold', 'paid_out', 'rejected'] as const;
 const FINANCIAL_STATUSES = new Set(['sold', 'paid_out']);
+const NON_DELETABLE_STATUSES = new Set(['sold', 'paid_out']);
 
 export default function AdminConsignmentsPage() {
     const [rows, setRows] = useState<Submission[]>([]);
@@ -97,6 +99,7 @@ export default function AdminConsignmentsPage() {
         approved_price: '',
         commission_pct: '20',
         compare_price: '',
+        stock_quantity: '1',
     });
     const [rejectReason, setRejectReason] = useState('');
     const [changesNote, setChangesNote] = useState('');
@@ -113,6 +116,11 @@ export default function AdminConsignmentsPage() {
     const [commissionTo, setCommissionTo] = useState(todayIso());
     const [commissionStats, setCommissionStats] = useState<CommissionStats | null>(null);
     const [loadingCommission, setLoadingCommission] = useState(true);
+    const [chartMounted, setChartMounted] = useState(false);
+
+    useEffect(() => {
+        setChartMounted(true);
+    }, []);
 
     const fetchCommissionStats = async (from = commissionFrom, to = commissionTo) => {
         setLoadingCommission(true);
@@ -193,6 +201,7 @@ export default function AdminConsignmentsPage() {
             approved_price: String(Number(s.asking_price)),
             commission_pct: platformSettings.default_commission_pct,
             compare_price: '',
+            stock_quantity: String(s.stock_quantity ?? 1),
         });
         setModal('approve');
     };
@@ -220,13 +229,20 @@ export default function AdminConsignmentsPage() {
 
     const handleApprove = async () => {
         if (!selected) return;
+        const stockQty = parseInt(approveForm.stock_quantity, 10);
+        if (!Number.isFinite(stockQty) || stockQty < 1) {
+            toast.error('Stock quantity must be at least 1');
+            return;
+        }
         setProcessing(true);
         try {
             const payload: Record<string, number | string> = {};
             const price = parseFloat(approveForm.approved_price);
             const commission = parseFloat(approveForm.commission_pct);
+            const stockQty = parseInt(approveForm.stock_quantity, 10);
             if (Number.isFinite(price)) payload.approved_price = price;
             if (Number.isFinite(commission)) payload.commission_pct = commission;
+            if (Number.isFinite(stockQty) && stockQty >= 1) payload.stock_quantity = stockQty;
             if (approveForm.compare_price) {
                 const cp = parseFloat(approveForm.compare_price);
                 if (Number.isFinite(cp)) payload.compare_price = cp;
@@ -318,6 +334,31 @@ export default function AdminConsignmentsPage() {
             fetchRows();
         } catch {
             toast.error('Failed to update');
+        }
+    };
+
+    const handleDelete = async (s: Submission) => {
+        if (NON_DELETABLE_STATUSES.has(s.status)) {
+            toast.error('Cannot delete listings with sales or payout history');
+            return;
+        }
+        const label = s.name || s.submission_number;
+        if (!window.confirm(`Permanently delete "${label}"? This removes the listing and shop product if present.`)) {
+            return;
+        }
+        setProcessing(true);
+        try {
+            await api.delete(`/consignment/admin/${s.id}`);
+            toast.success('Listing deleted');
+            if (selected?.id === s.id) {
+                setModal(null);
+                setSelected(null);
+            }
+            fetchRows();
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Delete failed');
+        } finally {
+            setProcessing(false);
         }
     };
 
@@ -425,8 +466,9 @@ export default function AdminConsignmentsPage() {
                                     No commission releases in this period
                                 </div>
                             ) : (
-                                <div className="h-[200px] w-full">
-                                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={100}>
+                                <div className="h-[200px] w-full min-w-0">
+                                    {chartMounted && (
+                                    <ResponsiveContainer width="100%" height={200} minWidth={200}>
                                         <AreaChart data={commissionChartData}>
                                             <defs>
                                                 <linearGradient id="colorCommission" x1="0" y1="0" x2="0" y2="1">
@@ -468,6 +510,7 @@ export default function AdminConsignmentsPage() {
                                             />
                                         </AreaChart>
                                     </ResponsiveContainer>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -481,7 +524,7 @@ export default function AdminConsignmentsPage() {
                             type="button"
                             onClick={() => setStatusFilter(tab)}
                             className={`h-8 px-3 rounded-lg text-xs font-semibold border ${
-                                statusFilter === tab ? 'bg-brand text-white border-brand' : 'bg-white text-gray-600 border-gray-200'
+                                statusFilter === tab ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200'
                             }`}
                         >
                             {tab === '' ? 'All' : tab.replace(/_/g, ' ')}
@@ -506,7 +549,7 @@ export default function AdminConsignmentsPage() {
                                 type="checkbox"
                                 checked={platformSettings.sell_for_me_enabled}
                                 onChange={(e) => setPlatformSettings({ ...platformSettings, sell_for_me_enabled: e.target.checked })}
-                                className="rounded border-gray-300 text-brand focus:ring-brand"
+                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
                             Accept new submissions
                         </label>
@@ -541,6 +584,7 @@ export default function AdminConsignmentsPage() {
                                     <th className="admin-th">Listing</th>
                                     <th className="admin-th">Consignor</th>
                                     <th className="admin-th">Price</th>
+                                    <th className="admin-th">Stock</th>
                                     {showFinancialColumns && (
                                         <>
                                             <th className="admin-th">Sale</th>
@@ -554,18 +598,19 @@ export default function AdminConsignmentsPage() {
                             </thead>
                             <tbody className="divide-y divide-gray-50">
                                 {loading ? (
-                                    <tr><td colSpan={showFinancialColumns ? 8 : 5} className="py-10 text-center text-sm text-gray-500">Loading…</td></tr>
+                                    <tr><td colSpan={showFinancialColumns ? 9 : 6} className="py-10 text-center text-sm text-gray-500">Loading…</td></tr>
                                 ) : filtered.length === 0 ? (
-                                    <tr><td colSpan={showFinancialColumns ? 8 : 5} className="py-10 text-center text-sm text-gray-500">No listings</td></tr>
+                                    <tr><td colSpan={showFinancialColumns ? 9 : 6} className="py-10 text-center text-sm text-gray-500">No listings</td></tr>
                                 ) : (
                                     filtered.map((s) => (
                                         <tr key={s.id} className="hover:bg-gray-50/50">
                                             <td className="px-3 py-2.5">
                                                 <p className="text-xs font-semibold text-gray-900">{s.name}</p>
-                                                <p className="text-[10px] text-gray-500">{s.submission_number} · {s.category?.name}</p>
+                                                <p className="text-[10px] text-gray-500">{s.submission_number} · {s.category?.name} · Qty {s.stock_quantity ?? 1}</p>
                                             </td>
                                             <td className="px-3 py-2.5 text-xs text-gray-700">{userName(s)}</td>
                                             <td className="px-3 py-2.5 text-xs font-semibold">₵{Number(s.asking_price).toFixed(2)}</td>
+                                            <td className="px-3 py-2.5 text-xs text-gray-700 tabular-nums">{s.stock_quantity ?? 1}</td>
                                             {showFinancialColumns && (
                                                 <>
                                                     <td className="px-3 py-2.5 text-xs font-semibold text-gray-900">
@@ -604,7 +649,7 @@ export default function AdminConsignmentsPage() {
                                                         <Link
                                                             href={`/products/${s.product.slug}`}
                                                             target="_blank"
-                                                            className="px-2 py-1 text-[10px] font-semibold rounded-lg border border-brand/30 text-brand inline-flex items-center gap-1"
+                                                            className="px-2 py-1 text-[10px] font-semibold rounded-lg border border-blue-300 text-blue-600 inline-flex items-center gap-1"
                                                         >
                                                             Shop <ExternalLink className="h-3 w-3" />
                                                         </Link>
@@ -654,6 +699,16 @@ export default function AdminConsignmentsPage() {
                                                             </button>
                                                         </>
                                                     )}
+                                                    {!NON_DELETABLE_STATUSES.has(s.status) && (
+                                                        <button
+                                                            type="button"
+                                                            disabled={processing}
+                                                            onClick={() => handleDelete(s)}
+                                                            className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-red-50 text-red-700 border border-red-100 inline-flex items-center gap-1"
+                                                        >
+                                                            <Trash2 className="h-3 w-3" /> Delete
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -681,6 +736,7 @@ export default function AdminConsignmentsPage() {
                                     )}
                                     <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3">{selected.description}</p>
                                     <p className="text-xs text-gray-500 mb-1"><strong>Pickup:</strong> {selected.pickup_details}</p>
+                                    <p className="text-xs text-gray-500 mb-1"><strong>Stock:</strong> {selected.stock_quantity ?? 1} unit{(selected.stock_quantity ?? 1) === 1 ? '' : 's'}</p>
                                     <p className="text-xs text-gray-500"><strong>Consignor:</strong> {userName(selected)} · {selected.user?.email}</p>
                                     <button type="button" onClick={() => setModal(null)} className="mt-4 h-9 px-4 rounded-lg text-sm font-semibold bg-gray-100">Close</button>
                                 </>
@@ -710,6 +766,18 @@ export default function AdminConsignmentsPage() {
                                                 value={approveForm.commission_pct}
                                                 onChange={(e) => setApproveForm({ ...approveForm, commission_pct: e.target.value })}
                                             />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-semibold text-gray-500">Stock quantity</label>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                step={1}
+                                                className="admin-input w-full mt-1"
+                                                value={approveForm.stock_quantity}
+                                                onChange={(e) => setApproveForm({ ...approveForm, stock_quantity: e.target.value })}
+                                            />
+                                            <p className="text-[10px] text-gray-400 mt-1">Units available on the shop after approval</p>
                                         </div>
                                         <div>
                                             <label className="text-xs font-semibold text-gray-500">Compare price (optional)</label>
@@ -755,7 +823,7 @@ export default function AdminConsignmentsPage() {
                                         value={changesNote}
                                         onChange={(e) => setChangesNote(e.target.value)}
                                     />
-                                    <button type="button" disabled={processing} onClick={handleRequestChanges} className="mt-4 h-10 px-4 rounded-lg bg-brand text-white text-sm font-semibold">Send</button>
+                                    <button type="button" disabled={processing} onClick={handleRequestChanges} className="mt-4 h-10 px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold">Send</button>
                                 </>
                             )}
 

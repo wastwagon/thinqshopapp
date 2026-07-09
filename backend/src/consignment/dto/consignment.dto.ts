@@ -32,6 +32,11 @@ export class CreateConsignmentSubmissionDto {
     @Min(1)
     asking_price: number;
 
+    @IsOptional()
+    @IsNumber()
+    @Min(1)
+    stock_quantity?: number;
+
     @IsIn(['new', 'like_new', 'good', 'fair'])
     condition: 'new' | 'like_new' | 'good' | 'fair';
 
@@ -86,6 +91,11 @@ export class UpdateConsignmentSubmissionDto {
     asking_price?: number;
 
     @IsOptional()
+    @IsNumber()
+    @Min(1)
+    stock_quantity?: number;
+
+    @IsOptional()
     @IsIn(['new', 'like_new', 'good', 'fair'])
     condition?: 'new' | 'like_new' | 'good' | 'fair';
 
@@ -122,6 +132,11 @@ export class ApproveConsignmentDto {
     @IsNumber()
     @Min(1)
     approved_price?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(1)
+    stock_quantity?: number;
 
     @IsOptional()
     @IsNumber()

@@ -3,6 +3,7 @@ import {
     Post,
     Get,
     Patch,
+    Delete,
     Body,
     Param,
     Query,
@@ -100,6 +101,12 @@ export class ConsignmentController {
         @Body() body: UpdateConsignmentSubmissionDto,
     ) {
         return this.consignmentService.updateUserSubmission(req.user.sub, Number(id), body);
+    }
+
+    @Delete('submissions/:id')
+    @UseGuards(AuthGuard)
+    async deleteUserSubmission(@Request() req: any, @Param('id') id: string) {
+        return this.consignmentService.deleteSubmission(Number(id), { userId: req.user.sub });
     }
 
     @Get('admin/list')
@@ -356,5 +363,17 @@ export class ConsignmentController {
             recordId: Number(id),
         });
         return updated;
+    }
+
+    @Delete('admin/:id')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.CONSIGNMENT_MANAGE)
+    async deleteSubmission(@Request() req: any, @Param('id') id: string) {
+        const result = await this.consignmentService.deleteSubmission(Number(id), { adminId: req.user.sub });
+        await this.auditService.logAdminAction(req, 'consignment.delete.admin', {
+            tableName: 'consignment_submissions',
+            recordId: Number(id),
+        });
+        return result;
     }
 }

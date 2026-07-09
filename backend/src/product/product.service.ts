@@ -316,7 +316,41 @@ export class ProductService {
     }
 
     async remove(id: number) {
-        return this.prisma.product.delete({ where: { id } });
+        const product = await this.prisma.product.findUnique({
+            where: { id },
+            include: { consignment_submission: { select: { id: true, status: true } } },
+        });
+        if (!product) {
+            throw new NotFoundException(`Product #${id} not found`);
+        }
+
+        const orderItemCount = await this.prisma.orderItem.count({ where: { product_id: id } });
+        if (orderItemCount > 0) {
+            throw new BadRequestException(
+                'Cannot delete product with order history. Deactivate it or remove it from Sell for Me instead.',
+            );
+        }
+
+        return this.prisma.$transaction(async (tx) => {
+            await tx.cartItem.deleteMany({ where: { product_id: id } });
+            await tx.wishlist.deleteMany({ where: { product_id: id } });
+            await tx.productReview.deleteMany({ where: { product_id: id } });
+            await tx.productVariant.deleteMany({ where: { product_id: id } });
+
+            if (product.consignment_submission) {
+                await tx.consignmentSubmission.update({
+                    where: { id: product.consignment_submission.id },
+                    data: {
+                        product_id: null,
+                        ...(product.consignment_submission.status === 'listed'
+                            ? { status: 'delisted' }
+                            : {}),
+                    },
+                });
+            }
+
+            return tx.product.delete({ where: { id } });
+        });
     }
 
     private async resolveLegacyCategoryIds(parentSlug: string): Promise<number[]> {
