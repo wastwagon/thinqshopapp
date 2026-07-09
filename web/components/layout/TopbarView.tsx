@@ -50,24 +50,22 @@ export interface TopbarViewProps {
 
 function DashboardHomeLogo() {
     return (
-        <div className="flex flex-col items-center justify-center min-w-0 pointer-events-none select-none">
-            <div className="flex items-center gap-1.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-sm">
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
-                        <path d="M6 8h12l-1.2 10.5a1 1 0 01-1 .8H8.2a1 1 0 01-1-.8L6 8z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                        <path d="M9 8V6a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                        <circle cx="15" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5" />
-                        <path d="M16.5 13.5l1.5 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                </span>
-                <span className="text-sm font-bold text-gray-900 tracking-tight truncate">
-                    ThinQ<span className="text-blue-600">Shopping</span>
-                </span>
+        <Link
+            href="/"
+            className="flex items-center justify-center min-w-0 pointer-events-auto"
+            aria-label="ThinQShopping home"
+        >
+            <div className="relative h-8 w-[148px] max-w-[52vw]">
+                <Image
+                    src="/thinqshop-logo.webp"
+                    alt="ThinQShopping"
+                    fill
+                    className="object-contain"
+                    sizes="148px"
+                    priority
+                />
             </div>
-            <p className="text-[9px] font-medium text-gray-400 tracking-wide mt-0.5 truncate max-w-[180px]">
-                Buy Smart, Ship Anywhere
-            </p>
-        </div>
+        </Link>
     );
 }
 
@@ -98,14 +96,14 @@ export default function TopbarView(props: TopbarViewProps) {
                     <button
                         type="button"
                         onClick={onMenuPress}
-                        className={`${isDashboardHome ? '' : 'md:hidden'} touch-target min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 shrink-0`}
+                        className="md:hidden touch-target min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 shrink-0"
                         aria-label="Open menu"
                     >
                         <Menu className="h-6 w-6" aria-hidden />
                     </button>
                 )}
                 {isDashboardHome && (
-                    <div className="flex-1 flex justify-center min-w-0 px-1">
+                    <div className="flex-1 flex justify-center min-w-0 px-1 md:hidden">
                         <DashboardHomeLogo />
                     </div>
                 )}
@@ -119,7 +117,7 @@ export default function TopbarView(props: TopbarViewProps) {
                     />
                 </div>
 
-                <div className={`flex items-center gap-1.5 md:gap-3 shrink-0 ${isDashboardHome ? '' : 'ml-auto'}`}>
+                <div className={`flex items-center gap-1.5 md:gap-3 shrink-0 ${isDashboardHome ? 'md:ml-auto' : 'ml-auto'}`}>
                     {!isDashboardHome && (
                         <button
                             type="button"

@@ -117,15 +117,15 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
                 <div className="h-full flex flex-col min-h-0">
                     {/* Header: safe area top so close button isn't under notch */}
                     <div className="flex items-center justify-between min-h-16 h-16 px-4 border-b border-gray-50 safe-area-inset-top flex-shrink-0">
-                        <Link href="/" className="flex items-center justify-center min-w-0 flex-1 md:flex-initial" aria-label="ThinQShop home">
-                            <div className="relative h-10 w-[168px] sm:h-11 sm:w-[185px] md:h-12 md:w-[202px] shrink-0">
-                                <Image src="/thinqshop-logo.webp" alt="ThinQShopping" fill className="object-contain object-left" priority sizes="202px" />
+                        <Link href="/" className="hidden md:flex items-center min-w-0" aria-label="ThinQShopping home">
+                            <div className="relative h-8 w-[134px] lg:h-9 lg:w-[151px] shrink-0">
+                                <Image src="/thinqshop-logo.webp" alt="ThinQShopping" fill className="object-contain object-left" priority sizes="151px" />
                             </div>
                         </Link>
                         <button
                             type="button"
                             onClick={toggleSidebar}
-                            className="md:hidden touch-target min-w-[44px] min-h-[44px] p-3 rounded-xl bg-gray-50 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors"
+                            className="md:hidden touch-target min-w-[44px] min-h-[44px] p-3 rounded-xl bg-gray-50 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors ml-auto"
                             aria-label="Close navigation menu"
                         >
                             <ChevronLeft className="h-5 w-5 text-gray-400" aria-hidden />
