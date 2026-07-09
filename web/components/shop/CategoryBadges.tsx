@@ -20,6 +20,11 @@ function getSlug(cat: Category): string {
     return cat.slug ?? cat.name?.toLowerCase?.()?.replace(/\s+/g, '-') ?? '';
 }
 
+const rootLinkClass = (active: boolean) =>
+    active
+        ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white border-blue-600 shadow-[0_4px_14px_-4px_rgba(37,99,235,0.55)]'
+        : 'bg-white text-gray-700 border-gray-200/90 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900 shadow-sm';
+
 export default function CategoryBadges({ categories, currentSlug = '' }: CategoryBadgesProps) {
     const isAll = !currentSlug;
     const roots = getShopNavRoots(categories);
@@ -30,35 +35,38 @@ export default function CategoryBadges({ categories, currentSlug = '' }: Categor
 
     return (
         <div className="space-y-3">
-            <div className="lg:hidden w-full -mx-4 sm:-mx-6 px-4 sm:px-6 overflow-x-auto overflow-y-hidden pb-2 no-scrollbar overflow-touch">
-                <div className="flex flex-nowrap gap-2 min-w-max items-stretch">
-                    <Link
-                        href="/shop"
-                        className={`shrink-0 min-h-[44px] flex items-center px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${isAll ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'}`}
-                        aria-current={isAll ? 'page' : undefined}
-                    >
-                        All products
-                    </Link>
-                    {roots.map((cat) => {
-                        const slug = getSlug(cat);
-                        const isActive =
-                            currentSlug === slug ||
-                            (activeRootId != null && cat.id === activeRootId);
-                        return (
-                            <Link
-                                key={cat.id ?? cat.slug ?? cat.name}
-                                href={`/shop/${slug}`}
-                                className={`shrink-0 min-h-[44px] flex items-center px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${isActive ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'}`}
-                                aria-current={isActive ? 'page' : undefined}
-                            >
-                                {cat.name}
-                            </Link>
-                        );
-                    })}
+            <div className="rounded-2xl border border-gray-200/90 bg-gray-50/60 p-2 sm:p-2.5">
+                <div className="w-full overflow-x-auto overflow-y-hidden pb-0.5 no-scrollbar overflow-touch">
+                    <div className="flex flex-nowrap sm:flex-wrap gap-2 min-w-max sm:min-w-0 items-stretch">
+                        <Link
+                            href="/shop"
+                            className={`shrink-0 min-h-[44px] flex items-center px-4 sm:px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all border ${rootLinkClass(isAll)}`}
+                            aria-current={isAll ? 'page' : undefined}
+                        >
+                            All Products
+                        </Link>
+                        {roots.map((cat) => {
+                            const slug = getSlug(cat);
+                            const isActive =
+                                currentSlug === slug ||
+                                (activeRootId != null && cat.id === activeRootId);
+                            return (
+                                <Link
+                                    key={cat.id ?? cat.slug ?? cat.name}
+                                    href={`/shop/${slug}`}
+                                    className={`shrink-0 min-h-[44px] flex items-center px-4 sm:px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all border ${rootLinkClass(isActive)}`}
+                                    aria-current={isActive ? 'page' : undefined}
+                                >
+                                    {cat.name}
+                                </Link>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
+
             {childChips.length > 0 && (
-                <div className="lg:hidden w-full -mx-4 sm:-mx-6 px-4 sm:px-6 overflow-x-auto overflow-y-hidden pb-1 no-scrollbar overflow-touch">
+                <div className="w-full overflow-x-auto overflow-y-hidden pb-0.5 no-scrollbar overflow-touch">
                     <SubcategoryLinks
                         subcategories={childChips}
                         currentSlug={currentSlug}

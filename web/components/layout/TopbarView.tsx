@@ -92,7 +92,7 @@ export default function TopbarView(props: TopbarViewProps) {
     const isDashboardHome = variant === 'dashboard-home';
 
     return (
-        <div role="banner" className="min-h-14 bg-white/92 border-b border-gray-200/80 flex flex-col sticky top-0 z-30 backdrop-blur-xl">
+        <div role="banner" className="min-h-14 bg-white border-b border-gray-200 flex flex-col sticky top-0 z-30">
             <div className={`h-14 flex items-center gap-2 px-3 md:px-6 ${isDashboardHome ? 'justify-between' : 'justify-between gap-3'}`}>
                 {onMenuPress && (
                     <button
@@ -114,7 +114,7 @@ export default function TopbarView(props: TopbarViewProps) {
                         id="topbar-search-desktop"
                         listboxId="topbar-search-desktop-suggestions"
                         className="w-full"
-                        inputClassName="h-10 pl-9 pr-3 rounded-xl text-sm border-gray-100 bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                        inputClassName="h-10 pl-9 pr-3 rounded-xl text-sm border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Search products..."
                     />
                 </div>
@@ -146,8 +146,8 @@ export default function TopbarView(props: TopbarViewProps) {
                         </button>
 
                         {showNotifications && (
-                            <div className="absolute right-0 mt-4 w-80 lg:w-96 bg-white border border-gray-200/90 rounded-2xl shadow-xl overflow-hidden z-50 flex flex-col max-h-[500px] animate-in slide-in-from-top-4 fade-in duration-200">
-                                <div className="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                            <div className="absolute right-0 mt-4 w-80 lg:w-96 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-50 flex flex-col max-h-[500px] animate-in slide-in-from-top-4 fade-in duration-200">
+                                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                                     <h3 className="text-xs font-semibold text-gray-900">Notifications</h3>
                                     {unreadCount > 0 && (
                                         <button onClick={handleMarkAllAsRead} className="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -m-2">
@@ -251,7 +251,7 @@ export default function TopbarView(props: TopbarViewProps) {
             </div>
 
             {mobileSearchOpen && (
-                <div className="md:hidden px-3 pb-3 pt-0 border-t border-gray-100 bg-white/95 relative z-40">
+                <div className="md:hidden px-3 pb-3 pt-0 border-t border-gray-200 bg-white relative z-40">
                     <SearchWithSuggestions
                         id="topbar-search-mobile"
                         listboxId="topbar-search-mobile-suggestions"

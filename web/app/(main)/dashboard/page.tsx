@@ -84,7 +84,7 @@ export default function DashboardPage() {
                             </h1>
                             <p className="text-sm text-gray-500 mt-1">What would you like to do today?</p>
                         </div>
-                        <div className="w-[46%] max-w-[180px] shrink-0">
+                        <div className="w-[52%] min-w-[148px] max-w-[220px] shrink-0">
                             <DashboardWalletCard
                                 balance={walletBalance}
                                 hidden={balanceHidden}

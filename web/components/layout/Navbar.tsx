@@ -90,7 +90,7 @@ export default function Navbar() {
 
     return (
         <nav
-            className="fixed top-0 w-full z-50 bg-white/92 backdrop-blur-xl border-b border-gray-200/80 flex flex-col"
+            className="fixed top-0 w-full z-50 bg-white border-b border-gray-200 flex flex-col"
             aria-label="Main navigation"
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 w-full flex items-center gap-4 sm:gap-8 lg:gap-4">
@@ -100,8 +100,8 @@ export default function Navbar() {
                     className="flex items-center h-full flex-shrink-0 touch-target rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
                     aria-label="ThinQShop home"
                 >
-                    <div className="relative h-10 w-[120px] sm:h-11 sm:w-[140px] md:h-12 md:w-[160px] flex items-center justify-center">
-                        <Image src="/thinqshop-logo.svg" alt="ThinQShop" fill className="object-contain object-left" priority sizes="160px" />
+                    <div className="relative h-10 w-[168px] sm:h-11 sm:w-[185px] md:h-12 md:w-[202px] flex items-center justify-center">
+                        <Image src="/thinqshop-logo.webp" alt="ThinQShopping" fill className="object-contain object-left" priority sizes="202px" />
                     </div>
                 </Link>
 
@@ -120,7 +120,7 @@ export default function Navbar() {
                                 <Link
                                     href={item.href}
                                     role="menuitem"
-                                    className={`py-2 px-1 -mx-1 rounded-lg hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors inline-flex items-center gap-1 ${pathname === '/shop' || pathname.startsWith('/shop/') ? 'text-blue-600' : ''}`}
+                                    className={`py-2 px-1 -mx-1 rounded-lg hover:text-blue-600 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors inline-flex items-center gap-1 ${pathname === '/shop' || pathname.startsWith('/shop/') ? 'text-blue-600 bg-blue-50' : ''}`}
                                 >
                                     {item.label}
                                     <ChevronDown className={`h-3.5 w-3.5 transition-transform ${shopMegaOpen ? 'rotate-180' : ''}`} />
@@ -133,7 +133,7 @@ export default function Navbar() {
                                     className={`absolute left-0 top-full pt-2 -ml-4 z-50 transition-all duration-200 ease-out ${shopMegaOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
                                     aria-hidden={!shopMegaOpen}
                                 >
-                                    <div className="w-[min(90vw,680px)] bg-white rounded-2xl shadow-xl border border-gray-200/90 overflow-hidden">
+                                    <div className="w-[min(90vw,680px)] bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
                                         <div className="p-6">
                                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                                                 {STATIC_CATEGORIES.map((cat) => {
@@ -152,7 +152,7 @@ export default function Navbar() {
                                                             }`}
                                                         >
                                                             <span className={`flex items-center justify-center w-10 h-10 rounded-xl ${
-                                                                isActive ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-blue-600/10'
+                                                                isActive ? 'bg-blue-500' : 'bg-gray-100 group-hover:bg-blue-50'
                                                             }`}>
                                                                 <Icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-gray-600 group-hover:text-blue-600'}`} />
                                                             </span>
@@ -191,7 +191,7 @@ export default function Navbar() {
                                 href={item.href}
                                 role="menuitem"
                                 aria-current={item.href === '/' && pathname === '/' ? 'page' : undefined}
-                                className={`py-2 px-1 -mx-1 rounded-lg hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors ${item.highlight ? 'text-blue-600 font-extrabold' : ''} ${!item.highlight && pathname === item.href ? 'text-blue-600' : ''}`}
+                                className={`py-2 px-1 -mx-1 rounded-lg hover:text-blue-600 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors ${item.highlight ? 'text-blue-600 font-extrabold bg-blue-50' : ''} ${!item.highlight && pathname === item.href ? 'text-blue-600 bg-blue-50' : ''}`}
                             >
                                 {item.label}
                             </Link>
@@ -216,7 +216,7 @@ export default function Navbar() {
                                     href={href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-600/10 transition-colors"
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                                     aria-label={label}
                                 >
                                     <Icon className="h-3.5 w-3.5" />

@@ -118,8 +118,8 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
                     {/* Header: safe area top so close button isn't under notch */}
                     <div className="flex items-center justify-between min-h-16 h-16 px-4 border-b border-gray-50 safe-area-inset-top flex-shrink-0">
                         <Link href="/" className="flex items-center justify-center min-w-0 flex-1 md:flex-initial" aria-label="ThinQShop home">
-                            <div className="relative h-10 w-[120px] sm:h-11 sm:w-[140px] md:h-12 md:w-[160px] rounded-lg overflow-hidden shrink-0 bg-white border border-gray-100 shadow-sm">
-                                <Image src="/thinqshop-logo.svg" alt="ThinQShop" fill className="object-contain object-left" priority sizes="160px" />
+                            <div className="relative h-10 w-[168px] sm:h-11 sm:w-[185px] md:h-12 md:w-[202px] shrink-0">
+                                <Image src="/thinqshop-logo.webp" alt="ThinQShopping" fill className="object-contain object-left" priority sizes="202px" />
                             </div>
                         </Link>
                         <button
@@ -150,7 +150,7 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
                                     <Icon className={`mr-3 h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-blue-600'}`} />
                                     <span className="flex-1">{link.name}</span>
                                     {isAdmin && adminBadges[link.href] > 0 && (
-                                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center ${isActive ? 'bg-white/20 text-white' : 'bg-violet-100 text-violet-800'}`}>
+                                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center ${isActive ? 'bg-blue-500 text-white' : 'bg-violet-100 text-violet-800'}`}>
                                             {adminBadges[link.href] > 99 ? '99+' : adminBadges[link.href]}
                                         </span>
                                     )}

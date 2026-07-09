@@ -14,8 +14,8 @@ export default function manifest(): MetadataRoute.Manifest {
         theme_color: '#02274f',
         orientation: 'portrait-primary',
         icons: [
-            { src: '/thinqshop-logo.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
-            { src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+            { src: '/thinqshop-icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: '/thinqshop-icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
         ],
     };
 }

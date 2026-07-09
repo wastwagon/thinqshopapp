@@ -2,7 +2,6 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import api from '@/lib/axios';
 import ProductGrid from '@/components/ui/ProductGrid';
 import { Search, Loader2 } from 'lucide-react';
@@ -10,8 +9,6 @@ import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import ShopPageShell from '@/components/shop/ShopContent';
 import CategoryBadges from '@/components/shop/CategoryBadges';
-import CategoryNav from '@/components/shop/CategoryNav';
-import type { CategoryNode } from '@/lib/category-utils';
 import staticProducts from '@/lib/data/scraped_products.json';
 import { normalizeProduct, STATIC_CATEGORIES } from '@/lib/product-utils';
 
@@ -126,8 +123,8 @@ function ShopContent() {
                     accent="blue"
                     breadcrumbs={breadcrumbs}
                 />
-                <div className="flex flex-col md:flex-row justify-end mb-8">
-                    <form onSubmit={handleSearch} className="w-full md:w-80 relative group">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+                    <form onSubmit={handleSearch} className="w-full sm:max-w-sm relative group order-2 sm:order-2">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <Search className="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                         </div>
@@ -141,45 +138,30 @@ function ShopContent() {
                     </form>
                 </div>
 
-                <div className="mb-6 lg:mb-0">
-                    <h3 className="section-label mb-3 lg:hidden">Categories</h3>
+                <div className="mb-8">
                     <CategoryBadges categories={categories} currentSlug={category} />
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-12">
-                    <aside className="hidden lg:block w-full lg:w-64 flex-shrink-0">
-                        <div className="sticky top-24">
-                            <h3 className="section-label mb-6">Categories</h3>
-                            <CategoryNav categories={categories as CategoryNode[]} currentSlug={category} />
-                            <div className="mt-12 flat-card border-l-4 border-l-blue-600 p-5">
-                                <p className="text-xs font-medium text-blue-600 mb-2">Shipping</p>
-                                <p className="text-xs font-bold text-gray-900 leading-tight">International delivery. Items ship from abroad with 7–14 day estimated delivery.</p>
-                            </div>
-                        </div>
-                    </aside>
-                    <main className="flex-1">
-                        <ProductGrid products={products} loading={loading} />
-                        {!loading && hasMore && useApi && (
-                            <div className="mt-12 flex justify-center">
-                                <button
-                                    type="button"
-                                    onClick={loadMore}
-                                    disabled={loadingMore}
-                                    className="inline-flex items-center justify-center gap-2 min-h-[44px] px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                                >
-                                    {loadingMore ? (
-                                        <>
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                            Loading...
-                                        </>
-                                    ) : (
-                                        'Load more'
-                                    )}
-                                </button>
-                            </div>
-                        )}
-                    </main>
-                </div>
+                <ProductGrid products={products} loading={loading} />
+                {!loading && hasMore && useApi && (
+                    <div className="mt-12 flex justify-center">
+                        <button
+                            type="button"
+                            onClick={loadMore}
+                            disabled={loadingMore}
+                            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                        >
+                            {loadingMore ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Loading...
+                                </>
+                            ) : (
+                                'Load more'
+                            )}
+                        </button>
+                    </div>
+                )}
             </ShopPageShell>
             </div>
         </ShopLayout>

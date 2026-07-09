@@ -79,8 +79,8 @@ export default function Footer() {
                     {/* Column 1 — Brand */}
                     <div className="sm:col-span-2 lg:col-span-1">
                         <Link href="/" className="inline-flex items-center mb-6">
-                            <div className="relative h-10 w-[120px] sm:h-11 sm:w-[140px] flex-shrink-0">
-                                <Image src="/thinqshop-logo.svg" alt="ThinQShop" fill className="object-contain object-left" sizes="140px" />
+                            <div className="relative h-10 w-[168px] sm:h-11 sm:w-[185px] flex-shrink-0">
+                                <Image src="/thinqshop-logo.webp" alt="ThinQShopping" fill className="object-contain object-left" sizes="185px" />
                             </div>
                         </Link>
                         <p className="text-gray-600 max-w-xs mb-6 leading-relaxed text-sm font-medium">
