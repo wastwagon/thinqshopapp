@@ -73,7 +73,7 @@ export default function Footer() {
     };
 
     return (
-        <footer className="border-t border-gray-200/80 bg-app">
+        <footer className="hidden md:block border-t border-gray-200/80 bg-app">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-10 xl:gap-14 mb-14 sm:mb-16">
                     {/* Column 1 — Brand */}
