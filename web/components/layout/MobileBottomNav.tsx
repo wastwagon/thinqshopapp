@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 import {
     Home,
@@ -14,13 +14,9 @@ import {
     Tag,
     Send,
     ShoppingBag,
-    Package,
-    ScanLine,
-    Wallet,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import BarcodeScanner from '@/components/ui/BarcodeScanner';
 
 const dashboardNavItems = [
     { name: 'Home', href: '/', icon: Home },
@@ -32,9 +28,10 @@ const dashboardNavItems = [
 
 const homeNavItems = [
     { name: 'Home', href: '/dashboard', icon: Home },
-    { name: 'Orders', href: '/dashboard/orders', icon: Package },
-    { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet },
-    { name: 'Profile', href: '/dashboard/profile', icon: User },
+    { name: 'Logistics', href: '/dashboard/logistics', icon: Truck },
+    { name: 'Transfer', href: '/dashboard/transfers', icon: Send },
+    { name: 'Sell', href: '/dashboard/sell-for-me', icon: Tag },
+    { name: 'Procure', href: '/dashboard/procurement', icon: ShoppingBag },
 ];
 
 type MobileBottomNavProps = {
@@ -142,63 +139,24 @@ function ShopBottomNav() {
 
 function HomeBottomNav() {
     const pathname = usePathname();
-    const router = useRouter();
-    const [scannerOpen, setScannerOpen] = useState(false);
-
-    const leftItems = homeNavItems.slice(0, 2);
-    const rightItems = homeNavItems.slice(2);
 
     return (
-        <>
-            <NavShell elevated>
-                {leftItems.map((item) => {
-                    const isActive =
-                        pathname === item.href ||
-                        (item.href !== '/dashboard' && pathname?.startsWith(item.href));
-                    return (
-                        <NavLink
-                            key={item.name}
-                            name={item.name}
-                            href={item.href}
-                            icon={item.icon}
-                            isActive={!!isActive}
-                        />
-                    );
-                })}
-                <div className="flex flex-col items-center justify-end flex-1 -mt-5 px-0.5">
-                    <button
-                        type="button"
-                        onClick={() => setScannerOpen(true)}
-                        className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-[0_8px_24px_-4px_rgba(37,99,235,0.55)] hover:scale-105 active:scale-95 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-                        aria-label="Scan barcode"
-                    >
-                        <ScanLine className="h-6 w-6" strokeWidth={2.25} />
-                    </button>
-                    <span className="text-[10px] font-medium text-gray-500 mt-1">Scan</span>
-                </div>
-                {rightItems.map((item) => {
-                    const isActive =
-                        pathname === item.href || pathname?.startsWith(item.href);
-                    return (
-                        <NavLink
-                            key={item.name}
-                            name={item.name}
-                            href={item.href}
-                            icon={item.icon}
-                            isActive={!!isActive}
-                        />
-                    );
-                })}
-            </NavShell>
-            <BarcodeScanner
-                open={scannerOpen}
-                onClose={() => setScannerOpen(false)}
-                onScan={(value) => {
-                    setScannerOpen(false);
-                    router.push(`/track?n=${encodeURIComponent(value.trim())}`);
-                }}
-            />
-        </>
+        <NavShell>
+            {homeNavItems.map((item) => {
+                const isActive =
+                    pathname === item.href ||
+                    (item.href !== '/dashboard' && pathname?.startsWith(item.href));
+                return (
+                    <NavLink
+                        key={item.name}
+                        name={item.name}
+                        href={item.href}
+                        icon={item.icon}
+                        isActive={!!isActive}
+                    />
+                );
+            })}
+        </NavShell>
     );
 }
 
