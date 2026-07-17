@@ -9,6 +9,7 @@ import DashboardContent from '@/components/dashboard/DashboardContent';
 import Link from 'next/link';
 import { Download, Printer, CheckCircle, Clock, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getMediaUrl } from '@/lib/media';
 
 function downloadImage(url: string, filename: string) {
     fetch(url, { mode: 'cors' })
@@ -32,11 +33,16 @@ interface Transfer {
     amount_ghs: string;
     amount_cny: string;
     status: string;
+    payment_status?: string;
+    payment_method?: string;
     recipient_name: string;
     recipient_type: string;
     created_at: string;
     admin_reply_images?: string[];
     admin_notes?: string;
+    proof_of_transfer?: string | null;
+    payment_transaction_id?: string | null;
+    payment_sender_name?: string | null;
     qr_codes?: string[] | QrEntry[];
     qr_fulfillments?: QrFulfillment[];
 }
@@ -144,7 +150,11 @@ export default function TransferConfirmationPage() {
                                 </div>
                                 <div>
                                     <p className="text-gray-500">Status</p>
-                                    <p className="font-semibold text-gray-900 capitalize">{transfer.status.replace(/_/g, ' ')}</p>
+                                    <p className="font-semibold text-gray-900 capitalize">
+                                        {transfer.payment_status === 'pending' && transfer.status === 'processing'
+                                            ? 'Awaiting payment review'
+                                            : transfer.status.replace(/_/g, ' ')}
+                                    </p>
                                 </div>
                                 <div>
                                     <p className="text-gray-500">Date</p>
@@ -152,6 +162,42 @@ export default function TransferConfirmationPage() {
                                 </div>
                             </div>
                         </section>
+
+                        {(transfer.proof_of_transfer || transfer.payment_transaction_id || transfer.payment_sender_name) && (
+                            <section>
+                                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Your payment submission</h2>
+                                <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                                    {transfer.payment_method && (
+                                        <div>
+                                            <p className="text-gray-500">Method</p>
+                                            <p className="font-semibold text-gray-900 capitalize">{transfer.payment_method.replace(/_/g, ' ')}</p>
+                                        </div>
+                                    )}
+                                    {transfer.payment_transaction_id && (
+                                        <div>
+                                            <p className="text-gray-500">Transaction ID</p>
+                                            <p className="font-semibold text-gray-900 font-mono">{transfer.payment_transaction_id}</p>
+                                        </div>
+                                    )}
+                                    {transfer.payment_sender_name && (
+                                        <div>
+                                            <p className="text-gray-500">Sender name</p>
+                                            <p className="font-semibold text-gray-900">{transfer.payment_sender_name}</p>
+                                        </div>
+                                    )}
+                                </div>
+                                {transfer.proof_of_transfer && (
+                                    <a
+                                        href={getMediaUrl(transfer.proof_of_transfer)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-block w-28 h-28 rounded-lg border border-gray-200 overflow-hidden bg-gray-50"
+                                    >
+                                        <img src={getMediaUrl(transfer.proof_of_transfer)} alt="Payment screenshot" className="w-full h-full object-cover" />
+                                    </a>
+                                )}
+                            </section>
+                        )}
 
                         {transfer.admin_notes && (
                             <section>

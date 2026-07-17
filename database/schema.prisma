@@ -603,7 +603,9 @@ model MoneyTransfer {
   payment_method     PaymentMethod
   payment_status     PaymentStatus      @default(pending)
   paystack_reference String?            @db.VarChar(255)
-  proof_of_transfer  String?            @db.VarChar(255)
+  proof_of_transfer  String?            @db.VarChar(500)
+  payment_transaction_id String?        @db.VarChar(100)
+  payment_sender_name String?           @db.VarChar(255)
   qr_codes           Json?              // Array of { image, amount_ghs }
   qr_fulfillments    Json?              // Per-QR: [{ qr_index, status, confirmation_image?, admin_notes?, fulfilled_at? }]
   admin_reply_images Json?              // Array of admin response image URLs (legacy / overall)

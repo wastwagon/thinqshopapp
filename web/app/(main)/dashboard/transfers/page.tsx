@@ -2,20 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
-import { ArrowRight, Send, AlertCircle, Plus, CreditCard, Wallet, Upload, X, History as HistoryIcon, RefreshCw, FileDown } from 'lucide-react';
+import { Send, AlertCircle, Plus, Upload, X, History as HistoryIcon, RefreshCw, FileDown, Copy, Smartphone, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
-import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-
-const PaystackTrigger = dynamic(
-    () => import('@/components/payments/PaystackTrigger').then((m) => m.default),
-    { ssr: false }
-);
+import { getMediaUrl } from '@/lib/media';
 
 interface Transfer {
     id: number;
@@ -24,9 +19,24 @@ interface Transfer {
     amount_cny: number;
     recipient_name: string;
     status: string;
+    payment_status?: string;
     created_at: string;
     admin_reply_images?: string[];
+    proof_of_transfer?: string | null;
 }
+
+type PaymentDetails = {
+    momo_agent_number: string;
+    momo_name_primary: string;
+    momo_name_alternate: string;
+    momo_network: string;
+    bank_name: string;
+    bank_account_name: string;
+    bank_account_number: string;
+    bank_branch: string;
+};
+
+type PaymentMethod = 'mobile_money' | 'bank_transfer';
 
 export default function TransferPage() {
     const { user } = useAuth();
@@ -35,6 +45,7 @@ export default function TransferPage() {
     const [loading, setLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
     const [rate, setRate] = useState<number>(0);
+    const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
     const [transferDirection, setTransferDirection] = useState('send_to_china');
     const [purpose, setPurpose] = useState('Personal');
     const [amountGhs, setAmountGhs] = useState('');
@@ -44,13 +55,16 @@ export default function TransferPage() {
     const [recipientId, setRecipientId] = useState('');
     const [bankName, setBankName] = useState('');
     const [accountNumber, setAccountNumber] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'card'>('wallet');
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mobile_money');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [uploadingProof, setUploadingProof] = useState(false);
+
+    const [proofUrl, setProofUrl] = useState('');
+    const [transactionId, setTransactionId] = useState('');
+    const [paymentSenderName, setPaymentSenderName] = useState('');
 
     type QrEntry = { id: string; dataUrl: string; amount: string; recipientName: string };
     const [qrEntries, setQrEntries] = useState<QrEntry[]>([{ id: crypto.randomUUID(), dataUrl: '', amount: '', recipientName: '' }]);
-
-    const [paystackConfig, setPaystackConfig] = useState<{ reference: string; amount: number; transferId: number } | null>(null);
 
     const addQrEntry = () => setQrEntries((prev) => [...prev, { id: crypto.randomUUID(), dataUrl: '', amount: '', recipientName: '' }]);
     const removeQrEntry = (id: string) => setQrEntries((prev) => (prev.length > 1 ? prev.filter((e) => e.id !== id) : prev));
@@ -66,6 +80,15 @@ export default function TransferPage() {
         const reader = new FileReader();
         reader.onload = () => setQrEntryImage(id, reader.result as string);
         reader.readAsDataURL(file);
+    };
+
+    const copyText = async (text: string, label: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            toast.success(`${label} copied`);
+        } catch {
+            toast.error('Could not copy');
+        }
     };
 
     const fetchTransfers = async () => {
@@ -85,15 +108,19 @@ export default function TransferPage() {
     }, []);
 
     useEffect(() => {
-        const fetchRate = async () => {
+        const fetchMeta = async () => {
             try {
-                const { data } = await api.get('/finance/transfers/rate');
-                setRate(data.rate_ghs_to_cny);
+                const [rateRes, detailsRes] = await Promise.all([
+                    api.get('/finance/transfers/rate'),
+                    api.get('/finance/transfers/payment-details'),
+                ]);
+                setRate(rateRes.data.rate_ghs_to_cny);
+                setPaymentDetails(detailsRes.data);
             } catch (error) {
-                console.error("Failed to load transfer rate", error);
+                console.error('Failed to load transfer meta', error);
             }
         };
-        fetchRate();
+        fetchMeta();
     }, []);
 
     useEffect(() => {
@@ -105,38 +132,68 @@ export default function TransferPage() {
         }
     }, [amountGhs, rate]);
 
-    const handlePaystackSuccess = async (ref: { reference: string }) => {
-        if (!paystackConfig) return;
+    useEffect(() => {
+        if (!paymentSenderName && user) {
+            const full = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
+            if (full) setPaymentSenderName(full);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
+
+    const handleProofUpload = async (file: File | null) => {
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please upload an image (JPEG, PNG, WebP)');
+            return;
+        }
+        setUploadingProof(true);
         try {
-            await api.post(`/finance/transfers/${paystackConfig.transferId}/confirm-payment`, {
-                paystack_reference: ref.reference
+            const formData = new FormData();
+            formData.append('file', file);
+            const { data } = await api.post('/transfers/upload-payment-proof', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
-            setPaystackConfig(null);
-            setAmountGhs('');
-            setRecipientName('');
-            setRecipientId('');
-            setQrEntries([{ id: crypto.randomUUID(), dataUrl: '', amount: '', recipientName: '' }]);
-            router.push(`/dashboard/transfers/success?id=${paystackConfig.transferId}`);
+            if (!data?.url) throw new Error('No URL returned');
+            setProofUrl(data.url);
+            toast.success('Screenshot uploaded');
         } catch (err: any) {
-            toast.error(err.response?.data?.message || "Payment confirmation failed.");
+            toast.error(err.response?.data?.message || 'Upload failed');
         } finally {
-            setIsSubmitting(false);
+            setUploadingProof(false);
         }
     };
-    const handlePaystackClose = () => {
-        setPaystackConfig(null);
-        setIsSubmitting(false);
-        toast.error("Payment cancelled.");
+
+    const resetForm = () => {
+        setAmountGhs('');
+        setRecipientName('');
+        setRecipientId('');
+        setBankName('');
+        setAccountNumber('');
+        setProofUrl('');
+        setTransactionId('');
+        setQrEntries([{ id: crypto.randomUUID(), dataUrl: '', amount: '', recipientName: '' }]);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!amountGhs || Number(amountGhs) <= 0) {
-            toast.error("Please enter a valid amount");
+            toast.error('Please enter a valid amount');
             return;
         }
-        if (recipientType === 'bank_account' && (!bankName || !accountNumber)) {
-            toast.error("Please enter bank details");
+        if (recipientType === 'bank_account' && (!bankName || !accountNumber || !recipientName)) {
+            toast.error('Please enter bank recipient details');
+            return;
+        }
+        if (!proofUrl.trim()) {
+            toast.error('Upload your payment confirmation screenshot');
+            return;
+        }
+        if (!transactionId.trim()) {
+            toast.error('Enter the transaction ID');
+            return;
+        }
+        if (!paymentSenderName.trim()) {
+            toast.error('Enter the sender name used for the payment');
             return;
         }
 
@@ -145,7 +202,7 @@ export default function TransferPage() {
 
         if (recipientType !== 'bank_account') {
             if (filledQr.length === 0) {
-                toast.error("Add at least one QR code with image, recipient name and amount.");
+                toast.error('Add at least one QR code with image, recipient name and amount.');
                 return;
             }
             const partialRow = qrEntries.some((e) => {
@@ -154,13 +211,12 @@ export default function TransferPage() {
                 return hasSome && !hasAll;
             });
             if (partialRow) {
-                toast.error("Each QR row must have image, recipient name and amount together.");
+                toast.error('Each QR row must have image, recipient name and amount together.');
                 return;
             }
             const sumQr = filledQr.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-            const targetAmount = amountCny;
-            if (Math.abs(sumQr - targetAmount) > 0.01) {
-                toast.error(`Total of QR amounts (¥${sumQr.toFixed(2)}) must equal converted amount (¥${targetAmount.toFixed(2)}). Recipients receive CNY.`);
+            if (Math.abs(sumQr - amountCny) > 0.01) {
+                toast.error(`Total of QR amounts (¥${sumQr.toFixed(2)}) must equal converted amount (¥${amountCny.toFixed(2)}). Recipients receive CNY.`);
                 return;
             }
         }
@@ -182,7 +238,10 @@ export default function TransferPage() {
                 account_number: accountNumber,
                 bank_name: bankName
             },
-            payment_method: paymentMethod === 'wallet' ? 'wallet' : 'card',
+            payment_method: paymentMethod,
+            proof_of_transfer: proofUrl.trim(),
+            payment_transaction_id: transactionId.trim(),
+            payment_sender_name: paymentSenderName.trim(),
             purpose: purpose,
             qr_codes
         };
@@ -190,39 +249,44 @@ export default function TransferPage() {
         setIsSubmitting(true);
         try {
             const { data } = await api.post('/finance/transfers', payload);
-
-            if (paymentMethod === 'wallet') {
-                setAmountGhs('');
-                setRecipientName('');
-                setQrEntries([{ id: crypto.randomUUID(), dataUrl: '', amount: '', recipientName: '' }]);
-                setRecipientId('');
-                router.push(`/dashboard/transfers/success?id=${data.id}`);
-            } else if (data.paystack_reference) {
-                setPaystackConfig({
-                    reference: data.paystack_reference,
-                    amount: Math.round(Number(data.total_amount) * 100),
-                    transferId: data.id
-                });
-                // PaystackTrigger will open popup when paystackConfig is set
-            }
+            resetForm();
+            setIsCreating(false);
+            toast.success('Transfer submitted. We will verify your payment.');
+            router.push(`/dashboard/transfers/success?id=${data.id}`);
         } catch (error: any) {
-            toast.error(error.response?.data?.message || "Transfer failed.");
+            toast.error(error.response?.data?.message || 'Transfer failed.');
         } finally {
-            if (paymentMethod === 'wallet') setIsSubmitting(false);
+            setIsSubmitting(false);
         }
     };
+
+    const momoCopyBlock = paymentDetails
+        ? [
+              `MOMO Agent Number: ${paymentDetails.momo_agent_number}`,
+              `Network: ${paymentDetails.momo_network}`,
+              `Name: ${paymentDetails.momo_name_primary}`,
+              paymentDetails.momo_name_alternate ? `Or: ${paymentDetails.momo_name_alternate}` : '',
+              amountGhs ? `Amount: GHS ${Number(amountGhs).toFixed(2)}` : '',
+          ]
+              .filter(Boolean)
+              .join('\n')
+        : '';
+
+    const bankCopyBlock = paymentDetails
+        ? [
+              `Bank: ${paymentDetails.bank_name}`,
+              `Account Name: ${paymentDetails.bank_account_name}`,
+              `Account Number: ${paymentDetails.bank_account_number}`,
+              `Branch: ${paymentDetails.bank_branch}`,
+              amountGhs ? `Amount: GHS ${Number(amountGhs).toFixed(2)}` : '',
+          ]
+              .filter(Boolean)
+              .join('\n')
+        : '';
 
     return (
         <DashboardLayout>
             <DashboardContent wide>
-            {paystackConfig && (
-                <PaystackTrigger
-                    config={{ reference: paystackConfig.reference, amount: paystackConfig.amount }}
-                    onSuccess={handlePaystackSuccess}
-                    onClose={handlePaystackClose}
-                    userEmail={user?.email}
-                />
-            )}
             <DashboardPageHeader
                 title="Transfers"
                 subtitle={
@@ -244,11 +308,9 @@ export default function TransferPage() {
 
             {isCreating && (
             <div className="max-w-2xl">
-                {/* Transfer Form */}
                 <div className="space-y-4">
                     <div className="dashboard-card p-4 lg:p-5">
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            {/* Direction Selection */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 <button
                                     type="button"
@@ -302,33 +364,172 @@ export default function TransferPage() {
                                 </div>
                             </div>
 
+                            {/* Offline payment method */}
                             <div className="space-y-2">
-                                <label className="text-xs font-medium text-gray-500 ml-1 block">Payment</label>
+                                <label className="text-xs font-medium text-gray-500 ml-1 block">How will you pay?</label>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     <button
                                         type="button"
-                                        onClick={() => setPaymentMethod('wallet')}
-                                        className={`flex items-center gap-2 py-2.5 px-3 rounded-lg border-2 transition-all text-left ${paymentMethod === 'wallet' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
+                                        onClick={() => setPaymentMethod('mobile_money')}
+                                        className={`flex items-center gap-2 py-2.5 px-3 rounded-lg border-2 transition-all text-left ${paymentMethod === 'mobile_money' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
                                     >
-                                        <Wallet className={`h-5 w-5 shrink-0 ${paymentMethod === 'wallet' ? 'text-blue-600' : 'text-gray-400'}`} />
+                                        <Smartphone className={`h-5 w-5 shrink-0 ${paymentMethod === 'mobile_money' ? 'text-blue-600' : 'text-gray-400'}`} />
                                         <div className="min-w-0">
-                                            <p className={`text-xs font-semibold ${paymentMethod === 'wallet' ? 'text-blue-600' : 'text-gray-700'}`}>Wallet</p>
-                                            <p className="text-xs text-gray-500 truncate">Use balance</p>
+                                            <p className={`text-xs font-semibold ${paymentMethod === 'mobile_money' ? 'text-blue-600' : 'text-gray-700'}`}>Mobile Money</p>
+                                            <p className="text-xs text-gray-500 truncate">Pay manually on your phone</p>
                                         </div>
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => setPaymentMethod('card')}
-                                        className={`flex items-center gap-2 py-2.5 px-3 rounded-lg border-2 transition-all text-left ${paymentMethod === 'card' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
+                                        onClick={() => setPaymentMethod('bank_transfer')}
+                                        className={`flex items-center gap-2 py-2.5 px-3 rounded-lg border-2 transition-all text-left ${paymentMethod === 'bank_transfer' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
                                     >
-                                        <CreditCard className={`h-5 w-5 shrink-0 ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-400'}`} />
+                                        <Building2 className={`h-5 w-5 shrink-0 ${paymentMethod === 'bank_transfer' ? 'text-blue-600' : 'text-gray-400'}`} />
                                         <div className="min-w-0">
-                                            <p className={`text-xs font-semibold ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-700'}`}>Paystack</p>
-                                            <p className="text-xs text-gray-500 truncate">Card / mobile money</p>
+                                            <p className={`text-xs font-semibold ${paymentMethod === 'bank_transfer' ? 'text-blue-600' : 'text-gray-700'}`}>Bank Transfer</p>
+                                            <p className="text-xs text-gray-500 truncate">Pay to our bank account</p>
                                         </div>
                                     </button>
                                 </div>
                             </div>
+
+                            {/* Copyable payment instructions (logistics-style) */}
+                            {paymentDetails && paymentMethod === 'mobile_money' && (
+                                <section>
+                                    <h3 className="text-xs font-bold tracking-[0.2em] text-gray-400 mb-2">MOMO DETAILS</h3>
+                                    <p className="text-xs font-medium text-gray-500 mb-3">
+                                        Copy the details, pay on your phone, then upload your confirmation below.
+                                    </p>
+                                    <div className="rounded-xl border-2 border-gray-100 bg-gray-50/50 p-4 flex justify-between items-start gap-4">
+                                        <div className="min-w-0 font-mono text-xs text-gray-800 whitespace-pre-wrap break-words space-y-1">
+                                            <p>
+                                                <span className="text-gray-500">MOMO Agent Number: </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => copyText(paymentDetails.momo_agent_number, 'MoMo number')}
+                                                    className="font-bold text-blue-700 hover:underline"
+                                                >
+                                                    {paymentDetails.momo_agent_number}
+                                                </button>
+                                            </p>
+                                            <p><span className="text-gray-500">Network: </span>{paymentDetails.momo_network}</p>
+                                            <p><span className="text-gray-500">Name: </span>{paymentDetails.momo_name_primary}</p>
+                                            {paymentDetails.momo_name_alternate && (
+                                                <p><span className="text-gray-500">Or: </span>{paymentDetails.momo_name_alternate}</p>
+                                            )}
+                                            {amountGhs && Number(amountGhs) > 0 && (
+                                                <p className="mt-2 text-gray-600">Amount to send: GHS {Number(amountGhs).toFixed(2)}</p>
+                                            )}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => copyText(momoCopyBlock, 'MoMo details')}
+                                            className="shrink-0 min-h-[44px] h-9 px-3 rounded-lg bg-white border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-1.5"
+                                        >
+                                            <Copy className="h-3.5 w-3.5" />
+                                            Copy
+                                        </button>
+                                    </div>
+                                </section>
+                            )}
+
+                            {paymentDetails && paymentMethod === 'bank_transfer' && (
+                                <section>
+                                    <h3 className="text-xs font-bold tracking-[0.2em] text-gray-400 mb-2">BANK DETAILS</h3>
+                                    <p className="text-xs font-medium text-gray-500 mb-3">
+                                        Copy the details, transfer from your bank, then upload your confirmation below.
+                                    </p>
+                                    <div className="rounded-xl border-2 border-gray-100 bg-gray-50/50 p-4 flex justify-between items-start gap-4">
+                                        <div className="min-w-0 font-mono text-xs text-gray-800 whitespace-pre-wrap break-words space-y-1">
+                                            <p><span className="text-gray-500">Bank: </span>{paymentDetails.bank_name}</p>
+                                            <p><span className="text-gray-500">Account Name: </span>{paymentDetails.bank_account_name}</p>
+                                            <p>
+                                                <span className="text-gray-500">Account Number: </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => copyText(paymentDetails.bank_account_number, 'Account number')}
+                                                    className="font-bold text-blue-700 hover:underline"
+                                                >
+                                                    {paymentDetails.bank_account_number}
+                                                </button>
+                                            </p>
+                                            <p><span className="text-gray-500">Branch: </span>{paymentDetails.bank_branch}</p>
+                                            {amountGhs && Number(amountGhs) > 0 && (
+                                                <p className="mt-2 text-gray-600">Amount to send: GHS {Number(amountGhs).toFixed(2)}</p>
+                                            )}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => copyText(bankCopyBlock, 'Bank details')}
+                                            className="shrink-0 min-h-[44px] h-9 px-3 rounded-lg bg-white border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-1.5"
+                                        >
+                                            <Copy className="h-3.5 w-3.5" />
+                                            Copy
+                                        </button>
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Payment proof */}
+                            <section className="space-y-3 rounded-xl border border-blue-100 bg-blue-50/40 p-4">
+                                <h3 className="text-xs font-bold text-blue-800">After you pay — confirm your transfer</h3>
+                                <p className="text-xs text-blue-700/80">
+                                    Upload the confirmation screenshot, then enter the transaction ID and the sender name used for the payment.
+                                </p>
+
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 mb-1.5 block">Payment screenshot</label>
+                                    {proofUrl ? (
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-20 h-20 rounded-lg border border-gray-200 overflow-hidden bg-white shrink-0">
+                                                <img src={getMediaUrl(proofUrl)} alt="Payment proof" className="w-full h-full object-cover" />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setProofUrl('')}
+                                                className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 min-h-[44px]"
+                                            >
+                                                <X className="h-3.5 w-3.5" /> Remove
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 min-h-[44px]">
+                                            <Upload className="h-4 w-4" />
+                                            {uploadingProof ? 'Uploading…' : 'Upload screenshot'}
+                                            <input
+                                                type="file"
+                                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                                className="sr-only"
+                                                disabled={uploadingProof}
+                                                onChange={(e) => handleProofUpload(e.target.files?.[0] ?? null)}
+                                            />
+                                        </label>
+                                    )}
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-600 mb-1 block">Transaction ID</label>
+                                        <input
+                                            type="text"
+                                            value={transactionId}
+                                            onChange={(e) => setTransactionId(e.target.value)}
+                                            className="block w-full px-3 py-2.5 bg-white border border-gray-100 rounded-lg text-sm font-medium text-gray-900 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                            placeholder="e.g. 1234567890"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-gray-600 mb-1 block">Sender name</label>
+                                        <input
+                                            type="text"
+                                            value={paymentSenderName}
+                                            onChange={(e) => setPaymentSenderName(e.target.value)}
+                                            className="block w-full px-3 py-2.5 bg-white border border-gray-100 rounded-lg text-sm font-medium text-gray-900 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                            placeholder="Name on MoMo / bank transfer"
+                                        />
+                                    </div>
+                                </div>
+                            </section>
 
                             <div className="space-y-3">
                                 <label className="text-xs font-medium text-gray-500 ml-1 block">Recipient type</label>
@@ -445,17 +646,17 @@ export default function TransferPage() {
                                 <div className="min-w-0">
                                     <p className="text-xs font-semibold text-orange-800 mb-0.5">Please verify</p>
                                     <p className="text-[11px] text-orange-700 leading-snug">
-                                        Cross-border transfers cannot be reversed. Double-check recipient name and details.
+                                        Cross-border transfers cannot be reversed. Double-check recipient name and payment details.
                                     </p>
                                 </div>
                             </div>
 
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || uploadingProof}
                                 className="w-full h-11 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                             >
-                                {isSubmitting ? 'Processing...' : 'Send transfer'}
+                                {isSubmitting ? 'Submitting…' : 'Submit transfer for review'}
                             </button>
                         </form>
                     </div>
@@ -506,9 +707,13 @@ export default function TransferPage() {
                                                 <p className="text-xs text-gray-500">₵{Number(tx.amount_ghs).toFixed(2)}</p>
                                                 <span className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold uppercase mt-1 ${
                                                     tx.status === 'completed' ? 'bg-green-50 text-green-700' :
-                                                    tx.status === 'failed' ? 'bg-red-50 text-red-700' : 'bg-yellow-50 text-yellow-600'
+                                                    tx.status === 'failed' ? 'bg-red-50 text-red-700' :
+                                                    tx.payment_status === 'pending' ? 'bg-orange-50 text-orange-700' :
+                                                    'bg-yellow-50 text-yellow-600'
                                                 }`}>
-                                                    {tx.status?.replace(/_/g, ' ') || 'Pending'}
+                                                    {tx.payment_status === 'pending' && tx.status === 'processing'
+                                                        ? 'Awaiting review'
+                                                        : tx.status?.replace(/_/g, ' ') || 'Pending'}
                                                 </span>
                                             </div>
                                         </div>

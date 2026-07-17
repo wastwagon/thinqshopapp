@@ -16,10 +16,34 @@ import {
     Shield,
     Play,
     DatabaseIcon,
-    Loader2
+    Loader2,
+    Smartphone,
+    Building2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+
+type PaymentDetailsForm = {
+    momo_agent_number: string;
+    momo_name_primary: string;
+    momo_name_alternate: string;
+    momo_network: string;
+    bank_name: string;
+    bank_account_name: string;
+    bank_account_number: string;
+    bank_branch: string;
+};
+
+const EMPTY_PAYMENT: PaymentDetailsForm = {
+    momo_agent_number: '',
+    momo_name_primary: '',
+    momo_name_alternate: '',
+    momo_network: '',
+    bank_name: '',
+    bank_account_name: '',
+    bank_account_number: '',
+    bank_branch: '',
+};
 
 export default function AdminSettings() {
     const [settings, setSettings] = useState({
@@ -29,15 +53,21 @@ export default function AdminSettings() {
         debugLogs: true,
         allowAutomaticPayouts: false
     });
+    const [paymentDetails, setPaymentDetails] = useState<PaymentDetailsForm>(EMPTY_PAYMENT);
     const [rateLoading, setRateLoading] = useState(true);
     const [savingRate, setSavingRate] = useState(false);
+    const [savingPayment, setSavingPayment] = useState(false);
     const [dbAction, setDbAction] = useState<'idle' | 'migrate' | 'seed' | 'migrate-seed'>('idle');
 
     useEffect(() => {
         (async () => {
             try {
-                const { data } = await api.get('/finance/transfers/rate');
-                setSettings((s) => ({ ...s, ghsCnyRate: String(data.rate_ghs_to_cny ?? '') }));
+                const [rateRes, payRes] = await Promise.all([
+                    api.get('/finance/transfers/rate'),
+                    api.get('/finance/transfers/admin/payment-details'),
+                ]);
+                setSettings((s) => ({ ...s, ghsCnyRate: String(rateRes.data.rate_ghs_to_cny ?? '') }));
+                setPaymentDetails({ ...EMPTY_PAYMENT, ...payRes.data });
             } catch {
                 setSettings((s) => ({ ...s, ghsCnyRate: '0.055' }));
             } finally {
@@ -63,8 +93,26 @@ export default function AdminSettings() {
         }
     };
 
+    const handleSavePaymentDetails = async () => {
+        if (!paymentDetails.momo_agent_number.trim()) {
+            toast.error('MoMo agent number is required');
+            return;
+        }
+        setSavingPayment(true);
+        try {
+            const { data } = await api.patch('/finance/transfers/admin/payment-details', paymentDetails);
+            setPaymentDetails({ ...EMPTY_PAYMENT, ...data });
+            toast.success('Transfer payment details updated.');
+        } catch (e: any) {
+            toast.error(e.response?.data?.message || 'Failed to save payment details');
+        } finally {
+            setSavingPayment(false);
+        }
+    };
+
     const handleSave = async () => {
         await handleSaveRate();
+        await handleSavePaymentDetails();
     };
 
     const runDbAction = async (action: 'migrate' | 'seed' | 'migrate-seed') => {
@@ -95,9 +143,9 @@ export default function AdminSettings() {
                 title="Settings"
                 subtitle="Manage operational controls and platform defaults"
                 actions={
-                    <button type="button" onClick={handleSave} disabled={savingRate || rateLoading} className="admin-btn-primary h-9 px-4 shrink-0 disabled:opacity-50">
+                    <button type="button" onClick={handleSave} disabled={savingRate || savingPayment || rateLoading} className="admin-btn-primary h-9 px-4 shrink-0 disabled:opacity-50">
                         <Save className="h-3.5 w-3.5" aria-hidden />
-                        {savingRate ? 'Saving…' : 'Save'}
+                        {savingRate || savingPayment ? 'Saving…' : 'Save'}
                     </button>
                 }
             />
@@ -145,6 +193,125 @@ export default function AdminSettings() {
                                 </div>
                                 <p className="text-xs text-gray-400">Applied to procurement request pricing.</p>
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="admin-card p-5">
+                        <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2.5 mb-4">
+                            <div className="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center text-violet-600 border border-violet-100">
+                                <Smartphone className="h-4 w-4" />
+                            </div>
+                            Transfer payment details (offline)
+                        </h3>
+                        <p className="text-xs text-gray-500 mb-4">
+                            Shown to customers when they pay by Mobile Money or Bank Transfer. They copy these details and pay manually.
+                        </p>
+
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                    <Smartphone className="h-3.5 w-3.5" /> Mobile Money
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-semibold text-gray-500">MOMO Agent Number</label>
+                                        <input
+                                            type="text"
+                                            className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                            value={paymentDetails.momo_agent_number}
+                                            onChange={(e) => setPaymentDetails({ ...paymentDetails, momo_agent_number: e.target.value })}
+                                            placeholder="0539761297"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-semibold text-gray-500">Network</label>
+                                        <input
+                                            type="text"
+                                            className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                            value={paymentDetails.momo_network}
+                                            onChange={(e) => setPaymentDetails({ ...paymentDetails, momo_network: e.target.value })}
+                                            placeholder="MTN"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-semibold text-gray-500">Name (primary)</label>
+                                        <input
+                                            type="text"
+                                            className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                            value={paymentDetails.momo_name_primary}
+                                            onChange={(e) => setPaymentDetails({ ...paymentDetails, momo_name_primary: e.target.value })}
+                                            placeholder="Gohdit Print and Computers"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-semibold text-gray-500">Name (alternate)</label>
+                                        <input
+                                            type="text"
+                                            className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                            value={paymentDetails.momo_name_alternate}
+                                            onChange={(e) => setPaymentDetails({ ...paymentDetails, momo_name_alternate: e.target.value })}
+                                            placeholder="Emmanuel ASIEDU"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                    <Building2 className="h-3.5 w-3.5" /> Bank Transfer
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-semibold text-gray-500">Bank name</label>
+                                        <input
+                                            type="text"
+                                            className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                            value={paymentDetails.bank_name}
+                                            onChange={(e) => setPaymentDetails({ ...paymentDetails, bank_name: e.target.value })}
+                                            placeholder="GCB Bank"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-semibold text-gray-500">Account name</label>
+                                        <input
+                                            type="text"
+                                            className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                            value={paymentDetails.bank_account_name}
+                                            onChange={(e) => setPaymentDetails({ ...paymentDetails, bank_account_name: e.target.value })}
+                                            placeholder="ThinQShop Ltd"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-semibold text-gray-500">Account number</label>
+                                        <input
+                                            type="text"
+                                            className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                            value={paymentDetails.bank_account_number}
+                                            onChange={(e) => setPaymentDetails({ ...paymentDetails, bank_account_number: e.target.value })}
+                                            placeholder="1234567890123"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-semibold text-gray-500">Branch</label>
+                                        <input
+                                            type="text"
+                                            className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                            value={paymentDetails.bank_branch}
+                                            onChange={(e) => setPaymentDetails({ ...paymentDetails, bank_branch: e.target.value })}
+                                            placeholder="Accra Main"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={handleSavePaymentDetails}
+                                disabled={savingPayment}
+                                className="h-9 px-4 rounded-lg bg-violet-600 text-white text-xs font-semibold hover:bg-violet-700 disabled:opacity-50"
+                            >
+                                {savingPayment ? 'Saving…' : 'Save payment details'}
+                            </button>
                         </div>
                     </div>
 

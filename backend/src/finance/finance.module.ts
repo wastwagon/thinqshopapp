@@ -12,9 +12,18 @@ import { SmsModule } from '../sms/sms.module';
 import { AuditModule } from '../audit/audit.module';
 import { OrderModule } from '../order/order.module';
 import { ConsignmentModule } from '../consignment/consignment.module';
+import { MediaModule } from '../media/media.module';
 
 @Module({
-    imports: [PrismaModule, AuthModule, SmsModule, AuditModule, forwardRef(() => OrderModule), forwardRef(() => ConsignmentModule)],
+    imports: [
+        PrismaModule,
+        AuthModule,
+        SmsModule,
+        AuditModule,
+        MediaModule,
+        forwardRef(() => OrderModule),
+        forwardRef(() => ConsignmentModule),
+    ],
     providers: [PaymentService, WalletService, TransferService],
     controllers: [PaymentController, WalletController, TransferController],
     exports: [WalletService, PaymentService, TransferService],

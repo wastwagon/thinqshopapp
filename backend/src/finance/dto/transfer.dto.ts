@@ -36,8 +36,23 @@ export class CreateTransferDto {
     purpose?: string;
 
     @IsString()
-    @IsIn(['wallet', 'card', 'mobile_money'])
+    @IsIn(['mobile_money', 'bank_transfer'])
     payment_method: string;
+
+    /** Screenshot / confirmation image URL from upload */
+    @IsString()
+    @IsNotEmpty()
+    proof_of_transfer: string;
+
+    /** MoMo or bank transaction / reference ID entered by customer */
+    @IsString()
+    @IsNotEmpty()
+    payment_transaction_id: string;
+
+    /** Name used when sending the MoMo/bank payment */
+    @IsString()
+    @IsNotEmpty()
+    payment_sender_name: string;
 
     @IsOptional()
     @IsArray()
@@ -76,4 +91,38 @@ export class UpdateTransferFulfillmentDto {
     @IsOptional()
     @IsString()
     admin_notes?: string;
+}
+
+export class UpdateTransferPaymentDetailsDto {
+    @IsOptional()
+    @IsString()
+    momo_agent_number?: string;
+
+    @IsOptional()
+    @IsString()
+    momo_name_primary?: string;
+
+    @IsOptional()
+    @IsString()
+    momo_name_alternate?: string;
+
+    @IsOptional()
+    @IsString()
+    momo_network?: string;
+
+    @IsOptional()
+    @IsString()
+    bank_name?: string;
+
+    @IsOptional()
+    @IsString()
+    bank_account_name?: string;
+
+    @IsOptional()
+    @IsString()
+    bank_account_number?: string;
+
+    @IsOptional()
+    @IsString()
+    bank_branch?: string;
 }

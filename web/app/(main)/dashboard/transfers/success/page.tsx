@@ -61,14 +61,17 @@ export default function TransferSuccessPage() {
     }
 
     const refShort = transfer.token?.slice(0, 12) || `TRF-${transfer.id}`;
-    const statusLabel = transfer.status?.replace(/_/g, ' ') || 'Submitted';
+    const statusLabel =
+        transfer.status === 'processing'
+            ? 'Awaiting payment review'
+            : transfer.status?.replace(/_/g, ' ') || 'Submitted';
 
     return (
         <DashboardLayout>
             <DashboardSuccessShell>
                 <ThankYouCard
                     title="Transfer submitted successfully"
-                    subtitle="Your cross-border transfer has been initiated. We will process it and send funds to your recipient."
+                    subtitle="We received your payment proof. Our team will verify the payment and process your transfer."
                     details={[
                         { label: 'Reference', value: refShort },
                         { label: 'Amount (GHS)', value: `₵${Number(transfer.amount_ghs).toFixed(2)}` },

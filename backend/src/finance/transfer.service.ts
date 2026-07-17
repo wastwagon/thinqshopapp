@@ -1,27 +1,59 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { WalletService } from './wallet.service';
-import { PaymentService } from './payment.service';
 import { SmsService } from '../sms/sms.service';
 import { TransferDirection, RecipientType, PaymentMethod, PaymentStatus, Prisma } from '@prisma/client';
-import { CreateTransferDto } from './dto/transfer.dto';
+import { CreateTransferDto, UpdateTransferPaymentDetailsDto } from './dto/transfer.dto';
+
+export type TransferPaymentDetails = {
+    momo_agent_number: string;
+    momo_name_primary: string;
+    momo_name_alternate: string;
+    momo_network: string;
+    bank_name: string;
+    bank_account_name: string;
+    bank_account_number: string;
+    bank_branch: string;
+};
+
+const PAYMENT_DETAIL_KEYS = [
+    'transfer_momo_agent_number',
+    'transfer_momo_name_primary',
+    'transfer_momo_name_alternate',
+    'transfer_momo_network',
+    'transfer_bank_name',
+    'transfer_bank_account_name',
+    'transfer_bank_account_number',
+    'transfer_bank_branch',
+] as const;
+
+const PAYMENT_DETAIL_DEFAULTS: TransferPaymentDetails = {
+    momo_agent_number: '0539761297',
+    momo_name_primary: 'Gohdit Print and Computers',
+    momo_name_alternate: 'Emmanuel ASIEDU',
+    momo_network: 'MTN',
+    bank_name: 'GCB Bank',
+    bank_account_name: 'ThinQShop Ltd',
+    bank_account_number: '1234567890123',
+    bank_branch: 'Accra Main',
+};
+
+const KEY_TO_FIELD: Record<(typeof PAYMENT_DETAIL_KEYS)[number], keyof TransferPaymentDetails> = {
+    transfer_momo_agent_number: 'momo_agent_number',
+    transfer_momo_name_primary: 'momo_name_primary',
+    transfer_momo_name_alternate: 'momo_name_alternate',
+    transfer_momo_network: 'momo_network',
+    transfer_bank_name: 'bank_name',
+    transfer_bank_account_name: 'bank_account_name',
+    transfer_bank_account_number: 'bank_account_number',
+    transfer_bank_branch: 'bank_branch',
+};
 
 @Injectable()
 export class TransferService {
     constructor(
         private prisma: PrismaService,
-        private walletService: WalletService,
-        private paymentService: PaymentService,
         private smsService: SmsService,
     ) { }
-
-    private getPaystackSecret(): string {
-        const key = process.env.PAYSTACK_SECRET_KEY;
-        if (!key || key === 'your_paystack_secret') {
-            throw new BadRequestException('Paystack is not configured');
-        }
-        return key;
-    }
 
     async getExchangeRate() {
         const rate = await this.prisma.exchangeRate.findFirst({
@@ -53,15 +85,83 @@ export class TransferService {
         return { rate_ghs_to_cny: rate };
     }
 
+    async getPaymentDetails(): Promise<TransferPaymentDetails> {
+        const rows = await this.prisma.setting.findMany({
+            where: { setting_key: { in: [...PAYMENT_DETAIL_KEYS] } },
+        });
+        const map = { ...PAYMENT_DETAIL_DEFAULTS };
+        for (const row of rows) {
+            const field = KEY_TO_FIELD[row.setting_key as (typeof PAYMENT_DETAIL_KEYS)[number]];
+            if (field && row.setting_value?.trim()) {
+                map[field] = row.setting_value.trim();
+            }
+        }
+        return map;
+    }
+
+    async updatePaymentDetails(dto: UpdateTransferPaymentDetailsDto): Promise<TransferPaymentDetails> {
+        const pairs: Array<{ key: (typeof PAYMENT_DETAIL_KEYS)[number]; value?: string }> = [
+            { key: 'transfer_momo_agent_number', value: dto.momo_agent_number },
+            { key: 'transfer_momo_name_primary', value: dto.momo_name_primary },
+            { key: 'transfer_momo_name_alternate', value: dto.momo_name_alternate },
+            { key: 'transfer_momo_network', value: dto.momo_network },
+            { key: 'transfer_bank_name', value: dto.bank_name },
+            { key: 'transfer_bank_account_name', value: dto.bank_account_name },
+            { key: 'transfer_bank_account_number', value: dto.bank_account_number },
+            { key: 'transfer_bank_branch', value: dto.bank_branch },
+        ];
+
+        await Promise.all(
+            pairs
+                .filter((p) => p.value !== undefined)
+                .map((p) =>
+                    this.prisma.setting.upsert({
+                        where: { setting_key: p.key },
+                        update: { setting_value: String(p.value ?? '').trim(), updated_at: new Date() },
+                        create: {
+                            setting_key: p.key,
+                            setting_value: String(p.value ?? '').trim(),
+                            description: 'Transfer offline payment detail',
+                            updated_at: new Date(),
+                        },
+                    }),
+                ),
+        );
+
+        return this.getPaymentDetails();
+    }
+
     async createTransfer(userId: number, dto: CreateTransferDto) {
-        const { amount_ghs, transfer_direction, recipient_type, recipient_details, purpose, payment_method, qr_codes: rawQrCodes } = dto;
+        const {
+            amount_ghs,
+            transfer_direction,
+            recipient_type,
+            recipient_details,
+            purpose,
+            payment_method,
+            proof_of_transfer,
+            payment_transaction_id,
+            payment_sender_name,
+            qr_codes: rawQrCodes,
+        } = dto;
+
+        if (payment_method !== 'mobile_money' && payment_method !== 'bank_transfer') {
+            throw new BadRequestException('Only mobile money or bank transfer payment is supported');
+        }
+
+        const proofUrl = String(proof_of_transfer || '').trim();
+        const txnId = String(payment_transaction_id || '').trim();
+        const paySender = String(payment_sender_name || '').trim();
+        if (!proofUrl) throw new BadRequestException('Payment confirmation screenshot is required');
+        if (!txnId) throw new BadRequestException('Transaction ID is required');
+        if (!paySender) throw new BadRequestException('Sender name is required');
+
         const recipientName = String((recipient_details as any)?.name || '').trim();
         const recipientPhone = String((recipient_details as any)?.phone || '').trim();
         if (!recipientName) {
             throw new BadRequestException('recipient_details.name is required');
         }
 
-        // Normalize and validate QR codes (array of { image, amount_cny, recipient_name? })
         const rate = await this.getExchangeRate();
         const amount_cny = Number(amount_ghs) * rate;
         let qr_codes: Array<{ image: string; amount_cny: number; recipient_name?: string }> = [];
@@ -81,7 +181,6 @@ export class TransferService {
             }
         }
 
-        // Fetch User Details for Sender Info
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
             include: { profile: true }
@@ -91,24 +190,10 @@ export class TransferService {
 
         const senderName = user.profile ? `${user.profile.first_name} ${user.profile.last_name}` : 'Unknown User';
 
-        const transfer_fee = 0; // Or calculate based on amount
+        const transfer_fee = 0;
         const total_amount = Number(amount_ghs) + transfer_fee;
-
-        const isWallet = payment_method === 'wallet';
-        const isPaystack = payment_method === 'card' || payment_method === 'mobile_money';
-
-        // Payment Logic - wallet: deduct after transfer record exists; card/mobile_money: create pending, pay via Paystack
-        if (isWallet) {
-            const wallet = await this.walletService.getBalance(userId);
-            if (!wallet || Number(wallet.balance_ghs) < total_amount) {
-                throw new BadRequestException('Insufficient wallet balance');
-            }
-        }
-
         const token = `TRF-${Date.now()}`;
-        const paystackRef = isPaystack ? `PAY-TRF-${Date.now()}-${userId}` : null;
 
-        // Create Transfer Record
         const transfer = await this.prisma.moneyTransfer.create({
             data: {
                 user_id: userId,
@@ -119,7 +204,8 @@ export class TransferService {
                 exchange_rate: rate,
                 transfer_fee,
                 total_amount,
-                status: isWallet ? 'payment_received' : 'processing',
+                // Awaiting admin payment review
+                status: 'processing',
                 sender_name: senderName,
                 sender_phone: user.phone,
                 sender_email: user.email,
@@ -128,40 +214,24 @@ export class TransferService {
                 recipient_type: recipient_type as RecipientType,
                 recipient_details: recipient_details as Prisma.InputJsonValue,
                 payment_method: payment_method as PaymentMethod,
-                payment_status: isWallet ? 'success' : 'pending',
-                paystack_reference: paystackRef,
+                payment_status: PaymentStatus.pending,
+                proof_of_transfer: proofUrl,
+                payment_transaction_id: txnId,
+                payment_sender_name: paySender,
                 purpose,
                 qr_codes,
                 admin_reply_images: []
             }
         });
 
-        if (isWallet) {
-            await this.walletService.debit(
+        this.smsService
+            .sendToUser(
                 userId,
-                total_amount,
-                'transfer_payment',
-                `Money transfer ${token}`,
-                transfer.id,
-            );
-        }
+                `ThinQShop Transfer: GHS ${amount_ghs} (Token: ${token}) submitted. We will verify your payment and process your transfer.`,
+            )
+            .catch(() => {});
 
-        // Create Payment record for Paystack (reference used in Paystack popup)
-        if (isPaystack && paystackRef) {
-            await this.paymentService.initializePayment(
-                userId,
-                Number(total_amount),
-                'money_transfer',
-                transfer.id,
-                paystackRef
-            );
-        }
-
-        if (isWallet) {
-            this.smsService.sendToUser(userId, `ThinQShop Transfer: GHS ${amount_ghs} (Token: ${token}) received. We will process your transfer.`).catch(() => {});
-        }
-
-        return { ...transfer, paystack_reference: paystackRef };
+        return transfer;
     }
 
     async getTransferByToken(token: string) {
@@ -200,11 +270,20 @@ export class TransferService {
     }
 
     async updateTransferStatus(id: number, status: string, notes?: string) {
-        const data: { status: any; admin_notes?: string } = {
+        const data: {
+            status: any;
+            admin_notes?: string;
+            payment_status?: PaymentStatus;
+        } = {
             status: status as any,
         };
         if (notes !== undefined && notes !== null) {
             data.admin_notes = notes;
+        }
+        if (status === 'payment_received') {
+            data.payment_status = PaymentStatus.success;
+        } else if (status === 'failed' || status === 'cancelled') {
+            data.payment_status = PaymentStatus.failed;
         }
         return this.prisma.moneyTransfer.update({
             where: { id },
@@ -274,39 +353,10 @@ export class TransferService {
         });
     }
 
-    async confirmTransferPayment(transferId: number, userId: number, paystackReference: string) {
-        const transfer = await this.prisma.moneyTransfer.findUnique({
-            where: { id: transferId }
-        });
-        if (!transfer) throw new BadRequestException('Transfer not found');
-        if (transfer.user_id !== userId) throw new BadRequestException('Unauthorized');
-        if (transfer.payment_status === 'success') return transfer;
-
-        const secret = this.getPaystackSecret();
-        const res = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(paystackReference)}`, {
-            headers: { Authorization: `Bearer ${secret}` }
-        });
-        const json = await res.json();
-        if (!json.status || json.data?.status !== 'success') {
-            throw new BadRequestException('Payment verification failed');
-        }
-
-        await this.prisma.moneyTransfer.update({
-            where: { id: transferId },
-            data: {
-                paystack_reference: paystackReference,
-                payment_status: 'success',
-                status: 'payment_received'
-            }
-        });
-
-        await this.prisma.payment.updateMany({
-            where: { transaction_ref: paystackReference, service_type: 'money_transfer', service_id: transferId },
-            data: { status: 'success', paystack_reference: paystackReference, paystack_response: json }
-        });
-
-        this.smsService.sendToUser(userId, `ThinQShop Transfer: Payment confirmed for transfer #${transferId}. We will process your transfer.`).catch(() => {});
-
-        return this.prisma.moneyTransfer.findUnique({ where: { id: transferId } });
+    /** Legacy Paystack path — transfers now use offline payment only. */
+    async confirmTransferPayment(_transferId: number, _userId: number, _paystackReference: string) {
+        throw new BadRequestException(
+            'Online payment is no longer available for transfers. Please use mobile money or bank transfer and submit your payment proof.',
+        );
     }
 }

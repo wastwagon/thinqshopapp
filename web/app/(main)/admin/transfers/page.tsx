@@ -7,6 +7,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Send, Search, History, ChevronRight, Calendar, ArrowRight, QrCode, Upload, ImagePlus, Download, CheckCircle, Loader2, FileText, Clock, Package } from 'lucide-react';
 import { STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
+import { getMediaUrl } from '@/lib/media';
 
 type QrCodeEntry = { image: string; amount_ghs?: number; amount_cny?: number; recipient_name?: string };
 type QrFulfillment = { qr_index: number; status: string; confirmation_image?: string; admin_notes?: string; fulfilled_at?: string };
@@ -17,10 +18,15 @@ interface Transfer {
     amount_ghs: string;
     amount_cny: string;
     status: string;
+    payment_status?: string;
+    payment_method?: string;
     recipient_name: string;
     recipient_type: string;
     admin_reply_images?: string[];
     admin_notes?: string;
+    proof_of_transfer?: string | null;
+    payment_transaction_id?: string | null;
+    payment_sender_name?: string | null;
     qr_fulfillments?: QrFulfillment[];
     user: {
         email: string;
@@ -118,8 +124,12 @@ export default function AdminTransfersPage() {
             (t.user?.email ?? '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const pendingCount = transfers.filter((t) => t.status === 'pending').length;
-    const inProgressCount = transfers.filter((t) => ['payment_received', 'processing', 'sent_to_partner'].includes(t.status)).length;
+    const isAwaitingPaymentReview = (t: Transfer) =>
+        t.payment_status === 'pending' && (t.status === 'processing' || t.status === 'pending');
+    const pendingCount = transfers.filter(isAwaitingPaymentReview).length;
+    const inProgressCount = transfers.filter((t) =>
+        ['payment_received', 'processing', 'sent_to_partner'].includes(t.status) && !isAwaitingPaymentReview(t)
+    ).length;
     const completedCount = transfers.filter((t) => t.status === 'completed').length;
     const inProgressAmount = transfers
         .filter((t) => t.status !== 'completed' && t.status !== 'failed' && t.status !== 'cancelled')
@@ -277,7 +287,10 @@ export default function AdminTransfersPage() {
                                             </div>
                                         </td>
                                         <td className="px-3 py-2.5 text-center">
-                                            <StatusBadge status={transfer.status} />
+                                            <StatusBadge status={isAwaitingPaymentReview(transfer) ? 'pending' : transfer.status} />
+                                            {isAwaitingPaymentReview(transfer) && (
+                                                <p className="text-[10px] text-orange-600 font-semibold mt-0.5">Payment review</p>
+                                            )}
                                             {transfer.qr_codes && transfer.qr_codes.length > 0 && (
                                                 <button
                                                     type="button"
@@ -290,6 +303,34 @@ export default function AdminTransfersPage() {
                                         </td>
                                         <td className="px-3 py-2.5">
                                             <div className="space-y-1.5">
+                                                {(transfer.proof_of_transfer || transfer.payment_transaction_id || transfer.payment_sender_name) && (
+                                                    <div className="rounded-lg border border-orange-100 bg-orange-50/60 p-2 space-y-1 max-w-[200px]">
+                                                        <p className="text-[10px] font-bold uppercase tracking-wide text-orange-700">Customer payment</p>
+                                                        {transfer.payment_method && (
+                                                            <p className="text-[10px] text-gray-600 capitalize">{transfer.payment_method.replace(/_/g, ' ')}</p>
+                                                        )}
+                                                        {transfer.payment_transaction_id && (
+                                                            <p className="text-[10px] text-gray-800 font-mono break-all">ID: {transfer.payment_transaction_id}</p>
+                                                        )}
+                                                        {transfer.payment_sender_name && (
+                                                            <p className="text-[10px] text-gray-800">From: {transfer.payment_sender_name}</p>
+                                                        )}
+                                                        {transfer.proof_of_transfer && (
+                                                            <a
+                                                                href={getMediaUrl(transfer.proof_of_transfer)}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="block w-12 h-12 rounded-md overflow-hidden border border-orange-200 bg-white"
+                                                            >
+                                                                <img
+                                                                    src={getMediaUrl(transfer.proof_of_transfer)}
+                                                                    alt="Payment proof"
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                )}
                                                 {transfer.admin_reply_images && transfer.admin_reply_images.length > 0 && (
                                                     <div className="flex gap-1.5 flex-wrap">
                                                             {transfer.admin_reply_images.map((img, i) => (
@@ -329,7 +370,7 @@ export default function AdminTransfersPage() {
                                             </div>
                                         </td>
                                         <td className="px-3 py-2.5 text-right">
-                                            {transfer.status === 'pending' ? (
+                                            {isAwaitingPaymentReview(transfer) ? (
                                                 <div className="flex justify-end gap-1.5">
                                                     <button
                                                         type="button"
@@ -337,7 +378,7 @@ export default function AdminTransfersPage() {
                                                         onClick={() => handleStatusUpdate(transfer.id, 'payment_received')}
                                                         className="h-8 px-3 bg-blue-600 text-white rounded-lg font-semibold text-xs hover:bg-blue-700 transition-all"
                                                     >
-                                                        Approve
+                                                        Approve payment
                                                     </button>
                                                     <button
                                                         type="button"
@@ -356,7 +397,6 @@ export default function AdminTransfersPage() {
                                                         value={transfer.status}
                                                         onChange={(e) => handleStatusUpdate(transfer.id, e.target.value)}
                                                     >
-                                                        <option value="pending">Pending</option>
                                                         <option value="payment_received">Payment received</option>
                                                         <option value="processing">Processing</option>
                                                         <option value="sent_to_partner">Sent to partner</option>

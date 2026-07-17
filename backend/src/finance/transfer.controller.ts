@@ -1,6 +1,23 @@
 
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Request, ForbiddenException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Patch,
+    Body,
+    Param,
+    UseGuards,
+    Request,
+    ForbiddenException,
+    BadRequestException,
+    NotFoundException,
+    UseInterceptors,
+    UploadedFile,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { TransferService } from './transfer.service';
+import { MediaService } from '../media/media.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Public } from '../auth/public.decorator';
 import { PermissionGuard } from '../auth/permission.guard';
@@ -12,14 +29,19 @@ import {
     ConfirmTransferPaymentDto,
     CreateTransferDto,
     UpdateTransferFulfillmentDto,
+    UpdateTransferPaymentDetailsDto,
     UpdateTransferStatusDto,
 } from './dto/transfer.dto';
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 @Controller('finance/transfers')
 @UseGuards(AuthGuard)
 export class TransferController {
     constructor(
         private transferService: TransferService,
+        private mediaService: MediaService,
         private auditService: AuditService,
     ) { }
 
@@ -30,12 +52,39 @@ export class TransferController {
         return { rate_ghs_to_cny: rate };
     }
 
+    @Get('payment-details')
+    async getPaymentDetails() {
+        return this.transferService.getPaymentDetails();
+    }
+
     @Public()
     @Get('track/:token')
     async trackByToken(@Param('token') token: string) {
         const transfer = await this.transferService.getTransferByToken(token);
         if (!transfer) throw new NotFoundException('Transfer not found');
         return transfer;
+    }
+
+    @Post('upload-payment-proof')
+    @UseInterceptors(
+        FileInterceptor('file', {
+            storage: memoryStorage(),
+            limits: { fileSize: MAX_FILE_SIZE },
+            fileFilter: (_req, file, cb) => {
+                if (!file.mimetype || ALLOWED_MIMES.includes(file.mimetype)) {
+                    cb(null, true);
+                } else {
+                    cb(new Error('Invalid file type. Allowed: JPEG, PNG, GIF, WebP'), false);
+                }
+            },
+        }),
+    )
+    async uploadPaymentProof(@UploadedFile() file: Express.Multer.File) {
+        if (!file) {
+            throw new BadRequestException('No file uploaded');
+        }
+        const result = await this.mediaService.createFromFile(file);
+        return { url: result.url, path: result.path };
     }
 
     @Post()
@@ -53,6 +102,25 @@ export class TransferController {
     @RequirePermission(PERMISSION_MAP.TRANSFERS_READ_ALL)
     async getAllTransfers(@Request() req) {
         return this.transferService.getAllTransfers();
+    }
+
+    @Get('admin/payment-details')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.TRANSFERS_MANAGE)
+    async getPaymentDetailsAdmin() {
+        return this.transferService.getPaymentDetails();
+    }
+
+    @Patch('admin/payment-details')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.TRANSFERS_MANAGE)
+    async updatePaymentDetails(@Request() req, @Body() body: UpdateTransferPaymentDetailsDto) {
+        const updated = await this.transferService.updatePaymentDetails(body);
+        await this.auditService.logAdminAction(req, 'transfer.payment_details.update', {
+            tableName: 'settings',
+            details: body as Record<string, unknown>,
+        });
+        return updated;
     }
 
     @Patch('admin/rate')
