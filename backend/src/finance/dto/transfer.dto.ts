@@ -36,7 +36,7 @@ export class CreateTransferDto {
     purpose?: string;
 
     @IsString()
-    @IsIn(['mobile_money', 'bank_transfer'])
+    @IsIn(['mobile_money'])
     payment_method: string;
 
     /** Screenshot / confirmation image URL from upload */
@@ -109,20 +109,4 @@ export class UpdateTransferPaymentDetailsDto {
     @IsOptional()
     @IsString()
     momo_network?: string;
-
-    @IsOptional()
-    @IsString()
-    bank_name?: string;
-
-    @IsOptional()
-    @IsString()
-    bank_account_name?: string;
-
-    @IsOptional()
-    @IsString()
-    bank_account_number?: string;
-
-    @IsOptional()
-    @IsString()
-    bank_branch?: string;
 }

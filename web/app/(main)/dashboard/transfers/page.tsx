@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
-import { Send, AlertCircle, Plus, Upload, X, History as HistoryIcon, RefreshCw, FileDown, Copy, Smartphone, Building2 } from 'lucide-react';
+import { Send, AlertCircle, Plus, Upload, X, History as HistoryIcon, RefreshCw, FileDown, Copy, Smartphone } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -30,13 +30,7 @@ type PaymentDetails = {
     momo_name_primary: string;
     momo_name_alternate: string;
     momo_network: string;
-    bank_name: string;
-    bank_account_name: string;
-    bank_account_number: string;
-    bank_branch: string;
 };
-
-type PaymentMethod = 'mobile_money' | 'bank_transfer';
 
 export default function TransferPage() {
     const { user } = useAuth();
@@ -55,7 +49,6 @@ export default function TransferPage() {
     const [recipientId, setRecipientId] = useState('');
     const [bankName, setBankName] = useState('');
     const [accountNumber, setAccountNumber] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mobile_money');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [uploadingProof, setUploadingProof] = useState(false);
 
@@ -238,7 +231,7 @@ export default function TransferPage() {
                 account_number: accountNumber,
                 bank_name: bankName
             },
-            payment_method: paymentMethod,
+            payment_method: 'mobile_money',
             proof_of_transfer: proofUrl.trim(),
             payment_transaction_id: transactionId.trim(),
             payment_sender_name: paymentSenderName.trim(),
@@ -266,18 +259,6 @@ export default function TransferPage() {
               `Network: ${paymentDetails.momo_network}`,
               `Name: ${paymentDetails.momo_name_primary}`,
               paymentDetails.momo_name_alternate ? `Or: ${paymentDetails.momo_name_alternate}` : '',
-              amountGhs ? `Amount: GHS ${Number(amountGhs).toFixed(2)}` : '',
-          ]
-              .filter(Boolean)
-              .join('\n')
-        : '';
-
-    const bankCopyBlock = paymentDetails
-        ? [
-              `Bank: ${paymentDetails.bank_name}`,
-              `Account Name: ${paymentDetails.bank_account_name}`,
-              `Account Number: ${paymentDetails.bank_account_number}`,
-              `Branch: ${paymentDetails.bank_branch}`,
               amountGhs ? `Amount: GHS ${Number(amountGhs).toFixed(2)}` : '',
           ]
               .filter(Boolean)
@@ -366,35 +347,20 @@ export default function TransferPage() {
 
                             {/* Offline payment method */}
                             <div className="space-y-2">
-                                <label className="text-xs font-medium text-gray-500 ml-1 block">How will you pay?</label>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setPaymentMethod('mobile_money')}
-                                        className={`flex items-center gap-2 py-2.5 px-3 rounded-lg border-2 transition-all text-left ${paymentMethod === 'mobile_money' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
-                                    >
-                                        <Smartphone className={`h-5 w-5 shrink-0 ${paymentMethod === 'mobile_money' ? 'text-blue-600' : 'text-gray-400'}`} />
+                                <label className="text-xs font-medium text-gray-500 ml-1 block">Payment method</label>
+                                <div className="grid grid-cols-1 gap-2">
+                                    <div className="flex items-center gap-2 py-2.5 px-3 rounded-lg border-2 border-blue-600 bg-blue-50 text-left">
+                                        <Smartphone className="h-5 w-5 shrink-0 text-blue-600" />
                                         <div className="min-w-0">
-                                            <p className={`text-xs font-semibold ${paymentMethod === 'mobile_money' ? 'text-blue-600' : 'text-gray-700'}`}>Mobile Money</p>
+                                            <p className="text-xs font-semibold text-blue-600">Mobile Money</p>
                                             <p className="text-xs text-gray-500 truncate">Pay manually on your phone</p>
                                         </div>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setPaymentMethod('bank_transfer')}
-                                        className={`flex items-center gap-2 py-2.5 px-3 rounded-lg border-2 transition-all text-left ${paymentMethod === 'bank_transfer' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}
-                                    >
-                                        <Building2 className={`h-5 w-5 shrink-0 ${paymentMethod === 'bank_transfer' ? 'text-blue-600' : 'text-gray-400'}`} />
-                                        <div className="min-w-0">
-                                            <p className={`text-xs font-semibold ${paymentMethod === 'bank_transfer' ? 'text-blue-600' : 'text-gray-700'}`}>Bank Transfer</p>
-                                            <p className="text-xs text-gray-500 truncate">Pay to our bank account</p>
-                                        </div>
-                                    </button>
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Copyable payment instructions (logistics-style) */}
-                            {paymentDetails && paymentMethod === 'mobile_money' && (
+                            {paymentDetails && (
                                 <section>
                                     <h3 className="text-xs font-bold tracking-[0.2em] text-gray-400 mb-2">MOMO DETAILS</h3>
                                     <p className="text-xs font-medium text-gray-500 mb-3">
@@ -424,43 +390,6 @@ export default function TransferPage() {
                                         <button
                                             type="button"
                                             onClick={() => copyText(momoCopyBlock, 'MoMo details')}
-                                            className="shrink-0 min-h-[44px] h-9 px-3 rounded-lg bg-white border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-1.5"
-                                        >
-                                            <Copy className="h-3.5 w-3.5" />
-                                            Copy
-                                        </button>
-                                    </div>
-                                </section>
-                            )}
-
-                            {paymentDetails && paymentMethod === 'bank_transfer' && (
-                                <section>
-                                    <h3 className="text-xs font-bold tracking-[0.2em] text-gray-400 mb-2">BANK DETAILS</h3>
-                                    <p className="text-xs font-medium text-gray-500 mb-3">
-                                        Copy the details, transfer from your bank, then upload your confirmation below.
-                                    </p>
-                                    <div className="rounded-xl border-2 border-gray-100 bg-gray-50/50 p-4 flex justify-between items-start gap-4">
-                                        <div className="min-w-0 font-mono text-xs text-gray-800 whitespace-pre-wrap break-words space-y-1">
-                                            <p><span className="text-gray-500">Bank: </span>{paymentDetails.bank_name}</p>
-                                            <p><span className="text-gray-500">Account Name: </span>{paymentDetails.bank_account_name}</p>
-                                            <p>
-                                                <span className="text-gray-500">Account Number: </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => copyText(paymentDetails.bank_account_number, 'Account number')}
-                                                    className="font-bold text-blue-700 hover:underline"
-                                                >
-                                                    {paymentDetails.bank_account_number}
-                                                </button>
-                                            </p>
-                                            <p><span className="text-gray-500">Branch: </span>{paymentDetails.bank_branch}</p>
-                                            {amountGhs && Number(amountGhs) > 0 && (
-                                                <p className="mt-2 text-gray-600">Amount to send: GHS {Number(amountGhs).toFixed(2)}</p>
-                                            )}
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => copyText(bankCopyBlock, 'Bank details')}
                                             className="shrink-0 min-h-[44px] h-9 px-3 rounded-lg bg-white border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-1.5"
                                         >
                                             <Copy className="h-3.5 w-3.5" />

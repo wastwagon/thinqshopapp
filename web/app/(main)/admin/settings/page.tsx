@@ -18,7 +18,6 @@ import {
     DatabaseIcon,
     Loader2,
     Smartphone,
-    Building2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -28,10 +27,6 @@ type PaymentDetailsForm = {
     momo_name_primary: string;
     momo_name_alternate: string;
     momo_network: string;
-    bank_name: string;
-    bank_account_name: string;
-    bank_account_number: string;
-    bank_branch: string;
 };
 
 const EMPTY_PAYMENT: PaymentDetailsForm = {
@@ -39,10 +34,6 @@ const EMPTY_PAYMENT: PaymentDetailsForm = {
     momo_name_primary: '',
     momo_name_alternate: '',
     momo_network: '',
-    bank_name: '',
-    bank_account_name: '',
-    bank_account_number: '',
-    bank_branch: '',
 };
 
 export default function AdminSettings() {
@@ -204,7 +195,7 @@ export default function AdminSettings() {
                             Transfer payment details (offline)
                         </h3>
                         <p className="text-xs text-gray-500 mb-4">
-                            Shown to customers when they pay by Mobile Money or Bank Transfer. They copy these details and pay manually.
+                            Shown to customers when they pay by Mobile Money. They copy these details and pay manually.
                         </p>
 
                         <div className="space-y-4">
@@ -251,54 +242,6 @@ export default function AdminSettings() {
                                             value={paymentDetails.momo_name_alternate}
                                             onChange={(e) => setPaymentDetails({ ...paymentDetails, momo_name_alternate: e.target.value })}
                                             placeholder="Emmanuel ASIEDU"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                                    <Building2 className="h-3.5 w-3.5" /> Bank Transfer
-                                </p>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-gray-500">Bank name</label>
-                                        <input
-                                            type="text"
-                                            className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                            value={paymentDetails.bank_name}
-                                            onChange={(e) => setPaymentDetails({ ...paymentDetails, bank_name: e.target.value })}
-                                            placeholder="GCB Bank"
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-gray-500">Account name</label>
-                                        <input
-                                            type="text"
-                                            className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                            value={paymentDetails.bank_account_name}
-                                            onChange={(e) => setPaymentDetails({ ...paymentDetails, bank_account_name: e.target.value })}
-                                            placeholder="ThinQShop Ltd"
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-gray-500">Account number</label>
-                                        <input
-                                            type="text"
-                                            className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                            value={paymentDetails.bank_account_number}
-                                            onChange={(e) => setPaymentDetails({ ...paymentDetails, bank_account_number: e.target.value })}
-                                            placeholder="1234567890123"
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-gray-500">Branch</label>
-                                        <input
-                                            type="text"
-                                            className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                            value={paymentDetails.bank_branch}
-                                            onChange={(e) => setPaymentDetails({ ...paymentDetails, bank_branch: e.target.value })}
-                                            placeholder="Accra Main"
                                         />
                                     </div>
                                 </div>

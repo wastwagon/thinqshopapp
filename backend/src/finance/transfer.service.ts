@@ -9,10 +9,6 @@ export type TransferPaymentDetails = {
     momo_name_primary: string;
     momo_name_alternate: string;
     momo_network: string;
-    bank_name: string;
-    bank_account_name: string;
-    bank_account_number: string;
-    bank_branch: string;
 };
 
 const PAYMENT_DETAIL_KEYS = [
@@ -20,10 +16,6 @@ const PAYMENT_DETAIL_KEYS = [
     'transfer_momo_name_primary',
     'transfer_momo_name_alternate',
     'transfer_momo_network',
-    'transfer_bank_name',
-    'transfer_bank_account_name',
-    'transfer_bank_account_number',
-    'transfer_bank_branch',
 ] as const;
 
 const PAYMENT_DETAIL_DEFAULTS: TransferPaymentDetails = {
@@ -31,10 +23,6 @@ const PAYMENT_DETAIL_DEFAULTS: TransferPaymentDetails = {
     momo_name_primary: 'Gohdit Print and Computers',
     momo_name_alternate: 'Emmanuel ASIEDU',
     momo_network: 'MTN',
-    bank_name: 'GCB Bank',
-    bank_account_name: 'ThinQShop Ltd',
-    bank_account_number: '1234567890123',
-    bank_branch: 'Accra Main',
 };
 
 const KEY_TO_FIELD: Record<(typeof PAYMENT_DETAIL_KEYS)[number], keyof TransferPaymentDetails> = {
@@ -42,10 +30,6 @@ const KEY_TO_FIELD: Record<(typeof PAYMENT_DETAIL_KEYS)[number], keyof TransferP
     transfer_momo_name_primary: 'momo_name_primary',
     transfer_momo_name_alternate: 'momo_name_alternate',
     transfer_momo_network: 'momo_network',
-    transfer_bank_name: 'bank_name',
-    transfer_bank_account_name: 'bank_account_name',
-    transfer_bank_account_number: 'bank_account_number',
-    transfer_bank_branch: 'bank_branch',
 };
 
 @Injectable()
@@ -105,10 +89,6 @@ export class TransferService {
             { key: 'transfer_momo_name_primary', value: dto.momo_name_primary },
             { key: 'transfer_momo_name_alternate', value: dto.momo_name_alternate },
             { key: 'transfer_momo_network', value: dto.momo_network },
-            { key: 'transfer_bank_name', value: dto.bank_name },
-            { key: 'transfer_bank_account_name', value: dto.bank_account_name },
-            { key: 'transfer_bank_account_number', value: dto.bank_account_number },
-            { key: 'transfer_bank_branch', value: dto.bank_branch },
         ];
 
         await Promise.all(
@@ -145,8 +125,8 @@ export class TransferService {
             qr_codes: rawQrCodes,
         } = dto;
 
-        if (payment_method !== 'mobile_money' && payment_method !== 'bank_transfer') {
-            throw new BadRequestException('Only mobile money or bank transfer payment is supported');
+        if (payment_method !== 'mobile_money') {
+            throw new BadRequestException('Only mobile money payment is supported');
         }
 
         const proofUrl = String(proof_of_transfer || '').trim();
