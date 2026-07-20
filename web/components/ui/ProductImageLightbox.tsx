@@ -2,7 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ZoomIn, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import ProductImage from './ProductImage';
 
@@ -14,6 +14,11 @@ type ProductImageLightboxProps = {
     productHref?: string;
     initialIndex?: number;
     onIndexChange?: (index: number) => void;
+    /** Express checkout — add to cart and go to checkout */
+    onBuy?: () => void | Promise<void>;
+    buyDisabled?: boolean;
+    buyLabel?: string;
+    buying?: boolean;
 };
 
 export default function ProductImageLightbox({
@@ -24,6 +29,10 @@ export default function ProductImageLightbox({
     productHref,
     initialIndex = 0,
     onIndexChange,
+    onBuy,
+    buyDisabled = false,
+    buyLabel = 'Buy',
+    buying = false,
 }: ProductImageLightboxProps) {
     const [index, setIndex] = useState(initialIndex);
     const count = images.length;
@@ -175,15 +184,32 @@ export default function ProductImageLightbox({
                                 </div>
                             )}
 
-                            {productHref && (
-                                <div className="mt-4 flex justify-center">
-                                    <Link
-                                        href={productHref}
-                                        onClick={onClose}
-                                        className="inline-flex items-center justify-center min-h-[44px] px-6 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
-                                    >
-                                        View product details
-                                    </Link>
+                            {(onBuy || productHref) && (
+                                <div className="mt-4 flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 px-1">
+                                    {onBuy && (
+                                        <button
+                                            type="button"
+                                            onClick={() => void onBuy()}
+                                            disabled={buyDisabled || buying}
+                                            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <ShoppingBag className="h-4 w-4 shrink-0" aria-hidden />
+                                            {buying ? 'Buying…' : buyLabel}
+                                        </button>
+                                    )}
+                                    {productHref && (
+                                        <Link
+                                            href={productHref}
+                                            onClick={onClose}
+                                            className={`inline-flex items-center justify-center min-h-[44px] px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                                                onBuy
+                                                    ? 'bg-white/10 border border-white/20 text-white hover:bg-white/20'
+                                                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                                            }`}
+                                        >
+                                            View product details
+                                        </Link>
+                                    )}
                                 </div>
                             )}
                         </Dialog.Panel>

@@ -3,12 +3,15 @@
 import type { MouseEvent } from 'react';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Heart, ShoppingCart, Star, Eye, ArrowRight } from 'lucide-react';
 import ProductImage from './ProductImage';
 import ProductImageLightbox, { ProductImageTapHint } from './ProductImageLightbox';
 import PriceDisplay from './PriceDisplay';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
+import { useAuth } from '@/context/AuthContext';
+import toast from 'react-hot-toast';
 
 interface ProductVariantRow {
     id?: number;
@@ -60,7 +63,10 @@ function collectGalleryImages(product: Product, imagesList: string[], fallback: 
 export default function ProductCard({ product }: ProductCardProps) {
     const { addToCart } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
+    const { user } = useAuth();
+    const router = useRouter();
     const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [buying, setBuying] = useState(false);
 
     const basePrice = typeof product.price === 'string'
         ? parseFloat(String(product.price).replace(/[^0-9.]/g, ''))
@@ -121,6 +127,28 @@ export default function ProductCard({ product }: ProductCardProps) {
         e?.preventDefault();
         e?.stopPropagation();
         if (galleryImages.length > 0) setLightboxOpen(true);
+    };
+
+    const handleExpressBuy = async () => {
+        if (!productId) return;
+        if (!user) {
+            toast.error('Please login to continue');
+            setLightboxOpen(false);
+            router.push('/login?from=/checkout');
+            return;
+        }
+        setBuying(true);
+        try {
+            const ok = await addToCart(productId, 1, firstVariantId, {
+                openDrawer: false,
+                successMessage: 'Added — going to checkout',
+            });
+            if (!ok) return;
+            setLightboxOpen(false);
+            router.push('/checkout');
+        } finally {
+            setBuying(false);
+        }
     };
 
     const inWishlist = isInWishlist(Number(productId));
@@ -267,6 +295,9 @@ export default function ProductCard({ product }: ProductCardProps) {
                 images={galleryImages}
                 title={product.name}
                 productHref={productHref}
+                onBuy={handleExpressBuy}
+                buying={buying}
+                buyLabel="Buy"
             />
         </>
     );

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart, Star, Heart, Plus, Minus, Truck, RotateCcw, ZoomIn } from 'lucide-react';
@@ -43,6 +43,7 @@ type PolicyRow = { type: string; short_text: string | null; full_text: string | 
 
 export default function ProductDetailsPage({ params }: { params: { slug: string } }) {
     const { slug } = params;
+    const router = useRouter();
     const { addToCart } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
     const { user } = useAuth();
@@ -50,6 +51,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
     const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [buying, setBuying] = useState(false);
     const [quantity, setQuantity] = useState(1);
     const [reviews, setReviews] = useState<{ data: ReviewRow[]; meta: { total: number; totalPages: number } }>({ data: [], meta: { total: 0, totalPages: 0 } });
     const [policies, setPolicies] = useState<PolicyRow[]>([]);
@@ -200,6 +202,39 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
         );
     const maxQuantity = product.is_consignment ? 1 : Math.max(1, stockToShow);
     const moreNeeded = hasWholesale && quantity < minQty ? minQty - quantity : 0;
+
+    const expressVariantId =
+        selectedVariantId ??
+        (variants.length > 0 && variants[0]?.id != null ? Number(variants[0].id) : undefined);
+
+    const handleExpressBuy = async () => {
+        if (isOwnConsignment) {
+            toast.error('You cannot purchase your own Sell for Me listing');
+            return;
+        }
+        if (stockToShow <= 0) {
+            toast.error('Out of stock');
+            return;
+        }
+        if (!user) {
+            toast.error('Please login to continue');
+            setLightboxOpen(false);
+            router.push('/login?from=/checkout');
+            return;
+        }
+        setBuying(true);
+        try {
+            const ok = await addToCart(Number(product.id), Math.max(1, quantity), expressVariantId, {
+                openDrawer: false,
+                successMessage: 'Added — going to checkout',
+            });
+            if (!ok) return;
+            setLightboxOpen(false);
+            router.push('/checkout');
+        } finally {
+            setBuying(false);
+        }
+    };
 
     return (
         <ShopLayout>
@@ -537,6 +572,10 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                 title={product.name}
                 initialIndex={selectedImage}
                 onIndexChange={setSelectedImage}
+                onBuy={handleExpressBuy}
+                buying={buying}
+                buyDisabled={isOwnConsignment || stockToShow <= 0}
+                buyLabel={isOwnConsignment ? 'Your listing' : stockToShow <= 0 ? 'Out of stock' : 'Buy'}
             />
             </div>
         </ShopLayout>

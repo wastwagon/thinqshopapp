@@ -29,7 +29,12 @@ interface CartContextType {
     itemCount: number;
     cartTotal: number;
     loading: boolean;
-    addToCart: (productId: number, quantity: number, variantId?: number) => Promise<void>;
+    addToCart: (
+        productId: number,
+        quantity: number,
+        variantId?: number,
+        options?: { openDrawer?: boolean; successMessage?: string },
+    ) => Promise<boolean>;
     updateQuantity: (itemId: number, quantity: number) => Promise<void>;
     removeFromCart: (itemId: number) => Promise<void>;
     clearCart: () => Promise<void>;
@@ -65,19 +70,27 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         fetchCart();
     }, [user]);
 
-    const addToCart = async (productId: number, quantity: number, variantId?: number) => {
+    const addToCart = async (
+        productId: number,
+        quantity: number,
+        variantId?: number,
+        options?: { openDrawer?: boolean; successMessage?: string },
+    ): Promise<boolean> => {
         if (!user) {
             toast.error("Please login to add items to cart");
-            return;
+            return false;
         }
+        const openDrawer = options?.openDrawer !== false;
         try {
             await api.post('/cart', { productId, quantity, ...(variantId != null ? { variantId } : {}) });
             trackAddToCart(String(productId), quantity);
-            toast.success('Added to cart');
+            toast.success(options?.successMessage ?? 'Added to cart');
             fetchCart();
-            if (typeof window !== 'undefined' && window.innerWidth >= 768) setIsCartOpen(true);
+            if (openDrawer && typeof window !== 'undefined' && window.innerWidth >= 768) setIsCartOpen(true);
+            return true;
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Failed to add to cart');
+            return false;
         }
     };
 
