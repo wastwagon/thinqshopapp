@@ -12,6 +12,7 @@ export type CategoryNode = {
 /** Legacy root slugs hidden from shop nav when a replacement tree exists */
 export const NAV_SUPERSEDED_BY: Record<string, string> = {
     photography: 'cameras',
+    'audio-studio': 'pro-audio',
 };
 
 function sortCategories(list: CategoryNode[]): CategoryNode[] {

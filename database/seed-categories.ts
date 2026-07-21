@@ -1,5 +1,5 @@
 /**
- * Idempotent two-level category tree (Cameras/Drones + New/Used subcategories).
+ * Idempotent two-level category trees (high-ticket New/Used subcategories).
  */
 import { PrismaClient } from '@prisma/client';
 
@@ -22,6 +22,60 @@ const CATEGORY_TREE: CategorySeed[] = [
         children: [
             { name: 'New Drones', slug: 'new-drones', sort_order: 1 },
             { name: 'Used Drones', slug: 'used-drones', sort_order: 2 },
+        ],
+    },
+    {
+        name: 'Computers',
+        slug: 'computers',
+        sort_order: 30,
+        children: [
+            { name: 'New Computers', slug: 'new-computers', sort_order: 1 },
+            { name: 'Used Computers', slug: 'used-computers', sort_order: 2 },
+        ],
+    },
+    {
+        name: 'Gaming',
+        slug: 'gaming',
+        sort_order: 40,
+        children: [
+            { name: 'New Gaming', slug: 'new-gaming', sort_order: 1 },
+            { name: 'Used Gaming', slug: 'used-gaming', sort_order: 2 },
+        ],
+    },
+    {
+        name: 'Pro Audio',
+        slug: 'pro-audio',
+        sort_order: 50,
+        children: [
+            { name: 'New Pro Audio', slug: 'new-pro-audio', sort_order: 1 },
+            { name: 'Used Pro Audio', slug: 'used-pro-audio', sort_order: 2 },
+        ],
+    },
+    {
+        name: 'Electronics',
+        slug: 'electronics',
+        sort_order: 60,
+        children: [
+            { name: 'New Electronics', slug: 'new-electronics', sort_order: 1 },
+            { name: 'Used Electronics', slug: 'used-electronics', sort_order: 2 },
+        ],
+    },
+    {
+        name: 'Lighting',
+        slug: 'lighting',
+        sort_order: 70,
+        children: [
+            { name: 'New Lighting', slug: 'new-lighting', sort_order: 1 },
+            { name: 'Used Lighting', slug: 'used-lighting', sort_order: 2 },
+        ],
+    },
+    {
+        name: 'Pro Video',
+        slug: 'pro-video',
+        sort_order: 80,
+        children: [
+            { name: 'New Pro Video', slug: 'new-pro-video', sort_order: 1 },
+            { name: 'Used Pro Video', slug: 'used-pro-video', sort_order: 2 },
         ],
     },
 ];
@@ -62,7 +116,9 @@ async function main() {
     const prisma = new PrismaClient();
     try {
         await seedCategoryTree(prisma);
-        console.log('Seeded category tree (Cameras, Drones + New/Used subcategories)');
+        console.log(
+            'Seeded category tree (Cameras, Drones, Computers, Gaming, Pro Audio, Electronics, Lighting, Pro Video + New/Used)',
+        );
     } finally {
         await prisma.$disconnect();
     }

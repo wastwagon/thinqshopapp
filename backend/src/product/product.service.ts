@@ -6,17 +6,39 @@ import { CreateReviewDto } from './dto/review.dto';
 
 /**
  * Legacy flat categories rolled into shop URLs (no product reassignment).
- * Subcategories: new-cameras inherits photography; used-cameras stays empty until assigned in Admin.
+ * New-* inherits legacy/flat catalog; used-* stays empty until assigned in Admin.
  */
-const CAMERA_TREE_ROOT_SLUG = 'cameras';
-
 const LEGACY_CHILD_SLUGS: Record<string, string[]> = {
     cameras: ['photography'],
     'new-cameras': ['photography'],
     'used-cameras': [],
     drones: [],
-    'new-drones': [],
+    'new-drones': ['drones'],
     'used-drones': [],
+    computers: [],
+    'new-computers': ['computers'],
+    'used-computers': [],
+    gaming: [],
+    'new-gaming': ['gaming'],
+    'used-gaming': [],
+    'pro-audio': ['audio-studio'],
+    'new-pro-audio': ['audio-studio', 'pro-audio'],
+    'used-pro-audio': [],
+    electronics: [],
+    'new-electronics': ['electronics'],
+    'used-electronics': [],
+    lighting: [],
+    'new-lighting': ['lighting'],
+    'used-lighting': [],
+    'pro-video': [],
+    'new-pro-video': ['pro-video'],
+    'used-pro-video': [],
+};
+
+/** Legacy root URLs that should return the same product set as a New/Used tree root */
+const LEGACY_MIRROR_TO_ROOT: Record<string, string> = {
+    photography: 'cameras',
+    'audio-studio': 'pro-audio',
 };
 
 @Injectable()
@@ -363,15 +385,15 @@ export class ProductService {
         return legacy.map((c) => c.id);
     }
 
-    /** Same product set as /shop/cameras (parent + subcategories + legacy Photography). */
-    private async resolveCameraCatalogIds(): Promise<number[]> {
-        const cameras = await this.prisma.category.findUnique({
-            where: { slug: CAMERA_TREE_ROOT_SLUG },
+    /** Same product set as a tree root (parent + subcategories + legacy aliases). */
+    private async resolveTreeCatalogIds(rootSlug: string): Promise<number[]> {
+        const root = await this.prisma.category.findUnique({
+            where: { slug: rootSlug },
         });
-        if (!cameras) {
+        if (!root) {
             return [];
         }
-        return this.resolveCategoryIdsForFilter(cameras);
+        return this.resolveCategoryIdsForFilter(root);
     }
 
     private async resolveCategoryIdsForFilter(category: {
@@ -379,8 +401,9 @@ export class ProductService {
         parent_id: number | null;
         slug: string;
     }) {
-        if (category.slug === 'photography') {
-            const catalogIds = await this.resolveCameraCatalogIds();
+        const mirrorRoot = LEGACY_MIRROR_TO_ROOT[category.slug];
+        if (mirrorRoot) {
+            const catalogIds = await this.resolveTreeCatalogIds(mirrorRoot);
             if (catalogIds.length > 0) {
                 return catalogIds;
             }
