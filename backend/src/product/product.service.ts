@@ -5,34 +5,12 @@ import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { CreateReviewDto } from './dto/review.dto';
 
 /**
- * Legacy flat categories rolled into shop URLs (no product reassignment).
- * New-* inherits legacy/flat catalog; used-* stays empty until assigned in Admin.
+ * Extra flat slugs rolled into a New/Used tree root (no product reassignment).
+ * new-{root} always includes {root}; used-* has no extras.
  */
-const LEGACY_CHILD_SLUGS: Record<string, string[]> = {
+const LEGACY_EXTRA_FOR_ROOT: Record<string, string[]> = {
     cameras: ['photography'],
-    'new-cameras': ['photography'],
-    'used-cameras': [],
-    drones: [],
-    'new-drones': ['drones'],
-    'used-drones': [],
-    computers: [],
-    'new-computers': ['computers'],
-    'used-computers': [],
-    gaming: [],
-    'new-gaming': ['gaming'],
-    'used-gaming': [],
     'pro-audio': ['audio-studio'],
-    'new-pro-audio': ['audio-studio', 'pro-audio'],
-    'used-pro-audio': [],
-    electronics: [],
-    'new-electronics': ['electronics'],
-    'used-electronics': [],
-    lighting: [],
-    'new-lighting': ['lighting'],
-    'used-lighting': [],
-    'pro-video': [],
-    'new-pro-video': ['pro-video'],
-    'used-pro-video': [],
 };
 
 /** Legacy root URLs that should return the same product set as a New/Used tree root */
@@ -40,6 +18,18 @@ const LEGACY_MIRROR_TO_ROOT: Record<string, string> = {
     photography: 'cameras',
     'audio-studio': 'pro-audio',
 };
+
+/** Resolve alias slugs for rollup: used-* empty; new-{root} → root + extras; root → extras only. */
+function legacyAliasSlugsFor(categorySlug: string): string[] {
+    if (categorySlug.startsWith('used-')) {
+        return [];
+    }
+    if (categorySlug.startsWith('new-')) {
+        const rootSlug = categorySlug.slice(4);
+        return [rootSlug, ...(LEGACY_EXTRA_FOR_ROOT[rootSlug] ?? [])];
+    }
+    return LEGACY_EXTRA_FOR_ROOT[categorySlug] ?? [];
+}
 
 @Injectable()
 export class ProductService {
@@ -375,8 +365,8 @@ export class ProductService {
         });
     }
 
-    private async resolveLegacyCategoryIds(parentSlug: string): Promise<number[]> {
-        const legacySlugs = LEGACY_CHILD_SLUGS[parentSlug] ?? [];
+    private async resolveLegacyCategoryIds(categorySlug: string): Promise<number[]> {
+        const legacySlugs = legacyAliasSlugsFor(categorySlug);
         if (legacySlugs.length === 0) return [];
         const legacy = await this.prisma.category.findMany({
             where: { slug: { in: legacySlugs }, is_active: true },

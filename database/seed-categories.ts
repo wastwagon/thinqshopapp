@@ -1,9 +1,16 @@
 /**
- * Idempotent two-level category trees (high-ticket New/Used subcategories).
+ * Idempotent two-level category trees (New/Used under all mains except Fashion).
+ * Photography / audio-studio stay as legacy aliases (no New/Used trees).
  */
 import { PrismaClient } from '@prisma/client';
 
 type CategorySeed = { name: string; slug: string; sort_order?: number; children?: CategorySeed[] };
+
+/** Roots that must remain flat (no New/Used children). */
+const FLAT_ONLY_SLUGS = new Set(['fashion']);
+
+/** Legacy mirror sources — must not become New/Used trees. */
+const SKIP_AS_TREE_ROOT = new Set(['photography', 'audio-studio']);
 
 const CATEGORY_TREE: CategorySeed[] = [
     {
@@ -80,6 +87,52 @@ const CATEGORY_TREE: CategorySeed[] = [
     },
 ];
 
+async function upsertChild(
+    prisma: PrismaClient,
+    parentId: number,
+    child: { name: string; slug: string; sort_order: number },
+): Promise<void> {
+    await prisma.category.upsert({
+        where: { slug: child.slug },
+        update: {
+            name: child.name,
+            sort_order: child.sort_order,
+            parent_id: parentId,
+        },
+        create: {
+            name: child.name,
+            slug: child.slug,
+            sort_order: child.sort_order,
+            parent_id: parentId,
+            is_active: true,
+        },
+    });
+}
+
+/** Attach New/Used under every root except Fashion and legacy mirror sources. */
+async function ensureNewUsedForAllRoots(prisma: PrismaClient): Promise<void> {
+    const roots = await prisma.category.findMany({
+        where: { parent_id: null },
+        select: { id: true, name: true, slug: true },
+    });
+
+    for (const root of roots) {
+        if (FLAT_ONLY_SLUGS.has(root.slug) || SKIP_AS_TREE_ROOT.has(root.slug)) {
+            continue;
+        }
+        await upsertChild(prisma, root.id, {
+            name: `New ${root.name}`,
+            slug: `new-${root.slug}`,
+            sort_order: 1,
+        });
+        await upsertChild(prisma, root.id, {
+            name: `Used ${root.name}`,
+            slug: `used-${root.slug}`,
+            sort_order: 2,
+        });
+    }
+}
+
 export async function seedCategoryTree(prisma: PrismaClient): Promise<void> {
     for (const root of CATEGORY_TREE) {
         const parent = await prisma.category.upsert({
@@ -93,23 +146,14 @@ export async function seedCategoryTree(prisma: PrismaClient): Promise<void> {
             },
         });
         for (const child of root.children ?? []) {
-            await prisma.category.upsert({
-                where: { slug: child.slug },
-                update: {
-                    name: child.name,
-                    sort_order: child.sort_order ?? 0,
-                    parent_id: parent.id,
-                },
-                create: {
-                    name: child.name,
-                    slug: child.slug,
-                    sort_order: child.sort_order ?? 0,
-                    parent_id: parent.id,
-                    is_active: true,
-                },
+            await upsertChild(prisma, parent.id, {
+                name: child.name,
+                slug: child.slug,
+                sort_order: child.sort_order ?? 0,
             });
         }
     }
+    await ensureNewUsedForAllRoots(prisma);
 }
 
 async function main() {
@@ -117,7 +161,7 @@ async function main() {
     try {
         await seedCategoryTree(prisma);
         console.log(
-            'Seeded category tree (Cameras, Drones, Computers, Gaming, Pro Audio, Electronics, Lighting, Pro Video + New/Used)',
+            'Seeded category trees: New/Used under all mains except Fashion (legacy photography / audio-studio unchanged)',
         );
     } finally {
         await prisma.$disconnect();

@@ -56,7 +56,7 @@ The backend runs `prisma migrate deploy` on startup, so migrations are applied a
 
 **Variation catalog (Size values):** On every backend start, the entrypoint runs [`database/seed-variations.ts`](../database/seed-variations.ts) (idempotent upsert of Size → Small, Medium, Large, XL, XXL). No extra env var is required. Check backend logs for `Variation catalog OK.` after deploy.
 
-**Category tree (high-ticket New/Used):** On every backend start, the entrypoint runs [`database/seed-categories.ts`](../database/seed-categories.ts) (idempotent upsert of Cameras, Drones, Computers, Gaming, Pro Audio, Electronics, Lighting, Pro Video + New/Used children). Parent and New pages roll up legacy flat-category products; Used stays empty until you assign products in Admin. Check backend logs for `Category tree OK.` Without this, `/shop/cameras` may show the full catalog instead of cameras only.
+**Category tree (New/Used):** On every backend start, the entrypoint runs [`database/seed-categories.ts`](../database/seed-categories.ts). It upserts known high-ticket roots, then attaches **New/Used** children under every main category **except Fashion**. Photography and Audio Studio stay as legacy aliases (no New/Used trees under them). Parent and New pages roll up products still on the flat main slug; Used stays empty until you assign products in Admin. Check backend logs for `Category tree OK.` Without this, `/shop/cameras` may show the full catalog instead of cameras only.
 
 If sizes or categories are still missing before you redeploy with this change, open a shell on the **backend** container and run:
 
