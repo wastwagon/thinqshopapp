@@ -298,6 +298,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                 onBuy={handleExpressBuy}
                 buying={buying}
                 buyLabel="Buy"
+                priceGhs={fromPrice}
+                categoryLabel={
+                    typeof product.category === 'string'
+                        ? product.category
+                        : product.category?.name || 'Vetted Asset'
+                }
+                rating={Number(product.rating) || 4.8}
+                description={descPreview}
             />
         </>
     );

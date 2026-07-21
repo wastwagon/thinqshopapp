@@ -244,51 +244,53 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                 <ShopTrustRow compact />
                 <div className="lg:grid lg:grid-cols-2 lg:gap-x-16 lg:items-start">
                     {/* Image Gallery */}
-                    <div className="flex flex-col-reverse">
-                        {images.length > 1 && (
-                            <div className="mt-4 sm:mt-8 w-full max-w-2xl mx-auto lg:max-w-none">
-                                <div className="flex sm:grid sm:grid-cols-4 gap-3 sm:gap-6 overflow-x-auto sm:overflow-visible pb-1 sm:pb-0">
-                                    {images.map((img: string, idx: number) => (
-                                        <button
-                                            key={idx}
-                                            type="button"
-                                            aria-label={`View image ${idx + 1} of ${images.length}`}
-                                            className={`relative h-20 w-20 sm:h-24 sm:w-auto shrink-0 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden border transition-all ${selectedImage === idx ? 'border-blue-500 ring-1 ring-blue-100' : 'border-gray-100 hover:border-gray-200'}`}
-                                            onClick={() => setSelectedImage(idx)}
-                                        >
-                                            <Image src={img} alt="" fill className="object-contain p-2" sizes="96px" unoptimized={imgUnoptimized(img)} />
-                                        </button>
-                                    ))}
+                    <div className="px-4 sm:px-0">
+                        <div className="flex flex-col-reverse">
+                            {images.length > 1 && (
+                                <div className="mt-3 sm:mt-8 w-full max-w-2xl mx-auto lg:max-w-none">
+                                    <div className="flex sm:grid sm:grid-cols-4 gap-3 sm:gap-6 overflow-x-auto sm:overflow-visible pb-1 sm:pb-0">
+                                        {images.map((img: string, idx: number) => (
+                                            <button
+                                                key={idx}
+                                                type="button"
+                                                aria-label={`View image ${idx + 1} of ${images.length}`}
+                                                className={`relative h-20 w-20 sm:h-24 sm:w-auto shrink-0 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden border transition-all ${selectedImage === idx ? 'border-blue-500 ring-1 ring-blue-100' : 'border-gray-100 hover:border-gray-200'}`}
+                                                onClick={() => setSelectedImage(idx)}
+                                            >
+                                                <Image src={img} alt="" fill className="object-contain p-2" sizes="96px" unoptimized={imgUnoptimized(img)} />
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-
-                        <button
-                            type="button"
-                            onClick={() => canExpandGallery && setLightboxOpen(true)}
-                            disabled={!canExpandGallery}
-                            aria-label={`Expand image: ${product.name}`}
-                            className="group/image w-full aspect-square relative rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-default"
-                        >
-                            <Image
-                                src={images[selectedImage] || '/placeholder.svg'}
-                                alt={product.name}
-                                fill
-                                className="object-contain p-8 transition-transform duration-700 group-hover/image:scale-[1.02] pointer-events-none"
-                                sizes="(max-width: 1024px) 100vw, 50vw"
-                                unoptimized={imgUnoptimized(images[selectedImage] || '')}
-                            />
-                            {canExpandGallery && (
-                                <span className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-xl bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
-                                    <ZoomIn className="h-3.5 w-3.5" aria-hidden />
-                                    Tap to expand
-                                </span>
                             )}
-                        </button>
+
+                            <button
+                                type="button"
+                                onClick={() => canExpandGallery && setLightboxOpen(true)}
+                                disabled={!canExpandGallery}
+                                aria-label={`Expand image: ${product.name}`}
+                                className="group/image w-full aspect-[4/3] max-h-[42vh] lg:aspect-square lg:max-h-none relative rounded-lg lg:rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-default"
+                            >
+                                <Image
+                                    src={images[selectedImage] || '/placeholder.svg'}
+                                    alt={product.name}
+                                    fill
+                                    className="object-contain p-2 sm:p-4 lg:p-8 transition-transform duration-700 group-hover/image:scale-[1.02] pointer-events-none"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    unoptimized={imgUnoptimized(images[selectedImage] || '')}
+                                />
+                                {canExpandGallery && (
+                                    <span className="pointer-events-none absolute bottom-2 right-2 lg:bottom-3 lg:right-3 flex items-center gap-1 lg:gap-1.5 rounded-lg lg:rounded-xl bg-black/50 px-2 py-1 lg:px-3 lg:py-1.5 text-[10px] lg:text-xs font-medium text-white backdrop-blur-sm">
+                                        <ZoomIn className="h-3 w-3 lg:h-3.5 lg:w-3.5" aria-hidden />
+                                        Tap to expand
+                                    </span>
+                                )}
+                            </button>
+                        </div>
                     </div>
 
                     {/* Product Info */}
-                    <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
+                    <div className="mt-6 px-4 sm:px-0 sm:mt-16 lg:mt-0">
                         <div className="mb-8">
                             <div className="flex flex-wrap gap-2 mb-4">
                                 <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${stockToShow > (product.low_stock_threshold ?? 10) ? 'bg-green-50 text-green-700 border border-green-100' : stockToShow > 0 ? 'bg-orange-50 text-orange-700 border border-orange-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
@@ -395,61 +397,94 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                         </div>
 
                         <div className="space-y-3 mb-10">
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-                                <div className="flex items-center gap-2 sm:gap-4">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                <div className="flex items-center gap-2 shrink-0">
                                     <div className="flex items-center gap-1 p-1 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl">
-                                    <button
-                                        type="button"
-                                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                                        className="min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all"
-                                        aria-label="Decrease quantity"
-                                    >
-                                        <Minus className="h-4 w-4" />
-                                    </button>
-                                    <span className="w-12 text-center text-sm font-bold text-gray-900">{quantity}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
-                                        disabled={quantity >= maxQuantity}
-                                        className="min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all disabled:opacity-40"
-                                        aria-label="Increase quantity"
-                                    >
-                                        <Plus className="h-4 w-4" />
-                                    </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                                            className="min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all"
+                                            aria-label="Decrease quantity"
+                                        >
+                                            <Minus className="h-4 w-4" />
+                                        </button>
+                                        <span className="w-12 text-center text-sm font-bold text-gray-900">{quantity}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
+                                            disabled={quantity >= maxQuantity}
+                                            className="min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all disabled:opacity-40"
+                                            aria-label="Increase quantity"
+                                        >
+                                            <Plus className="h-4 w-4" />
+                                        </button>
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={() => toggleWishlist({ id: Number(product.id), name: product.name, price: listUnitBeforeWholesale, slug: product.slug ?? slug, images: product.images, gallery_images: product.gallery_images, category: product.category })}
-                                    className={`min-w-[44px] min-h-[44px] w-10 h-10 sm:w-12 sm:h-12 border rounded-lg sm:rounded-xl flex items-center justify-center transition-all shrink-0 ${
-                                        isInWishlist(Number(product.id))
-                                            ? 'bg-red-50 border-red-200 text-red-500'
-                                            : 'border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50'
-                                    }`}
-                                >
-                                    <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${isInWishlist(Number(product.id)) ? 'fill-current' : ''}`} />
+                                        onClick={() =>
+                                            toggleWishlist({
+                                                id: Number(product.id),
+                                                name: product.name,
+                                                price: listUnitBeforeWholesale,
+                                                slug: product.slug ?? slug,
+                                                images: product.images,
+                                                gallery_images: product.gallery_images,
+                                                category: product.category,
+                                            })
+                                        }
+                                        className={`min-w-[44px] min-h-[44px] w-10 h-10 sm:w-12 sm:h-12 border rounded-lg sm:rounded-xl flex items-center justify-center transition-all shrink-0 ${
+                                            isInWishlist(Number(product.id))
+                                                ? 'bg-red-50 border-red-200 text-red-500'
+                                                : 'border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50'
+                                        }`}
+                                    >
+                                        <Heart
+                                            className={`h-4 w-4 sm:h-5 sm:w-5 ${isInWishlist(Number(product.id)) ? 'fill-current' : ''}`}
+                                        />
                                     </button>
                                 </div>
                                 <button
                                     type="button"
-                                    className="w-full sm:flex-1 min-h-[44px] bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 py-2.5 px-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_8px_24px_-8px_rgba(2,39,79,0.35)]"
-                                        onClick={() => {
-                                            if (isOwnConsignment) {
-                                                toast.error('You cannot purchase your own Sell for Me listing');
-                                                return;
-                                            }
-                                            if (variants.length > 0 && selectedVariantId == null) {
-                                                toast.error('Please select an option');
-                                                return;
-                                            }
-                                            addToCart(Number(product.id), quantity, selectedVariantId ?? undefined);
-                                        }}
-                                        disabled={isOwnConsignment || stockToShow <= 0}
-                                    >
-                                        <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" aria-hidden />
-                                        <span className="whitespace-nowrap">
-                                            {isOwnConsignment ? 'Your listing' : stockToShow <= 0 ? 'Out of stock' : 'Add to Cart'}
-                                        </span>
-                                    </button>
+                                    className="flex-1 min-w-[7.5rem] min-h-[44px] border border-blue-600 text-blue-700 bg-white rounded-xl font-semibold text-sm hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 py-2.5 px-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={() => {
+                                        if (isOwnConsignment) {
+                                            toast.error('You cannot purchase your own Sell for Me listing');
+                                            return;
+                                        }
+                                        if (variants.length > 0 && selectedVariantId == null) {
+                                            toast.error('Please select an option');
+                                            return;
+                                        }
+                                        addToCart(Number(product.id), quantity, selectedVariantId ?? undefined);
+                                    }}
+                                    disabled={isOwnConsignment || stockToShow <= 0}
+                                >
+                                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" aria-hidden />
+                                    <span className="whitespace-nowrap">
+                                        {isOwnConsignment
+                                            ? 'Your listing'
+                                            : stockToShow <= 0
+                                              ? 'Out of stock'
+                                              : 'Add to Cart'}
+                                    </span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className="flex-1 min-w-[7.5rem] min-h-[44px] bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 py-2.5 px-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_8px_24px_-8px_rgba(2,39,79,0.35)]"
+                                    onClick={() => void handleExpressBuy()}
+                                    disabled={buying || isOwnConsignment || stockToShow <= 0}
+                                >
+                                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" aria-hidden />
+                                    <span className="whitespace-nowrap">
+                                        {buying
+                                            ? 'Buying…'
+                                            : isOwnConsignment
+                                              ? 'Your listing'
+                                              : stockToShow <= 0
+                                                ? 'Out of stock'
+                                                : 'Buy'}
+                                    </span>
+                                </button>
                             </div>
                             {isOwnConsignment && (
                                 <p className="text-xs text-violet-700 bg-violet-50 border border-violet-100 rounded-xl px-3 py-2">
