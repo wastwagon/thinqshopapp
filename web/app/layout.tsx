@@ -8,16 +8,20 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app';
 
 const webViewGoldForceBridge = process.env.NEXT_PUBLIC_WEBVIEWGOLD_FORCE_BRIDGE === '1';
+const webViewGoldPtrOffIframe = process.env.NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_IFRAME === '1';
 
 /**
- * Before React: WebViewGold — iframe + synthetic <a> for disablepulltorefresh:// only.
- * Do NOT set window.location here: it can unload the document / trap WebView and leave the
- * slate splash (#0f172a) forever if React never hydrates.
+ * Before React: mark .webview-gold for CSS overscroll only.
+ * Do NOT navigate via <a>/location to disablepulltorefresh:// — that can leave
+ * Android WebView on a non-http last URL so relaunch fails after first close.
+ * Optional PTR_OFF_IFRAME: one hidden iframe, once (never on pageshow).
  */
 const webViewGoldBootScript = `
 (function(){
   var FORCE=${webViewGoldForceBridge ? 'true' : 'false'};
+  var IFRAME_PTR=${webViewGoldPtrOffIframe ? 'true' : 'false'};
   var SCHEME='disablepulltorefresh://';
+  var sent=false;
   function isWG(){
     try {
       if (window.__WEBVIEWGOLD__===true) return true;
@@ -32,34 +36,22 @@ const webViewGoldBootScript = `
       if (document.body) document.body.classList.add('webview-gold');
     } catch(e){}
   }
-  function disable(){
+  function iframeOnce(){
+    if (!IFRAME_PTR || sent || !document.body) return;
+    sent=true;
     try {
-      if (!document.body) return;
       var f=document.createElement('iframe');
       f.setAttribute('src',SCHEME);
       f.setAttribute('title','WebViewGold disable pull to refresh');
       f.style.cssText='position:absolute;width:0;height:0;border:0;visibility:hidden;pointer-events:none';
       document.body.appendChild(f);
       setTimeout(function(){ if(f.parentNode)f.parentNode.removeChild(f);},400);
-      var a=document.createElement('a');
-      a.setAttribute('href',SCHEME);
-      a.setAttribute('aria-hidden','true');
-      a.style.cssText='position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0';
-      document.body.appendChild(a);
-      a.click();
-      if(a.parentNode)a.parentNode.removeChild(a);
     } catch(e){}
   }
-  function schedule(){
-    disable();
-    [0,80,200,600,1500].forEach(function(ms){ setTimeout(disable,ms); });
-  }
   mark();
-  schedule();
-  document.addEventListener('DOMContentLoaded',function(){ mark(); schedule(); });
-  window.addEventListener('pageshow',function(){ mark(); schedule(); });
+  iframeOnce();
+  document.addEventListener('DOMContentLoaded',function(){ mark(); iframeOnce(); });
 })();`;
-
 /** If React never adds .app-loaded (hydration error / broken navigation), exit slate splash after 5s. */
 const appLoadedFallbackScript = `
 (function(){

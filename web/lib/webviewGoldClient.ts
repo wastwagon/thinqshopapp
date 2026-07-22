@@ -1,27 +1,25 @@
 /**
- * WebViewGold — disable native pull-to-refresh from the website (no native rebuild).
+ * WebViewGold client helpers.
  *
- * Official docs (same API on both platforms):
- * - Android `Config.java` → ENABLE_PULL_REFRESH: “Additionally, you can always call
- *   `enablepulltorefresh://` or `disablepulltorefresh://` from your website to activate
- *   or deactivate pull-to-refresh dynamically.”
- *   https://www.webviewgold.com/docs/android/
- * - iOS `Config.swift` → pulltorefresh: same `enablepulltorefresh://` / `disablepulltorefresh://` note.
- *   https://www.webviewgold.com/docs/iOS/
+ * Prefer native Config (`ENABLE_PULL_REFRESH` / `pulltorefresh` = false) for PTR.
+ * Do NOT navigate the top frame to `disablepulltorefresh://` — that can leave Android
+ * WebView on a non-http last URL so the app opens once, then fails on relaunch.
  *
- * Android docs also use `window.location.href = "…://"` for other scheme APIs; we prefer
- * iframe + synthetic `<a click>` first so the SPA main frame does not navigate if a
- * scheme is not handled. Optional `NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_VIA_LOCATION=1` adds
- * a top-frame `location.href` attempt only when `window.__WEBVIEWGOLD__ === true` (inject in
- * the native app). Never combined with FORCE_BRIDGE alone — that can break normal browsers.
+ * We only mark `.webview-gold` so CSS overscroll rules apply.
+ * Optional `NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_IFRAME=1` fires the scheme once via a
+ * hidden iframe (never `<a click>` / `location.href`).
  *
- * `NEXT_PUBLIC_WEBVIEWGOLD_FORCE_BRIDGE=1` — run when the app strips “WebViewGold” from
- * the user agent but still registers WebViewGold URL handlers.
+ * `NEXT_PUBLIC_WEBVIEWGOLD_FORCE_BRIDGE=1` — treat all clients as WebViewGold when
+ * the app strips “WebViewGold” from the user agent.
  */
 
 const DISABLE_PTR_SCHEME = 'disablepulltorefresh://';
 
-function fireIframeScheme(url: string): void {
+let pullToRefreshIframeSent = false;
+
+function fireIframeSchemeOnce(url: string): void {
+    if (pullToRefreshIframeSent || !document.body) return;
+    pullToRefreshIframeSent = true;
     try {
         const iframe = document.createElement('iframe');
         iframe.setAttribute('src', url);
@@ -32,35 +30,6 @@ function fireIframeScheme(url: string): void {
         window.setTimeout(() => {
             iframe.remove();
         }, 400);
-    } catch {
-        /* ignore */
-    }
-}
-
-/** Matches WebViewGold doc examples that use `<a href="scheme://">` for native hooks. */
-function fireAnchorScheme(url: string): void {
-    try {
-        const a = document.createElement('a');
-        a.setAttribute('href', url);
-        a.setAttribute('aria-hidden', 'true');
-        a.style.cssText =
-            'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    } catch {
-        /* ignore */
-    }
-}
-
-let pullToRefreshLocationOffSent = false;
-
-/** Android doc pattern for scheme APIs; opt-in env only; once per page (schedule fires many times). */
-function fireLocationSchemeOnce(url: string): void {
-    if (pullToRefreshLocationOffSent) return;
-    pullToRefreshLocationOffSent = true;
-    try {
-        window.location.href = url;
     } catch {
         /* ignore */
     }
@@ -79,20 +48,11 @@ export function markWebViewGoldDocument(): void {
     document.body.classList.add('webview-gold');
 }
 
+/** CSS class + optional one-shot iframe scheme (never navigates the main frame). */
 export function disableWebViewGoldPullToRefresh(): void {
     if (!document.body) return;
-    fireIframeScheme(DISABLE_PTR_SCHEME);
-    fireAnchorScheme(DISABLE_PTR_SCHEME);
-    if (process.env.NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_VIA_LOCATION === '1') {
-        const w = window as unknown as { __WEBVIEWGOLD__?: boolean };
-        if (w.__WEBVIEWGOLD__ === true) {
-            fireLocationSchemeOnce(DISABLE_PTR_SCHEME);
-        }
+    markWebViewGoldDocument();
+    if (process.env.NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_IFRAME === '1') {
+        fireIframeSchemeOnce(DISABLE_PTR_SCHEME);
     }
-}
-
-export function scheduleDisableWebViewGoldPullToRefresh(): void {
-    disableWebViewGoldPullToRefresh();
-    const delays = [0, 80, 200, 600, 1500];
-    delays.forEach((ms) => window.setTimeout(disableWebViewGoldPullToRefresh, ms));
 }
