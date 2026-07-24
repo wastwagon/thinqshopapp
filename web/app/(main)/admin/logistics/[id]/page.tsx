@@ -16,7 +16,9 @@ import {
     Calendar,
     Zap,
 } from 'lucide-react';
-import { STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
+import { StatusBadge } from '@/components/ui/Badge';
+import Select from '@/components/ui/Select';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
@@ -87,23 +89,6 @@ function formatAddress(addr: Address | null | undefined): string {
     return parts.length ? parts.join('\n') : '—';
 }
 
-function StatusBadge({ status }: { status: string }) {
-    const colors: Record<string, string> = {
-        booked: 'bg-orange-50 text-orange-700 border-orange-200',
-        pickup_scheduled: 'bg-blue-50 text-blue-600 border-blue-300',
-        picked_up: STATUS_PROGRESS_BADGE,
-        in_transit: 'bg-blue-50 text-blue-700 border-blue-200',
-        out_for_delivery: 'bg-orange-50 text-orange-700 border-orange-200',
-        delivered: 'bg-green-50 text-green-700 border-green-200',
-        cancelled: 'bg-red-50 text-red-700 border-red-200',
-    };
-    return (
-        <span className={`px-2.5 py-1 text-xs font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
-            {formatCmsLabel(status)}
-        </span>
-    );
-}
-
 export default function AdminShipmentDetailPage() {
     const { confirm, confirmDialog } = useConfirmDialog();
     const params = useParams();
@@ -155,9 +140,8 @@ export default function AdminShipmentDetailPage() {
     if (loading) {
         return (
             <DashboardLayout isAdmin={true}>
-                <div className="p-6 pb-6 md:pb-8 text-center">
-                    <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">Loading shipment...</p>
+                <div className="p-6 pb-6 md:pb-8 flex justify-center">
+                    <LoadingSpinner label="Loading shipment…" />
                 </div>
             </DashboardLayout>
         );
@@ -171,7 +155,7 @@ export default function AdminShipmentDetailPage() {
                 <div className="mb-6 flex items-center justify-between gap-3">
                     <Link
                         href="/admin/logistics"
-                        className="text-blue-600 hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
+                        className="text-brand hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
                     >
                         <ArrowLeft className="h-4 w-4 mr-1.5" /> Shipments
                     </Link>
@@ -179,7 +163,7 @@ export default function AdminShipmentDetailPage() {
 
                 <div className="space-y-6">
                     {/* Header */}
-                    <div className="admin-table-wrap">
+                    <div className="admin-card overflow-hidden">
                         <div className="px-4 py-4 sm:px-6 border-b border-gray-50 flex flex-wrap justify-between items-start gap-4 bg-gray-50/50">
                             <div>
                                 <h1 className="text-xl font-bold text-gray-900">{shipment.tracking_number}</h1>
@@ -191,17 +175,18 @@ export default function AdminShipmentDetailPage() {
                                 )}
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
-                                <StatusBadge status={shipment.status} />
-                                <select
+                                <StatusBadge status={shipment.status}>{formatCmsLabel(shipment.status)}</StatusBadge>
+                                <Select
                                     value={shipment.status}
                                     onChange={(e) => void handleStatusUpdate(e.target.value)}
                                     disabled={updating}
-                                    className="text-xs font-semibold border border-gray-200 rounded-lg pl-3 pr-8 py-2 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="h-9 min-h-[36px] text-xs w-auto min-w-[9rem]"
+                                    aria-label="Update shipment status"
                                 >
                                     {SHIPMENT_STATUSES.map((s) => (
                                         <option key={s} value={s}>{formatCmsLabel(s)}</option>
                                     ))}
-                                </select>
+                                </Select>
                             </div>
                         </div>
                     </div>
@@ -210,7 +195,7 @@ export default function AdminShipmentDetailPage() {
                         <div className="lg:col-span-2 space-y-6">
                             {/* Tracking timeline */}
                             {shipment.tracking && shipment.tracking.length > 0 && (
-                                <div className="admin-table-wrap">
+                                <div className="admin-card overflow-hidden">
                                     <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                         <h3 className="text-sm font-semibold text-gray-900">Tracking history</h3>
                                     </div>
@@ -234,7 +219,7 @@ export default function AdminShipmentDetailPage() {
 
                             {/* Items declaration + images */}
                             {((shipment.items_declaration && (shipment.items_declaration as any[]).length > 0) || (shipment.declaration_image_urls && (shipment.declaration_image_urls as string[]).length > 0)) && (
-                                <div className="admin-table-wrap">
+                                <div className="admin-card overflow-hidden">
                                     <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                         <h3 className="text-sm font-semibold text-gray-900">Items declaration</h3>
                                     </div>
@@ -270,7 +255,7 @@ export default function AdminShipmentDetailPage() {
 
                             {/* Warehouses */}
                             {(shipment.origin_warehouse || shipment.destination_warehouse) && (
-                                <div className="admin-table-wrap">
+                                <div className="admin-card overflow-hidden">
                                     <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                         <h3 className="text-sm font-semibold text-gray-900">Route</h3>
                                     </div>
@@ -295,7 +280,7 @@ export default function AdminShipmentDetailPage() {
 
                         <div className="space-y-6">
                             {/* Customer */}
-                            <div className="admin-table-wrap">
+                            <div className="admin-card overflow-hidden">
                                 <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                     <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                         <User className="h-4 w-4" /> Customer
@@ -318,7 +303,7 @@ export default function AdminShipmentDetailPage() {
 
                             {/* Delivery address */}
                             {shipment.delivery_address && (
-                                <div className="admin-table-wrap">
+                                <div className="admin-card overflow-hidden">
                                     <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                         <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                             <MapPin className="h-4 w-4" /> Delivery address
@@ -331,7 +316,7 @@ export default function AdminShipmentDetailPage() {
                             )}
 
                             {/* Pricing */}
-                            <div className="admin-table-wrap">
+                            <div className="admin-card overflow-hidden">
                                 <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                     <h3 className="text-sm font-semibold text-gray-900">Summary</h3>
                                 </div>

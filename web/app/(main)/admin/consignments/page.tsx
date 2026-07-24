@@ -6,8 +6,24 @@ import { getMediaUrl } from '@/lib/media';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminToolbar from '@/components/admin/AdminToolbar';
+import AdminTable, {
+    AdminTableBody,
+    AdminTableEmpty,
+    AdminTableHead,
+    AdminTableLoading,
+    AdminTd,
+    AdminTh,
+    AdminTr,
+} from '@/components/admin/AdminTable';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import FormField from '@/components/ui/FormField';
+import Modal from '@/components/ui/Modal';
+import { StatusBadge } from '@/components/ui/Badge';
 import Link from 'next/link';
-import { Tag, Search, CheckCircle, XCircle, Eye, ExternalLink, TrendingUp, Calendar, Trash2 } from 'lucide-react';
+import { Tag, Eye, ExternalLink, TrendingUp, Calendar, Trash2 } from 'lucide-react';
 import {
     AreaChart,
     Area,
@@ -377,16 +393,12 @@ export default function AdminConsignmentsPage() {
                     title="Sell for Me"
                     subtitle="Review listings — approve to publish live on the shop automatically"
                     actions={
-                        <div className="relative min-w-0 sm:w-56">
-                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" aria-hidden />
-                            <input
-                                type="search"
-                                placeholder="Search listings..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="admin-input w-full sm:w-56 pl-8"
-                            />
-                        </div>
+                        <AdminToolbar
+                            searchValue={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            searchPlaceholder="Search listings…"
+                            searchAriaLabel="Search listings"
+                        />
                     }
                 />
 
@@ -404,31 +416,32 @@ export default function AdminConsignmentsPage() {
                             <div className="flex flex-wrap items-end gap-2">
                                 <div>
                                     <label className="text-[10px] font-semibold text-gray-500 block mb-1">From</label>
-                                    <input
+                                    <Input
                                         type="date"
                                         value={commissionFrom}
                                         onChange={(e) => setCommissionFrom(e.target.value)}
-                                        className="admin-input h-9 text-xs"
+                                        className="h-9 min-h-[36px] text-xs"
                                     />
                                 </div>
                                 <div>
                                     <label className="text-[10px] font-semibold text-gray-500 block mb-1">To</label>
-                                    <input
+                                    <Input
                                         type="date"
                                         value={commissionTo}
                                         onChange={(e) => setCommissionTo(e.target.value)}
-                                        className="admin-input h-9 text-xs"
+                                        className="h-9 min-h-[36px] text-xs"
                                     />
                                 </div>
-                                <button
+                                <Button
                                     type="button"
+                                    size="sm"
                                     onClick={() => fetchCommissionStats(commissionFrom, commissionTo)}
+                                    loading={loadingCommission}
                                     disabled={loadingCommission}
-                                    className="admin-btn-primary h-9 px-4 text-xs disabled:opacity-50 inline-flex items-center gap-1.5"
+                                    leftIcon={<Calendar className="h-3.5 w-3.5" aria-hidden />}
                                 >
-                                    <Calendar className="h-3.5 w-3.5" aria-hidden />
-                                    {loadingCommission ? 'Loading…' : 'Apply'}
-                                </button>
+                                    Apply
+                                </Button>
                             </div>
                         </div>
 
@@ -526,335 +539,391 @@ export default function AdminConsignmentsPage() {
 
                 <div className="flex flex-wrap gap-2 mb-4">
                     {TABS.map((tab) => (
-                        <button
+                        <Button
                             key={tab || 'all'}
                             type="button"
+                            size="sm"
+                            variant={statusFilter === tab ? 'primary' : 'secondary'}
                             onClick={() => setStatusFilter(tab)}
-                            className={`h-8 px-3 rounded-lg text-xs font-semibold border ${
-                                statusFilter === tab ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200'
-                            }`}
+                            className="capitalize"
                         >
                             {tab === '' ? 'All' : tab.replace(/_/g, ' ')}
-                        </button>
+                        </Button>
                     ))}
                 </div>
 
                 <div className="admin-card p-4 mb-4 flex flex-col sm:flex-row sm:items-end gap-4 justify-between">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
-                        <div>
-                            <label className="text-xs font-semibold text-gray-500 block mb-1">Default commission %</label>
-                            <input
+                        <FormField label="Default commission %">
+                            <Input
                                 type="number"
                                 step="0.1"
-                                className="admin-input w-full max-w-[140px]"
+                                className="max-w-[140px]"
                                 value={platformSettings.default_commission_pct}
                                 onChange={(e) => setPlatformSettings({ ...platformSettings, default_commission_pct: e.target.value })}
                             />
-                        </div>
+                        </FormField>
                         <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer pt-6">
                             <input
                                 type="checkbox"
                                 checked={platformSettings.sell_for_me_enabled}
                                 onChange={(e) => setPlatformSettings({ ...platformSettings, sell_for_me_enabled: e.target.checked })}
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                className="rounded border-gray-300 text-brand focus:ring-brand"
                             />
                             Accept new submissions
                         </label>
-                        <div>
-                            <label className="text-xs font-semibold text-gray-500 block mb-1">Auto-release after shipped (days)</label>
-                            <input
+                        <FormField
+                            label="Auto-release after shipped (days)"
+                            hint="0 = disabled. When set, auto-release also runs daily at 3:00 UTC; admins can trigger manually from Escrow payouts."
+                        >
+                            <Input
                                 type="number"
                                 min={0}
                                 max={365}
-                                className="admin-input w-full max-w-[140px]"
+                                className="max-w-[140px]"
                                 value={platformSettings.auto_release_days_after_shipped}
                                 onChange={(e) => setPlatformSettings({ ...platformSettings, auto_release_days_after_shipped: e.target.value })}
                             />
-                            <p className="text-[10px] text-gray-400 mt-1">0 = disabled. When set, auto-release also runs daily at 3:00 UTC; admins can trigger manually from Escrow payouts.</p>
-                        </div>
+                        </FormField>
                     </div>
-                    <button
+                    <Button
                         type="button"
+                        size="sm"
                         onClick={savePlatformSettings}
+                        loading={savingSettings}
                         disabled={savingSettings}
-                        className="admin-btn-primary h-9 px-4 shrink-0 disabled:opacity-50"
+                        className="shrink-0"
                     >
-                        {savingSettings ? 'Saving…' : 'Save settings'}
-                    </button>
+                        Save settings
+                    </Button>
                 </div>
 
-                <div className="admin-table-wrap">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-gray-50/50 border-b border-gray-50">
-                                    <th className="admin-th">Listing</th>
-                                    <th className="admin-th">Consignor</th>
-                                    <th className="admin-th">Price</th>
-                                    <th className="admin-th">Stock</th>
+                <AdminTable>
+                    <AdminTableHead>
+                        <AdminTh>Listing</AdminTh>
+                        <AdminTh>Consignor</AdminTh>
+                        <AdminTh>Price</AdminTh>
+                        <AdminTh>Stock</AdminTh>
+                        {showFinancialColumns && (
+                            <>
+                                <AdminTh>Sale</AdminTh>
+                                <AdminTh>Commission</AdminTh>
+                                <AdminTh>Seller</AdminTh>
+                            </>
+                        )}
+                        <AdminTh>Status</AdminTh>
+                        <AdminTh align="right">Actions</AdminTh>
+                    </AdminTableHead>
+                    <AdminTableBody>
+                        {loading ? (
+                            <AdminTableLoading colSpan={showFinancialColumns ? 9 : 6} />
+                        ) : filtered.length === 0 ? (
+                            <AdminTableEmpty
+                                colSpan={showFinancialColumns ? 9 : 6}
+                                icon={<Tag className="h-10 w-10 mx-auto mb-2 text-gray-200" />}
+                                message="No listings"
+                            />
+                        ) : (
+                            filtered.map((s) => (
+                                <AdminTr key={s.id}>
+                                    <AdminTd>
+                                        <p className="text-xs font-semibold text-gray-900">{s.name}</p>
+                                        <p className="text-[10px] text-gray-500">{s.submission_number} · {s.category?.name} · Qty {s.stock_quantity ?? 1}</p>
+                                    </AdminTd>
+                                    <AdminTd className="text-xs text-gray-700">{userName(s)}</AdminTd>
+                                    <AdminTd className="text-xs font-semibold">₵{Number(s.asking_price).toFixed(2)}</AdminTd>
+                                    <AdminTd className="text-xs text-gray-700 tabular-nums">{s.stock_quantity ?? 1}</AdminTd>
                                     {showFinancialColumns && (
                                         <>
-                                            <th className="admin-th">Sale</th>
-                                            <th className="admin-th">Commission</th>
-                                            <th className="admin-th">Seller</th>
+                                            <AdminTd className="text-xs font-semibold text-gray-900">
+                                                {FINANCIAL_STATUSES.has(s.status) ? formatMoney(s.sale_amount_ghs) : '—'}
+                                            </AdminTd>
+                                            <AdminTd>
+                                                {FINANCIAL_STATUSES.has(s.status) && s.commission_ghs != null ? (
+                                                    <div>
+                                                        <p className="text-xs font-semibold text-blue-700">{formatMoney(s.commission_ghs)}</p>
+                                                        <p className="text-[10px] text-gray-500">{Number(s.commission_pct ?? 0).toFixed(1)}%</p>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-xs text-gray-400">—</span>
+                                                )}
+                                            </AdminTd>
+                                            <AdminTd className="text-xs font-semibold text-gray-700">
+                                                {FINANCIAL_STATUSES.has(s.status) ? formatMoney(s.seller_payout_ghs) : '—'}
+                                            </AdminTd>
                                         </>
                                     )}
-                                    <th className="admin-th">Status</th>
-                                    <th className="admin-th text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-50">
-                                {loading ? (
-                                    <tr><td colSpan={showFinancialColumns ? 9 : 6} className="py-10 text-center text-sm text-gray-500">Loading…</td></tr>
-                                ) : filtered.length === 0 ? (
-                                    <tr><td colSpan={showFinancialColumns ? 9 : 6} className="py-10 text-center text-sm text-gray-500">No listings</td></tr>
-                                ) : (
-                                    filtered.map((s) => (
-                                        <tr key={s.id} className="hover:bg-gray-50/50">
-                                            <td className="px-3 py-2.5">
-                                                <p className="text-xs font-semibold text-gray-900">{s.name}</p>
-                                                <p className="text-[10px] text-gray-500">{s.submission_number} · {s.category?.name} · Qty {s.stock_quantity ?? 1}</p>
-                                            </td>
-                                            <td className="px-3 py-2.5 text-xs text-gray-700">{userName(s)}</td>
-                                            <td className="px-3 py-2.5 text-xs font-semibold">₵{Number(s.asking_price).toFixed(2)}</td>
-                                            <td className="px-3 py-2.5 text-xs text-gray-700 tabular-nums">{s.stock_quantity ?? 1}</td>
-                                            {showFinancialColumns && (
+                                    <AdminTd>
+                                        <StatusBadge status={s.status} />
+                                    </AdminTd>
+                                    <AdminTd className="text-right">
+                                        <div className="flex justify-end gap-1 flex-wrap">
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                size="sm"
+                                                onClick={() => { setSelected(s); setModal('view'); }}
+                                                leftIcon={<Eye className="h-3 w-3" />}
+                                                className="h-8 min-h-[32px] px-2 text-xs"
+                                            >
+                                                View
+                                            </Button>
+                                            {s.product?.slug && (
+                                                <Link
+                                                    href={`/products/${s.product.slug}`}
+                                                    target="_blank"
+                                                    className="px-2 py-1 text-[10px] font-semibold rounded-lg border border-blue-300 text-blue-600 inline-flex items-center gap-1"
+                                                >
+                                                    Shop <ExternalLink className="h-3 w-3" />
+                                                </Link>
+                                            )}
+                                            {s.status === 'delisted' && (
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    disabled={processing}
+                                                    onClick={() => handleRelist(s.id)}
+                                                    className="h-8 min-h-[32px] px-2 text-xs bg-emerald-600 hover:bg-emerald-700"
+                                                >
+                                                    Re-list
+                                                </Button>
+                                            )}
+                                            {s.status === 'listed' && (
+                                                <Button
+                                                    type="button"
+                                                    variant="secondary"
+                                                    size="sm"
+                                                    onClick={() => { setSelected(s); setDelistReason(''); setModal('delist'); }}
+                                                    className="h-8 min-h-[32px] px-2 text-xs"
+                                                >
+                                                    Delist
+                                                </Button>
+                                            )}
+                                            {['submitted', 'changes_requested'].includes(s.status) && (
+                                                <Button
+                                                    type="button"
+                                                    variant="secondary"
+                                                    size="sm"
+                                                    onClick={() => handleReview(s.id)}
+                                                    className="h-8 min-h-[32px] px-2 text-xs"
+                                                >
+                                                    Review
+                                                </Button>
+                                            )}
+                                            {['submitted', 'under_review', 'changes_requested'].includes(s.status) && (
                                                 <>
-                                                    <td className="px-3 py-2.5 text-xs font-semibold text-gray-900">
-                                                        {FINANCIAL_STATUSES.has(s.status) ? formatMoney(s.sale_amount_ghs) : '—'}
-                                                    </td>
-                                                    <td className="px-3 py-2.5">
-                                                        {FINANCIAL_STATUSES.has(s.status) && s.commission_ghs != null ? (
-                                                            <div>
-                                                                <p className="text-xs font-semibold text-blue-700">{formatMoney(s.commission_ghs)}</p>
-                                                                <p className="text-[10px] text-gray-500">{Number(s.commission_pct ?? 0).toFixed(1)}%</p>
-                                                            </div>
-                                                        ) : (
-                                                            <span className="text-xs text-gray-400">—</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-3 py-2.5 text-xs font-semibold text-gray-700">
-                                                        {FINANCIAL_STATUSES.has(s.status) ? formatMoney(s.seller_payout_ghs) : '—'}
-                                                    </td>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        onClick={() => openApprove(s)}
+                                                        className="h-8 min-h-[32px] px-2 text-xs bg-emerald-600 hover:bg-emerald-700"
+                                                    >
+                                                        Approve
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="secondary"
+                                                        size="sm"
+                                                        onClick={() => { setSelected(s); setChangesNote(s.admin_notes || ''); setModal('changes'); }}
+                                                        className="h-8 min-h-[32px] px-2 text-xs bg-amber-50 text-amber-800 border-amber-100 hover:bg-amber-100"
+                                                    >
+                                                        Changes
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="danger"
+                                                        size="sm"
+                                                        onClick={() => { setSelected(s); setModal('reject'); }}
+                                                        className="h-8 min-h-[32px] px-2 text-xs"
+                                                    >
+                                                        Reject
+                                                    </Button>
                                                 </>
                                             )}
-                                            <td className="px-3 py-2.5">
-                                                <span className="text-[10px] font-semibold capitalize px-2 py-0.5 rounded-md bg-gray-100 text-gray-700">
-                                                    {s.status.replace(/_/g, ' ')}
-                                                </span>
-                                            </td>
-                                            <td className="px-3 py-2.5 text-right">
-                                                <div className="flex justify-end gap-1 flex-wrap">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => { setSelected(s); setModal('view'); }}
-                                                        className="px-2 py-1 text-[10px] font-semibold rounded-lg border border-gray-200 text-gray-600"
-                                                    >
-                                                        <Eye className="h-3 w-3 inline" /> View
-                                                    </button>
-                                                    {s.product?.slug && (
-                                                        <Link
-                                                            href={`/products/${s.product.slug}`}
-                                                            target="_blank"
-                                                            className="px-2 py-1 text-[10px] font-semibold rounded-lg border border-blue-300 text-blue-600 inline-flex items-center gap-1"
-                                                        >
-                                                            Shop <ExternalLink className="h-3 w-3" />
-                                                        </Link>
-                                                    )}
-                                                    {s.status === 'delisted' && (
-                                                        <button
-                                                            type="button"
-                                                            disabled={processing}
-                                                            onClick={() => handleRelist(s.id)}
-                                                            className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-green-50 text-green-700 border border-green-100"
-                                                        >
-                                                            Re-list
-                                                        </button>
-                                                    )}
-                                                    {s.status === 'listed' && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => { setSelected(s); setDelistReason(''); setModal('delist'); }}
-                                                            className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-gray-100 text-gray-700 border border-gray-200"
-                                                        >
-                                                            Delist
-                                                        </button>
-                                                    )}
-                                                    {['submitted', 'changes_requested'].includes(s.status) && (
-                                                        <button type="button" onClick={() => handleReview(s.id)} className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-gray-100 text-gray-700">
-                                                            Review
-                                                        </button>
-                                                    )}
-                                                    {['submitted', 'under_review', 'changes_requested'].includes(s.status) && (
-                                                        <>
-                                                            <button type="button" onClick={() => openApprove(s)} className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-green-50 text-green-700 border border-green-100">
-                                                                Approve
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => { setSelected(s); setChangesNote(s.admin_notes || ''); setModal('changes'); }}
-                                                                className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-amber-50 text-amber-800 border border-amber-100"
-                                                            >
-                                                                Changes
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => { setSelected(s); setModal('reject'); }}
-                                                                className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-red-50 text-red-600 border border-red-100"
-                                                            >
-                                                                Reject
-                                                            </button>
-                                                        </>
-                                                    )}
-                                                    {!NON_DELETABLE_STATUSES.has(s.status) && (
-                                                        <button
-                                                            type="button"
-                                                            disabled={processing}
-                                                            onClick={() => void handleDelete(s)}
-                                                            className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-red-50 text-red-700 border border-red-100 inline-flex items-center gap-1"
-                                                        >
-                                                            <Trash2 className="h-3 w-3" /> Delete
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {modal && selected && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <div className="absolute inset-0 bg-black/40" onClick={() => !processing && setModal(null)} aria-hidden />
-                        <div className="admin-modal-panel relative max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
-                            {modal === 'view' && (
-                                <>
-                                    <h2 className="text-lg font-bold text-gray-900 mb-2">{selected.name}</h2>
-                                    <p className="text-xs text-gray-500 mb-4">{selected.submission_number}</p>
-                                    {Array.isArray(selected.images) && selected.images.length > 0 && (
-                                        <div className="flex gap-2 flex-wrap mb-4">
-                                            {selected.images.map((img, i) => (
-                                                <img key={i} src={getMediaUrl(img)} alt="" className="w-16 h-16 rounded-lg object-cover border" />
-                                            ))}
+                                            {!NON_DELETABLE_STATUSES.has(s.status) && (
+                                                <Button
+                                                    type="button"
+                                                    variant="danger"
+                                                    size="sm"
+                                                    disabled={processing}
+                                                    onClick={() => void handleDelete(s)}
+                                                    leftIcon={<Trash2 className="h-3 w-3" />}
+                                                    className="h-8 min-h-[32px] px-2 text-xs"
+                                                >
+                                                    Delete
+                                                </Button>
+                                            )}
                                         </div>
-                                    )}
-                                    <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3">{selected.description}</p>
-                                    <p className="text-xs text-gray-500 mb-1"><strong>Pickup:</strong> {selected.pickup_details}</p>
-                                    <p className="text-xs text-gray-500 mb-1"><strong>Stock:</strong> {selected.stock_quantity ?? 1} unit{(selected.stock_quantity ?? 1) === 1 ? '' : 's'}</p>
-                                    <p className="text-xs text-gray-500"><strong>Consignor:</strong> {userName(selected)} · {selected.user?.email}</p>
-                                    <button type="button" onClick={() => setModal(null)} className="mt-4 h-9 px-4 rounded-lg text-sm font-semibold bg-gray-100">Close</button>
-                                </>
-                            )}
+                                    </AdminTd>
+                                </AdminTr>
+                            ))
+                        )}
+                    </AdminTableBody>
+                </AdminTable>
 
-                            {modal === 'approve' && (
-                                <>
-                                    <h2 className="text-lg font-bold text-gray-900 mb-1">Approve & publish</h2>
-                                    <p className="text-xs text-gray-500 mb-4">Creates a live product on /shop immediately.</p>
-                                    <div className="space-y-3">
-                                        <div>
-                                            <label className="text-xs font-semibold text-gray-500">Sale price (GHS)</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                className="admin-input w-full mt-1"
-                                                value={approveForm.approved_price}
-                                                onChange={(e) => setApproveForm({ ...approveForm, approved_price: e.target.value })}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-semibold text-gray-500">Commission %</label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                className="admin-input w-full mt-1"
-                                                value={approveForm.commission_pct}
-                                                onChange={(e) => setApproveForm({ ...approveForm, commission_pct: e.target.value })}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-semibold text-gray-500">Stock quantity</label>
-                                            <input
-                                                type="number"
-                                                min={1}
-                                                step={1}
-                                                className="admin-input w-full mt-1"
-                                                value={approveForm.stock_quantity}
-                                                onChange={(e) => setApproveForm({ ...approveForm, stock_quantity: e.target.value })}
-                                            />
-                                            <p className="text-[10px] text-gray-400 mt-1">Units available on the shop after approval</p>
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-semibold text-gray-500">Compare price (optional)</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                className="admin-input w-full mt-1"
-                                                value={approveForm.compare_price}
-                                                onChange={(e) => setApproveForm({ ...approveForm, compare_price: e.target.value })}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2 mt-4">
-                                        <button type="button" disabled={processing} onClick={handleApprove} className="flex-1 h-10 rounded-lg bg-green-600 text-white text-sm font-semibold disabled:opacity-50">
-                                            {processing ? 'Publishing…' : 'Approve & go live'}
-                                        </button>
-                                        <button type="button" onClick={() => setModal(null)} className="h-10 px-4 rounded-lg bg-gray-100 text-sm font-semibold">Cancel</button>
-                                    </div>
-                                </>
+                <Modal
+                    open={!!(modal && selected)}
+                    onClose={() => {
+                        if (!processing) setModal(null);
+                    }}
+                    size={modal === 'approve' || modal === 'view' ? 'lg' : 'md'}
+                    title={
+                        modal === 'view'
+                            ? selected?.name
+                            : modal === 'approve'
+                              ? 'Approve & publish'
+                              : modal === 'reject'
+                                ? 'Reject listing'
+                                : modal === 'changes'
+                                  ? 'Request changes'
+                                  : modal === 'delist'
+                                    ? 'Remove from shop'
+                                    : undefined
+                    }
+                    description={
+                        modal === 'view'
+                            ? selected?.submission_number
+                            : modal === 'approve'
+                              ? 'Creates a live product on /shop immediately.'
+                              : modal === 'delist'
+                                ? 'Takes the product offline. The consignor can contact support to re-list.'
+                                : undefined
+                    }
+                    footer={
+                        modal === 'view' ? undefined : modal === 'approve' ? (
+                            <>
+                                <Button type="button" variant="secondary" size="sm" disabled={processing} onClick={() => setModal(null)}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    loading={processing}
+                                    disabled={processing}
+                                    onClick={handleApprove}
+                                    className="bg-emerald-600 hover:bg-emerald-700"
+                                >
+                                    Approve & go live
+                                </Button>
+                            </>
+                        ) : modal === 'reject' ? (
+                            <>
+                                <Button type="button" variant="secondary" size="sm" disabled={processing} onClick={() => setModal(null)}>
+                                    Cancel
+                                </Button>
+                                <Button type="button" variant="danger" size="sm" loading={processing} disabled={processing} onClick={handleReject}>
+                                    Reject
+                                </Button>
+                            </>
+                        ) : modal === 'changes' ? (
+                            <Button type="button" size="sm" loading={processing} disabled={processing} onClick={handleRequestChanges}>
+                                Send
+                            </Button>
+                        ) : modal === 'delist' ? (
+                            <>
+                                <Button type="button" variant="secondary" size="sm" onClick={() => setModal(null)}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    loading={processing}
+                                    disabled={processing}
+                                    onClick={handleDelist}
+                                    className="bg-gray-800 hover:bg-gray-900"
+                                >
+                                    Delist from shop
+                                </Button>
+                            </>
+                        ) : undefined
+                    }
+                >
+                    {modal === 'view' && selected && (
+                        <>
+                            {Array.isArray(selected.images) && selected.images.length > 0 && (
+                                <div className="flex gap-2 flex-wrap mb-4">
+                                    {selected.images.map((img, i) => (
+                                        <img key={i} src={getMediaUrl(img)} alt="" className="w-16 h-16 rounded-lg object-cover border" />
+                                    ))}
+                                </div>
                             )}
+                            <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3">{selected.description}</p>
+                            <p className="text-xs text-gray-500 mb-1"><strong>Pickup:</strong> {selected.pickup_details}</p>
+                            <p className="text-xs text-gray-500 mb-1"><strong>Stock:</strong> {selected.stock_quantity ?? 1} unit{(selected.stock_quantity ?? 1) === 1 ? '' : 's'}</p>
+                            <p className="text-xs text-gray-500"><strong>Consignor:</strong> {userName(selected)} · {selected.user?.email}</p>
+                        </>
+                    )}
 
-                            {modal === 'reject' && (
-                                <>
-                                    <h2 className="text-lg font-bold text-gray-900 mb-4">Reject listing</h2>
-                                    <textarea
-                                        className="w-full min-h-[80px] admin-input"
-                                        placeholder="Reason for rejection"
-                                        value={rejectReason}
-                                        onChange={(e) => setRejectReason(e.target.value)}
-                                    />
-                                    <div className="flex gap-2 mt-4">
-                                        <button type="button" disabled={processing} onClick={handleReject} className="flex-1 h-10 rounded-lg bg-red-600 text-white text-sm font-semibold">Reject</button>
-                                        <button type="button" onClick={() => setModal(null)} className="h-10 px-4 rounded-lg bg-gray-100 text-sm">Cancel</button>
-                                    </div>
-                                </>
-                            )}
-
-                            {modal === 'changes' && (
-                                <>
-                                    <h2 className="text-lg font-bold text-gray-900 mb-4">Request changes</h2>
-                                    <textarea
-                                        className="w-full min-h-[80px] admin-input"
-                                        value={changesNote}
-                                        onChange={(e) => setChangesNote(e.target.value)}
-                                    />
-                                    <button type="button" disabled={processing} onClick={handleRequestChanges} className="mt-4 h-10 px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold">Send</button>
-                                </>
-                            )}
-
-                            {modal === 'delist' && (
-                                <>
-                                    <h2 className="text-lg font-bold text-gray-900 mb-1">Remove from shop</h2>
-                                    <p className="text-xs text-gray-500 mb-4">Takes the product offline. The consignor can contact support to re-list.</p>
-                                    <textarea
-                                        className="w-full min-h-[80px] admin-input"
-                                        placeholder="Optional note to consignor"
-                                        value={delistReason}
-                                        onChange={(e) => setDelistReason(e.target.value)}
-                                    />
-                                    <div className="flex gap-2 mt-4">
-                                        <button type="button" disabled={processing} onClick={handleDelist} className="flex-1 h-10 rounded-lg bg-gray-800 text-white text-sm font-semibold">
-                                            {processing ? 'Removing…' : 'Delist from shop'}
-                                        </button>
-                                        <button type="button" onClick={() => setModal(null)} className="h-10 px-4 rounded-lg bg-gray-100 text-sm">Cancel</button>
-                                    </div>
-                                </>
-                            )}
+                    {modal === 'approve' && (
+                        <div className="space-y-3">
+                            <FormField label="Sale price (GHS)">
+                                <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={approveForm.approved_price}
+                                    onChange={(e) => setApproveForm({ ...approveForm, approved_price: e.target.value })}
+                                />
+                            </FormField>
+                            <FormField label="Commission %">
+                                <Input
+                                    type="number"
+                                    step="0.1"
+                                    value={approveForm.commission_pct}
+                                    onChange={(e) => setApproveForm({ ...approveForm, commission_pct: e.target.value })}
+                                />
+                            </FormField>
+                            <FormField label="Stock quantity" hint="Units available on the shop after approval">
+                                <Input
+                                    type="number"
+                                    min={1}
+                                    step={1}
+                                    value={approveForm.stock_quantity}
+                                    onChange={(e) => setApproveForm({ ...approveForm, stock_quantity: e.target.value })}
+                                />
+                            </FormField>
+                            <FormField label="Compare price (optional)">
+                                <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={approveForm.compare_price}
+                                    onChange={(e) => setApproveForm({ ...approveForm, compare_price: e.target.value })}
+                                />
+                            </FormField>
                         </div>
-                    </div>
-                )}
+                    )}
+
+                    {modal === 'reject' && (
+                        <FormField label="Rejection reason" htmlFor="reject-reason" required>
+                            <Textarea
+                                id="reject-reason"
+                                placeholder="Reason for rejection"
+                                value={rejectReason}
+                                onChange={(e) => setRejectReason(e.target.value)}
+                            />
+                        </FormField>
+                    )}
+
+                    {modal === 'changes' && (
+                        <FormField label="Notes for consignor" htmlFor="changes-note">
+                            <Textarea
+                                id="changes-note"
+                                value={changesNote}
+                                onChange={(e) => setChangesNote(e.target.value)}
+                            />
+                        </FormField>
+                    )}
+
+                    {modal === 'delist' && (
+                        <FormField label="Note to consignor (optional)" htmlFor="delist-reason">
+                            <Textarea
+                                id="delist-reason"
+                                placeholder="Optional note to consignor"
+                                value={delistReason}
+                                onChange={(e) => setDelistReason(e.target.value)}
+                            />
+                        </FormField>
+                    )}
+                </Modal>
             </div>
             {confirmDialog}
         </DashboardLayout>

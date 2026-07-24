@@ -18,6 +18,8 @@ import {
     ExternalLink,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Badge from '@/components/ui/Badge';
 
 /** Convert phone to WhatsApp wa.me URL. Handles Ghana (0/233) and international (+country). */
 function toWhatsAppUrl(phone: string | null | undefined): string | null {
@@ -81,9 +83,8 @@ export default function AdminUserDetailPage() {
     if (loading) {
         return (
             <DashboardLayout isAdmin={true}>
-                <div className="p-6 pb-6 md:pb-8 text-center">
-                    <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">Loading user...</p>
+                <div className="p-6 pb-6 md:pb-8 flex justify-center">
+                    <LoadingSpinner label="Loading user…" />
                 </div>
             </DashboardLayout>
         );
@@ -97,7 +98,7 @@ export default function AdminUserDetailPage() {
             <div className="mb-6 flex items-center justify-between gap-3">
                 <Link
                     href="/admin/users"
-                    className="text-blue-600 hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
+                    className="text-brand hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
                 >
                     <ArrowLeft className="h-4 w-4 mr-1.5" /> Users
                 </Link>
@@ -105,7 +106,7 @@ export default function AdminUserDetailPage() {
 
             <div className="space-y-6">
                 {/* Header card */}
-                <div className="admin-table-wrap">
+                <div className="admin-card overflow-hidden">
                     <div className="px-4 py-4 sm:px-6 border-b border-gray-50 flex flex-wrap justify-between items-start gap-4 bg-gray-50/50">
                         <div>
                             <h1 className="text-xl font-bold text-gray-900">{displayName}</h1>
@@ -114,16 +115,20 @@ export default function AdminUserDetailPage() {
                             </p>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <span className={`px-2.5 py-1 rounded-lg text-xs font-medium capitalize ${user.role === 'admin' || user.role === 'superadmin' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                            <Badge
+                                variant={
+                                    user.role === 'admin' || user.role === 'superadmin' ? 'brand' : 'default'
+                                }
+                            >
                                 {formatCmsLabel(user.role)}
-                            </span>
-                            <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${user.is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                            </Badge>
+                            <Badge variant={user.is_active ? 'success' : 'danger'}>
                                 {user.is_active ? 'Active' : 'Inactive'}
-                            </span>
+                            </Badge>
                             {user.is_verified && (
-                                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 flex items-center gap-1">
+                                <Badge variant="success">
                                     <Shield className="h-3 w-3" /> Verified
-                                </span>
+                                </Badge>
                             )}
                         </div>
                     </div>
@@ -133,7 +138,7 @@ export default function AdminUserDetailPage() {
                     {/* Main content */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Contact info */}
-                        <div className="admin-table-wrap">
+                        <div className="admin-card overflow-hidden">
                             <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                 <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                     <User className="h-4 w-4" /> Contact details
@@ -178,7 +183,7 @@ export default function AdminUserDetailPage() {
                     {/* Sidebar */}
                     <div className="space-y-6">
                         {/* Stats */}
-                        <div className="admin-table-wrap">
+                        <div className="admin-card overflow-hidden">
                             <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                 <h3 className="text-sm font-semibold text-gray-900">Account</h3>
                             </div>

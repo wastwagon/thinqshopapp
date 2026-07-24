@@ -12,6 +12,16 @@ import Select from '@/components/ui/Select';
 import FormField from '@/components/ui/FormField';
 import Modal from '@/components/ui/Modal';
 import Badge from '@/components/ui/Badge';
+import AdminTable, {
+    AdminTableBody,
+    AdminTableEmpty,
+    AdminTableHead,
+    AdminTd,
+    AdminTh,
+    AdminTr,
+} from '@/components/admin/AdminTable';
+import AdminStatGrid from '@/components/admin/AdminStatGrid';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { Package, Plus, Pencil, Trash2, Plane, Ship, CheckCircle, FileText } from 'lucide-react';
 import { ADMIN_STAT_LOGISTICS } from '@/lib/status-styles';
@@ -176,53 +186,60 @@ export default function AdminShippingRatesPage() {
     const Table = ({ list, title }: { list: ShippingRate[]; title: string }) => (
         <div className="mb-4">
             <h3 className="text-xs font-bold text-gray-600 mb-2">{title}</h3>
-            <div className="admin-table-wrap overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="bg-gray-50/50 border-b border-gray-50">
-                            <th className="admin-th">Rate ID</th>
-                            <th className="admin-th">Name</th>
-                            <th className="admin-th">Rate</th>
-                            <th className="admin-th">Type</th>
-                            <th className="admin-th">Duration</th>
-                            <th className="admin-th">Status</th>
-                            <th className="admin-th">Sort</th>
-                            <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                        {list.length === 0 ? (
-                            <tr>
-                                <td colSpan={8} className="px-3 py-6 text-center text-xs text-gray-500">No rates</td>
-                            </tr>
-                        ) : (
-                            list.map((r) => (
-                                <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
-                                    <td className="px-3 py-2.5 text-xs font-mono text-gray-900">{r.rate_id}</td>
-                                    <td className="px-3 py-2.5 text-xs font-medium text-gray-900">{r.name}</td>
-                                    <td className="px-3 py-2.5 text-xs font-semibold text-gray-900">{rateSymbol(r)}{Number(r.price).toFixed(2)}/{r.type}</td>
-                                    <td className="px-3 py-2.5 text-xs font-semibold text-gray-600">{r.type}</td>
-                                    <td className="px-3 py-2.5 text-xs text-gray-500">{r.duration || '—'}</td>
-                                    <td className="px-3 py-2.5">
-                                        <Badge variant={r.is_active ? 'success' : 'default'}>
-                                            {r.is_active ? 'Active' : 'Inactive'}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-3 py-2.5 text-xs text-gray-500">{r.sort_order}</td>
-                                    <td className="px-3 py-2.5 text-right">
-                                        <button type="button" onClick={() => openEdit(r)} className="p-1.5 text-gray-400 hover:text-brand rounded-lg" aria-label="Edit">
-                                            <Pencil className="h-3.5 w-3.5" />
-                                        </button>
-                                        <button type="button" onClick={() => void handleDelete(r.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg ml-0.5" aria-label="Delete">
-                                            <Trash2 className="h-3.5 w-3.5" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            <AdminTable>
+                <AdminTableHead>
+                    <AdminTh>Rate ID</AdminTh>
+                    <AdminTh>Name</AdminTh>
+                    <AdminTh>Rate</AdminTh>
+                    <AdminTh>Type</AdminTh>
+                    <AdminTh>Duration</AdminTh>
+                    <AdminTh>Status</AdminTh>
+                    <AdminTh>Sort</AdminTh>
+                    <AdminTh align="right">Actions</AdminTh>
+                </AdminTableHead>
+                <AdminTableBody>
+                    {list.length === 0 ? (
+                        <AdminTableEmpty colSpan={8} message="No rates" />
+                    ) : (
+                        list.map((r) => (
+                            <AdminTr key={r.id}>
+                                <AdminTd className="text-xs font-mono text-gray-900">{r.rate_id}</AdminTd>
+                                <AdminTd className="text-xs font-medium text-gray-900">{r.name}</AdminTd>
+                                <AdminTd className="text-xs font-semibold text-gray-900 tabular-nums">
+                                    {rateSymbol(r)}
+                                    {Number(r.price).toFixed(2)}/{r.type}
+                                </AdminTd>
+                                <AdminTd className="text-xs font-semibold text-gray-600">{r.type}</AdminTd>
+                                <AdminTd className="text-xs text-gray-500">{r.duration || '—'}</AdminTd>
+                                <AdminTd>
+                                    <Badge variant={r.is_active ? 'success' : 'default'}>
+                                        {r.is_active ? 'Active' : 'Inactive'}
+                                    </Badge>
+                                </AdminTd>
+                                <AdminTd className="text-xs text-gray-500">{r.sort_order}</AdminTd>
+                                <AdminTd className="text-right">
+                                    <button
+                                        type="button"
+                                        onClick={() => openEdit(r)}
+                                        className="p-1.5 text-gray-400 hover:text-brand rounded-lg"
+                                        aria-label="Edit"
+                                    >
+                                        <Pencil className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => void handleDelete(r.id)}
+                                        className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg ml-0.5"
+                                        aria-label="Delete"
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                </AdminTd>
+                            </AdminTr>
+                        ))
+                    )}
+                </AdminTableBody>
+            </AdminTable>
         </div>
     );
 
@@ -246,22 +263,11 @@ export default function AdminShippingRatesPage() {
                     </AdminToolbar>
                 }
             />
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                {stats.map((s, i) => (
-                    <div key={i} className="admin-stat-card">
-                        <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
-                            <s.icon className="h-4 w-4" />
-                        </div>
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
-                        <p className="text-xl font-bold text-gray-900">{s.value}</p>
-                    </div>
-                ))}
-            </div>
+            <AdminStatGrid items={stats} columns={4} />
 
             {loading ? (
-                <div className="py-10 text-center admin-card">
-                    <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto" />
-                    <p className="text-sm text-gray-500 mt-2">Loading...</p>
+                <div className="py-10 flex justify-center admin-card">
+                    <LoadingSpinner size="sm" label="Loading…" />
                 </div>
             ) : (
                 <>

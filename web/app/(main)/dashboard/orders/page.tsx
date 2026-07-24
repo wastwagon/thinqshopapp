@@ -12,7 +12,7 @@ export default function OrdersPage() {
                 <DashboardPageHeader
                     title="Orders"
                     subtitle="Track and manage your purchases"
-                    accent="orange"
+                    accent="brand"
                 />
                 <OrderHistory />
             </DashboardContent>

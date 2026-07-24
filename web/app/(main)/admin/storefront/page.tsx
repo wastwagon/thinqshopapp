@@ -3,7 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
-import { Type, Save, Loader2 } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import FormField from '@/components/ui/FormField';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { Type, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 
@@ -48,46 +52,43 @@ export default function AdminStorefront() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <AdminPageHeader
-                icon={Type}
-                title="Storefront"
-                subtitle="Manage storefront copy, shipping values, and support contacts"
-                actions={
-                    <>
-                        <button
-                    type="button"
-                    onClick={handleSave}
-                    disabled={saving || loading}
-                    className="min-h-[44px] px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50 touch-manipulation"
-                >
-                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    Save
-                </button>
-                    </>
-                }
-            />
+                <AdminPageHeader
+                    icon={Type}
+                    title="Storefront"
+                    subtitle="Manage storefront copy, shipping values, and support contacts"
+                    actions={
+                        <Button
+                            type="button"
+                            size="sm"
+                            onClick={handleSave}
+                            disabled={saving || loading}
+                            loading={saving}
+                            leftIcon={!saving ? <Save className="h-4 w-4" /> : undefined}
+                        >
+                            Save
+                        </Button>
+                    }
+                />
 
-            {loading ? (
-                <div className="min-h-[200px] flex items-center justify-center text-gray-500 text-sm">Loading…</div>
-            ) : (
-                <div className="admin-card p-4 sm:p-6 space-y-5">
-                    {FIELDS.map(({ key, label, placeholder, type }) => (
-                        <div key={key}>
-                            <label htmlFor={key} className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                {label}
-                            </label>
-                            <input
-                                id={key}
-                                type={type}
-                                value={settings[key] ?? ''}
-                                onChange={(e) => setSettings((s) => ({ ...s, [key]: e.target.value }))}
-                                placeholder={placeholder}
-                                className="w-full min-h-[44px] px-4 rounded-xl border border-gray-200 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent touch-manipulation"
-                            />
-                        </div>
-                    ))}
-                </div>
-            )}
+                {loading ? (
+                    <div className="min-h-[200px] flex items-center justify-center">
+                        <LoadingSpinner label="Loading…" />
+                    </div>
+                ) : (
+                    <div className="admin-card p-4 sm:p-6 space-y-5">
+                        {FIELDS.map(({ key, label, placeholder, type }) => (
+                            <FormField key={key} label={label} htmlFor={key}>
+                                <Input
+                                    id={key}
+                                    type={type}
+                                    value={settings[key] ?? ''}
+                                    onChange={(e) => setSettings((s) => ({ ...s, [key]: e.target.value }))}
+                                    placeholder={placeholder}
+                                />
+                            </FormField>
+                        ))}
+                    </div>
+                )}
             </div>
         </DashboardLayout>
     );

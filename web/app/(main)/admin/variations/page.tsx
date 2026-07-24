@@ -7,7 +7,8 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import FormField from '@/components/ui/FormField';
 import Modal from '@/components/ui/Modal';
-import { Layers, Plus, Edit3, Trash2, FileText, Loader2 } from 'lucide-react';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { Layers, Plus, Edit3, Trash2, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
@@ -195,10 +196,10 @@ export default function AdminVariationsPage() {
                     </div>
                 </div>
 
-                <div className="admin-table-wrap">
+                <div className="admin-card overflow-hidden">
                     {loading ? (
                         <div className="py-12 flex justify-center">
-                            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                            <LoadingSpinner label="Loading variations…" />
                         </div>
                     ) : options.length === 0 ? (
                         <div className="py-12 text-center text-gray-500">

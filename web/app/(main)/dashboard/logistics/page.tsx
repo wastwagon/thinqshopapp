@@ -9,6 +9,9 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
 import BarcodeScanner from '@/components/ui/BarcodeScanner';
+import Button, { buttonVariants } from '@/components/ui/Button';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { StatusBadge } from '@/components/ui/Badge';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -276,14 +279,17 @@ export default function LogisticsPage() {
                         Shipping & freight
                     </span>
                 }
-                accent="blue"
+                accent="brand"
                 action={
-                    <button
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant={isCreating ? 'secondary' : 'primary'}
+                        leftIcon={isCreating ? undefined : <Plus className="h-4 w-4" />}
                         onClick={() => setIsCreating(!isCreating)}
-                        className={`min-h-[44px] h-9 px-4 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
                     >
-                        {isCreating ? 'Cancel' : <><Plus className="h-4 w-4" /> New shipment</>}
-                    </button>
+                        {isCreating ? 'Cancel' : 'New shipment'}
+                    </Button>
                 }
             />
 
@@ -422,7 +428,7 @@ Shipping Mark: (${customerId}) +${phone}`;
                                         </>
                                     )}
                                     {ratesError && (
-                                        <p className="text-xs text-orange-600 mt-1.5 font-medium">{ratesError}</p>
+                                        <p className="text-xs text-red-600 mt-1.5 font-medium">{ratesError}</p>
                                     )}
                                 </div>
                             </section>
@@ -607,14 +613,16 @@ Shipping Mark: (${customerId}) +${phone}`;
 
                             {/* Ship Now */}
                             <div className="pt-2 pb-20 md:pb-4">
-                                <button
+                                <Button
                                     type="button"
+                                    size="lg"
                                     onClick={handleBooking}
+                                    loading={isBooking}
                                     disabled={isBooking}
-                                    className="w-full md:w-auto min-h-[44px] h-12 px-8 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center justify-center"
+                                    className="w-full md:w-auto"
                                 >
-                                    {isBooking ? 'Submitting…' : 'Ship Now'}
-                                </button>
+                                    Ship Now
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -639,16 +647,17 @@ Shipping Mark: (${customerId}) +${phone}`;
                             </button>
                         </div>
                         {historyLoading ? (
-                            <div className="p-12 text-center">
-                                <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto" />
+                            <div className="p-12 flex justify-center">
+                                <LoadingSpinner size="sm" label="Loading shipments…" />
                             </div>
                         ) : shipments.length === 0 ? (
                             <div className="p-12 md:p-16 text-center">
                                 <Package className="h-12 w-12 mx-auto mb-6 text-gray-200" />
                                 <p className="text-sm text-gray-500 mb-4">No shipments yet</p>
                                 <button
+                                    type="button"
                                     onClick={() => setIsCreating(true)}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                                    className={buttonVariants({ variant: 'primary', size: 'md' })}
                                 >
                                     Create your first shipment
                                 </button>
@@ -659,22 +668,18 @@ Shipping Mark: (${customerId}) +${phone}`;
                                     <li key={shipment.id} className="px-4 py-4 md:px-8 md:py-6 hover:bg-gray-50 transition-all group">
                                         <div className="flex justify-between items-start">
                                             <div className="space-y-1">
-                                                <p className="text-sm font-bold text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors">
+                                                <p className="text-sm font-bold text-gray-900 tracking-tight group-hover:text-brand transition-colors">
                                                     {shipment.tracking_number || 'PENDING_ID'}
                                                 </p>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-brand" />
                                                     <p className="text-sm font-medium text-gray-500">
                                                         {new Date(shipment.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                                     </p>
                                                 </div>
                                             </div>
                                             <div className="text-right flex flex-col items-end gap-2">
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                                                    shipment.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-50 text-blue-600'
-                                                }`}>
-                                                    {shipment.status?.replace(/_/g, ' ') || 'Pending'}
-                                                </span>
+                                                <StatusBadge status={shipment.status || 'pending'} />
                                                 <p className="text-sm font-bold text-gray-900">₵{Number(shipment.total_price || 0).toFixed(2)}</p>
                                             </div>
                                         </div>

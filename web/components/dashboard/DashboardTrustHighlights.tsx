@@ -26,7 +26,7 @@ const HIGHLIGHTS = [
         icon: BadgeCheck,
         title: 'Trusted',
         subtitle: 'Trusted by Thousands',
-        color: 'text-indigo-600 bg-indigo-50',
+        color: 'text-brand bg-blue-50',
     },
 ] as const;
 

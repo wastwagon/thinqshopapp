@@ -6,6 +6,8 @@ import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { StatusBadge } from '@/components/ui/Badge';
 import Link from 'next/link';
 import { Download, Printer, CheckCircle, Clock, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -89,12 +91,7 @@ export default function TransferConfirmationPage() {
         return (
             <DashboardLayout>
                 <div className="max-w-3xl mx-auto py-12 flex flex-col items-center justify-center min-h-[40vh] print:hidden">
-                    {loading && (
-                        <>
-                            <div className="animate-spin h-10 w-10 border-2 border-blue-600 border-t-transparent rounded-full mb-4" />
-                            <p className="text-sm text-gray-500">Loading confirmation…</p>
-                        </>
-                    )}
+                    {loading && <LoadingSpinner label="Loading confirmation" />}
                     {!loading && !transfer && (
                         <p className="text-sm text-gray-500">Transfer not found.</p>
                     )}
@@ -259,15 +256,13 @@ export default function TransferConfirmationPage() {
                                                         <p className="text-lg font-bold text-gray-900">¥{(entry.amount_cny ?? entry.amount_ghs) != null ? Number(entry.amount_cny ?? entry.amount_ghs).toFixed(2) : '—'}</p>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        {fulfilled ? (
-                                                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 px-3 py-1.5 rounded-lg">
-                                                                <CheckCircle className="h-3.5 w-3.5" /> Fulfilled
-                                                            </span>
-                                                        ) : (
-                                                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-700 bg-orange-50 px-3 py-1.5 rounded-lg">
-                                                                <Clock className="h-3.5 w-3.5" /> Pending
-                                                            </span>
-                                                        )}
+                                                        <StatusBadge status={fulfilled ? 'fulfilled' : 'pending'}>
+                                                            {fulfilled ? (
+                                                                <><CheckCircle className="h-3.5 w-3.5" /> Fulfilled</>
+                                                            ) : (
+                                                                <><Clock className="h-3.5 w-3.5" /> Pending</>
+                                                            )}
+                                                        </StatusBadge>
                                                     </div>
                                                 </div>
                                                 {fulfilled && (fulfillment!.confirmation_image || fulfillment!.admin_notes) && (

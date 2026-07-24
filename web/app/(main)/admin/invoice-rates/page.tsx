@@ -5,6 +5,15 @@ import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminTable, {
+    AdminTableBody,
+    AdminTableEmpty,
+    AdminTableHead,
+    AdminTableLoading,
+    AdminTd,
+    AdminTh,
+    AdminTr,
+} from '@/components/admin/AdminTable';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
@@ -169,102 +178,101 @@ export default function AdminInvoiceRatesPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-4">
-                    <select
+                    <Select
                         value={unitFilter}
                         onChange={(e) => setUnitFilter(e.target.value)}
-                        className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none bg-white"
+                        aria-label="Filter by unit"
+                        className="h-9 min-h-[36px] text-xs w-auto min-w-[9rem]"
                     >
                         <option value="">All units</option>
                         {UNITS.map((u) => (
                             <option key={u} value={u}>{u}</option>
                         ))}
-                    </select>
-                    <select
+                    </Select>
+                    <Select
                         value={modeFilter}
                         onChange={(e) => setModeFilter(e.target.value)}
-                        className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none bg-white"
+                        aria-label="Filter by mode"
+                        className="h-9 min-h-[36px] text-xs w-auto min-w-[9rem]"
                     >
                         <option value="">All modes</option>
                         <option value="air">Air</option>
                         <option value="sea">Sea</option>
                         <option value="standard">Standard</option>
-                    </select>
-                    <select
+                    </Select>
+                    <Select
                         value={activeFilter}
                         onChange={(e) => setActiveFilter(e.target.value)}
-                        className="h-9 pl-3 pr-8 border border-gray-100 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none bg-white"
+                        aria-label="Filter by active status"
+                        className="h-9 min-h-[36px] text-xs w-auto min-w-[9rem]"
                     >
                         <option value="">All</option>
                         <option value="true">Active only</option>
                         <option value="false">Inactive only</option>
-                    </select>
+                    </Select>
                 </div>
 
-                <div className="admin-table-wrap">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-gray-50/80 border-b border-gray-100">
-                                    <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Unit</th>
-                                    <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Rate per unit</th>
-                                    <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Mode</th>
-                                    <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {loading ? (
-                                    <tr>
-                                        <td colSpan={6} className="py-10 text-center text-gray-500 text-sm">Loading...</td>
-                                    </tr>
-                                ) : rates.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={6} className="py-10 text-center text-gray-500">
-                                            <DollarSign className="h-10 w-10 mx-auto mb-2 text-gray-200" />
-                                            <p className="text-sm">No rates yet</p>
-                                            <button type="button" onClick={openCreate} className="text-blue-600 text-sm font-medium mt-2 inline-block">Add a rate</button>
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    rates.map((r) => (
-                                        <tr key={r.id} className="hover:bg-gray-50/60 transition-colors">
-                                            <td className="px-4 py-3 text-sm font-medium text-gray-900">{r.name}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-600">{r.unit}</td>
-                                            <td className="px-4 py-3 text-sm font-semibold text-gray-900">
-                                                GHS {Number(r.rate_per_unit).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-gray-600">{r.mode || '—'}</td>
-                                            <td className="px-4 py-3">
-                                                <Badge variant={r.is_active ? 'success' : 'default'}>
-                                                    {r.is_active ? 'Active' : 'Inactive'}
-                                                </Badge>
-                                            </td>
-                                            <td className="px-4 py-3 text-right">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => openEdit(r)}
-                                                    className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-100 text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all mr-1"
-                                                    title="Edit"
-                                                >
-                                                    <Edit3 className="h-4 w-4" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => void handleDelete(r.id)}
-                                                    className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-100 text-gray-400 hover:text-red-600 hover:border-red-600 transition-all"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <AdminTable>
+                    <AdminTableHead>
+                        <AdminTh>Name</AdminTh>
+                        <AdminTh>Unit</AdminTh>
+                        <AdminTh>Rate per unit</AdminTh>
+                        <AdminTh>Mode</AdminTh>
+                        <AdminTh>Status</AdminTh>
+                        <AdminTh align="right">Actions</AdminTh>
+                    </AdminTableHead>
+                    <AdminTableBody>
+                        {loading ? (
+                            <AdminTableLoading colSpan={6} />
+                        ) : rates.length === 0 ? (
+                            <AdminTableEmpty
+                                colSpan={6}
+                                icon={<DollarSign className="h-10 w-10 mx-auto mb-2 text-gray-200" />}
+                                message="No rates yet"
+                            />
+                        ) : (
+                            rates.map((r) => (
+                                <AdminTr key={r.id}>
+                                    <AdminTd className="text-xs font-semibold text-gray-900">{r.name}</AdminTd>
+                                    <AdminTd className="text-xs text-gray-600">{r.unit}</AdminTd>
+                                    <AdminTd className="text-xs font-semibold text-gray-900 tabular-nums">
+                                        GHS {Number(r.rate_per_unit).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                    </AdminTd>
+                                    <AdminTd className="text-xs text-gray-600">{r.mode || '—'}</AdminTd>
+                                    <AdminTd>
+                                        <Badge variant={r.is_active ? 'success' : 'default'}>
+                                            {r.is_active ? 'Active' : 'Inactive'}
+                                        </Badge>
+                                    </AdminTd>
+                                    <AdminTd className="text-right">
+                                        <div className="flex justify-end gap-1">
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                size="sm"
+                                                onClick={() => openEdit(r)}
+                                                className="h-8 min-h-[32px] px-2 text-xs"
+                                                title="Edit"
+                                            >
+                                                <Edit3 className="h-3.5 w-3.5" />
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="danger"
+                                                size="sm"
+                                                onClick={() => void handleDelete(r.id)}
+                                                className="h-8 min-h-[32px] px-2 text-xs"
+                                                title="Delete"
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </Button>
+                                        </div>
+                                    </AdminTd>
+                                </AdminTr>
+                            ))
+                        )}
+                    </AdminTableBody>
+                </AdminTable>
             </div>
 
             <Modal

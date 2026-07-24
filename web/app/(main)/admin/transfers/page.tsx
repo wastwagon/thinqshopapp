@@ -5,8 +5,22 @@ import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
-import { Send, Search, History, ChevronRight, Calendar, ArrowRight, QrCode, Upload, ImagePlus, Download, CheckCircle, Loader2, FileText, Clock, Package } from 'lucide-react';
-import { STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
+import AdminStatGrid from '@/components/admin/AdminStatGrid';
+import AdminToolbar from '@/components/admin/AdminToolbar';
+import AdminTable, {
+    AdminTableBody,
+    AdminTableEmpty,
+    AdminTableHead,
+    AdminTableLoading,
+    AdminTd,
+    AdminTh,
+    AdminTr,
+} from '@/components/admin/AdminTable';
+import Button, { buttonVariants } from '@/components/ui/Button';
+import Select from '@/components/ui/Select';
+import Modal from '@/components/ui/Modal';
+import { StatusBadge } from '@/components/ui/Badge';
+import { Send, History, Calendar, ArrowRight, QrCode, Upload, ImagePlus, Download, CheckCircle, FileText, Clock, Package } from 'lucide-react';
 import { getMediaUrl } from '@/lib/media';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
@@ -178,23 +192,6 @@ export default function AdminTransfersPage() {
         }
     };
 
-    const StatusBadge = ({ status }: { status: string }) => {
-        const colors: Record<string, string> = {
-            pending: 'bg-orange-50 text-orange-700 border-orange-200',
-            payment_received: 'bg-blue-50 text-blue-600 border-blue-300',
-            processing: STATUS_PROGRESS_BADGE,
-            sent_to_partner: 'bg-blue-50 text-blue-700 border-blue-200',
-            completed: 'bg-green-50 text-green-700 border-green-200',
-            failed: 'bg-red-50 text-red-700 border-red-200',
-            cancelled: 'bg-gray-50 text-gray-600 border-gray-200'
-        };
-        return (
-            <span className={`px-2 py-0.5 text-xs font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
-                {formatCmsLabel(status)}
-            </span>
-        );
-    };
-
     const stats = [
         { label: 'Total', value: transfers.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
         { label: 'Pending', value: pendingCount, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
@@ -210,224 +207,205 @@ export default function AdminTransfersPage() {
                 title="Transfers"
                 subtitle="Manage transfer requests and confirmations"
                 actions={
-                    <div className="relative min-w-0 sm:w-56">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" aria-hidden />
-                        <input
-                            type="search"
-                            placeholder="Search by reference, customer, or recipient..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="admin-input w-full sm:w-56 pl-9"
-                            aria-label="Search transfers"
-                        />
-                    </div>
+                    <AdminToolbar
+                        searchValue={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        searchPlaceholder="Search reference, customer, recipient…"
+                        searchAriaLabel="Search transfers"
+                    />
                 }
             />
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                {stats.map((s, i) => (
-                    <div key={i} className="admin-stat-card">
-                        <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
-                            <s.icon className="h-4 w-4" />
-                        </div>
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
-                        <p className="text-xl font-bold text-gray-900">{s.value}</p>
-                    </div>
-                ))}
-            </div>
+            <AdminStatGrid items={stats} columns={4} />
 
-            <div className="admin-table-wrap mb-4">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="admin-th">Reference</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-center">Amount</th>
-                                <th className="admin-th">Customer</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-center">Status</th>
-                                <th className="admin-th">Confirmation</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={6} className="py-10 text-center">
-                                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
-                                        <p className="text-sm text-gray-500">Loading...</p>
-                                    </td>
-                                </tr>
-                            ) : filteredTransfers.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="py-10 text-center text-gray-500">
-                                        <History className="h-10 w-10 mx-auto mb-2 text-gray-200" />
-                                        <p className="text-sm">No transfers found</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredTransfers.map((transfer) => (
-                                    <tr key={transfer.id} className="hover:bg-gray-50/50 transition-all group">
-                                        <td className="px-3 py-2.5">
-                                            <div className="flex flex-col gap-0.5">
-                                                <span className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate max-w-[120px]">{transfer.token}</span>
-                                                <span className="text-xs text-gray-500 flex items-center gap-1">
-                                                    <Calendar className="h-3 w-3" />
-                                                    {new Date(transfer.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 py-2.5 text-center">
-                                            <div className="flex items-center justify-center gap-1.5">
-                                                <span className="text-xs font-semibold text-gray-900">₵{Number(transfer.amount_ghs).toFixed(2)}</span>
-                                                <ArrowRight className="h-3 w-3 text-gray-300" />
-                                                <span className="text-xs font-semibold text-blue-600">¥{Number(transfer.amount_cny).toFixed(2)}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 py-2.5">
-                                            <div className="space-y-1">
-                                                <p className="text-xs font-medium text-gray-700 truncate max-w-[140px]">
-                                                    {`${transfer.user.profile?.first_name || ''} ${transfer.user.profile?.last_name || ''}`.trim() || transfer.user.email}
-                                                </p>
-                                                <p className="text-xs text-blue-600 truncate max-w-[140px]">
-                                                    Recipient: {transfer.recipient_name}
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 py-2.5 text-center">
-                                            <StatusBadge status={isAwaitingPaymentReview(transfer) ? 'pending' : transfer.status} />
-                                            {isAwaitingPaymentReview(transfer) && (
-                                                <p className="text-[10px] text-orange-600 font-semibold mt-0.5">Payment review</p>
-                                            )}
-                                            {transfer.qr_codes && transfer.qr_codes.length > 0 && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setQrModalTransferId(transfer.id)}
-                                                    className="mt-1 inline-flex items-center text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-50 py-0.5 rounded px-1.5"
-                                                >
-                                                    <QrCode className="h-2.5 w-2.5 mr-1" /> QR ({transfer.qr_codes.length})
-                                                </button>
-                                            )}
-                                        </td>
-                                        <td className="px-3 py-2.5">
-                                            <div className="space-y-1.5">
-                                                {(transfer.proof_of_transfer || transfer.payment_transaction_id || transfer.payment_sender_name) && (
-                                                    <div className="rounded-lg border border-orange-100 bg-orange-50/60 p-2 space-y-1 max-w-[200px]">
-                                                        <p className="text-[10px] font-bold uppercase tracking-wide text-orange-700">Customer payment</p>
-                                                        {transfer.payment_method && (
-                                                            <p className="text-[10px] text-gray-600 capitalize">{transfer.payment_method.replace(/_/g, ' ')}</p>
-                                                        )}
-                                                        {transfer.payment_transaction_id && (
-                                                            <p className="text-[10px] text-gray-800 font-mono break-all">ID: {transfer.payment_transaction_id}</p>
-                                                        )}
-                                                        {transfer.payment_sender_name && (
-                                                            <p className="text-[10px] text-gray-800">From: {transfer.payment_sender_name}</p>
-                                                        )}
-                                                        {transfer.proof_of_transfer && (
-                                                            <a
-                                                                href={getMediaUrl(transfer.proof_of_transfer)}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="block w-12 h-12 rounded-md overflow-hidden border border-orange-200 bg-white"
-                                                            >
-                                                                <img
-                                                                    src={getMediaUrl(transfer.proof_of_transfer)}
-                                                                    alt="Payment proof"
-                                                                    className="w-full h-full object-cover"
-                                                                />
-                                                            </a>
-                                                        )}
-                                                    </div>
+            <div className="mb-4">
+            <AdminTable>
+                <AdminTableHead>
+                    <AdminTh>Reference</AdminTh>
+                    <AdminTh align="right">Amount</AdminTh>
+                    <AdminTh>Customer</AdminTh>
+                    <AdminTh align="right">Status</AdminTh>
+                    <AdminTh>Confirmation</AdminTh>
+                    <AdminTh align="right">Actions</AdminTh>
+                </AdminTableHead>
+                <AdminTableBody>
+                    {loading ? (
+                        <AdminTableLoading colSpan={6} />
+                    ) : filteredTransfers.length === 0 ? (
+                        <AdminTableEmpty
+                            colSpan={6}
+                            icon={<History className="h-10 w-10 mx-auto mb-2 text-gray-200" />}
+                            message="No transfers found"
+                        />
+                    ) : (
+                        filteredTransfers.map((transfer) => (
+                            <AdminTr key={transfer.id}>
+                                <AdminTd>
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className="text-sm font-semibold text-gray-900 truncate max-w-[120px]">{transfer.token}</span>
+                                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                                            <Calendar className="h-3 w-3" />
+                                            {new Date(transfer.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        </span>
+                                    </div>
+                                </AdminTd>
+                                <AdminTd className="text-right">
+                                    <div className="flex items-center justify-end gap-1.5">
+                                        <span className="text-xs font-semibold text-gray-900">₵{Number(transfer.amount_ghs).toFixed(2)}</span>
+                                        <ArrowRight className="h-3 w-3 text-gray-300" />
+                                        <span className="text-xs font-semibold text-brand">¥{Number(transfer.amount_cny).toFixed(2)}</span>
+                                    </div>
+                                </AdminTd>
+                                <AdminTd>
+                                    <div className="space-y-1">
+                                        <p className="text-xs font-medium text-gray-700 truncate max-w-[140px]">
+                                            {`${transfer.user.profile?.first_name || ''} ${transfer.user.profile?.last_name || ''}`.trim() || transfer.user.email}
+                                        </p>
+                                        <p className="text-xs text-brand truncate max-w-[140px]">
+                                            Recipient: {transfer.recipient_name}
+                                        </p>
+                                    </div>
+                                </AdminTd>
+                                <AdminTd className="text-right">
+                                    <StatusBadge status={isAwaitingPaymentReview(transfer) ? 'pending' : transfer.status}>
+                                        {formatCmsLabel(isAwaitingPaymentReview(transfer) ? 'pending' : transfer.status)}
+                                    </StatusBadge>
+                                    {isAwaitingPaymentReview(transfer) && (
+                                        <p className="text-[10px] text-orange-600 font-semibold mt-0.5">Payment review</p>
+                                    )}
+                                    {transfer.qr_codes && transfer.qr_codes.length > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setQrModalTransferId(transfer.id)}
+                                            className="mt-1 inline-flex items-center text-xs font-semibold text-brand bg-blue-50 hover:bg-blue-50 py-0.5 rounded px-1.5"
+                                        >
+                                            <QrCode className="h-2.5 w-2.5 mr-1" /> QR ({transfer.qr_codes.length})
+                                        </button>
+                                    )}
+                                </AdminTd>
+                                <AdminTd>
+                                    <div className="space-y-1.5">
+                                        {(transfer.proof_of_transfer || transfer.payment_transaction_id || transfer.payment_sender_name) && (
+                                            <div className="rounded-lg border border-orange-100 bg-orange-50/60 p-2 space-y-1 max-w-[200px]">
+                                                <p className="text-[10px] font-bold uppercase tracking-wide text-orange-700">Customer payment</p>
+                                                {transfer.payment_method && (
+                                                    <p className="text-[10px] text-gray-600 capitalize">{transfer.payment_method.replace(/_/g, ' ')}</p>
                                                 )}
-                                                {transfer.admin_reply_images && transfer.admin_reply_images.length > 0 && (
-                                                    <div className="flex gap-1.5 flex-wrap">
-                                                            {transfer.admin_reply_images.map((img, i) => (
-                                                            <a key={i} href={img} target="_blank" rel="noopener noreferrer" className="block w-10 h-10 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 hover:ring-2 hover:ring-blue-300">
-                                                                <img src={img} alt="Proof" className="w-full h-full object-cover" />
-                                                            </a>
-                                                        ))}
-                                                    </div>
+                                                {transfer.payment_transaction_id && (
+                                                    <p className="text-[10px] text-gray-800 font-mono break-all">ID: {transfer.payment_transaction_id}</p>
                                                 )}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setExpandedId(expandedId === transfer.id ? null : transfer.id)}
-                                                    className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700"
-                                                >
-                                                    <ImagePlus className="h-3 w-3" />
-                                                    {transfer.admin_reply_images?.length ? 'Add more' : 'Add proof'}
-                                                </button>
-                                                {expandedId === transfer.id && (
-                                                    <div className="flex gap-2 mt-1.5 p-2.5 bg-gray-50 rounded-lg border border-gray-100">
-                                                        <input
-                                                            type="url"
-                                                            value={feedbackUrl[transfer.id] || ''}
-                                                            onChange={(e) => setFeedbackUrl((prev) => ({ ...prev, [transfer.id]: e.target.value }))}
-                                                            placeholder="Image URL"
-                                                            className="flex-1 min-w-0 px-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                                {transfer.payment_sender_name && (
+                                                    <p className="text-[10px] text-gray-800">From: {transfer.payment_sender_name}</p>
+                                                )}
+                                                {transfer.proof_of_transfer && (
+                                                    <a
+                                                        href={getMediaUrl(transfer.proof_of_transfer)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="block w-12 h-12 rounded-md overflow-hidden border border-orange-200 bg-white"
+                                                    >
+                                                        <img
+                                                            src={getMediaUrl(transfer.proof_of_transfer)}
+                                                            alt="Payment proof"
+                                                            className="w-full h-full object-cover"
                                                         />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleAddFeedbackImage(transfer.id)}
-                                                            disabled={uploadingId === transfer.id || !feedbackUrl[transfer.id]?.trim()}
-                                                            className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1 shrink-0"
-                                                        >
-                                                            {uploadingId === transfer.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Upload className="h-3 w-3" /> Add</>}
-                                                        </button>
-                                                    </div>
+                                                    </a>
                                                 )}
                                             </div>
-                                        </td>
-                                        <td className="px-3 py-2.5 text-right">
-                                            {isAwaitingPaymentReview(transfer) ? (
-                                                <div className="flex justify-end gap-1.5">
-                                                    <button
-                                                        type="button"
-                                                        disabled={updatingId === transfer.id}
-                                                        onClick={() => void handleStatusUpdate(transfer.id, 'payment_received')}
-                                                        className="h-8 px-3 bg-blue-600 text-white rounded-lg font-semibold text-xs hover:bg-blue-700 transition-all"
-                                                    >
-                                                        Approve payment
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        disabled={updatingId === transfer.id}
-                                                        onClick={() => void handleStatusUpdate(transfer.id, 'failed')}
-                                                        className="h-8 px-3 border border-gray-200 text-gray-500 rounded-lg font-semibold text-xs hover:text-red-600 hover:border-red-200 transition-all"
-                                                    >
-                                                        Decline
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <div className="relative inline-block">
-                                                    <select
-                                                        disabled={updatingId === transfer.id}
-                                                        className="appearance-none bg-gray-50 border border-gray-100 text-gray-700 text-xs font-semibold rounded-lg py-2 pl-2.5 pr-8 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
-                                                        value={transfer.status}
-                                                        onChange={(e) => void handleStatusUpdate(transfer.id, e.target.value)}
-                                                    >
-                                                        <option value="payment_received">Payment received</option>
-                                                        <option value="processing">Processing</option>
-                                                        <option value="sent_to_partner">Sent to partner</option>
-                                                        <option value="completed">Completed</option>
-                                                        <option value="failed">Failed</option>
-                                                        <option value="cancelled">Cancelled</option>
-                                                    </select>
-                                                    <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none rotate-90" aria-hidden />
-                                                </div>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                        )}
+                                        {transfer.admin_reply_images && transfer.admin_reply_images.length > 0 && (
+                                            <div className="flex gap-1.5 flex-wrap">
+                                                    {transfer.admin_reply_images.map((img, i) => (
+                                                    <a key={i} href={img} target="_blank" rel="noopener noreferrer" className="block w-10 h-10 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 hover:ring-2 hover:ring-blue-300">
+                                                        <img src={img} alt="Proof" className="w-full h-full object-cover" />
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={() => setExpandedId(expandedId === transfer.id ? null : transfer.id)}
+                                            className="flex items-center gap-1.5 text-xs font-semibold text-brand hover:text-brand/80"
+                                        >
+                                            <ImagePlus className="h-3 w-3" />
+                                            {transfer.admin_reply_images?.length ? 'Add more' : 'Add proof'}
+                                        </button>
+                                        {expandedId === transfer.id && (
+                                            <div className="flex gap-2 mt-1.5 p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                                                <input
+                                                    type="url"
+                                                    value={feedbackUrl[transfer.id] || ''}
+                                                    onChange={(e) => setFeedbackUrl((prev) => ({ ...prev, [transfer.id]: e.target.value }))}
+                                                    placeholder="Image URL"
+                                                    className="flex-1 min-w-0 px-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20"
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    onClick={() => handleAddFeedbackImage(transfer.id)}
+                                                    disabled={uploadingId === transfer.id || !feedbackUrl[transfer.id]?.trim()}
+                                                    loading={uploadingId === transfer.id}
+                                                    leftIcon={<Upload className="h-3 w-3" />}
+                                                    className="h-8 min-h-[32px] px-3 text-xs shrink-0"
+                                                >
+                                                    Add
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </AdminTd>
+                                <AdminTd className="text-right">
+                                    {isAwaitingPaymentReview(transfer) ? (
+                                        <div className="flex justify-end gap-1.5">
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                disabled={updatingId === transfer.id}
+                                                onClick={() => void handleStatusUpdate(transfer.id, 'payment_received')}
+                                                className="h-8 min-h-[32px] px-3 text-xs"
+                                            >
+                                                Approve payment
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                size="sm"
+                                                disabled={updatingId === transfer.id}
+                                                onClick={() => void handleStatusUpdate(transfer.id, 'failed')}
+                                                className="h-8 min-h-[32px] px-3 text-xs hover:text-red-600 hover:border-red-200"
+                                            >
+                                                Decline
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <Select
+                                            disabled={updatingId === transfer.id}
+                                            value={transfer.status}
+                                            onChange={(e) => void handleStatusUpdate(transfer.id, e.target.value)}
+                                            className="h-9 min-h-[36px] text-xs py-1.5 w-auto min-w-[9.5rem] ml-auto"
+                                            aria-label={`Update status for ${transfer.token}`}
+                                        >
+                                            <option value="payment_received">Payment received</option>
+                                            <option value="processing">Processing</option>
+                                            <option value="sent_to_partner">Sent to partner</option>
+                                            <option value="completed">Completed</option>
+                                            <option value="failed">Failed</option>
+                                            <option value="cancelled">Cancelled</option>
+                                        </Select>
+                                    )}
+                                </AdminTd>
+                            </AdminTr>
+                        ))
+                    )}
+                </AdminTableBody>
+            </AdminTable>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-                <div className="bg-blue-600 rounded-xl p-4 text-white">
+                <div className="bg-brand rounded-xl p-4 text-white">
                     <h4 className="text-xs font-semibold text-white/90 mb-1">Amount in progress</h4>
                     <p className="text-xl font-bold tracking-tight">₵{inProgressAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                    <p className="text-white/90/80 text-xs mt-2 pt-2 border-t border-white/10">Total GHS not yet completed</p>
+                    <p className="text-white/70 text-xs mt-2 pt-2 border-t border-white/10">Total GHS not yet completed</p>
                 </div>
                 <div className="admin-stat-card">
                     <h4 className="text-xs font-semibold text-gray-500 mb-2">Completion rate</h4>
@@ -435,7 +413,7 @@ export default function AdminTransfersPage() {
                         <div className="relative w-14 h-14 shrink-0">
                             <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                                 <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="3" className="text-gray-100" />
-                                <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="3" className="text-blue-600" strokeDasharray={94.25} strokeDashoffset={94.25 * (1 - completionRate / 100)} />
+                                <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="3" className="text-brand" strokeDasharray={94.25} strokeDashoffset={94.25 * (1 - completionRate / 100)} />
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-sm font-bold text-gray-900">{completionRate}%</span>
@@ -446,109 +424,110 @@ export default function AdminTransfersPage() {
                 </div>
             </div>
 
-            {qrModalTransferId != null && (() => {
-                const transfer = transfers.find((t) => t.id === qrModalTransferId);
+            {(() => {
+                const transfer = qrModalTransferId != null ? transfers.find((t) => t.id === qrModalTransferId) : undefined;
                 const entries = transfer ? normalizeQrCodes(transfer) : [];
                 return (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => { setQrModalTransferId(null); setFulfillmentDraft({}); }}>
-                        <div className="admin-modal-panel max-w-2xl w-full flex flex-col" onClick={(e) => e.stopPropagation()}>
-                            <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-                                <h3 className="text-sm font-bold text-gray-900">Fulfill transfer by QR · {transfer?.token}</h3>
-                                <button type="button" onClick={() => { setQrModalTransferId(null); setFulfillmentDraft({}); }} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close">×</button>
-                            </div>
-                            <div className="p-4 overflow-y-auto overscroll-y-contain scrollbar-thin space-y-4">
-                                {entries.length === 0 ? (
-                                    <p className="text-sm text-gray-500">No payment QR codes available for this transfer.</p>
-                                ) : (
-                                    entries.map((entry, i) => {
-                                        const fulfillment = transfer ? getFulfillment(transfer, i) : undefined;
-                                        const key = `${transfer?.id}-${i}`;
-                                        const draft = fulfillmentDraft[key] || { image: '', notes: '' };
-                                        const displayImage = fulfillment?.confirmation_image || draft.image;
-                                        return (
-                                            <div key={i} className="rounded-xl border border-gray-200 bg-gray-50/50 overflow-hidden">
-                                                <div className="p-3 flex flex-wrap items-start gap-3 border-b border-gray-100 bg-white">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
-                                                            <img src={entry.image} alt={`QR ${i + 1}`} className="w-full h-full object-contain" />
-                                                        </div>
-                                                        <a
-                                                            href={entry.image}
-                                                            download={`${transfer?.token}-qr-${i + 1}.png`}
-                                                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lgbg-blue-600 text-white text-xs font-semiboldhover:bg-blue-700"
-                                                        >
-                                                            <Download className="h-3 w-3" /> Download
-                                                        </a>
+                    <Modal
+                        open={qrModalTransferId != null}
+                        onClose={() => { setQrModalTransferId(null); setFulfillmentDraft({}); }}
+                        title={`Fulfill transfer by QR · ${transfer?.token ?? ''}`}
+                        size="xl"
+                    >
+                        <div className="space-y-4 max-h-[70vh] overflow-y-auto overscroll-y-contain scrollbar-thin -mx-1 px-1">
+                            {entries.length === 0 ? (
+                                <p className="text-sm text-gray-500">No payment QR codes available for this transfer.</p>
+                            ) : (
+                                entries.map((entry, i) => {
+                                    const fulfillment = transfer ? getFulfillment(transfer, i) : undefined;
+                                    const key = `${transfer?.id}-${i}`;
+                                    const draft = fulfillmentDraft[key] || { image: '', notes: '' };
+                                    const displayImage = fulfillment?.confirmation_image || draft.image;
+                                    return (
+                                        <div key={i} className="rounded-xl border border-gray-200 bg-gray-50/50 overflow-hidden">
+                                            <div className="p-3 flex flex-wrap items-start gap-3 border-b border-gray-100 bg-white">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
+                                                        <img src={entry.image} alt={`QR ${i + 1}`} className="w-full h-full object-contain" />
                                                     </div>
-                                                    <div className="min-w-0">
-                                                        {entry.recipient_name && <p className="text-xs font-semibold text-gray-900 mb-0.5">{entry.recipient_name}</p>}
-                                                        <p className="text-xs text-gray-500">Amount</p>
-                                                        <p className="text-lg font-bold text-gray-900">¥{(entry.amount_cny ?? entry.amount_ghs) != null ? Number(entry.amount_cny ?? entry.amount_ghs).toFixed(2) : '—'}</p>
-                                                        {fulfillment?.status === 'fulfilled' && (
-                                                            <span className="inline-flex items-center gap-1 mt-1.5 text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded">
-                                                                <CheckCircle className="h-2.5 w-2.5" /> Fulfilled
-                                                            </span>
-                                                        )}
-                                                    </div>
+                                                    <a
+                                                        href={entry.image}
+                                                        download={`${transfer?.token}-qr-${i + 1}.png`}
+                                                        className={buttonVariants({ size: 'sm', className: 'h-8 min-h-[32px] px-2.5 text-xs' })}
+                                                    >
+                                                        <Download className="h-3 w-3" /> Download
+                                                    </a>
                                                 </div>
-                                                <div className="p-3 space-y-2">
-                                                    <p className="text-xs font-semibold text-gray-500">Confirmation</p>
-                                                    {displayImage && (
-                                                        <div className="flex items-start gap-2">
-                                                            <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
-                                                                <img src={displayImage} alt="Confirmation" className="w-full h-full object-cover" />
-                                                            </div>
-                                                            {fulfillment?.status === 'fulfilled' && fulfillment.admin_notes && (
-                                                                <p className="text-xs text-gray-600 flex-1">{fulfillment.admin_notes}</p>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                    {(!fulfillment || fulfillment.status !== 'fulfilled') && (
-                                                        <>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 text-blue-600 text-xs font-semibold hover:bg-blue-50">
-                                                                    <Upload className="h-3 w-3" /> Upload
-                                                                    <input
-                                                                        type="file"
-                                                                        accept="image/*"
-                                                                        className="sr-only"
-                                                                        onChange={(e) => handleFulfillmentFile(transfer!.id, i, e.target.files?.[0] ?? null)}
-                                                                    />
-                                                                </label>
-                                                                <input
-                                                                    type="url"
-                                                                    value={draft.image?.startsWith('data:') ? '' : draft.image}
-                                                                    onChange={(e) => setFulfillmentDraft((p) => ({ ...p, [key]: { ...p[key], image: e.target.value } }))}
-                                                                    placeholder="Or image URL"
-                                                                    className="flex-1 min-w-[120px] px-2.5 py-2 rounded-lg border border-gray-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
-                                                                />
-                                                            </div>
-                                                            <textarea
-                                                                value={draft.notes}
-                                                                onChange={(e) => setFulfillmentDraft((p) => ({ ...p, [key]: { ...p[key], notes: e.target.value } }))}
-                                                                placeholder="Notes (optional)"
-                                                                rows={2}
-                                                                className="w-full px-2.5 py-2 rounded-lg border border-gray-200 text-xs focus:ring-2 focus:ring-blue-500/20 outline-none resize-none"
-                                                            />
-                                                            <button
-                                                                type="button"
-                                                                disabled={fulfillingKey === key || !(draft.image.trim())}
-                                                                onClick={() => handleSaveFulfillment(transfer!.id, i, draft.image, draft.notes)}
-                                                                className="w-full sm:w-auto px-4 py-2 rounded-lgbg-blue-600 text-white text-xs font-semibold hover:bg-blue-600 disabled:opacity-50 flex items-center justify-center gap-1.5"
-                                                            >
-                                                                {fulfillingKey === key ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
-                                                                {fulfillingKey === key ? 'Saving…' : 'Mark fulfilled'}
-                                                            </button>
-                                                        </>
+                                                <div className="min-w-0">
+                                                    {entry.recipient_name && <p className="text-xs font-semibold text-gray-900 mb-0.5">{entry.recipient_name}</p>}
+                                                    <p className="text-xs text-gray-500">Amount</p>
+                                                    <p className="text-lg font-bold text-gray-900">¥{(entry.amount_cny ?? entry.amount_ghs) != null ? Number(entry.amount_cny ?? entry.amount_ghs).toFixed(2) : '—'}</p>
+                                                    {fulfillment?.status === 'fulfilled' && (
+                                                        <span className="inline-flex items-center gap-1 mt-1.5 text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded">
+                                                            <CheckCircle className="h-2.5 w-2.5" /> Fulfilled
+                                                        </span>
                                                     )}
                                                 </div>
                                             </div>
-                                        );
-                                    })
-                                )}
-                            </div>
+                                            <div className="p-3 space-y-2">
+                                                <p className="text-xs font-semibold text-gray-500">Confirmation</p>
+                                                {displayImage && (
+                                                    <div className="flex items-start gap-2">
+                                                        <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
+                                                            <img src={displayImage} alt="Confirmation" className="w-full h-full object-cover" />
+                                                        </div>
+                                                        {fulfillment?.status === 'fulfilled' && fulfillment.admin_notes && (
+                                                            <p className="text-xs text-gray-600 flex-1">{fulfillment.admin_notes}</p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                {(!fulfillment || fulfillment.status !== 'fulfilled') && (
+                                                    <>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 text-brand text-xs font-semibold hover:bg-blue-50">
+                                                                <Upload className="h-3 w-3" /> Upload
+                                                                <input
+                                                                    type="file"
+                                                                    accept="image/*"
+                                                                    className="sr-only"
+                                                                    onChange={(e) => handleFulfillmentFile(transfer!.id, i, e.target.files?.[0] ?? null)}
+                                                                />
+                                                            </label>
+                                                            <input
+                                                                type="url"
+                                                                value={draft.image?.startsWith('data:') ? '' : draft.image}
+                                                                onChange={(e) => setFulfillmentDraft((p) => ({ ...p, [key]: { ...p[key], image: e.target.value } }))}
+                                                                placeholder="Or image URL"
+                                                                className="flex-1 min-w-[120px] px-2.5 py-2 rounded-lg border border-gray-200 text-xs focus:ring-2 focus:ring-brand/20 focus:border-brand outline-none"
+                                                            />
+                                                        </div>
+                                                        <textarea
+                                                            value={draft.notes}
+                                                            onChange={(e) => setFulfillmentDraft((p) => ({ ...p, [key]: { ...p[key], notes: e.target.value } }))}
+                                                            placeholder="Notes (optional)"
+                                                            rows={2}
+                                                            className="w-full px-2.5 py-2 rounded-lg border border-gray-200 text-xs focus:ring-2 focus:ring-brand/20 outline-none resize-none"
+                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            disabled={fulfillingKey === key || !(draft.image.trim())}
+                                                            loading={fulfillingKey === key}
+                                                            onClick={() => handleSaveFulfillment(transfer!.id, i, draft.image, draft.notes)}
+                                                            leftIcon={<CheckCircle className="h-3.5 w-3.5" />}
+                                                            className="w-full sm:w-auto h-9 min-h-[36px] px-4 text-xs"
+                                                        >
+                                                            {fulfillingKey === key ? 'Saving…' : 'Mark fulfilled'}
+                                                        </Button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
-                    </div>
+                    </Modal>
                 );
             })()}
             </div>

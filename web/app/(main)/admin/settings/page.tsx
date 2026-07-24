@@ -16,11 +16,11 @@ import {
     Shield,
     Play,
     DatabaseIcon,
-    Loader2,
     Smartphone,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import Button from '@/components/ui/Button';
 
 type PaymentDetailsForm = {
     momo_agent_number: string;
@@ -134,10 +134,16 @@ export default function AdminSettings() {
                 title="Settings"
                 subtitle="Manage operational controls and platform defaults"
                 actions={
-                    <button type="button" onClick={handleSave} disabled={savingRate || savingPayment || rateLoading} className="admin-btn-primary h-9 px-4 shrink-0 disabled:opacity-50">
-                        <Save className="h-3.5 w-3.5" aria-hidden />
-                        {savingRate || savingPayment ? 'Saving…' : 'Save'}
-                    </button>
+                    <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleSave}
+                        disabled={savingRate || savingPayment || rateLoading}
+                        loading={savingRate || savingPayment}
+                        leftIcon={!(savingRate || savingPayment) ? <Save className="h-3.5 w-3.5" /> : undefined}
+                    >
+                        Save
+                    </Button>
                 }
             />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
@@ -316,39 +322,48 @@ export default function AdminSettings() {
                         <div className="space-y-2">
                             <p className="text-xs font-semibold text-gray-500 mb-2">Database</p>
                             <div className="flex flex-col gap-2">
-                                <button
+                                <Button
                                     type="button"
+                                    size="sm"
+                                    variant="secondary"
                                     onClick={() => runDbAction('migrate')}
                                     disabled={dbAction !== 'idle'}
-                                    className="w-full h-9 border border-blue-300 text-blue-600 rounded-lg text-xs font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                    loading={dbAction === 'migrate'}
+                                    leftIcon={dbAction !== 'migrate' ? <DatabaseIcon className="h-3.5 w-3.5" /> : undefined}
+                                    className="w-full border-blue-300 text-brand"
                                 >
-                                    {dbAction === 'migrate' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <DatabaseIcon className="h-3.5 w-3.5" />}
                                     Run migrations
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="button"
+                                    size="sm"
+                                    variant="secondary"
                                     onClick={() => runDbAction('seed')}
                                     disabled={dbAction !== 'idle'}
-                                    className="w-full h-9 border border-emerald-200 text-emerald-600 rounded-lg text-xs font-semibold hover:bg-emerald-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                    loading={dbAction === 'seed'}
+                                    leftIcon={dbAction !== 'seed' ? <Play className="h-3.5 w-3.5" /> : undefined}
+                                    className="w-full border-emerald-200 text-emerald-600"
                                 >
-                                    {dbAction === 'seed' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
                                     Run seed
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="button"
+                                    size="sm"
+                                    variant="secondary"
                                     onClick={() => runDbAction('migrate-seed')}
                                     disabled={dbAction !== 'idle'}
-                                    className="w-full h-9 border border-blue-200 text-brand rounded-lg text-xs font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                    loading={dbAction === 'migrate-seed'}
+                                    leftIcon={dbAction !== 'migrate-seed' ? <RefreshCw className="h-3.5 w-3.5" /> : undefined}
+                                    className="w-full"
                                 >
-                                    {dbAction === 'migrate-seed' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
                                     Migrate + seed
-                                </button>
+                                </Button>
                             </div>
                             <p className="text-xs text-gray-400">Apply migrations and/or seed data. Admin only.</p>
                         </div>
-                        <button type="button" className="w-full h-9 border border-red-200 text-red-600 rounded-lg text-xs font-semibold hover:bg-red-50 transition-colors">
+                        <Button type="button" size="sm" variant="secondary" className="w-full border-red-200 text-red-600 hover:bg-red-50">
                             Clear cache
-                        </button>
+                        </Button>
                         </div>
                     </section>
 

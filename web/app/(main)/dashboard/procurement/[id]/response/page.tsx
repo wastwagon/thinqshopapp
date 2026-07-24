@@ -6,6 +6,7 @@ import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Link from 'next/link';
 import { Printer, ShoppingBag, FileText, DollarSign, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -68,12 +69,7 @@ export default function ProcurementResponsePage() {
         return (
             <DashboardLayout>
                 <div className="max-w-3xl mx-auto py-12 flex flex-col items-center justify-center min-h-[40vh] print:hidden">
-                    {loading && (
-                        <>
-                            <div className="animate-spin h-10 w-10 border-2 border-blue-600 border-t-transparent rounded-full mb-4" />
-                            <p className="text-sm text-gray-500">Loading response…</p>
-                        </>
-                    )}
+                    {loading && <LoadingSpinner label="Loading response" />}
                     {!loading && !request && <p className="text-sm text-gray-500">Request not found.</p>}
                 </div>
             </DashboardLayout>

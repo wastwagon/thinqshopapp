@@ -3,8 +3,21 @@
 import { useCallback, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminTable, {
+    AdminTableBody,
+    AdminTableEmpty,
+    AdminTableHead,
+    AdminTableLoading,
+    AdminTd,
+    AdminTh,
+    AdminTr,
+} from '@/components/admin/AdminTable';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Badge from '@/components/ui/Badge';
+import Modal from '@/components/ui/Modal';
 import api from '@/lib/axios';
-import { Shield, Search, RefreshCw, Download, X } from 'lucide-react';
+import { Shield, Search, RefreshCw, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AUDIT_PATCH_BADGE } from '@/lib/status-styles';
 
@@ -198,261 +211,263 @@ export default function AdminAuditLogsPage() {
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
                 <AdminPageHeader
-                icon={Shield}
-                title="Audit logs"
-                subtitle="Security and admin action history"
-                actions={
-                    <>
-                        <button
-                        type="button"
-                        onClick={fetchLogs}
-                        className="min-h-[44px] px-4 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-500 transition-all flex items-center justify-center gap-2"
-                    >
-                        <RefreshCw className="h-4 w-4" />
-                        Refresh
-                    </button>
-                    </>
-                }
-            />
+                    icon={Shield}
+                    title="Audit logs"
+                    subtitle="Security and admin action history"
+                    actions={
+                        <Button
+                            type="button"
+                            size="sm"
+                            leftIcon={<RefreshCw className="h-4 w-4" />}
+                            onClick={fetchLogs}
+                        >
+                            Refresh
+                        </Button>
+                    }
+                />
 
-                <div className="admin-table-wrap">
+                <div className="admin-card overflow-hidden mb-4">
                     <div className="p-4 border-b border-gray-100 space-y-3">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                             <div className="relative">
-                                <Search className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                                <input
+                                <Search className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                <Input
                                     type="text"
                                     value={draftFilters.action}
-                                    onChange={(e) => setDraftFilters((prev) => ({ ...prev, action: e.target.value }))}
+                                    onChange={(e) =>
+                                        setDraftFilters((prev) => ({ ...prev, action: e.target.value }))
+                                    }
                                     placeholder="Filter by action (e.g. order, wallet, product)"
-                                    className="w-full min-h-[44px] pl-9 pr-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="pl-9"
                                 />
                             </div>
-                            <input
+                            <Input
                                 type="text"
                                 value={draftFilters.table_name}
-                                onChange={(e) => setDraftFilters((prev) => ({ ...prev, table_name: e.target.value }))}
+                                onChange={(e) =>
+                                    setDraftFilters((prev) => ({ ...prev, table_name: e.target.value }))
+                                }
                                 placeholder="Filter by table (e.g. orders, users, wallets)"
-                                className="w-full min-h-[44px] px-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                             />
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                            <input
+                            <Input
                                 type="datetime-local"
                                 value={draftFilters.from}
-                                onChange={(e) => setDraftFilters((prev) => ({ ...prev, from: e.target.value }))}
-                                className="w-full min-h-[44px] px-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                onChange={(e) =>
+                                    setDraftFilters((prev) => ({ ...prev, from: e.target.value }))
+                                }
                             />
-                            <input
+                            <Input
                                 type="datetime-local"
                                 value={draftFilters.to}
-                                onChange={(e) => setDraftFilters((prev) => ({ ...prev, to: e.target.value }))}
-                                className="w-full min-h-[44px] px-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                onChange={(e) =>
+                                    setDraftFilters((prev) => ({ ...prev, to: e.target.value }))
+                                }
                             />
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            <button
-                                type="button"
-                                onClick={applyFilter}
-                                className="min-h-[44px] px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                            >
+                            <Button type="button" size="sm" variant="secondary" onClick={applyFilter}>
                                 Apply
-                            </button>
-                            <button
-                                type="button"
-                                onClick={clearFilter}
-                                className="min-h-[44px] px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                            >
+                            </Button>
+                            <Button type="button" size="sm" variant="secondary" onClick={clearFilter}>
                                 Clear
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 type="button"
+                                size="sm"
                                 onClick={exportCsv}
+                                loading={exporting}
                                 disabled={exporting}
-                                className="min-h-[44px] px-4 py-2.5bg-blue-600 text-white rounded-xl font-semibold text-smhover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                leftIcon={!exporting ? <Download className="h-4 w-4" /> : undefined}
                             >
-                                <Download className="h-4 w-4" />
-                                {exporting ? 'Exporting...' : 'Export CSV'}
-                            </button>
+                                Export CSV
+                            </Button>
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full min-w-[900px]">
-                            <thead className="bg-gray-50">
-                                <tr className="text-left text-xs uppercase tracking-wide text-gray-500">
-                                    <th className="px-4 py-3">Time</th>
-                                    <th className="px-4 py-3">Actor</th>
-                                    <th className="px-4 py-3">Action</th>
-                                    <th className="px-4 py-3">Target</th>
-                                    <th className="px-4 py-3">IP</th>
-                                    <th className="px-4 py-3">Details</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {loading ? (
-                                    <tr>
-                                        <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">Loading audit logs...</td>
-                                    </tr>
-                                ) : rows.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">No audit entries found.</td>
-                                    </tr>
-                                ) : (
-                                    rows.map((row) => (
-                                        <tr key={row.id} className="text-sm text-gray-700">
-                                            <td className="px-4 py-3 whitespace-nowrap">{new Date(row.created_at).toLocaleString()}</td>
-                                            <td className="px-4 py-3">
-                                                <p className="font-semibold text-gray-900">{row.admin?.name || 'System'}</p>
-                                                <p className="text-xs text-gray-500">{row.admin?.email || '-'}</p>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span className="px-2 py-1 rounded-lg bg-blue-50 text-blue-600 text-xs font-semibold">
-                                                    {formatActionName(row.action)}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-xs">
-                                                <p>{formatTableName(row.table_name)}</p>
-                                                <p className="text-gray-500">ID: {row.record_id ?? '-'}</p>
-                                            </td>
-                                            <td className="px-4 py-3 text-xs text-gray-500">{row.ip_address || '-'}</td>
-                                            <td className="px-4 py-3 text-xs text-gray-500 max-w-[320px]">
-                                                {(() => {
-                                                    const detailObj = getDetailObject(row.details);
-                                                    if (!detailObj) return <span>-</span>;
-                                                    const route = formatValue(detailObj.route);
-                                                    const method = formatValue(detailObj.method);
-                                                    const actorRole = formatValue(detailObj.actor_role);
-                                                    const otherEntries = Object.entries(detailObj).filter(
-                                                        ([key]) => !['route', 'method', 'actor_role'].includes(key),
-                                                    );
+                    <AdminTable className="border-0 rounded-none shadow-none">
+                        <AdminTableHead>
+                            <AdminTh>Time</AdminTh>
+                            <AdminTh>Actor</AdminTh>
+                            <AdminTh>Action</AdminTh>
+                            <AdminTh>Target</AdminTh>
+                            <AdminTh>IP</AdminTh>
+                            <AdminTh>Details</AdminTh>
+                        </AdminTableHead>
+                        <AdminTableBody>
+                            {loading ? (
+                                <AdminTableLoading colSpan={6} label="Loading audit logs…" />
+                            ) : rows.length === 0 ? (
+                                <AdminTableEmpty colSpan={6} message="No audit entries found." />
+                            ) : (
+                                rows.map((row) => (
+                                    <AdminTr key={row.id}>
+                                        <AdminTd className="whitespace-nowrap text-sm text-gray-700">
+                                            {new Date(row.created_at).toLocaleString()}
+                                        </AdminTd>
+                                        <AdminTd>
+                                            <p className="font-semibold text-gray-900 text-sm">
+                                                {row.admin?.name || 'System'}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                                {row.admin?.email || '-'}
+                                            </p>
+                                        </AdminTd>
+                                        <AdminTd>
+                                            <Badge variant="brand">{formatActionName(row.action)}</Badge>
+                                        </AdminTd>
+                                        <AdminTd className="text-xs">
+                                            <p>{formatTableName(row.table_name)}</p>
+                                            <p className="text-gray-500">ID: {row.record_id ?? '-'}</p>
+                                        </AdminTd>
+                                        <AdminTd className="text-xs text-gray-500">
+                                            {row.ip_address || '-'}
+                                        </AdminTd>
+                                        <AdminTd className="text-xs text-gray-500 max-w-[320px]">
+                                            {(() => {
+                                                const detailObj = getDetailObject(row.details);
+                                                if (!detailObj) return <span>-</span>;
+                                                const route = formatValue(detailObj.route);
+                                                const method = formatValue(detailObj.method);
+                                                const actorRole = formatValue(detailObj.actor_role);
+                                                const otherEntries = Object.entries(detailObj).filter(
+                                                    ([key]) =>
+                                                        !['route', 'method', 'actor_role'].includes(key)
+                                                );
 
-                                                    return (
-                                                        <div className="space-y-2">
-                                                            <div className="flex flex-wrap gap-1.5">
-                                                                {method !== '-' && (
-                                                                    <span className={AUDIT_PATCH_BADGE}>
-                                                                        {method}
-                                                                    </span>
-                                                                )}
-                                                                {actorRole !== '-' && (
-                                                                    <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold">
-                                                                        {actorRole}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                            {route !== '-' && (
-                                                                <p className="text-gray-600 break-words">
-                                                                    <span className="font-semibold text-gray-700">Route:</span> {route}
-                                                                </p>
+                                                return (
+                                                    <div className="space-y-2">
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            {method !== '-' && (
+                                                                <span className={AUDIT_PATCH_BADGE}>
+                                                                    {method}
+                                                                </span>
                                                             )}
-                                                            {otherEntries.length > 0 && (
-                                                                <p className="text-gray-500">
-                                                                    <span className="font-semibold text-gray-700">{otherEntries.length}</span> more detail field(s)
-                                                                </p>
+                                                            {actorRole !== '-' && (
+                                                                <Badge variant="success">{actorRole}</Badge>
                                                             )}
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setSelectedRow(row)}
-                                                                className="text-blue-600 hover:text-blue-700 font-semibold"
-                                                            >
-                                                                View details
-                                                            </button>
                                                         </div>
-                                                    );
-                                                })()}
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                                        {route !== '-' && (
+                                                            <p className="text-gray-600 break-words">
+                                                                <span className="font-semibold text-gray-700">
+                                                                    Route:
+                                                                </span>{' '}
+                                                                {route}
+                                                            </p>
+                                                        )}
+                                                        {otherEntries.length > 0 && (
+                                                            <p className="text-gray-500">
+                                                                <span className="font-semibold text-gray-700">
+                                                                    {otherEntries.length}
+                                                                </span>{' '}
+                                                                more detail field(s)
+                                                            </p>
+                                                        )}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setSelectedRow(row)}
+                                                            className="text-brand hover:text-brand/80 font-semibold"
+                                                        >
+                                                            View details
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </AdminTd>
+                                    </AdminTr>
+                                ))
+                            )}
+                        </AdminTableBody>
+                    </AdminTable>
 
                     <div className="p-4 border-t border-gray-100 flex items-center justify-between">
-                        <p className="text-xs text-gray-500">Page {page} of {totalPages}</p>
+                        <p className="text-xs text-gray-500">
+                            Page {page} of {totalPages}
+                        </p>
                         <div className="flex items-center gap-2">
-                            <button
+                            <Button
                                 type="button"
+                                size="sm"
+                                variant="secondary"
                                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                                 disabled={page <= 1}
-                                className="min-h-[40px] px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold disabled:opacity-50"
                             >
                                 Previous
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 type="button"
+                                size="sm"
+                                variant="secondary"
                                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                 disabled={page >= totalPages}
-                                className="min-h-[40px] px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold disabled:opacity-50"
                             >
                                 Next
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
             </div>
-            {selectedRow && (
-                <div
-                    className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4"
-                    onClick={() => setSelectedRow(null)}
-                >
-                    <div
-                        className="admin-modal-panel w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl max-h-[85vh] overflow-hidden"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-base font-bold text-gray-900">Audit details</h3>
+
+            <Modal
+                open={!!selectedRow}
+                onClose={() => setSelectedRow(null)}
+                title="Audit details"
+                description={
+                    selectedRow
+                        ? `${selectedRow.action} • ${new Date(selectedRow.created_at).toLocaleString()}`
+                        : undefined
+                }
+                size="xl"
+                footer={
+                    <Button type="button" variant="secondary" onClick={() => setSelectedRow(null)}>
+                        Close
+                    </Button>
+                }
+            >
+                {selectedRow && (
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                <p className="text-[11px] uppercase tracking-wide text-gray-500">Actor</p>
+                                <p className="text-sm font-semibold text-gray-900">
+                                    {selectedRow.admin?.name || 'System'}
+                                </p>
+                                <p className="text-xs text-gray-500">{selectedRow.admin?.email || '-'}</p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                <p className="text-[11px] uppercase tracking-wide text-gray-500">Target</p>
+                                <p className="text-sm font-semibold text-gray-900">
+                                    {formatTableName(selectedRow.table_name)}
+                                </p>
                                 <p className="text-xs text-gray-500">
-                                    {selectedRow.action} • {new Date(selectedRow.created_at).toLocaleString()}
+                                    Record ID: {selectedRow.record_id ?? '-'}
                                 </p>
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => setSelectedRow(null)}
-                                className="min-h-[40px] min-w-[40px] rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
                         </div>
-                        <div className="p-4 overflow-y-auto max-h-[calc(85vh-64px)]">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                                    <p className="text-[11px] uppercase tracking-wide text-gray-500">Actor</p>
-                                    <p className="text-sm font-semibold text-gray-900">{selectedRow.admin?.name || 'System'}</p>
-                                    <p className="text-xs text-gray-500">{selectedRow.admin?.email || '-'}</p>
-                                </div>
-                                <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                                    <p className="text-[11px] uppercase tracking-wide text-gray-500">Target</p>
-                                    <p className="text-sm font-semibold text-gray-900">{formatTableName(selectedRow.table_name)}</p>
-                                    <p className="text-xs text-gray-500">Record ID: {selectedRow.record_id ?? '-'}</p>
-                                </div>
-                            </div>
 
-                            {(() => {
-                                const detailObj = getDetailObject(selectedRow.details);
-                                if (!detailObj) {
-                                    return <p className="text-sm text-gray-500">No detail payload available.</p>;
-                                }
-                                const entries = Object.entries(detailObj);
-                                return (
-                                    <div className="space-y-2">
-                                        {entries.map(([key, value]) => (
-                                            <div key={key} className="border border-gray-100 rounded-lg p-3">
-                                                <p className="text-[11px] uppercase tracking-wide text-gray-500 mb-1">
-                                                    {formatLabel(key)}
-                                                </p>
-                                                {renderDetailValue(value)}
-                                            </div>
-                                        ))}
-                                    </div>
-                                );
-                            })()}
-                        </div>
-                    </div>
-                </div>
-            )}
+                        {(() => {
+                            const detailObj = getDetailObject(selectedRow.details);
+                            if (!detailObj) {
+                                return <p className="text-sm text-gray-500">No detail payload available.</p>;
+                            }
+                            const entries = Object.entries(detailObj);
+                            return (
+                                <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+                                    {entries.map(([key, value]) => (
+                                        <div key={key} className="border border-gray-100 rounded-lg p-3">
+                                            <p className="text-[11px] uppercase tracking-wide text-gray-500 mb-1">
+                                                {formatLabel(key)}
+                                            </p>
+                                            {renderDetailValue(value)}
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        })()}
+                    </>
+                )}
+            </Modal>
         </DashboardLayout>
     );
 }

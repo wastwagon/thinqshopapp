@@ -6,16 +6,37 @@ import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import AdminStatGrid from '@/components/admin/AdminStatGrid';
+import AdminToolbar from '@/components/admin/AdminToolbar';
+import AdminTable, {
+    AdminTableBody,
+    AdminTableEmpty,
+    AdminTableHead,
+    AdminTableLoading,
+    AdminTd,
+    AdminTh,
+    AdminTr,
+} from '@/components/admin/AdminTable';
+import Select from '@/components/ui/Select';
+import { StatusBadge } from '@/components/ui/Badge';
+import { buttonVariants } from '@/components/ui/Button';
 import Link from 'next/link';
-import { Package, Search, ChevronRight, FileText, Clock, Truck, CheckCircle, XCircle, Eye } from 'lucide-react';
-import { ADMIN_STAT_PROGRESS, STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
+import { Package, FileText, Clock, Truck, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { ADMIN_STAT_PROGRESS } from '@/lib/status-styles';
 
-const ORDER_STATUSES = ['pending', 'processing', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'];
+const ORDER_STATUSES = [
+    'pending',
+    'processing',
+    'packed',
+    'shipped',
+    'out_for_delivery',
+    'delivered',
+    'cancelled',
+];
 
 export default function AdminOrdersPage() {
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [statusFilter, setStatusFilter] = useState<string>('');
+    const [statusFilter, setStatusFilter] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [updatingId, setUpdatingId] = useState<number | null>(null);
 
@@ -63,150 +84,168 @@ export default function AdminOrdersPage() {
     );
 
     const pendingCount = orders.filter((o) => o.status === 'pending').length;
-    const processingCount = orders.filter((o) => ['processing', 'packed', 'shipped', 'out_for_delivery'].includes(o.status)).length;
+    const processingCount = orders.filter((o) =>
+        ['processing', 'packed', 'shipped', 'out_for_delivery'].includes(o.status)
+    ).length;
     const deliveredCount = orders.filter((o) => o.status === 'delivered').length;
     const cancelledCount = orders.filter((o) => o.status === 'cancelled').length;
 
     const stats = [
-        { label: 'Total', value: orders.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
-        { label: 'Pending', value: pendingCount, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
+        {
+            label: 'Total',
+            value: orders.length,
+            icon: FileText,
+            color: 'text-blue-600',
+            bg: 'bg-blue-50',
+            border: 'border-blue-200',
+        },
+        {
+            label: 'Pending',
+            value: pendingCount,
+            icon: Clock,
+            color: 'text-orange-600',
+            bg: 'bg-orange-50',
+            border: 'border-orange-100',
+        },
         { label: 'In progress', value: processingCount, icon: Truck, ...ADMIN_STAT_PROGRESS },
-        { label: 'Delivered', value: deliveredCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
-        { label: 'Cancelled', value: cancelledCount, icon: XCircle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100' },
+        {
+            label: 'Delivered',
+            value: deliveredCount,
+            icon: CheckCircle,
+            color: 'text-green-600',
+            bg: 'bg-green-50',
+            border: 'border-green-100',
+        },
+        {
+            label: 'Cancelled',
+            value: cancelledCount,
+            icon: XCircle,
+            color: 'text-red-600',
+            bg: 'bg-red-50',
+            border: 'border-red-100',
+        },
     ];
-
-    const StatusBadge = ({ status }: { status: string }) => {
-        const colors: Record<string, string> = {
-            pending: 'bg-orange-50 text-orange-700 border-orange-200',
-            processing: 'bg-blue-50 text-blue-600 border-blue-300',
-            packed: STATUS_PROGRESS_BADGE,
-            shipped: 'bg-blue-50 text-blue-700 border-blue-200',
-            out_for_delivery: 'bg-orange-50 text-orange-700 border-orange-200',
-            delivered: 'bg-green-50 text-green-700 border-green-200',
-            cancelled: 'bg-red-50 text-red-700 border-red-200',
-        };
-        return (
-            <span className={`px-2 py-0.5 text-xs font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
-                {status?.replace(/_/g, ' ')}
-            </span>
-        );
-    };
 
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <AdminPageHeader
-                icon={Package}
-                title="Orders"
-                subtitle="Customer orders"
-                actions={
-                    <>
-                    <div className="relative min-w-0 sm:w-44">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" aria-hidden />
-                        <input
-                            type="search"
-                            placeholder="Search orders..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="admin-input w-full sm:w-44 pl-8"
-                            aria-label="Search orders"
-                        />
-                    </div>
-                    <div className="relative">
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="admin-input pl-3 pr-8 appearance-none font-medium"
-                            aria-label="Filter by status"
+                <AdminPageHeader
+                    icon={Package}
+                    title="Orders"
+                    subtitle="Customer orders"
+                    actions={
+                        <AdminToolbar
+                            searchValue={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            searchPlaceholder="Search orders…"
+                            searchAriaLabel="Search orders"
                         >
-                            <option value="">All statuses</option>
-                            {ORDER_STATUSES.map((s) => (
-                                <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
-                            ))}
-                        </select>
-                        <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none rotate-90" aria-hidden />
-                    </div>
-                    </>
-                }
-            />
+                            <Select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                aria-label="Filter by status"
+                                className="h-9 min-h-[36px] text-xs w-auto min-w-[9rem]"
+                            >
+                                <option value="">All statuses</option>
+                                {ORDER_STATUSES.map((s) => (
+                                    <option key={s} value={s}>
+                                        {s.replace(/_/g, ' ')}
+                                    </option>
+                                ))}
+                            </Select>
+                        </AdminToolbar>
+                    }
+                />
 
-            <AdminStatGrid items={stats} columns={5} />
+                <AdminStatGrid items={stats} columns={5} />
 
-            <div className="admin-table-wrap">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="admin-th">Order</th>
-                                <th className="admin-th">Customer</th>
-                                <th className="admin-th">Items</th>
-                                <th className="admin-th">Total</th>
-                                <th className="admin-th">Status</th>
-                                <th className="admin-th">Date</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={7} className="py-10 text-center">
-                                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
-                                        <p className="text-sm text-gray-500">Loading...</p>
-                                    </td>
-                                </tr>
-                            ) : filteredOrders.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="py-10 text-center text-gray-500">
-                                        <Package className="h-10 w-10 mx-auto mb-2 text-gray-200" />
-                                        <p className="text-sm">No orders found</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredOrders.map((o) => (
-                                    <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="px-3 py-2.5">
+                <AdminTable>
+                    <AdminTableHead>
+                        <AdminTh>Order</AdminTh>
+                        <AdminTh>Customer</AdminTh>
+                        <AdminTh>Items</AdminTh>
+                        <AdminTh>Total</AdminTh>
+                        <AdminTh>Status</AdminTh>
+                        <AdminTh>Date</AdminTh>
+                        <AdminTh align="right">Actions</AdminTh>
+                    </AdminTableHead>
+                    <AdminTableBody>
+                        {loading ? (
+                            <AdminTableLoading colSpan={7} />
+                        ) : filteredOrders.length === 0 ? (
+                            <AdminTableEmpty
+                                colSpan={7}
+                                icon={<Package className="h-10 w-10 mx-auto mb-2 text-gray-200" />}
+                                message="No orders found"
+                            />
+                        ) : (
+                            filteredOrders.map((o) => (
+                                <AdminTr key={o.id}>
+                                    <AdminTd>
+                                        <Link
+                                            href={`/admin/orders/${o.id}`}
+                                            className="text-xs font-semibold text-brand hover:underline"
+                                        >
+                                            {o.order_number}
+                                        </Link>
+                                    </AdminTd>
+                                    <AdminTd>
+                                        <span className="text-xs text-gray-700 truncate block max-w-[120px]">
+                                            {userName(o)}
+                                        </span>
+                                    </AdminTd>
+                                    <AdminTd>
+                                        <span className="text-xs text-gray-600">
+                                            {o.items?.length ?? 0} items
+                                        </span>
+                                    </AdminTd>
+                                    <AdminTd>
+                                        <span className="text-xs font-semibold text-gray-900 tabular-nums">
+                                            ₵{Number(o.total).toFixed(2)}
+                                        </span>
+                                    </AdminTd>
+                                    <AdminTd>
+                                        <StatusBadge status={o.status} />
+                                    </AdminTd>
+                                    <AdminTd className="text-xs text-gray-500">
+                                        {o.created_at
+                                            ? new Date(o.created_at).toLocaleDateString()
+                                            : '—'}
+                                    </AdminTd>
+                                    <AdminTd className="text-right">
+                                        <div className="flex items-center gap-2 justify-end">
                                             <Link
                                                 href={`/admin/orders/${o.id}`}
-                                                className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+                                                className={buttonVariants({
+                                                    variant: 'secondary',
+                                                    size: 'sm',
+                                                    className: 'h-8 min-h-[32px] px-2 text-xs',
+                                                })}
                                             >
-                                                {o.order_number}
+                                                <Eye className="h-3 w-3" /> View
                                             </Link>
-                                        </td>
-                                        <td className="px-3 py-2.5"><span className="text-xs text-gray-700 truncate block max-w-[120px]">{userName(o)}</span></td>
-                                        <td className="px-3 py-2.5"><span className="text-xs text-gray-600">{o.items?.length ?? 0} items</span></td>
-                                        <td className="px-3 py-2.5"><span className="text-xs font-semibold text-gray-900">₵{Number(o.total).toFixed(2)}</span></td>
-                                        <td className="px-3 py-2.5"><StatusBadge status={o.status} /></td>
-                                        <td className="px-3 py-2.5 text-xs text-gray-500">{o.created_at ? new Date(o.created_at).toLocaleDateString() : '—'}</td>
-                                        <td className="px-3 py-2.5 text-right">
-                                            <div className="flex items-center gap-2 justify-end">
-                                                <Link
-                                                    href={`/admin/orders/${o.id}`}
-                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-blue-600 hover:bg-blue-50 border border-blue-200"
-                                                >
-                                                    <Eye className="h-3 w-3" /> View
-                                                </Link>
-                                                <div className="relative inline-block">
-                                                    <select
-                                                        value={o.status}
-                                                        onChange={(e) => handleStatusUpdate(o.id, e.target.value)}
-                                                        disabled={updatingId === o.id}
-                                                        className="text-xs font-semibold border border-gray-100 rounded-lg pl-2 pr-6 py-1.5 bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer"
-                                                    >
-                                                        {ORDER_STATUSES.map((s) => (
-                                                            <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
-                                                        ))}
-                                                    </select>
-                                                    <ChevronRight className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none rotate-90" aria-hidden />
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                            <Select
+                                                value={o.status}
+                                                onChange={(e) =>
+                                                    handleStatusUpdate(o.id, e.target.value)
+                                                }
+                                                disabled={updatingId === o.id}
+                                                className="h-8 min-h-[32px] text-xs py-1 w-auto min-w-[7.5rem]"
+                                                aria-label={`Update status for ${o.order_number}`}
+                                            >
+                                                {ORDER_STATUSES.map((s) => (
+                                                    <option key={s} value={s}>
+                                                        {s.replace(/_/g, ' ')}
+                                                    </option>
+                                                ))}
+                                            </Select>
+                                        </div>
+                                    </AdminTd>
+                                </AdminTr>
+                            ))
+                        )}
+                    </AdminTableBody>
+                </AdminTable>
             </div>
         </DashboardLayout>
     );

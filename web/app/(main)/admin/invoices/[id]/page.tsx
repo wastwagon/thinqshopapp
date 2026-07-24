@@ -7,6 +7,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { FileText, ArrowLeft, Edit3, Trash2, Download, MessageSquare } from 'lucide-react';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 const UNITS = ['pcs', 'kg', 'CBM', 'hour', 'box', 'set'];
 const STATUSES = ['draft', 'sent', 'paid', 'overdue'];
@@ -187,7 +188,9 @@ export default function InvoiceDetailPage() {
     if (loading || !invoice) {
         return (
             <DashboardLayout isAdmin={true}>
-                <div className="flex items-center justify-center min-h-[40vh]"><div className="text-gray-500">Loading...</div></div>
+                <div className="flex items-center justify-center min-h-[40vh]">
+                    <LoadingSpinner label="Loading invoice…" />
+                </div>
             </DashboardLayout>
         );
     }
@@ -317,7 +320,7 @@ export default function InvoiceDetailPage() {
                         </div>
                     </form>
                 ) : (
-                    <div className="admin-table-wrap">
+                    <div className="admin-card overflow-hidden">
                         <div className="p-6 border-b border-gray-100">
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>

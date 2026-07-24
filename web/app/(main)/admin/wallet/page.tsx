@@ -3,7 +3,22 @@
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
-import { Wallet, Search, Plus, Minus, FileText, Users } from 'lucide-react';
+import AdminStatGrid from '@/components/admin/AdminStatGrid';
+import AdminToolbar from '@/components/admin/AdminToolbar';
+import AdminTable, {
+    AdminTableBody,
+    AdminTableEmpty,
+    AdminTableHead,
+    AdminTableLoading,
+    AdminTd,
+    AdminTh,
+    AdminTr,
+} from '@/components/admin/AdminTable';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import FormField from '@/components/ui/FormField';
+import Modal from '@/components/ui/Modal';
+import { Wallet, Plus, Minus, FileText, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 
@@ -12,7 +27,13 @@ type WalletRow = {
     user_id: number;
     balance_ghs: number;
     updated_at: string;
-    user: { id: number; email: string; phone?: string; role?: string; profile?: { first_name?: string; last_name?: string } };
+    user: {
+        id: number;
+        email: string;
+        phone?: string;
+        role?: string;
+        profile?: { first_name?: string; last_name?: string };
+    };
 };
 
 export default function AdminWalletPage() {
@@ -52,7 +73,9 @@ export default function AdminWalletPage() {
         setSubmitting(true);
         try {
             await api.post('/finance/wallet/admin/adjust', { user_id: adjusting.user_id, amount });
-            toast.success(`${adjustType === 'credit' ? 'Credited' : 'Debited'} ₵${Math.abs(amount).toFixed(2)} successfully`);
+            toast.success(
+                `${adjustType === 'credit' ? 'Credited' : 'Debited'} ₵${Math.abs(amount).toFixed(2)} successfully`
+            );
             setAdjusting(null);
             setAdjustAmount('');
             fetchWallets();
@@ -81,165 +104,198 @@ export default function AdminWalletPage() {
     const withBalanceCount = wallets.filter((w) => (w.balance_ghs || 0) > 0).length;
 
     const stats = [
-        { label: 'Total wallets', value: wallets.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
-        { label: 'Total balance', value: `₵${totalBalance.toFixed(2)}`, icon: Wallet, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
-        { label: 'With balance', value: withBalanceCount, icon: Plus, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
-        { label: 'Zero balance', value: zeroBalanceCount, icon: FileText, color: 'text-gray-600', bg: 'bg-gray-50', border: 'border-gray-100' },
+        {
+            label: 'Total wallets',
+            value: wallets.length,
+            icon: Users,
+            color: 'text-blue-600',
+            bg: 'bg-blue-50',
+            border: 'border-blue-200',
+        },
+        {
+            label: 'Total balance',
+            value: `₵${totalBalance.toFixed(2)}`,
+            icon: Wallet,
+            color: 'text-green-600',
+            bg: 'bg-green-50',
+            border: 'border-green-100',
+        },
+        {
+            label: 'With balance',
+            value: withBalanceCount,
+            icon: Plus,
+            color: 'text-emerald-600',
+            bg: 'bg-emerald-50',
+            border: 'border-emerald-100',
+        },
+        {
+            label: 'Zero balance',
+            value: zeroBalanceCount,
+            icon: FileText,
+            color: 'text-gray-600',
+            bg: 'bg-gray-50',
+            border: 'border-gray-100',
+        },
     ];
 
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <AdminPageHeader
-                icon={Wallet}
-                title="Wallet management"
-                subtitle="Adjust customer wallet balances and review wallet activity"
-                actions={
-                    <div className="relative min-w-0 sm:w-56">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" aria-hidden />
-                        <input
-                            type="search"
-                            placeholder="Search by customer name, email, or phone..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="admin-input w-full sm:w-56 pl-8"
-                            aria-label="Search wallets"
+                <AdminPageHeader
+                    icon={Wallet}
+                    title="Wallet management"
+                    subtitle="Adjust customer wallet balances and review wallet activity"
+                    actions={
+                        <AdminToolbar
+                            searchValue={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            searchPlaceholder="Search name, email, phone…"
+                            searchAriaLabel="Search wallets"
                         />
-                    </div>
-                }
-            />
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                {stats.map((s, i) => (
-                    <div key={i} className="admin-stat-card">
-                        <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
-                            <s.icon className="h-4 w-4" />
-                        </div>
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
-                        <p className="text-xl font-bold text-gray-900">{s.value}</p>
-                    </div>
-                ))}
-            </div>
+                    }
+                />
 
-            <div className="admin-table-wrap">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="admin-th">User</th>
-                                <th className="admin-th">Email</th>
-                                <th className="admin-th">Balance</th>
-                                <th className="admin-th">Updated</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={5} className="py-10 text-center">
-                                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
-                                        <p className="text-sm text-gray-500">Loading...</p>
-                                    </td>
-                                </tr>
-                            ) : filtered.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="py-10 text-center text-gray-500">
-                                        <Wallet className="h-10 w-10 mx-auto mb-2 text-gray-200" />
-                                        <p className="text-sm">No wallets found</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                filtered.map((w) => (
-                                    <tr key={w.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="px-3 py-2.5">
-                                            <span className="text-xs font-semibold text-gray-900 truncate block max-w-[120px]">{userName(w)}</span>
-                                        </td>
-                                        <td className="px-3 py-2.5">
-                                            <span className="text-xs text-gray-700 truncate block max-w-[160px]">{w.user?.email ?? '—'}</span>
-                                        </td>
-                                        <td className="px-3 py-2.5">
-                                            <span className="text-xs font-semibold text-gray-900">₵{(w.balance_ghs ?? 0).toFixed(2)}</span>
-                                        </td>
-                                        <td className="px-3 py-2.5 text-xs text-gray-500">
-                                            {w.updated_at ? new Date(w.updated_at).toLocaleDateString() : '—'}
-                                        </td>
-                                        <td className="px-3 py-2.5 text-right">
-                                            <div className="flex items-center justify-end gap-1">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => { setAdjusting({ user_id: w.user_id, email: w.user?.email ?? '' }); setAdjustType('credit'); setAdjustAmount(''); }}
-                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-green-50 text-green-700 border border-green-100 hover:bg-green-100 transition-colors"
-                                                >
-                                                    <Plus className="h-3 w-3" /> Credit
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => { setAdjusting({ user_id: w.user_id, email: w.user?.email ?? '' }); setAdjustType('debit'); setAdjustAmount(''); }}
-                                                    disabled={(w.balance_ghs ?? 0) <= 0}
-                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-red-50 text-red-700 border border-red-100 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                >
-                                                    <Minus className="h-3 w-3" /> Debit
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                <AdminStatGrid items={stats} columns={4} />
 
-            {adjusting && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/40" onClick={() => !submitting && setAdjusting(null)} aria-hidden />
-                    <div className="admin-modal-panel relative max-w-md p-6">
-                        <h2 className="text-lg font-bold text-gray-900 mb-1">
-                            {adjustType === 'credit' ? 'Credit' : 'Debit'} wallet
-                        </h2>
-                        <p className="text-xs text-gray-500 mb-4">{adjusting.email}</p>
-                        <form onSubmit={handleAdjust} className="space-y-4">
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-gray-500">Amount (GHS)</label>
-                                <input
-                                    required
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    placeholder="0.00"
-                                    className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    value={adjustAmount}
-                                    onChange={(e) => setAdjustAmount(e.target.value)}
-                                />
-                            </div>
-                            <p className="text-xs text-gray-500">
-                                {adjustType === 'credit'
-                                    ? 'This amount will be added to the customer wallet.'
-                                    : 'This amount will be removed from the customer wallet.'}
-                            </p>
-                            <div className="flex gap-2 pt-2">
-                                <button
-                                    type="submit"
-                                    disabled={submitting}
-                                    className={`flex-1 h-10 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
-                                        adjustType === 'credit'
-                                            ? 'bg-green-600 text-white hover:bg-green-700'
-                                            : 'bg-red-600 text-white hover:bg-red-700'
-                                    } disabled:opacity-50`}
-                                >
-                                    {submitting ? 'Applying...' : `${adjustType === 'credit' ? 'Credit' : 'Debit'} ₵${adjustAmount || '0'}`}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => !submitting && setAdjusting(null)}
-                                    className="h-10 px-4 bg-gray-50 text-gray-600 border border-gray-200 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-all"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                <AdminTable>
+                    <AdminTableHead>
+                        <AdminTh>User</AdminTh>
+                        <AdminTh>Email</AdminTh>
+                        <AdminTh>Balance</AdminTh>
+                        <AdminTh>Updated</AdminTh>
+                        <AdminTh align="right">Actions</AdminTh>
+                    </AdminTableHead>
+                    <AdminTableBody>
+                        {loading ? (
+                            <AdminTableLoading colSpan={5} />
+                        ) : filtered.length === 0 ? (
+                            <AdminTableEmpty
+                                colSpan={5}
+                                icon={<Wallet className="h-10 w-10 mx-auto mb-2 text-gray-200" />}
+                                message="No wallets found"
+                            />
+                        ) : (
+                            filtered.map((w) => (
+                                <AdminTr key={w.id}>
+                                    <AdminTd>
+                                        <span className="text-xs font-semibold text-gray-900 truncate block max-w-[120px]">
+                                            {userName(w)}
+                                        </span>
+                                    </AdminTd>
+                                    <AdminTd>
+                                        <span className="text-xs text-gray-700 truncate block max-w-[160px]">
+                                            {w.user?.email ?? '—'}
+                                        </span>
+                                    </AdminTd>
+                                    <AdminTd>
+                                        <span className="text-xs font-semibold text-gray-900 tabular-nums">
+                                            ₵{(w.balance_ghs ?? 0).toFixed(2)}
+                                        </span>
+                                    </AdminTd>
+                                    <AdminTd className="text-xs text-gray-500">
+                                        {w.updated_at
+                                            ? new Date(w.updated_at).toLocaleDateString()
+                                            : '—'}
+                                    </AdminTd>
+                                    <AdminTd className="text-right">
+                                        <div className="flex items-center justify-end gap-1">
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                leftIcon={<Plus className="h-3 w-3" />}
+                                                onClick={() => {
+                                                    setAdjusting({
+                                                        user_id: w.user_id,
+                                                        email: w.user?.email ?? '',
+                                                    });
+                                                    setAdjustType('credit');
+                                                    setAdjustAmount('');
+                                                }}
+                                                className="h-8 min-h-[32px] px-2 text-xs bg-emerald-600 hover:bg-emerald-700"
+                                            >
+                                                Credit
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                variant="danger"
+                                                leftIcon={<Minus className="h-3 w-3" />}
+                                                disabled={(w.balance_ghs ?? 0) <= 0}
+                                                onClick={() => {
+                                                    setAdjusting({
+                                                        user_id: w.user_id,
+                                                        email: w.user?.email ?? '',
+                                                    });
+                                                    setAdjustType('debit');
+                                                    setAdjustAmount('');
+                                                }}
+                                                className="h-8 min-h-[32px] px-2 text-xs"
+                                            >
+                                                Debit
+                                            </Button>
+                                        </div>
+                                    </AdminTd>
+                                </AdminTr>
+                            ))
+                        )}
+                    </AdminTableBody>
+                </AdminTable>
+
+                <Modal
+                    open={!!adjusting}
+                    onClose={() => {
+                        if (!submitting) setAdjusting(null);
+                    }}
+                    title={`${adjustType === 'credit' ? 'Credit' : 'Debit'} wallet`}
+                    description={adjusting?.email}
+                    footer={
+                        <>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                disabled={submitting}
+                                onClick={() => !submitting && setAdjusting(null)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                form="wallet-adjust-form"
+                                loading={submitting}
+                                disabled={submitting}
+                                variant={adjustType === 'debit' ? 'danger' : 'primary'}
+                                className={
+                                    adjustType === 'credit'
+                                        ? 'bg-emerald-600 hover:bg-emerald-700'
+                                        : undefined
+                                }
+                            >
+                                {adjustType === 'credit' ? 'Credit' : 'Debit'} ₵
+                                {adjustAmount || '0'}
+                            </Button>
+                        </>
+                    }
+                >
+                    <form id="wallet-adjust-form" onSubmit={handleAdjust} className="space-y-4">
+                        <FormField label="Amount (GHS)" htmlFor="adjust-amount" required>
+                            <Input
+                                id="adjust-amount"
+                                required
+                                type="number"
+                                step="0.01"
+                                min={0}
+                                placeholder="0.00"
+                                value={adjustAmount}
+                                onChange={(e) => setAdjustAmount(e.target.value)}
+                            />
+                        </FormField>
+                        <p className="text-xs text-gray-500">
+                            {adjustType === 'credit'
+                                ? 'This amount will be added to the customer wallet.'
+                                : 'This amount will be removed from the customer wallet.'}
+                        </p>
+                    </form>
+                </Modal>
             </div>
         </DashboardLayout>
     );

@@ -3,8 +3,24 @@
 import React, { useEffect, useState, useRef } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminStatGrid from '@/components/admin/AdminStatGrid';
+import AdminToolbar from '@/components/admin/AdminToolbar';
+import AdminTable, {
+    AdminTableBody,
+    AdminTableEmpty,
+    AdminTableHead,
+    AdminTableLoading,
+    AdminTd,
+    AdminTh,
+    AdminTr,
+} from '@/components/admin/AdminTable';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import Textarea from '@/components/ui/Textarea';
+import FormField from '@/components/ui/FormField';
+import Modal from '@/components/ui/Modal';
 import {
-    Search,
     Plus,
     Package,
     Edit3,
@@ -13,7 +29,6 @@ import {
     Upload,
     ImageIcon,
     X,
-    Loader2,
     FileText,
     CheckCircle,
     AlertTriangle,
@@ -408,481 +423,479 @@ export default function AdminProducts() {
                 title="Products"
                 subtitle="Manage your storefront catalog"
                 actions={
-                    <>
-                        <div className="relative flex-1 min-w-0 sm:w-48">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" aria-hidden />
-                            <input
-                                type="search"
-                                placeholder="Search by product name or category..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="admin-input w-full sm:w-48 pl-9"
-                                aria-label="Search products"
-                            />
-                        </div>
-                        <button type="button" onClick={() => handleOpenModal()} className="admin-btn-primary h-9 px-4 shrink-0">
-                            <Plus className="h-3.5 w-3.5" aria-hidden /> Add product
-                        </button>
-                    </>
+                    <AdminToolbar
+                        searchValue={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        searchPlaceholder="Search name or category…"
+                        searchAriaLabel="Search products"
+                    >
+                        <Button
+                            type="button"
+                            size="sm"
+                            leftIcon={<Plus className="h-3.5 w-3.5" />}
+                            onClick={() => handleOpenModal()}
+                        >
+                            Add product
+                        </Button>
+                    </AdminToolbar>
                 }
             />
-            <div className="grid grid-cols-3 gap-3 mb-4">
-                {stats.map((s, i) => (
-                    <div key={i} className="admin-stat-card">
-                        <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
-                            <s.icon className="h-4 w-4" />
-                        </div>
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
-                        <p className="text-xl font-bold text-gray-900">{s.value}</p>
-                    </div>
-                ))}
-            </div>
+            <AdminStatGrid items={stats} columns={3} />
 
-            <div className="admin-table-wrap">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="admin-th">Product</th>
-                                <th className="admin-th">Category</th>
-                                <th className="admin-th">Price</th>
-                                <th className="admin-th">Status</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={5} className="py-10 text-center">
-                                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
-                                        <p className="text-sm text-gray-500">Loading...</p>
-                                    </td>
-                                </tr>
-                            ) : filteredProducts.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="py-10 text-center text-gray-500">
-                                        <Package className="h-10 w-10 mx-auto mb-2 text-gray-200" />
-                                        <p className="text-sm">No products found</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredProducts.map((p) => (
-                                    <tr key={p.id} className="group hover:bg-gray-50/50 transition-colors">
-                                        <td className="px-3 py-2.5">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-9 h-9 rounded-lg bg-gray-50 overflow-hidden border border-gray-100 shrink-0">
-                                                    <img src={productImageUrl(getProductImage(p))} alt="" className="w-full h-full object-contain" />
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="text-xs font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">{p.name}</p>
-                                                    <p className="text-xs text-gray-400">ID: {p.id}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 py-2.5">
-                                            <span className="px-2 py-0.5 bg-gray-50 border border-gray-100 rounded-lg text-xs font-semibold text-gray-600">
-                                                {getCategoryName(p)}
-                                            </span>
-                                        </td>
-                                        <td className="px-3 py-2.5">
-                                            <span className="text-xs font-semibold text-gray-900">
-                                                ₵{Number(p.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                            </span>
-                                        </td>
-                                        <td className="px-3 py-2.5">
-                                            <span className={`inline-flex items-center gap-1 text-xs font-semibold ${p.is_active !== false ? 'text-green-600' : 'text-gray-500'}`}>
-                                                <span className={`w-1.5 h-1.5 rounded-full ${p.is_active !== false ? 'bg-green-500' : 'bg-gray-400'}`} />
-                                                {p.is_active !== false ? 'Active' : 'Inactive'}
-                                            </span>
-                                        </td>
-                                        <td className="px-3 py-2.5 text-right">
-                                            <div className="flex justify-end gap-1.5">
-                                                <button type="button" className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all" aria-label="View"><Eye className="h-4 w-4" /></button>
-                                                <button type="button" onClick={() => handleOpenModal(p)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all" aria-label="Edit"><Edit3 className="h-4 w-4" /></button>
-                                                <button type="button" onClick={() => void handleDelete(p.id)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-all" aria-label="Delete"><Trash2 className="h-4 w-4" /></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <AdminTable>
+                <AdminTableHead>
+                    <AdminTh>Product</AdminTh>
+                    <AdminTh>Category</AdminTh>
+                    <AdminTh>Price</AdminTh>
+                    <AdminTh>Status</AdminTh>
+                    <AdminTh align="right">Actions</AdminTh>
+                </AdminTableHead>
+                <AdminTableBody>
+                    {loading ? (
+                        <AdminTableLoading colSpan={5} />
+                    ) : filteredProducts.length === 0 ? (
+                        <AdminTableEmpty
+                            colSpan={5}
+                            icon={<Package className="h-10 w-10 mx-auto mb-2 text-gray-200" />}
+                            message="No products found"
+                        />
+                    ) : (
+                        filteredProducts.map((p) => (
+                            <AdminTr key={p.id} className="group">
+                                <AdminTd>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-9 h-9 rounded-lg bg-gray-50 overflow-hidden border border-gray-100 shrink-0">
+                                            <img src={productImageUrl(getProductImage(p))} alt="" className="w-full h-full object-contain" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-semibold text-gray-900 truncate group-hover:text-brand transition-colors">{p.name}</p>
+                                            <p className="text-xs text-gray-400">ID: {p.id}</p>
+                                        </div>
+                                    </div>
+                                </AdminTd>
+                                <AdminTd>
+                                    <span className="px-2 py-0.5 bg-gray-50 border border-gray-100 rounded-lg text-xs font-semibold text-gray-600">
+                                        {getCategoryName(p)}
+                                    </span>
+                                </AdminTd>
+                                <AdminTd>
+                                    <span className="text-xs font-semibold text-gray-900">
+                                        ₵{Number(p.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                    </span>
+                                </AdminTd>
+                                <AdminTd>
+                                    <span className={`inline-flex items-center gap-1 text-xs font-semibold ${p.is_active !== false ? 'text-green-600' : 'text-gray-500'}`}>
+                                        <span className={`w-1.5 h-1.5 rounded-full ${p.is_active !== false ? 'bg-green-500' : 'bg-gray-400'}`} />
+                                        {p.is_active !== false ? 'Active' : 'Inactive'}
+                                    </span>
+                                </AdminTd>
+                                <AdminTd className="text-right">
+                                    <div className="flex justify-end gap-1.5">
+                                        <button type="button" className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand transition-all" aria-label="View"><Eye className="h-4 w-4" /></button>
+                                        <button type="button" onClick={() => handleOpenModal(p)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand transition-all" aria-label="Edit"><Edit3 className="h-4 w-4" /></button>
+                                        <button type="button" onClick={() => void handleDelete(p.id)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-all" aria-label="Delete"><Trash2 className="h-4 w-4" /></button>
+                                    </div>
+                                </AdminTd>
+                            </AdminTr>
+                        ))
+                    )}
+                </AdminTableBody>
+            </AdminTable>
 
             {/* Create/Edit Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setIsModalOpen(false)}>
-                    <div className="admin-modal-panel max-w-lg w-full max-h-[90vh] overflow-y-auto overscroll-y-contain scrollbar-thin p-5" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">
-                            {editingProduct ? 'Edit product' : 'New product'}
-                        </h2>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Name</label>
-                                <input
-                                    type="text"
+            <Modal
+                open={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title={editingProduct ? 'Edit product' : 'New product'}
+                size="xl"
+                footer={
+                    <>
+                        <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" form="product-form" variant="primary">
+                            {editingProduct ? 'Update' : 'Create'}
+                        </Button>
+                    </>
+                }
+            >
+                <form id="product-form" onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto overscroll-y-contain scrollbar-thin -mx-1 px-1">
+                    <FormField label="Name" htmlFor="product-name" required>
+                        <Input
+                            id="product-name"
+                            required
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        />
+                    </FormField>
+                    <FormField label="Main category" htmlFor="product-main-category" required>
+                        <Select
+                            id="product-main-category"
+                            required
+                            value={formData.main_category_id}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    main_category_id: e.target.value,
+                                    condition_category_id: '',
+                                })
+                            }
+                        >
+                            <option value="">Select category</option>
+                            {getShopNavRoots(categories).map((c) => (
+                                <option key={c.id} value={c.id}>
+                                    {c.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </FormField>
+                    {formData.main_category_id &&
+                        rootHasSubcategories(categories, parseInt(formData.main_category_id, 10)) && (
+                            <FormField label="Condition" htmlFor="product-condition" required>
+                                <Select
+                                    id="product-condition"
                                     required
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Main category</label>
-                                <select
-                                    required
-                                    value={formData.main_category_id}
+                                    value={formData.condition_category_id}
                                     onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            main_category_id: e.target.value,
-                                            condition_category_id: '',
-                                        })
+                                        setFormData({ ...formData, condition_category_id: e.target.value })
                                     }
-                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                 >
-                                    <option value="">Select category</option>
-                                    {getShopNavRoots(categories).map((c) => (
+                                    <option value="">Select New or Used</option>
+                                    {getSubcategoriesForRoot(
+                                        categories,
+                                        parseInt(formData.main_category_id, 10),
+                                    ).map((c) => (
                                         <option key={c.id} value={c.id}>
                                             {c.name}
                                         </option>
                                     ))}
-                                </select>
-                            </div>
-                            {formData.main_category_id &&
-                                rootHasSubcategories(categories, parseInt(formData.main_category_id, 10)) && (
-                                    <div>
-                                        <label className="block text-xs font-semibold text-gray-500 mb-1">
-                                            Condition
-                                        </label>
-                                        <select
-                                            required
-                                            value={formData.condition_category_id}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, condition_category_id: e.target.value })
-                                            }
-                                            className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                        >
-                                            <option value="">Select New or Used</option>
-                                            {getSubcategoriesForRoot(
-                                                categories,
-                                                parseInt(formData.main_category_id, 10),
-                                            ).map((c) => (
-                                                <option key={c.id} value={c.id}>
-                                                    {c.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Product type</label>
-                                <div className="flex rounded-lg border border-gray-100 p-0.5 bg-gray-50 gap-0.5">
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData((f) => ({ ...f, product_kind: 'simple', variants: [] }))}
-                                        className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'simple' ? 'bg-white text-gray-900border border-gray-200/90' : 'text-gray-500 hover:text-gray-700'}`}
-                                    >
-                                        Simple
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={async () => {
-                                            const opts = variationOptionsRef.current.length
-                                                ? variationOptionsRef.current
-                                                : await fetchVariationOptions();
-                                            setFormData((f) => ({
-                                                ...f,
-                                                product_kind: 'variable',
-                                                variants: f.variants.length > 0 ? f.variants : [newVariantRow(opts)],
-                                            }));
-                                        }}
-                                        className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'variable' ? 'bg-white text-gray-900border border-gray-200/90' : 'text-gray-500 hover:text-gray-700'}`}
-                                    >
-                                        Variable
-                                    </button>
-                                </div>
-                                <p className="text-xs text-gray-400 mt-1">Variable: set per-option prices below; base price can be 0 if each option price is the full amount.</p>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Short description</label>
-                                <input
-                                    type="text"
-                                    value={formData.short_description}
-                                    onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
-                                    placeholder="One line summary (e.g. Reliable computing for everyday tasks)"
-                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Product description / details</label>
-                                <textarea
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    placeholder="Full product description and key highlights shown on the product page."
-                                    rows={4}
-                                    className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y min-h-[80px]"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">
-                                        {formData.product_kind === 'variable' ? 'Base price (GHS) — optional' : 'Price (GHS)'}
-                                    </label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        required={formData.product_kind === 'simple'}
-                                        value={formData.price}
-                                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                        placeholder={formData.product_kind === 'variable' ? '0 if using full price per variant' : ''}
-                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Compare price (GHS)</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        value={formData.compare_price}
-                                        onChange={(e) => setFormData({ ...formData, compare_price: e.target.value })}
-                                        placeholder="Original price for sale display"
-                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    />
-                                    <p className="text-xs text-gray-400 mt-0.5">Shows in Featured Deals when set</p>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Stock</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={formData.stock_quantity}
-                                        onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
-                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-3 py-1">
-                                <input
-                                    type="checkbox"
-                                    id="is_featured"
-                                    checked={formData.is_featured}
-                                    onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
-                                    className="w-4 h-4 rounded border-gray-200 text-blue-600 focus:ring-blue-500"
-                                />
-                                <label htmlFor="is_featured" className="text-sm font-medium text-gray-700">Show in Featured section on homepage</label>
-                            </div>
-                            {formData.product_kind === 'variable' && (
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1.5">
-                                    <Layers className="h-3.5 w-3.5" /> Variants
-                                </label>
-                                <p className="text-xs text-gray-400 mb-2">Add options from Variations (e.g. Size, Color). Select <strong>Option</strong> first (e.g. Size), then pick a <strong>Value</strong>. Price = base + amount below (use base 0 and enter full GHS price per row if you prefer).</p>
-                                {variationOptions.length === 0 && (
-                                    <p className="text-xs text-amber-600 mb-2">
-                                        No variation options loaded.{' '}
-                                        <Link href="/admin/variations" className="underline font-medium">Set up Size/Color in Variations</Link>
-                                        {' '}or run <code className="text-[11px] bg-gray-100 px-1 rounded">npm run db:seed-variations</code> locally.
-                                    </p>
-                                )}
-                                <div className="space-y-2">
-                                    {formData.variants.map((v, idx) => (
-                                        <div key={idx} className="flex flex-wrap items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-100">
-                                            <select
-                                                value={v.variant_type}
-                                                onChange={(e) => setFormData((f) => ({
-                                                    ...f,
-                                                    variants: f.variants.map((x, i) => i === idx ? { ...x, variant_type: e.target.value, variant_value: '' } : x),
-                                                }))}
-                                                className="h-9 px-2 rounded-lg border border-gray-200 text-sm min-w-[100px]"
-                                            >
-                                                <option value="">Option</option>
-                                                {variationOptions.map((o) => (
-                                                    <option key={o.id} value={o.slug}>{o.name}</option>
-                                                ))}
-                                            </select>
-                                            <select
-                                                value={v.variant_value}
-                                                disabled={!v.variant_type}
-                                                onChange={(e) => setFormData((f) => ({
-                                                    ...f,
-                                                    variants: f.variants.map((x, i) => i === idx ? { ...x, variant_value: e.target.value } : x),
-                                                }))}
-                                                className="h-9 px-2 rounded-lg border border-gray-200 text-sm min-w-[90px] disabled:bg-gray-100 disabled:text-gray-400"
-                                            >
-                                                <option value="">{v.variant_type ? 'Value' : 'Select option first'}</option>
-                                                {getValuesForOption(v.variant_type).map((val) => (
-                                                    <option key={val.id} value={val.value}>{val.value}</option>
-                                                ))}
-                                            </select>
-                                            {v.variant_type && getValuesForOption(v.variant_type).length <= 1 && (
-                                                <Link href="/admin/variations" className="text-xs text-blue-600 hover:underline whitespace-nowrap">
-                                                    Add more values in Variations
-                                                </Link>
-                                            )}
-                                            <input
-                                                type="text"
-                                                placeholder="SKU"
-                                                value={v.sku ?? ''}
-                                                onChange={(e) => setFormData((f) => ({
-                                                    ...f,
-                                                    variants: f.variants.map((x, i) => i === idx ? { ...x, sku: e.target.value || undefined } : x),
-                                                }))}
-                                                className="h-9 px-2 rounded-lg border border-gray-200 text-sm w-20"
-                                            />
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="Price +"
-                                                value={v.price_adjust ?? ''}
-                                                onChange={(e) => setFormData((f) => ({
-                                                    ...f,
-                                                    variants: f.variants.map((x, i) => i === idx ? { ...x, price_adjust: e.target.value ? parseFloat(e.target.value) : undefined } : x),
-                                                }))}
-                                                className="h-9 px-2 rounded-lg border border-gray-200 text-sm w-20"
-                                            />
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                placeholder="Stock"
-                                                value={v.stock_quantity ?? ''}
-                                                onChange={(e) => setFormData((f) => ({
-                                                    ...f,
-                                                    variants: f.variants.map((x, i) => i === idx ? { ...x, stock_quantity: e.target.value ? parseInt(e.target.value, 10) : undefined } : x),
-                                                }))}
-                                                className="h-9 px-2 rounded-lg border border-gray-200 text-sm w-20"
-                                            />
-                                            <button type="button" onClick={() => setFormData((f) => ({ ...f, variants: f.variants.filter((_, i) => i !== idx) }))} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50" aria-label="Remove variant">
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
-                                        </div>
-                                    ))}
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData((f) => ({ ...f, variants: [...f.variants, newVariantRow()] }))}
-                                        className="min-h-[40px] px-3 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm font-medium flex items-center gap-1.5 hover:border-blue-300 hover:text-blue-600"
-                                    >
-                                        <Plus className="h-3.5 w-3.5" /> Add variant
-                                    </button>
-                                </div>
-                            </div>
-                            )}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Minimum quantity for wholesale</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={formData.wholesale_min_quantity}
-                                        onChange={(e) => setFormData({ ...formData, wholesale_min_quantity: e.target.value })}
-                                        placeholder="e.g. 10"
-                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Wholesale discount (%)</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        step="0.5"
-                                        value={formData.wholesale_discount_pct}
-                                        onChange={(e) => setFormData({ ...formData, wholesale_discount_pct: e.target.value })}
-                                        placeholder="e.g. 10"
-                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Specifications</label>
-                                <textarea
-                                    value={formData.specifications_json}
-                                    onChange={(e) => setFormData({ ...formData, specifications_json: e.target.value })}
-                                    placeholder={'Screen: 14"\nRAM: 8GB\nStorage: 128GB\nProcessor: Intel Core i7'}
-                                    rows={4}
-                                    className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y min-h-[80px]"
-                                />
-                                <p className="text-xs text-gray-400 mt-0.5">Add one item per line as <strong>Label: Value</strong>. These show in a clean specs table on the product page.</p>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Featured image</label>
-                                <div className="flex items-start gap-2">
-                                    <div className="w-20 h-20 rounded-lg border border-gray-100 bg-gray-50 overflow-hidden shrink-0">
-                                        {formData.featuredImage ? (
-                                            <img
-                                                src={productImageUrl(formData.featuredImage)}
-                                                alt=""
-                                                className="w-full h-full object-contain"
-                                                onError={(e) => {
-                                                    (e.target as HTMLImageElement).src = '/placeholder.svg';
-                                                    (e.target as HTMLImageElement).onerror = null;
-                                                }}
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                                <ImageIcon className="h-6 w-6" />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex flex-col gap-1.5">
-                                        <input ref={featuredInputRef} type="file" accept="image/*" className="hidden" onChange={handleFeaturedUpload} />
-                                        <button type="button" onClick={() => featuredInputRef.current?.click()} disabled={uploadingFeatured} className="min-h-[44px] h-9 px-3 rounded-lg border border-gray-200 text-xs font-medium flex items-center gap-1.5 disabled:opacity-60">
-                                            {uploadingFeatured ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-                                            Upload
-                                        </button>
-                                        <button type="button" onClick={() => setMediaPickerOpen('featured')} className="min-h-[44px] h-9 px-3 rounded-lg border border-gray-200 text-xs font-medium text-left flex items-center">
-                                            Choose from library
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Product gallery</label>
-                                <div className="space-y-1.5">
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {formData.gallery.map((path, i) => (
-                                            <div key={i} className="relative w-14 h-14 rounded-lg border border-gray-100 bg-gray-50 overflow-hidden group">
-                                                <img
-                                                    src={productImageUrl(path)}
-                                                    alt=""
-                                                    className="w-full h-full object-contain"
-                                                    onError={(e) => {
-                                                        (e.target as HTMLImageElement).src = '/placeholder.svg';
-                                                        (e.target as HTMLImageElement).onerror = null;
-                                                    }}
-                                                />
-                                                <button type="button" onClick={() => removeGalleryImage(i)} className="absolute top-0.5 right-0.5 w-5 h-5 rounded bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Remove">
-                                                    <X className="h-2.5 w-2.5" />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="flex gap-1.5">
-                                        <input ref={galleryInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleGalleryUpload} />
-                                        <button type="button" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery} className="min-h-[44px] h-9 px-3 rounded-lg border border-gray-200 text-xs font-medium flex items-center gap-1.5 disabled:opacity-60">
-                                            {uploadingGallery ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-                                            Upload
-                                        </button>
-                                        <button type="button" onClick={() => setMediaPickerOpen('gallery')} className="min-h-[44px] h-9 px-3 rounded-lg border border-gray-200 text-xs font-medium flex items-center">
-                                            Choose from library
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex gap-2 pt-2">
-                                <button type="submit" className="flex-1 min-h-[44px] h-10 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 flex items-center justify-center">
-                                    {editingProduct ? 'Update' : 'Create'}
-                                </button>
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="min-h-[44px] h-10 px-4 border border-gray-200 rounded-lg font-semibold text-sm text-gray-600 hover:bg-gray-50 flex items-center">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
+                                </Select>
+                            </FormField>
+                        )}
+                    <FormField
+                        label="Product type"
+                        hint="Variable: set per-option prices below; base price can be 0 if each option price is the full amount."
+                    >
+                        <div className="flex rounded-lg border border-gray-200/90 p-0.5 bg-gray-50 gap-0.5">
+                            <button
+                                type="button"
+                                onClick={() => setFormData((f) => ({ ...f, product_kind: 'simple', variants: [] }))}
+                                className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'simple' ? 'bg-white text-gray-900 border border-gray-200/90' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Simple
+                            </button>
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    const opts = variationOptionsRef.current.length
+                                        ? variationOptionsRef.current
+                                        : await fetchVariationOptions();
+                                    setFormData((f) => ({
+                                        ...f,
+                                        product_kind: 'variable',
+                                        variants: f.variants.length > 0 ? f.variants : [newVariantRow(opts)],
+                                    }));
+                                }}
+                                className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'variable' ? 'bg-white text-gray-900 border border-gray-200/90' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Variable
+                            </button>
+                        </div>
+                    </FormField>
+                    <FormField label="Short description" htmlFor="product-short-desc">
+                        <Input
+                            id="product-short-desc"
+                            value={formData.short_description}
+                            onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
+                            placeholder="One line summary (e.g. Reliable computing for everyday tasks)"
+                        />
+                    </FormField>
+                    <FormField label="Product description / details" htmlFor="product-desc">
+                        <Textarea
+                            id="product-desc"
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Full product description and key highlights shown on the product page."
+                            rows={4}
+                        />
+                    </FormField>
+                    <div className="grid grid-cols-2 gap-3">
+                        <FormField
+                            label={formData.product_kind === 'variable' ? 'Base price (GHS) — optional' : 'Price (GHS)'}
+                            htmlFor="product-price"
+                        >
+                            <Input
+                                id="product-price"
+                                type="number"
+                                step="0.01"
+                                required={formData.product_kind === 'simple'}
+                                value={formData.price}
+                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                placeholder={formData.product_kind === 'variable' ? '0 if using full price per variant' : ''}
+                            />
+                        </FormField>
+                        <FormField
+                            label="Compare price (GHS)"
+                            htmlFor="product-compare-price"
+                            hint="Shows in Featured Deals when set"
+                        >
+                            <Input
+                                id="product-compare-price"
+                                type="number"
+                                step="0.01"
+                                min={0}
+                                value={formData.compare_price}
+                                onChange={(e) => setFormData({ ...formData, compare_price: e.target.value })}
+                                placeholder="Original price for sale display"
+                            />
+                        </FormField>
+                        <FormField label="Stock" htmlFor="product-stock">
+                            <Input
+                                id="product-stock"
+                                type="number"
+                                min={0}
+                                value={formData.stock_quantity}
+                                onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
+                            />
+                        </FormField>
                     </div>
-                </div>
-            )}
+                    <div className="flex items-center gap-3 py-1">
+                        <input
+                            type="checkbox"
+                            id="is_featured"
+                            checked={formData.is_featured}
+                            onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                            className="w-4 h-4 rounded border-gray-200 text-brand focus:ring-brand"
+                        />
+                        <label htmlFor="is_featured" className="text-sm font-medium text-gray-700">Show in Featured section on homepage</label>
+                    </div>
+                    {formData.product_kind === 'variable' && (
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1.5">
+                            <Layers className="h-3.5 w-3.5" /> Variants
+                        </label>
+                        <p className="text-xs text-gray-400 mb-2">Add options from Variations (e.g. Size, Color). Select <strong>Option</strong> first (e.g. Size), then pick a <strong>Value</strong>. Price = base + amount below (use base 0 and enter full GHS price per row if you prefer).</p>
+                        {variationOptions.length === 0 && (
+                            <p className="text-xs text-amber-600 mb-2">
+                                No variation options loaded.{' '}
+                                <Link href="/admin/variations" className="underline font-medium">Set up Size/Color in Variations</Link>
+                                {' '}or run <code className="text-[11px] bg-gray-100 px-1 rounded">npm run db:seed-variations</code> locally.
+                            </p>
+                        )}
+                        <div className="space-y-2">
+                            {formData.variants.map((v, idx) => (
+                                <div key={idx} className="flex flex-wrap items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-100">
+                                    <select
+                                        value={v.variant_type}
+                                        onChange={(e) => setFormData((f) => ({
+                                            ...f,
+                                            variants: f.variants.map((x, i) => i === idx ? { ...x, variant_type: e.target.value, variant_value: '' } : x),
+                                        }))}
+                                        className="h-9 px-2 rounded-lg border border-gray-200 text-sm min-w-[100px]"
+                                    >
+                                        <option value="">Option</option>
+                                        {variationOptions.map((o) => (
+                                            <option key={o.id} value={o.slug}>{o.name}</option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        value={v.variant_value}
+                                        disabled={!v.variant_type}
+                                        onChange={(e) => setFormData((f) => ({
+                                            ...f,
+                                            variants: f.variants.map((x, i) => i === idx ? { ...x, variant_value: e.target.value } : x),
+                                        }))}
+                                        className="h-9 px-2 rounded-lg border border-gray-200 text-sm min-w-[90px] disabled:bg-gray-100 disabled:text-gray-400"
+                                    >
+                                        <option value="">{v.variant_type ? 'Value' : 'Select option first'}</option>
+                                        {getValuesForOption(v.variant_type).map((val) => (
+                                            <option key={val.id} value={val.value}>{val.value}</option>
+                                        ))}
+                                    </select>
+                                    {v.variant_type && getValuesForOption(v.variant_type).length <= 1 && (
+                                        <Link href="/admin/variations" className="text-xs text-brand hover:underline whitespace-nowrap">
+                                            Add more values in Variations
+                                        </Link>
+                                    )}
+                                    <input
+                                        type="text"
+                                        placeholder="SKU"
+                                        value={v.sku ?? ''}
+                                        onChange={(e) => setFormData((f) => ({
+                                            ...f,
+                                            variants: f.variants.map((x, i) => i === idx ? { ...x, sku: e.target.value || undefined } : x),
+                                        }))}
+                                        className="h-9 px-2 rounded-lg border border-gray-200 text-sm w-20"
+                                    />
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="Price +"
+                                        value={v.price_adjust ?? ''}
+                                        onChange={(e) => setFormData((f) => ({
+                                            ...f,
+                                            variants: f.variants.map((x, i) => i === idx ? { ...x, price_adjust: e.target.value ? parseFloat(e.target.value) : undefined } : x),
+                                        }))}
+                                        className="h-9 px-2 rounded-lg border border-gray-200 text-sm w-20"
+                                    />
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="Stock"
+                                        value={v.stock_quantity ?? ''}
+                                        onChange={(e) => setFormData((f) => ({
+                                            ...f,
+                                            variants: f.variants.map((x, i) => i === idx ? { ...x, stock_quantity: e.target.value ? parseInt(e.target.value, 10) : undefined } : x),
+                                        }))}
+                                        className="h-9 px-2 rounded-lg border border-gray-200 text-sm w-20"
+                                    />
+                                    <button type="button" onClick={() => setFormData((f) => ({ ...f, variants: f.variants.filter((_, i) => i !== idx) }))} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50" aria-label="Remove variant">
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={() => setFormData((f) => ({ ...f, variants: [...f.variants, newVariantRow()] }))}
+                                className="min-h-[40px] px-3 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm font-medium flex items-center gap-1.5 hover:border-blue-300 hover:text-brand"
+                            >
+                                <Plus className="h-3.5 w-3.5" /> Add variant
+                            </button>
+                        </div>
+                    </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-3">
+                        <FormField label="Minimum quantity for wholesale" htmlFor="product-wholesale-min">
+                            <Input
+                                id="product-wholesale-min"
+                                type="number"
+                                min={0}
+                                value={formData.wholesale_min_quantity}
+                                onChange={(e) => setFormData({ ...formData, wholesale_min_quantity: e.target.value })}
+                                placeholder="e.g. 10"
+                            />
+                        </FormField>
+                        <FormField label="Wholesale discount (%)" htmlFor="product-wholesale-pct">
+                            <Input
+                                id="product-wholesale-pct"
+                                type="number"
+                                min={0}
+                                max={100}
+                                step="0.5"
+                                value={formData.wholesale_discount_pct}
+                                onChange={(e) => setFormData({ ...formData, wholesale_discount_pct: e.target.value })}
+                                placeholder="e.g. 10"
+                            />
+                        </FormField>
+                    </div>
+                    <FormField
+                        label="Specifications"
+                        htmlFor="product-specs"
+                        hint="Add one item per line as Label: Value. These show in a clean specs table on the product page."
+                    >
+                        <Textarea
+                            id="product-specs"
+                            value={formData.specifications_json}
+                            onChange={(e) => setFormData({ ...formData, specifications_json: e.target.value })}
+                            placeholder={'Screen: 14"\nRAM: 8GB\nStorage: 128GB\nProcessor: Intel Core i7'}
+                            rows={4}
+                        />
+                    </FormField>
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1">Featured image</label>
+                        <div className="flex items-start gap-2">
+                            <div className="w-20 h-20 rounded-lg border border-gray-100 bg-gray-50 overflow-hidden shrink-0">
+                                {formData.featuredImage ? (
+                                    <img
+                                        src={productImageUrl(formData.featuredImage)}
+                                        alt=""
+                                        className="w-full h-full object-contain"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = '/placeholder.svg';
+                                            (e.target as HTMLImageElement).onerror = null;
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                        <ImageIcon className="h-6 w-6" />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <input ref={featuredInputRef} type="file" accept="image/*" className="hidden" onChange={handleFeaturedUpload} />
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => featuredInputRef.current?.click()}
+                                    disabled={uploadingFeatured}
+                                    loading={uploadingFeatured}
+                                    leftIcon={<Upload className="h-3.5 w-3.5" />}
+                                    className="h-9 min-h-[36px] px-3 text-xs justify-start"
+                                >
+                                    Upload
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => setMediaPickerOpen('featured')}
+                                    className="h-9 min-h-[36px] px-3 text-xs justify-start"
+                                >
+                                    Choose from library
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1">Product gallery</label>
+                        <div className="space-y-1.5">
+                            <div className="flex flex-wrap gap-1.5">
+                                {formData.gallery.map((path, i) => (
+                                    <div key={i} className="relative w-14 h-14 rounded-lg border border-gray-100 bg-gray-50 overflow-hidden group">
+                                        <img
+                                            src={productImageUrl(path)}
+                                            alt=""
+                                            className="w-full h-full object-contain"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = '/placeholder.svg';
+                                                (e.target as HTMLImageElement).onerror = null;
+                                            }}
+                                        />
+                                        <button type="button" onClick={() => removeGalleryImage(i)} className="absolute top-0.5 right-0.5 w-5 h-5 rounded bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Remove">
+                                            <X className="h-2.5 w-2.5" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex gap-1.5">
+                                <input ref={galleryInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleGalleryUpload} />
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => galleryInputRef.current?.click()}
+                                    disabled={uploadingGallery}
+                                    loading={uploadingGallery}
+                                    leftIcon={<Upload className="h-3.5 w-3.5" />}
+                                    className="h-9 min-h-[36px] px-3 text-xs"
+                                >
+                                    Upload
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => setMediaPickerOpen('gallery')}
+                                    className="h-9 min-h-[36px] px-3 text-xs"
+                                >
+                                    Choose from library
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </Modal>
 
             <MediaPickerModal
                 open={mediaPickerOpen === 'featured'}

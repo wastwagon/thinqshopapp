@@ -5,8 +5,9 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import AdminToolbar from '@/components/admin/AdminToolbar';
 import Button from '@/components/ui/Button';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
-import { Upload, Image as ImageIcon, Trash2, Loader2 } from 'lucide-react';
+import { Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import { getMediaUrl } from '@/lib/media';
@@ -136,10 +137,10 @@ export default function AdminMediaPage() {
                     </AdminToolbar>
                 }
             />
-            <div className="admin-table-wrap">
+            <div className="admin-card overflow-hidden">
                 {loading ? (
                     <div className="py-20 flex justify-center">
-                        <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
+                        <LoadingSpinner label="Loading media…" />
                     </div>
                 ) : items.length === 0 ? (
                     <div className="py-20 text-center">
@@ -190,25 +191,27 @@ export default function AdminMediaPage() {
                 )}
                 {totalPages > 1 && (
                     <div className="flex justify-center gap-2 py-4 border-t border-gray-50">
-                        <button
+                        <Button
                             type="button"
+                            size="sm"
+                            variant="secondary"
                             disabled={page <= 1}
                             onClick={() => setPage((p) => p - 1)}
-                            className="h-9 px-4 rounded-lg border border-gray-200 text-sm font-medium disabled:opacity-50"
                         >
                             Previous
-                        </button>
+                        </Button>
                         <span className="flex items-center px-4 text-sm text-gray-500">
                             Page {page} of {totalPages}
                         </span>
-                        <button
+                        <Button
                             type="button"
+                            size="sm"
+                            variant="secondary"
                             disabled={page >= totalPages}
                             onClick={() => setPage((p) => p + 1)}
-                            className="h-9 px-4 rounded-lg border border-gray-200 text-sm font-medium disabled:opacity-50"
                         >
                             Next
-                        </button>
+                        </Button>
                     </div>
                 )}
             </div>

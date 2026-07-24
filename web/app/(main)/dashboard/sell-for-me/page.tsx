@@ -9,6 +9,10 @@ import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
+import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
+import { StatusBadge } from '@/components/ui/Badge';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 interface Category {
@@ -305,17 +309,17 @@ export default function SellForMePage() {
                 <DashboardPageHeader
                     title="Sell for Me"
                     subtitle="List items for ThinQShop to sell — earnings go to your wallet"
-                    accent="orange"
+                    accent="brand"
                     action={
-                        <button
+                        <Button
                             type="button"
+                            size="sm"
+                            leftIcon={<Plus className="h-4 w-4" />}
                             onClick={() => setIsCreating(true)}
                             disabled={!serviceEnabled}
-                            className="h-10 px-4 bg-blue-600 text-white rounded-xl font-semibold text-xs flex items-center gap-2 hover:bg-blue-700 disabled:opacity-50 transition-colors"
                         >
-                            <Plus className="h-4 w-4" />
                             New listing
-                        </button>
+                        </Button>
                     }
                 />
 
@@ -483,18 +487,16 @@ export default function SellForMePage() {
                             </div>
 
                             <div className="flex gap-2 pt-2">
-                                <button type="submit" disabled={submitting} className="h-10 px-5 bg-blue-600 text-white rounded-xl text-xs font-semibold disabled:opacity-50">
-                                    {submitting
-                                        ? 'Saving…'
-                                        : editingId
-                                          ? submissions.find((s) => s.id === editingId)?.status === 'listed'
-                                              ? 'Save changes'
-                                              : 'Resubmit for review'
-                                          : 'Submit for review'}
-                                </button>
-                                <button type="button" onClick={resetForm} className="h-10 px-5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600">
+                                <Button type="submit" size="sm" loading={submitting} disabled={submitting}>
+                                    {editingId
+                                        ? submissions.find((s) => s.id === editingId)?.status === 'listed'
+                                            ? 'Save changes'
+                                            : 'Resubmit for review'
+                                        : 'Submit for review'}
+                                </Button>
+                                <Button type="button" size="sm" variant="secondary" onClick={resetForm}>
                                     Cancel
-                                </button>
+                                </Button>
                             </div>
                         </form>
                     </div>
@@ -503,7 +505,9 @@ export default function SellForMePage() {
                 <div className="space-y-3">
                     <h2 className="text-sm font-semibold text-gray-900">My listings</h2>
                     {loading ? (
-                        <p className="text-sm text-gray-500">Loading…</p>
+                        <div className="py-8 flex justify-center">
+                            <LoadingSpinner size="sm" label="Loading…" />
+                        </div>
                     ) : submissions.length === 0 ? (
                         <div className="flat-card p-8 text-center text-gray-500">
                             <Store className="h-10 w-10 mx-auto mb-2 text-gray-200" />
@@ -517,7 +521,21 @@ export default function SellForMePage() {
                                     <p className="text-xs text-gray-500">
                                         {s.submission_number} · ₵{Number(s.asking_price).toFixed(2)} · Qty {s.stock_quantity ?? 1}
                                     </p>
-                                    <p className="text-xs text-blue-600 font-medium mt-1">{STATUS_LABELS[s.status] || s.status}</p>
+                                    <div className="mt-1.5">
+                                        <StatusBadge
+                                            status={
+                                                s.status === 'listed' || s.status === 'paid_out'
+                                                    ? 'completed'
+                                                    : s.status === 'rejected' || s.status === 'sale_voided'
+                                                      ? 'cancelled'
+                                                      : s.status === 'sold' || s.status === 'under_review'
+                                                        ? 'pending'
+                                                        : s.status
+                                            }
+                                        >
+                                            {STATUS_LABELS[s.status] || s.status}
+                                        </StatusBadge>
+                                    </div>
                                     {s.status === 'sold' && s.expected_payout_ghs != null && (
                                         <p className="text-xs text-brand mt-1">
                                             ₵{Number(s.expected_payout_ghs).toFixed(2)} in escrow until delivery confirmed
@@ -538,7 +556,7 @@ export default function SellForMePage() {
                                         <button
                                             type="button"
                                             onClick={() => startEditing(s.id)}
-                                            className="text-xs font-semibold text-blue-600 hover:underline inline-flex items-center gap-1"
+                                            className="text-xs font-semibold text-brand hover:underline inline-flex items-center gap-1"
                                         >
                                             <Pencil className="h-3 w-3" /> Edit
                                         </button>
@@ -555,7 +573,7 @@ export default function SellForMePage() {
                                     {s.product?.slug && s.status === 'listed' && (
                                         <Link
                                             href={`/products/${s.product.slug}`}
-                                            className="text-xs font-semibold text-blue-600 flex items-center gap-1 hover:underline"
+                                            className="text-xs font-semibold text-brand flex items-center gap-1 hover:underline"
                                         >
                                             View on shop <ChevronRight className="h-3 w-3" />
                                         </Link>
@@ -565,11 +583,11 @@ export default function SellForMePage() {
                                             <button
                                                 type="button"
                                                 onClick={() => openLedger(s.id, s.name)}
-                                                className="text-xs font-semibold text-gray-600 hover:text-blue-600"
+                                                className="text-xs font-semibold text-gray-600 hover:text-brand"
                                             >
                                                 History
                                             </button>
-                                            <Link href="/dashboard/wallet" className="text-xs font-semibold text-gray-600 hover:text-blue-600">
+                                            <Link href="/dashboard/wallet" className="text-xs font-semibold text-gray-600 hover:text-brand">
                                                 Wallet
                                             </Link>
                                         </>
@@ -581,33 +599,37 @@ export default function SellForMePage() {
                 </div>
             </DashboardContent>
 
-            {ledgerModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/40" onClick={() => setLedgerModal(null)} aria-hidden />
-                    <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto">
-                        <h2 className="text-lg font-bold text-gray-900 mb-1">Payout history</h2>
-                        <p className="text-xs text-gray-500 mb-4">{ledgerModal.name}</p>
-                        {ledgerLoading ? (
-                            <p className="text-sm text-gray-500">Loading…</p>
-                        ) : ledgerEntries.length === 0 ? (
-                            <p className="text-sm text-gray-500">No events recorded yet.</p>
-                        ) : (
-                            <ul className="space-y-2">
-                                {ledgerEntries.map((e) => (
-                                    <li key={e.id} className="border border-gray-100 rounded-lg p-3 text-xs">
-                                        <div className="flex justify-between gap-2">
-                                            <span className="font-semibold">{LEDGER_LABELS[e.event_type] ?? e.event_type}</span>
-                                            <span className="text-gray-400">{new Date(e.created_at).toLocaleString()}</span>
-                                        </div>
-                                        {e.note && <p className="text-gray-600 mt-1">{e.note}</p>}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                        <button type="button" onClick={() => setLedgerModal(null)} className="mt-4 w-full h-10 rounded-xl bg-gray-100 text-sm font-semibold">Close</button>
+            <Modal
+                open={!!ledgerModal}
+                onClose={() => setLedgerModal(null)}
+                title="Payout history"
+                description={ledgerModal?.name}
+                footer={
+                    <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={() => setLedgerModal(null)}>
+                        Close
+                    </Button>
+                }
+            >
+                {ledgerLoading ? (
+                    <div className="py-6 flex justify-center">
+                        <LoadingSpinner size="sm" label="Loading…" />
                     </div>
-                </div>
-            )}
+                ) : ledgerEntries.length === 0 ? (
+                    <p className="text-sm text-gray-500">No events recorded yet.</p>
+                ) : (
+                    <ul className="space-y-2">
+                        {ledgerEntries.map((e) => (
+                            <li key={e.id} className="border border-gray-100 rounded-lg p-3 text-xs">
+                                <div className="flex justify-between gap-2">
+                                    <span className="font-semibold">{LEDGER_LABELS[e.event_type] ?? e.event_type}</span>
+                                    <span className="text-gray-400">{new Date(e.created_at).toLocaleString()}</span>
+                                </div>
+                                {e.note && <p className="text-gray-600 mt-1">{e.note}</p>}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </Modal>
             {confirmDialog}
         </DashboardLayout>
     );

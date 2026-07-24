@@ -3,7 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
-import { Eye, CheckCircle, XCircle, Loader2, Star, Package } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { Eye, CheckCircle, XCircle, Star, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import Link from 'next/link';
@@ -76,14 +79,15 @@ export default function AdminReviewsPage() {
                 actions={
                     <div className="flex gap-2">
                         {(['all', 'pending', 'approved'] as const).map((f) => (
-                            <button
+                            <Button
                                 key={f}
                                 type="button"
+                                size="sm"
+                                variant={filter === f ? 'primary' : 'secondary'}
                                 onClick={() => setFilter(f)}
-                                className={`min-h-[44px] px-4 rounded-xl text-sm font-medium touch-manipulation ${filter === f ? 'admin-btn-primary' : 'admin-btn-secondary'}`}
                             >
                                 {f === 'all' ? 'All' : f === 'pending' ? 'Pending' : 'Approved'}
-                            </button>
+                            </Button>
                         ))}
                     </div>
                 }
@@ -91,7 +95,7 @@ export default function AdminReviewsPage() {
 
             {loading ? (
                 <div className="min-h-[200px] flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                    <LoadingSpinner label="Loading reviews…" />
                 </div>
             ) : (
                 <div className="space-y-3">
@@ -105,18 +109,18 @@ export default function AdminReviewsPage() {
                                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex flex-wrap items-center gap-2 mb-1">
-                                            <span className="flex items-center gap-1 text-orange-600">
+                                            <span className="flex items-center gap-1 text-amber-500">
                                                 {Array.from({ length: 5 }).map((_, i) => (
                                                     <Star key={i} className={`h-4 w-4 ${i < r.rating ? 'fill-current' : ''}`} />
                                                 ))}
                                             </span>
                                             <span className="text-xs text-gray-500">{displayName(r)}</span>
-                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${r.is_approved ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                                            <Badge variant={r.is_approved ? 'success' : 'warning'}>
                                                 {r.is_approved ? 'Approved' : 'Pending'}
-                                            </span>
+                                            </Badge>
                                         </div>
                                         {r.product && (
-                                            <Link href={`/products/${r.product.slug}`} className="text-sm font-medium text-blue-600 hover:underline flex items-center gap-1">
+                                            <Link href={`/products/${r.product.slug}`} className="text-sm font-medium text-brand hover:underline flex items-center gap-1">
                                                 <Package className="h-3.5 w-3.5" />
                                                 {r.product.name}
                                             </Link>
@@ -126,24 +130,27 @@ export default function AdminReviewsPage() {
                                     </div>
                                     {!r.is_approved && (
                                         <div className="flex gap-2 flex-shrink-0">
-                                            <button
+                                            <Button
                                                 type="button"
+                                                size="sm"
                                                 onClick={() => handleApprove(r.id, true)}
                                                 disabled={updatingId === r.id}
-                                                className="min-h-[44px] min-w-[44px] rounded-xl bg-green-600 text-white flex items-center justify-center hover:bg-green-500 touch-manipulation disabled:opacity-50"
-                                                title="Approve"
+                                                loading={updatingId === r.id}
+                                                className="bg-emerald-600 hover:bg-emerald-700"
+                                                aria-label="Approve"
                                             >
-                                                {updatingId === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-5 w-5" />}
-                                            </button>
-                                            <button
+                                                <CheckCircle className="h-4 w-4" />
+                                            </Button>
+                                            <Button
                                                 type="button"
+                                                size="sm"
+                                                variant="danger"
                                                 onClick={() => handleApprove(r.id, false)}
                                                 disabled={updatingId === r.id}
-                                                className="min-h-[44px] min-w-[44px] rounded-xl bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 touch-manipulation disabled:opacity-50"
-                                                title="Decline"
+                                                aria-label="Decline"
                                             >
-                                                <XCircle className="h-5 w-5" />
-                                            </button>
+                                                <XCircle className="h-4 w-4" />
+                                            </Button>
                                         </div>
                                     )}
                                 </div>
@@ -152,25 +159,27 @@ export default function AdminReviewsPage() {
                     )}
                     {meta.totalPages > 1 && (
                         <div className="flex justify-center gap-2 pt-4">
-                            <button
+                            <Button
                                 type="button"
+                                size="sm"
+                                variant="secondary"
                                 onClick={() => fetchReviews(meta.page - 1)}
                                 disabled={meta.page <= 1}
-                                className="min-h-[44px] px-4 rounded-xl border border-gray-200 text-sm font-medium disabled:opacity-50"
                             >
                                 Previous
-                            </button>
-                            <span className="min-h-[44px] flex items-center text-sm text-gray-600">
+                            </Button>
+                            <span className="min-h-[36px] flex items-center text-sm text-gray-600">
                                 Page {meta.page} of {meta.totalPages}
                             </span>
-                            <button
+                            <Button
                                 type="button"
+                                size="sm"
+                                variant="secondary"
                                 onClick={() => fetchReviews(meta.page + 1)}
                                 disabled={meta.page >= meta.totalPages}
-                                className="min-h-[44px] px-4 rounded-xl border border-gray-200 text-sm font-medium disabled:opacity-50"
                             >
                                 Next
-                            </button>
+                            </Button>
                         </div>
                     )}
                 </div>

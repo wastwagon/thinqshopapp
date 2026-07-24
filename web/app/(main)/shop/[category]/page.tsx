@@ -4,9 +4,10 @@ import { Suspense, useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import ProductGrid from '@/components/ui/ProductGrid';
-import { Search, Loader2 } from 'lucide-react';
+import { Search } from 'lucide-react';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
+import Button from '@/components/ui/Button';
 import ShopPageShell from '@/components/shop/ShopContent';
 import CategoryBadges from '@/components/shop/CategoryBadges';
 import { findCategoryBySlug, type CategoryNode } from '@/lib/category-utils';
@@ -128,21 +129,15 @@ function CategoryShopContent() {
                 <ProductGrid products={products} loading={loading} />
                 {!loading && hasMore && useApi && (
                     <div className="mt-12 flex justify-center">
-                        <button
+                        <Button
                             type="button"
+                            size="lg"
+                            loading={loadingMore}
                             onClick={loadMore}
-                            disabled={loadingMore}
-                            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                            className="px-8"
                         >
-                            {loadingMore ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Loading...
-                                </>
-                            ) : (
-                                'Load more'
-                            )}
-                        </button>
+                            {loadingMore ? 'Loading…' : 'Load more'}
+                        </Button>
                     </div>
                 )}
             </ShopPageShell>

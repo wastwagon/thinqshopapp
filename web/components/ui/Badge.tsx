@@ -48,7 +48,24 @@ export function statusToBadgeVariant(status?: string | null): BadgeVariant {
     if (['completed', 'paid', 'approved', 'delivered', 'success', 'active', 'released'].includes(s)) {
         return 'success';
     }
-    if (['pending', 'processing', 'in_transit', 'shipped', 'awaiting', 'open'].includes(s)) {
+    if (
+        [
+            'pending',
+            'processing',
+            'in_transit',
+            'shipped',
+            'awaiting',
+            'open',
+            'booked',
+            'pickup_scheduled',
+            'picked_up',
+            'out_for_delivery',
+            'submitted',
+            'under_review',
+            'quote_provided',
+            'changes_requested',
+        ].includes(s)
+    ) {
         return 'brand';
     }
     if (['cancelled', 'canceled', 'failed', 'rejected', 'refunded', 'expired'].includes(s)) {
@@ -60,8 +77,9 @@ export function statusToBadgeVariant(status?: string | null): BadgeVariant {
     return 'default';
 }
 
-type StatusBadgeProps = Omit<BadgeProps, 'variant'> & {
+type StatusBadgeProps = Omit<BadgeProps, 'variant' | 'children'> & {
     status: string;
+    children?: ReactNode;
 };
 
 export function StatusBadge({ status, className, children, ...props }: StatusBadgeProps) {

@@ -10,27 +10,20 @@ import {
     Plus,
     Pencil,
     Trash2,
-    Loader2,
     Save,
     X,
     Upload,
-    Image as ImageIcon,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import { getMediaUrl } from '@/lib/media';
-import {
-    cmsInput,
-    cmsTextarea,
-    cmsItemCard,
-    cmsEditPanel,
-    cmsBtnPrimary,
-    cmsBtnSecondary,
-    cmsBtnIcon,
-    cmsBtnDangerIcon,
-    cmsAddRow,
-} from '@/components/admin/cms-classes';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import FormField from '@/components/ui/FormField';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
+import { cn } from '@/lib/cn';
 
 type HeroSlide = { id: number; title: string; subtitle?: string | null; cta_text?: string | null; cta_url?: string | null; image_path?: string | null; sort_order: number; is_active: boolean };
 type TrustBadge = { id: number; icon: string; label: string; optional_link?: string | null; sort_order: number; is_active: boolean };
@@ -108,7 +101,7 @@ export default function AdminContent() {
         return (
             <DashboardLayout isAdmin={true}>
                 <div className="min-h-[40vh] flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                    <LoadingSpinner label="Loading content…" />
                 </div>
             </DashboardLayout>
         );
@@ -132,7 +125,7 @@ export default function AdminContent() {
             />
             <div className="space-y-3">
                 {sectionCards.map(({ id, title, count }) => (
-                    <div key={id} className="admin-table-wrap">
+                    <div key={id} className="admin-card overflow-hidden">
                         <button
                             type="button"
                             onClick={() => setOpenSection(openSection === id ? null : id)}
@@ -187,30 +180,29 @@ function HeroSection({
     const heroImageInputRef = React.useRef<HTMLInputElement>(null);
 
     const saveSlide = async () => {
-        if (editing) {
-            setSaving('hero');
-            try {
-                await api.patch(`/content/admin/hero-slides/${editing.id}`, { ...form, image_path: form.image_path || undefined });
+        const isNew = !editing || editing.id === 0;
+        setSaving('hero');
+        try {
+            if (!isNew && editing) {
+                await api.patch(`/content/admin/hero-slides/${editing.id}`, {
+                    ...form,
+                    image_path: form.image_path || undefined,
+                });
                 toast.success('Slide updated');
-                setEditing(null);
-                onReload();
-            } catch {
-                toast.error('Failed to update');
-            } finally {
-                setSaving(null);
-            }
-        } else {
-            setSaving('hero');
-            try {
-                await api.post('/content/admin/hero-slides', { ...form, image_path: form.image_path || undefined });
+            } else {
+                await api.post('/content/admin/hero-slides', {
+                    ...form,
+                    image_path: form.image_path || undefined,
+                });
                 toast.success('Slide added');
                 setForm({ title: '', subtitle: '', cta_text: '', cta_url: '', image_path: '', is_active: true });
-                onReload();
-            } catch {
-                toast.error('Failed to add');
-            } finally {
-                setSaving(null);
             }
+            setEditing(null);
+            onReload();
+        } catch {
+            toast.error(isNew ? 'Failed to add' : 'Failed to update');
+        } finally {
+            setSaving(null);
         }
     };
 
@@ -258,8 +250,7 @@ function HeroSection({
     };
 
     const heroImageBlock = (
-        <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-700">Hero background image</label>
+        <FormField label="Hero background image">
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                     <input
@@ -269,23 +260,27 @@ function HeroSection({
                         className="hidden"
                         onChange={handleHeroImageUpload}
                     />
-                    <button
+                    <Button
                         type="button"
+                        variant="secondary"
+                        size="sm"
                         onClick={() => heroImageInputRef.current?.click()}
                         disabled={uploadingImage}
-                        className={`${cmsBtnSecondary} flex items-center gap-2 disabled:opacity-60`}
+                        loading={uploadingImage}
+                        leftIcon={!uploadingImage ? <Upload className="h-4 w-4" /> : undefined}
                     >
-                        {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                         {uploadingImage ? 'Uploading…' : 'Upload image'}
-                    </button>
+                    </Button>
                     {form.image_path && (
-                        <button
+                        <Button
                             type="button"
+                            variant="secondary"
+                            size="sm"
                             onClick={() => setForm((f) => ({ ...f, image_path: '' }))}
-                            className="admin-btn-secondary h-11 px-3 text-sm text-red-600 border-red-200/90 hover:bg-red-50"
+                            className="text-red-600 border-red-200/90 hover:bg-red-50"
                         >
                             Remove
-                        </button>
+                        </Button>
                     )}
                 </div>
                 {form.image_path && (
@@ -297,57 +292,100 @@ function HeroSection({
                                 className="w-full h-full object-cover"
                             />
                         </div>
-                        <p className="text-xs text-gray-500 truncate flex-1 min-w-0" title={form.image_path}>{form.image_path}</p>
+                        <p className="text-xs text-gray-500 truncate flex-1 min-w-0" title={form.image_path}>
+                            {form.image_path}
+                        </p>
                     </div>
                 )}
-                <input
+                <Input
                     type="text"
                     placeholder="Or paste image URL (optional)"
                     value={form.image_path?.startsWith('http') ? form.image_path : ''}
                     onChange={(e) => setForm((f) => ({ ...f, image_path: e.target.value }))}
-                    className={cmsInput}
                 />
             </div>
+        </FormField>
+    );
+
+    const slideFields = (
+        <div className="space-y-2">
+            <Input
+                placeholder="Title"
+                value={form.title}
+                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+            />
+            <Input
+                placeholder="Subtitle"
+                value={form.subtitle}
+                onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))}
+            />
+            {heroImageBlock}
+            <Input
+                placeholder="CTA text"
+                value={form.cta_text}
+                onChange={(e) => setForm((f) => ({ ...f, cta_text: e.target.value }))}
+            />
+            <Input
+                placeholder="CTA URL"
+                value={form.cta_url}
+                onChange={(e) => setForm((f) => ({ ...f, cta_url: e.target.value }))}
+            />
         </div>
     );
 
     return (
         <div className="space-y-3 pt-3">
             {editing && editing.id === 0 && (
-                <div className={`${cmsEditPanel} space-y-2`}>
-                    <input className={cmsInput} placeholder="Title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
-                    <input className={cmsInput} placeholder="Subtitle" value={form.subtitle} onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))} />
-                    {heroImageBlock}
-                    <input className={cmsInput} placeholder="CTA text" value={form.cta_text} onChange={(e) => setForm((f) => ({ ...f, cta_text: e.target.value }))} />
-                    <input className={cmsInput} placeholder="CTA URL" value={form.cta_url} onChange={(e) => setForm((f) => ({ ...f, cta_url: e.target.value }))} />
+                <div className="flat-card border-l-4 border-l-brand p-3 space-y-3">
+                    {slideFields}
                     <div className="flex gap-2">
-                        <button type="button" className={`${cmsBtnPrimary} flex items-center gap-2`} onClick={saveSlide} disabled={!!saving}>
-                            {saving === 'hero' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                        <Button
+                            type="button"
+                            size="sm"
+                            onClick={saveSlide}
+                            disabled={!!saving}
+                            loading={saving === 'hero'}
+                            leftIcon={saving !== 'hero' ? <Save className="h-4 w-4" /> : undefined}
+                        >
                             Save
-                        </button>
-                        <button type="button" className={`${cmsBtnSecondary} flex items-center gap-2`} onClick={() => setEditing(null)}>
-                            <X className="h-4 w-4" /> Cancel
-                        </button>
+                        </Button>
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            leftIcon={<X className="h-4 w-4" />}
+                            onClick={() => setEditing(null)}
+                        >
+                            Cancel
+                        </Button>
                     </div>
                 </div>
             )}
             {slides.map((s) => (
-                <div key={s.id} className={cmsItemCard}>
+                <div key={s.id} className="flat-card p-3">
                     {editing?.id === s.id ? (
-                        <div className="space-y-2">
-                            <input className={cmsInput} placeholder="Title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
-                            <input className={cmsInput} placeholder="Subtitle" value={form.subtitle} onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))} />
-                            {heroImageBlock}
-                            <input className={cmsInput} placeholder="CTA text" value={form.cta_text} onChange={(e) => setForm((f) => ({ ...f, cta_text: e.target.value }))} />
-                            <input className={cmsInput} placeholder="CTA URL" value={form.cta_url} onChange={(e) => setForm((f) => ({ ...f, cta_url: e.target.value }))} />
+                        <div className="space-y-3">
+                            {slideFields}
                             <div className="flex gap-2">
-                                <button type="button" className={`${cmsBtnPrimary} flex items-center gap-2`} onClick={saveSlide} disabled={!!saving}>
-                                    {saving === 'hero' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={saveSlide}
+                                    disabled={!!saving}
+                                    loading={saving === 'hero'}
+                                    leftIcon={saving !== 'hero' ? <Save className="h-4 w-4" /> : undefined}
+                                >
                                     Save
-                                </button>
-                                <button type="button" className={cmsBtnSecondary} onClick={() => setEditing(null)} aria-label="Cancel">
+                                </Button>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="secondary"
+                                    onClick={() => setEditing(null)}
+                                    aria-label="Cancel"
+                                >
                                     <X className="h-4 w-4" />
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     ) : (
@@ -355,15 +393,46 @@ function HeroSection({
                             <div>
                                 <p className="font-medium text-gray-900">{s.title}</p>
                                 {s.subtitle && <p className="text-xs text-gray-500 mt-0.5">{s.subtitle}</p>}
-                                {s.image_path && <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[200px]" title={s.image_path}>Image set</p>}
+                                {s.image_path && (
+                                    <p
+                                        className="text-xs text-gray-400 mt-0.5 truncate max-w-[200px]"
+                                        title={s.image_path}
+                                    >
+                                        Image set
+                                    </p>
+                                )}
                             </div>
                             <div className="flex gap-1">
-                                <button type="button" className={cmsBtnIcon} onClick={() => { setEditing(s); setForm({ title: s.title, subtitle: s.subtitle ?? '', cta_text: s.cta_text ?? '', cta_url: s.cta_url ?? '', image_path: s.image_path ?? '', is_active: s.is_active }); }} aria-label="Edit slide">
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="secondary"
+                                    className="min-w-[44px] px-0"
+                                    aria-label="Edit slide"
+                                    onClick={() => {
+                                        setEditing(s);
+                                        setForm({
+                                            title: s.title,
+                                            subtitle: s.subtitle ?? '',
+                                            cta_text: s.cta_text ?? '',
+                                            cta_url: s.cta_url ?? '',
+                                            image_path: s.image_path ?? '',
+                                            is_active: s.is_active,
+                                        });
+                                    }}
+                                >
                                     <Pencil className="h-4 w-4" />
-                                </button>
-                                <button type="button" className={cmsBtnDangerIcon} onClick={() => void deleteSlide(s.id)} aria-label="Delete slide">
+                                </Button>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="secondary"
+                                    className="min-w-[44px] px-0 text-red-600 border-red-200/90 hover:bg-red-50"
+                                    aria-label="Delete slide"
+                                    onClick={() => void deleteSlide(s.id)}
+                                >
                                     <Trash2 className="h-4 w-4" />
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     )}
@@ -372,8 +441,27 @@ function HeroSection({
             {!editing && (
                 <button
                     type="button"
-                    className={cmsAddRow}
-                    onClick={() => { setEditing({ id: 0, title: '', subtitle: '', cta_text: '', cta_url: '', image_path: '', sort_order: 0, is_active: true } as HeroSlide); setForm({ title: '', subtitle: '', cta_text: '', cta_url: '', image_path: '', is_active: true }); }}
+                    className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200/90 text-gray-600 font-medium text-sm touch-manipulation hover:border-brand/40 hover:text-brand transition-colors"
+                    onClick={() => {
+                        setEditing({
+                            id: 0,
+                            title: '',
+                            subtitle: '',
+                            cta_text: '',
+                            cta_url: '',
+                            image_path: '',
+                            sort_order: 0,
+                            is_active: true,
+                        } as HeroSlide);
+                        setForm({
+                            title: '',
+                            subtitle: '',
+                            cta_text: '',
+                            cta_url: '',
+                            image_path: '',
+                            is_active: true,
+                        });
+                    }}
                 >
                     <Plus className="h-5 w-5" /> Add slide
                 </button>
@@ -385,9 +473,6 @@ function HeroSection({
 
 function TrustSection({
     badges,
-    onReload,
-    setSaving,
-    saving,
 }: {
     badges: TrustBadge[];
     onReload: () => void;
@@ -397,7 +482,7 @@ function TrustSection({
     return (
         <div className="space-y-2 pt-3">
             {badges.map((b) => (
-                <div key={b.id} className={`${cmsItemCard} flex items-center justify-between`}>
+                <div key={b.id} className="flat-card p-3 flex items-center justify-between">
                     <span className="font-medium text-gray-900">{b.label}</span>
                     <span className="text-xs text-gray-500">{b.icon}</span>
                 </div>
@@ -409,9 +494,6 @@ function TrustSection({
 
 function TestimonialsSection({
     items,
-    onReload,
-    setSaving,
-    saving,
 }: {
     items: Testimonial[];
     onReload: () => void;
@@ -421,9 +503,12 @@ function TestimonialsSection({
     return (
         <div className="space-y-2 pt-3">
             {items.map((t) => (
-                <div key={t.id} className={cmsItemCard}>
+                <div key={t.id} className="flat-card p-3">
                     <p className="text-sm text-gray-700 line-clamp-2">&ldquo;{t.quote}&rdquo;</p>
-                    <p className="text-xs font-medium text-gray-900 mt-1">— {t.author_name}{t.author_role ? `, ${t.author_role}` : ''}</p>
+                    <p className="text-xs font-medium text-gray-900 mt-1">
+                        — {t.author_name}
+                        {t.author_role ? `, ${t.author_role}` : ''}
+                    </p>
                 </div>
             ))}
         </div>
@@ -446,23 +531,55 @@ function PoliciesSection({
     return (
         <div className="space-y-3 pt-3">
             {policies.map((p) => (
-                <div key={p.id} className={cmsItemCard}>
+                <div key={p.id} className="flat-card p-3">
                     <p className="font-medium text-gray-900">{formatCmsLabel(p.type)}</p>
                     {editing?.id === p.id ? (
                         <div className="mt-2 space-y-2">
-                            <textarea className={cmsTextarea} placeholder="Short customer-facing summary" value={short} onChange={(e) => setShort(e.target.value)} />
-                            <textarea className={`${cmsTextarea} min-h-[120px]`} placeholder="Full policy text for policy pages" value={full} onChange={(e) => setFull(e.target.value)} />
+                            <Textarea
+                                placeholder="Short customer-facing summary"
+                                value={short}
+                                onChange={(e) => setShort(e.target.value)}
+                            />
+                            <Textarea
+                                placeholder="Full policy text for policy pages"
+                                value={full}
+                                onChange={(e) => setFull(e.target.value)}
+                                className="min-h-[120px]"
+                            />
                             <div className="flex gap-2">
-                                <button type="button" className={cmsBtnPrimary} onClick={() => onUpdate(p.type, { short_text: short, full_text: full }).then(() => setEditing(null))} disabled={!!saving}>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    loading={!!saving}
+                                    disabled={!!saving}
+                                    onClick={() =>
+                                        onUpdate(p.type, { short_text: short, full_text: full }).then(() =>
+                                            setEditing(null)
+                                        )
+                                    }
+                                >
                                     Save
-                                </button>
-                                <button type="button" className={cmsBtnSecondary} onClick={() => setEditing(null)}>Cancel</button>
+                                </Button>
+                                <Button type="button" size="sm" variant="secondary" onClick={() => setEditing(null)}>
+                                    Cancel
+                                </Button>
                             </div>
                         </div>
                     ) : (
-                        <button type="button" className={`${cmsBtnSecondary} mt-1 flex items-center gap-2`} onClick={() => { setEditing(p); setShort(p.short_text ?? ''); setFull(p.full_text ?? ''); }}>
-                            <Pencil className="h-4 w-4" /> Edit
-                        </button>
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            className="mt-1"
+                            leftIcon={<Pencil className="h-4 w-4" />}
+                            onClick={() => {
+                                setEditing(p);
+                                setShort(p.short_text ?? '');
+                                setFull(p.full_text ?? '');
+                            }}
+                        >
+                            Edit
+                        </Button>
                     )}
                 </div>
             ))}
@@ -482,7 +599,7 @@ function SectionsList({
     return (
         <div className="space-y-2 pt-3">
             {sections.map((s) => (
-                <div key={s.id} className={`${cmsItemCard} flex items-center justify-between`}>
+                <div key={s.id} className="flat-card p-3 flex items-center justify-between">
                     <span className="font-medium text-gray-900">{formatCmsLabel(s.section_key)}</span>
                     <label className="flex items-center gap-2">
                         <span className="text-sm text-gray-500">{s.is_enabled ? 'On' : 'Off'}</span>
@@ -490,7 +607,10 @@ function SectionsList({
                             type="button"
                             role="switch"
                             aria-checked={s.is_enabled}
-                            className={`min-w-[44px] min-h-[24px] rounded-full transition-colors touch-manipulation ${s.is_enabled ? 'bg-blue-600' : 'bg-gray-200'}`}
+                            className={cn(
+                                'min-w-[44px] min-h-[24px] rounded-full transition-colors touch-manipulation',
+                                s.is_enabled ? 'bg-brand' : 'bg-gray-200'
+                            )}
                             onClick={() => onToggle(s.section_key, !s.is_enabled)}
                             disabled={!!saving}
                         />

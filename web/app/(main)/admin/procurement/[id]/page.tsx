@@ -19,6 +19,9 @@ import {
     ExternalLink,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Badge, { StatusBadge } from '@/components/ui/Badge';
+import Select from '@/components/ui/Select';
 
 const STATUS_OPTIONS = [
     'submitted',
@@ -152,9 +155,8 @@ export default function AdminProcurementDetailPage() {
     if (loading) {
         return (
             <DashboardLayout isAdmin={true}>
-                <div className="p-6 pb-6 md:pb-8 text-center">
-                    <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">Loading request...</p>
+                <div className="p-6 pb-6 md:pb-8 flex justify-center">
+                    <LoadingSpinner label="Loading request…" />
                 </div>
             </DashboardLayout>
         );
@@ -168,7 +170,7 @@ export default function AdminProcurementDetailPage() {
             <div className="mb-6 flex items-center justify-between gap-3">
                 <Link
                     href="/admin/procurement"
-                    className="text-blue-600 hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
+                    className="text-brand hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
                 >
                     <ArrowLeft className="h-4 w-4 mr-1.5" /> Procurement
                 </Link>
@@ -176,7 +178,7 @@ export default function AdminProcurementDetailPage() {
 
             <div className="space-y-6">
                 {/* Header card */}
-                <div className="admin-table-wrap">
+                <div className="admin-card overflow-hidden">
                     <div className="px-4 py-4 sm:px-6 border-b border-gray-50 flex flex-wrap justify-between items-start gap-4 bg-gray-50/50">
                         <div>
                             <h1 className="text-xl font-bold text-gray-900">{request.description}</h1>
@@ -186,23 +188,20 @@ export default function AdminProcurementDetailPage() {
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                             {request.request_type && (
-                                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-600 capitalize">
-                                    {formatCmsLabel(request.request_type)}
-                                </span>
+                                <Badge variant="brand">{formatCmsLabel(request.request_type)}</Badge>
                             )}
-                            <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-orange-50 text-orange-700 capitalize">
-                                {formatCmsLabel(request.status)}
-                            </span>
-                            <select
+                            <StatusBadge status={request.status}>{formatCmsLabel(request.status)}</StatusBadge>
+                            <Select
                                 value={request.status}
                                 onChange={(e) => handleStatusUpdate(e.target.value)}
                                 disabled={updating}
-                                className="text-xs font-semibold border border-gray-200 rounded-lg pl-3 pr-8 py-2 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                className="h-9 min-h-[36px] text-xs w-auto min-w-[9rem]"
+                                aria-label="Update request status"
                             >
                                 {STATUS_OPTIONS.map((s) => (
                                     <option key={s} value={s}>{formatCmsLabel(s)}</option>
                                 ))}
-                            </select>
+                            </Select>
                         </div>
                     </div>
                 </div>
@@ -211,7 +210,7 @@ export default function AdminProcurementDetailPage() {
                     {/* Main content */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Request details */}
-                        <div className="admin-table-wrap">
+                        <div className="admin-card overflow-hidden">
                             <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                 <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                     <FileText className="h-4 w-4" /> Request details
@@ -245,7 +244,7 @@ export default function AdminProcurementDetailPage() {
 
                         {/* Attached images */}
                         {images.length > 0 && (
-                            <div className="admin-table-wrap">
+                            <div className="admin-card overflow-hidden">
                                 <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                     <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                         <ImageIcon className="h-4 w-4" /> Attached images ({images.length})
@@ -297,7 +296,7 @@ export default function AdminProcurementDetailPage() {
                     {/* Sidebar */}
                     <div className="space-y-6">
                         {/* Customer */}
-                        <div className="admin-table-wrap">
+                        <div className="admin-card overflow-hidden">
                             <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                 <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                     <User className="h-4 w-4" /> Customer
@@ -320,7 +319,7 @@ export default function AdminProcurementDetailPage() {
 
                         {/* Add quote */}
                         {request.status === 'submitted' && (
-                            <div className="admin-table-wrap">
+                            <div className="admin-card overflow-hidden">
                                 <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                     <h3 className="text-sm font-semibold text-gray-900">Add quote</h3>
                                 </div>

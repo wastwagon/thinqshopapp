@@ -7,9 +7,23 @@ import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminStatGrid from '@/components/admin/AdminStatGrid';
+import AdminToolbar from '@/components/admin/AdminToolbar';
+import AdminTable, {
+    AdminTableBody,
+    AdminTableEmpty,
+    AdminTableHead,
+    AdminTableLoading,
+    AdminTd,
+    AdminTh,
+    AdminTr,
+} from '@/components/admin/AdminTable';
+import Button from '@/components/ui/Button';
+import Select from '@/components/ui/Select';
+import { StatusBadge } from '@/components/ui/Badge';
 import BarcodeScanner from '@/components/ui/BarcodeScanner';
-import { Truck, Search, Package, User, Mail, Calendar, Clock, Zap, FileText, CheckCircle, ChevronRight, Camera, ExternalLink } from 'lucide-react';
-import { ADMIN_STAT_PROGRESS, STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
+import { Truck, Package, User, Mail, Calendar, Clock, Zap, FileText, CheckCircle, ChevronRight, Camera, ExternalLink } from 'lucide-react';
+import { ADMIN_STAT_PROGRESS } from '@/lib/status-styles';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 interface Shipment {
@@ -124,23 +138,6 @@ export default function AdminLogisticsPage() {
         { label: 'Delivered', value: deliveredCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
     ];
 
-    const StatusBadge = ({ status }: { status: string }) => {
-        const colors: Record<string, string> = {
-            booked: 'bg-orange-50 text-orange-700 border-orange-200',
-            pickup_scheduled: 'bg-blue-50 text-blue-600 border-blue-300',
-            picked_up: STATUS_PROGRESS_BADGE,
-            in_transit: 'bg-blue-50 text-blue-700 border-blue-200',
-            out_for_delivery: 'bg-orange-50 text-orange-700 border-orange-200',
-            delivered: 'bg-green-50 text-green-700 border-green-200',
-            cancelled: 'bg-red-50 text-red-700 border-red-200',
-        };
-        return (
-            <span className={`px-2 py-0.5 text-xs font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
-                {status.replace(/_/g, ' ')}
-            </span>
-        );
-    };
-
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
@@ -149,163 +146,151 @@ export default function AdminLogisticsPage() {
                 title="Shipments"
                 subtitle="Freight and delivery"
                 actions={
-                    <div className="flex flex-wrap gap-2 min-w-0 flex-1 sm:flex-initial sm:max-w-md">
-                        <div className="relative flex-1 min-w-0">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" aria-hidden />
-                            <input
-                                type="search"
-                                placeholder="Search tracking or customer..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && goToShipmentDetail()}
-                                className="admin-input w-full pl-9"
-                                aria-label="Search shipments"
-                            />
-                        </div>
-                        <button type="button" onClick={() => setScannerOpen(true)} className="admin-btn-secondary h-9 px-3 shrink-0" title="Scan barcode to find shipment" aria-label="Scan barcode">
-                            <Camera className="h-4 w-4" aria-hidden />
-                            <span className="hidden xs:inline text-xs font-medium">Scan</span>
-                        </button>
-                        <button type="button" onClick={goToShipmentDetail} className="admin-btn-primary h-9 px-3 shrink-0" title="Open shipment details">
-                            <span className="hidden xs:inline">Go</span>
-                            <ChevronRight className="h-4 w-4" aria-hidden />
-                        </button>
-                    </div>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            goToShipmentDetail();
+                        }}
+                    >
+                        <AdminToolbar
+                            searchValue={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            searchPlaceholder="Search tracking or customer…"
+                            searchAriaLabel="Search shipments"
+                        >
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setScannerOpen(true)}
+                                leftIcon={<Camera className="h-3.5 w-3.5" />}
+                                title="Scan barcode to find shipment"
+                                className="h-9 min-h-[36px] px-3 text-xs shrink-0"
+                            >
+                                <span className="hidden xs:inline">Scan</span>
+                            </Button>
+                            <Button
+                                type="submit"
+                                size="sm"
+                                rightIcon={<ChevronRight className="h-3.5 w-3.5" />}
+                                title="Open shipment details"
+                                className="h-9 min-h-[36px] px-3 text-xs shrink-0"
+                            >
+                                <span className="hidden xs:inline">Go</span>
+                            </Button>
+                        </AdminToolbar>
+                    </form>
                 }
             />
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                {stats.map((s, i) => (
-                    <div key={i} className="admin-stat-card">
-                        <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
-                            <s.icon className="h-4 w-4" />
-                        </div>
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
-                        <p className="text-xl font-bold text-gray-900">{s.value}</p>
-                    </div>
-                ))}
-            </div>
+            <AdminStatGrid items={stats} columns={4} />
 
-            <div className="admin-table-wrap">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 min-w-0">Tracking</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 min-w-0">Customer</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-center min-w-0">Status</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right min-w-0">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={4} className="py-10 text-center">
-                                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
-                                        <p className="text-sm text-gray-500">Loading...</p>
-                                    </td>
-                                </tr>
-                            ) : filteredShipments.length === 0 ? (
-                                <tr>
-                                    <td colSpan={4} className="py-10 text-center text-gray-500">
-                                        <Package className="h-10 w-10 mx-auto mb-2 text-gray-200" />
-                                        <p className="text-sm">No shipments found</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredShipments.map((shipment) => (
-                                    <tr key={shipment.id} className="hover:bg-gray-50/50 transition-colors group">
-                                        <td className="px-3 py-2.5">
-                                            <div className="flex flex-col gap-0.5">
-                                                <Link
-                                                    href={`/admin/logistics/${shipment.id}`}
-                                                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
-                                                >
-                                                    {shipment.tracking_number || '—'}
-                                                </Link>
-                                                <span className="text-xs text-gray-500">{shipment.service_type || 'Standard'}</span>
-                                                {shipment.origin_warehouse && (
-                                                    <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                                        <span className="text-xs font-semibold py-0.5 px-1.5 bg-blue-50 text-blue-600 rounded border border-blue-200">{shipment.origin_warehouse.code}</span>
-                                                        {shipment.destination_warehouse && (
-                                                            <>
-                                                                <span className="text-gray-300">→</span>
-                                                                <span className="text-xs font-semibold py-0.5 px-1.5 bg-green-50 text-green-700 rounded border border-green-100">{shipment.destination_warehouse.code}</span>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                )}
-                                                {shipment.carrier_tracking_number && (
-                                                    <span className="text-xs text-gray-500">Carrier: {shipment.carrier_tracking_number}</span>
+            <AdminTable>
+                <AdminTableHead>
+                    <AdminTh>Tracking</AdminTh>
+                    <AdminTh>Customer</AdminTh>
+                    <AdminTh align="right">Status</AdminTh>
+                    <AdminTh align="right">Actions</AdminTh>
+                </AdminTableHead>
+                <AdminTableBody>
+                    {loading ? (
+                        <AdminTableLoading colSpan={4} />
+                    ) : filteredShipments.length === 0 ? (
+                        <AdminTableEmpty
+                            colSpan={4}
+                            icon={<Package className="h-10 w-10 mx-auto mb-2 text-gray-200" />}
+                            message="No shipments found"
+                        />
+                    ) : (
+                        filteredShipments.map((shipment) => (
+                            <AdminTr key={shipment.id}>
+                                <AdminTd>
+                                    <div className="flex flex-col gap-0.5">
+                                        <Link
+                                            href={`/admin/logistics/${shipment.id}`}
+                                            className="text-xs font-semibold text-brand hover:underline"
+                                        >
+                                            {shipment.tracking_number || '—'}
+                                        </Link>
+                                        <span className="text-xs text-gray-500">{shipment.service_type || 'Standard'}</span>
+                                        {shipment.origin_warehouse && (
+                                            <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                                <span className="text-xs font-semibold py-0.5 px-1.5 bg-blue-50 text-blue-600 rounded border border-blue-200">{shipment.origin_warehouse.code}</span>
+                                                {shipment.destination_warehouse && (
+                                                    <>
+                                                        <span className="text-gray-300">→</span>
+                                                        <span className="text-xs font-semibold py-0.5 px-1.5 bg-green-50 text-green-700 rounded border border-green-100">{shipment.destination_warehouse.code}</span>
+                                                    </>
                                                 )}
                                             </div>
-                                        </td>
-                                        <td className="px-3 py-2.5">
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                <div className="w-7 h-7 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-100 shrink-0">
-                                                    <User className="h-3.5 w-3.5 text-gray-400" />
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="text-xs font-medium text-gray-900 truncate">
-                                                        {[shipment.user?.profile?.first_name, shipment.user?.profile?.last_name].filter(Boolean).join(' ') || '—'}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 truncate flex items-center gap-1">
-                                                        <Mail className="h-2.5 w-2.5 shrink-0" />{shipment.user?.email}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 py-2.5 text-center">
-                                            <StatusBadge status={shipment.status} />
-                                            <p className="text-xs text-gray-500 mt-1 flex items-center justify-center gap-1">
-                                                <Calendar className="h-2.5 w-2.5" />{new Date(shipment.created_at).toLocaleDateString()}
+                                        )}
+                                        {shipment.carrier_tracking_number && (
+                                            <span className="text-xs text-gray-500">Carrier: {shipment.carrier_tracking_number}</span>
+                                        )}
+                                    </div>
+                                </AdminTd>
+                                <AdminTd>
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <div className="w-7 h-7 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-100 shrink-0">
+                                            <User className="h-3.5 w-3.5 text-gray-400" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-medium text-gray-900 truncate">
+                                                {[shipment.user?.profile?.first_name, shipment.user?.profile?.last_name].filter(Boolean).join(' ') || '—'}
                                             </p>
-                                        </td>
-                                        <td className="px-3 py-2.5 text-right">
-                                            <div className="flex items-center justify-end gap-1.5 flex-wrap">
-                                                <Link
-                                                    href={`/admin/logistics/${shipment.id}`}
-                                                    className="min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg border border-gray-200 bg-white text-gray-700 flex items-center justify-center hover:bg-gray-50 hover:border-gray-300 transition-all shrink-0"
-                                                    title="View details"
-                                                    aria-label="View shipment details"
-                                                >
-                                                    <ExternalLink className="h-4 w-4" />
-                                                </Link>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleSimulateWebhook(shipment.id)}
-                                                    disabled={updatingId === shipment.id || shipment.status === 'delivered'}
-                                                    title="Advance status"
-                                                    className="min-w-[44px] min-h-[44px] w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50 shrink-0"
-                                                    aria-label="Advance status"
-                                                >
-                                                    <Zap className="h-4 w-4" />
-                                                </button>
-                                                <div className="relative inline-block">
-                                                    <select
-                                                        disabled={updatingId === shipment.id}
-                                                        className="appearance-none bg-gray-50 border border-gray-100 text-gray-700 text-xs font-semibold rounded-lg min-h-[44px] py-2 pl-2.5 pr-7 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
-                                                        value={shipment.status}
-                                                        onChange={(e) => void handleStatusUpdate(shipment.id, e.target.value)}
-                                                    >
-                                                        <option value="booked">Booked</option>
-                                                        <option value="pickup_scheduled">Pickup scheduled</option>
-                                                        <option value="picked_up">Picked up</option>
-                                                        <option value="in_transit">In transit</option>
-                                                        <option value="out_for_delivery">Out for delivery</option>
-                                                        <option value="delivered">Delivered</option>
-                                                        <option value="cancelled">Cancelled</option>
-                                                    </select>
-                                                    <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none rotate-90" aria-hidden />
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                            <p className="text-xs text-gray-500 truncate flex items-center gap-1">
+                                                <Mail className="h-2.5 w-2.5 shrink-0" />{shipment.user?.email}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </AdminTd>
+                                <AdminTd className="text-right">
+                                    <StatusBadge status={shipment.status} />
+                                    <p className="text-xs text-gray-500 mt-1 flex items-center justify-end gap-1">
+                                        <Calendar className="h-2.5 w-2.5" />{new Date(shipment.created_at).toLocaleDateString()}
+                                    </p>
+                                </AdminTd>
+                                <AdminTd className="text-right">
+                                    <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                                        <Link
+                                            href={`/admin/logistics/${shipment.id}`}
+                                            className="min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg border border-gray-200 bg-white text-gray-700 flex items-center justify-center hover:bg-gray-50 hover:border-gray-300 transition-all shrink-0"
+                                            title="View details"
+                                            aria-label="View shipment details"
+                                        >
+                                            <ExternalLink className="h-4 w-4" />
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSimulateWebhook(shipment.id)}
+                                            disabled={updatingId === shipment.id || shipment.status === 'delivered'}
+                                            title="Advance status"
+                                            className="min-w-[44px] min-h-[44px] w-10 h-10 bg-blue-50 text-brand rounded-lg flex items-center justify-center hover:bg-brand hover:text-white transition-all disabled:opacity-50 shrink-0"
+                                            aria-label="Advance status"
+                                        >
+                                            <Zap className="h-4 w-4" />
+                                        </button>
+                                        <Select
+                                            disabled={updatingId === shipment.id}
+                                            value={shipment.status}
+                                            onChange={(e) => void handleStatusUpdate(shipment.id, e.target.value)}
+                                            className="h-9 min-h-[36px] text-xs py-1.5 w-auto min-w-[8.5rem]"
+                                            aria-label={`Update status for ${shipment.tracking_number}`}
+                                        >
+                                            <option value="booked">Booked</option>
+                                            <option value="pickup_scheduled">Pickup scheduled</option>
+                                            <option value="picked_up">Picked up</option>
+                                            <option value="in_transit">In transit</option>
+                                            <option value="out_for_delivery">Out for delivery</option>
+                                            <option value="delivered">Delivered</option>
+                                            <option value="cancelled">Cancelled</option>
+                                        </Select>
+                                    </div>
+                                </AdminTd>
+                            </AdminTr>
+                        ))
+                    )}
+                </AdminTableBody>
+            </AdminTable>
             </div>
 
             <BarcodeScanner

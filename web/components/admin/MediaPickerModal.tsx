@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import { getMediaUrl } from '@/lib/media';
-import { Loader2 } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { cn } from '@/lib/cn';
 
 type MediaItem = { id: number; filename: string; path: string; url: string };
@@ -85,7 +85,7 @@ export default function MediaPickerModal({
             <div className="max-h-[55vh] overflow-y-auto overscroll-y-contain scrollbar-thin -mx-1 px-1">
                 {loading ? (
                     <div className="flex justify-center py-12">
-                        <Loader2 className="h-8 w-8 text-brand animate-spin" />
+                        <LoadingSpinner label="Loading media…" />
                     </div>
                 ) : items.length === 0 ? (
                     <p className="text-center text-gray-500 py-12">No media. Upload images in Media first.</p>

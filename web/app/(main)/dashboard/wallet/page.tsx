@@ -13,6 +13,12 @@ import DashboardContent from '@/components/dashboard/DashboardContent';
 import DashboardWalletBalancePanel from '@/components/dashboard/DashboardWalletBalancePanel';
 import { useAuth } from '@/context/AuthContext';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
+import Button, { buttonVariants } from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import FormField from '@/components/ui/FormField';
+import Modal from '@/components/ui/Modal';
+import { StatusBadge } from '@/components/ui/Badge';
 
 const PaystackTrigger = dynamic(
     () => import('@/components/payments/PaystackTrigger').then((m) => m.default),
@@ -279,7 +285,7 @@ export default function WalletPage() {
                         <button
                             type="button"
                             onClick={() => document.getElementById('wallet-transaction-history')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="h-9 px-4 rounded-xl text-xs font-semibold border border-gray-200/90 text-gray-600 hover:border-blue-500/30 hover:text-blue-600 flex items-center gap-2 transition-colors"
+                            className={buttonVariants({ variant: 'secondary', size: 'sm' })}
                         >
                             <Activity className="h-3.5 w-3.5" />
                             Activity
@@ -315,23 +321,25 @@ export default function WalletPage() {
                     }
                     actions={
                         <>
-                            <button
+                            <Button
                                 type="button"
+                                size="sm"
                                 onClick={() => setShowTopUpModal(true)}
-                                className="h-10 px-5 bg-white text-blue-950 rounded-xl font-semibold text-xs hover:bg-blue-50 transition-colors flex items-center gap-2"
+                                className="bg-white text-blue-950 border-0 hover:bg-blue-50 shadow-sm"
+                                leftIcon={<Plus className="h-4 w-4" />}
                             >
-                                <Plus className="h-4 w-4" />
                                 Top-up
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 type="button"
+                                size="sm"
                                 onClick={() => setShowWithdrawModal(true)}
                                 disabled={availableBalance === null || availableBalance < 50}
-                                className="h-10 px-5 bg-white/10 border border-white/25 text-white rounded-xl font-semibold text-xs hover:bg-white/15 transition-colors flex items-center gap-2 disabled:opacity-50"
+                                className="bg-white/10 text-white border border-white/25 hover:bg-white/15"
+                                leftIcon={<Banknote className="h-4 w-4" />}
                             >
-                                <Banknote className="h-4 w-4" />
                                 Withdraw
-                            </button>
+                            </Button>
                         </>
                     }
                 />
@@ -425,11 +433,7 @@ export default function WalletPage() {
                                 <li key={w.id} className="text-sm border-b border-gray-50 pb-2 last:border-0 last:pb-0">
                                     <div className="flex items-center justify-between gap-2">
                                         <span className="text-gray-800">₵{Number(w.amount_ghs).toFixed(2)}</span>
-                                        <span className={`text-xs font-semibold capitalize ${
-                                            w.status === 'paid' ? 'text-green-600' : w.status === 'rejected' ? 'text-red-600' : 'text-gray-500'
-                                        }`}>
-                                            {w.status.replace(/_/g, ' ')}
-                                        </span>
+                                        <StatusBadge status={w.status} />
                                     </div>
                                     {w.rejection_reason && (
                                         <p className="text-xs text-red-600 mt-1">{w.rejection_reason}</p>
@@ -441,110 +445,143 @@ export default function WalletPage() {
                     </div>
                 )}
 
-                {showTopUpModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowTopUpModal(false)}>
-                        <div className="flat-card p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
-                            <h3 className="text-sm font-semibold text-gray-900 mb-4">Top-up wallet</h3>
-                            <form onSubmit={handleTopUp} className="space-y-4">
-                                <input
-                                    type="number"
-                                    className="block w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-base font-semibold"
-                                    placeholder="Amount (GHS)"
-                                    value={topUpAmount}
-                                    onChange={(e) => setTopUpAmount(e.target.value)}
-                                    min="1"
-                                    step="0.01"
-                                    required
-                                />
-                                <div className="flex gap-2">
-                                    <button type="button" onClick={() => setShowTopUpModal(false)} className="flex-1 py-3 rounded-xl text-sm font-semibold bg-gray-100">Cancel</button>
-                                    <button type="submit" disabled={isToppingUp} className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-blue-600 disabled:opacity-50">
-                                        {isToppingUp ? '…' : 'Deposit'}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )}
+                <Modal
+                    open={showTopUpModal}
+                    onClose={() => !isToppingUp && setShowTopUpModal(false)}
+                    title="Top-up wallet"
+                    size="sm"
+                    footer={
+                        <>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                disabled={isToppingUp}
+                                onClick={() => setShowTopUpModal(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button type="submit" form="wallet-topup-form" loading={isToppingUp} disabled={isToppingUp}>
+                                Deposit
+                            </Button>
+                        </>
+                    }
+                >
+                    <form id="wallet-topup-form" onSubmit={handleTopUp}>
+                        <FormField label="Amount (GHS)" htmlFor="topup-amount" required>
+                            <Input
+                                id="topup-amount"
+                                type="number"
+                                placeholder="0.00"
+                                value={topUpAmount}
+                                onChange={(e) => setTopUpAmount(e.target.value)}
+                                min="1"
+                                step="0.01"
+                                required
+                            />
+                        </FormField>
+                    </form>
+                </Modal>
 
-                {showWithdrawModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowWithdrawModal(false)}>
-                        <div className="flat-card p-6 w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                            <h3 className="text-sm font-semibold text-gray-900 mb-1">Request withdrawal</h3>
-                            <p className="text-xs text-gray-500 mb-4">Admin will send funds manually, then approve to debit your wallet. Min ₵50.</p>
-                            <form onSubmit={handleWithdraw} className="space-y-3">
-                                <input
-                                    type="number"
-                                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm"
-                                    placeholder="Amount (GHS)"
-                                    value={withdrawForm.amount}
-                                    onChange={(e) => setWithdrawForm({ ...withdrawForm, amount: e.target.value })}
-                                    min="50"
-                                    step="0.01"
-                                    required
-                                />
-                                <select
-                                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm"
-                                    value={withdrawForm.method}
-                                    onChange={(e) => setWithdrawForm({ ...withdrawForm, method: e.target.value as 'mobile_money' | 'bank_transfer' })}
-                                >
-                                    <option value="mobile_money">Mobile Money</option>
-                                    <option value="bank_transfer">Bank transfer</option>
-                                </select>
-                                <input
-                                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm"
-                                    placeholder="Account name"
-                                    value={withdrawForm.account_name}
-                                    onChange={(e) => setWithdrawForm({ ...withdrawForm, account_name: e.target.value })}
-                                    required
-                                />
-                                {withdrawForm.method === 'mobile_money' ? (
-                                    <>
-                                        <input
-                                            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm"
-                                            placeholder="Phone number"
-                                            value={withdrawForm.phone}
-                                            onChange={(e) => setWithdrawForm({ ...withdrawForm, phone: e.target.value })}
-                                            required
-                                        />
-                                        <select
-                                            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm"
-                                            value={withdrawForm.network}
-                                            onChange={(e) => setWithdrawForm({ ...withdrawForm, network: e.target.value })}
-                                        >
-                                            <option value="MTN">MTN</option>
-                                            <option value="Vodafone">Vodafone</option>
-                                            <option value="AirtelTigo">AirtelTigo</option>
-                                        </select>
-                                    </>
-                                ) : (
-                                    <>
-                                        <input
-                                            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm"
-                                            placeholder="Bank name"
-                                            value={withdrawForm.bank_name}
-                                            onChange={(e) => setWithdrawForm({ ...withdrawForm, bank_name: e.target.value })}
-                                            required
-                                        />
-                                        <input
-                                            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm"
-                                            placeholder="Account number"
-                                            value={withdrawForm.account_number}
-                                            onChange={(e) => setWithdrawForm({ ...withdrawForm, account_number: e.target.value })}
-                                            required
-                                        />
-                                    </>
-                                )}
-                                <div className="flex gap-2 pt-2">
-                                    <button type="button" onClick={() => setShowWithdrawModal(false)} className="flex-1 py-3 rounded-xl text-sm font-semibold bg-gray-100">Cancel</button>
-                                    <button type="submit" disabled={withdrawing} className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-blue-600 disabled:opacity-50">
-                                        {withdrawing ? 'Submitting…' : 'Submit request'}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )}
+                <Modal
+                    open={showWithdrawModal}
+                    onClose={() => !withdrawing && setShowWithdrawModal(false)}
+                    title="Request withdrawal"
+                    description="Admin will send funds manually, then approve to debit your wallet. Min ₵50."
+                    footer={
+                        <>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                disabled={withdrawing}
+                                onClick={() => setShowWithdrawModal(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button type="submit" form="wallet-withdraw-form" loading={withdrawing} disabled={withdrawing}>
+                                Submit request
+                            </Button>
+                        </>
+                    }
+                >
+                    <form id="wallet-withdraw-form" onSubmit={handleWithdraw} className="space-y-3">
+                        <FormField label="Amount (GHS)" htmlFor="withdraw-amount" required>
+                            <Input
+                                id="withdraw-amount"
+                                type="number"
+                                placeholder="0.00"
+                                value={withdrawForm.amount}
+                                onChange={(e) => setWithdrawForm({ ...withdrawForm, amount: e.target.value })}
+                                min="50"
+                                step="0.01"
+                                required
+                            />
+                        </FormField>
+                        <FormField label="Method" htmlFor="withdraw-method">
+                            <Select
+                                id="withdraw-method"
+                                value={withdrawForm.method}
+                                onChange={(e) => setWithdrawForm({ ...withdrawForm, method: e.target.value as 'mobile_money' | 'bank_transfer' })}
+                            >
+                                <option value="mobile_money">Mobile Money</option>
+                                <option value="bank_transfer">Bank transfer</option>
+                            </Select>
+                        </FormField>
+                        <FormField label="Account name" htmlFor="withdraw-account-name" required>
+                            <Input
+                                id="withdraw-account-name"
+                                placeholder="Account name"
+                                value={withdrawForm.account_name}
+                                onChange={(e) => setWithdrawForm({ ...withdrawForm, account_name: e.target.value })}
+                                required
+                            />
+                        </FormField>
+                        {withdrawForm.method === 'mobile_money' ? (
+                            <>
+                                <FormField label="Phone number" htmlFor="withdraw-phone" required>
+                                    <Input
+                                        id="withdraw-phone"
+                                        placeholder="Phone number"
+                                        value={withdrawForm.phone}
+                                        onChange={(e) => setWithdrawForm({ ...withdrawForm, phone: e.target.value })}
+                                        required
+                                    />
+                                </FormField>
+                                <FormField label="Network" htmlFor="withdraw-network">
+                                    <Select
+                                        id="withdraw-network"
+                                        value={withdrawForm.network}
+                                        onChange={(e) => setWithdrawForm({ ...withdrawForm, network: e.target.value })}
+                                    >
+                                        <option value="MTN">MTN</option>
+                                        <option value="Vodafone">Vodafone</option>
+                                        <option value="AirtelTigo">AirtelTigo</option>
+                                    </Select>
+                                </FormField>
+                            </>
+                        ) : (
+                            <>
+                                <FormField label="Bank name" htmlFor="withdraw-bank-name" required>
+                                    <Input
+                                        id="withdraw-bank-name"
+                                        placeholder="Bank name"
+                                        value={withdrawForm.bank_name}
+                                        onChange={(e) => setWithdrawForm({ ...withdrawForm, bank_name: e.target.value })}
+                                        required
+                                    />
+                                </FormField>
+                                <FormField label="Account number" htmlFor="withdraw-account-number" required>
+                                    <Input
+                                        id="withdraw-account-number"
+                                        placeholder="Account number"
+                                        value={withdrawForm.account_number}
+                                        onChange={(e) => setWithdrawForm({ ...withdrawForm, account_number: e.target.value })}
+                                        required
+                                    />
+                                </FormField>
+                            </>
+                        )}
+                    </form>
+                </Modal>
 
                 <div id="wallet-transaction-history" className="scroll-mt-6">
                     <GroupedList aria-label="Transaction history">
@@ -584,33 +621,35 @@ export default function WalletPage() {
                 </div>
             </DashboardContent>
 
-            {escrowLedgerModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/40" onClick={() => setEscrowLedgerModal(null)} aria-hidden />
-                    <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto">
-                        <h2 className="text-lg font-bold text-gray-900 mb-1">Payout history</h2>
-                        <p className="text-xs text-gray-500 mb-4">{escrowLedgerModal.name}</p>
-                        {escrowLedgerLoading ? (
-                            <p className="text-sm text-gray-500">Loading…</p>
-                        ) : escrowLedgerEntries.length === 0 ? (
-                            <p className="text-sm text-gray-500">No events recorded yet.</p>
-                        ) : (
-                            <ul className="space-y-2">
-                                {escrowLedgerEntries.map((e) => (
-                                    <li key={e.id} className="border border-gray-100 rounded-lg p-3 text-xs">
-                                        <div className="flex justify-between gap-2">
-                                            <span className="font-semibold">{ESCROW_EVENT_LABELS[e.event_type] ?? e.event_type}</span>
-                                            <span className="text-gray-400">{new Date(e.created_at).toLocaleString()}</span>
-                                        </div>
-                                        {e.note && <p className="text-gray-600 mt-1">{e.note}</p>}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                        <button type="button" onClick={() => setEscrowLedgerModal(null)} className="mt-4 w-full h-10 rounded-xl bg-gray-100 text-sm font-semibold">Close</button>
-                    </div>
-                </div>
-            )}
+            <Modal
+                open={!!escrowLedgerModal}
+                onClose={() => setEscrowLedgerModal(null)}
+                title="Payout history"
+                description={escrowLedgerModal?.name}
+                footer={
+                    <Button type="button" variant="secondary" onClick={() => setEscrowLedgerModal(null)}>
+                        Close
+                    </Button>
+                }
+            >
+                {escrowLedgerLoading ? (
+                    <p className="text-sm text-gray-500">Loading…</p>
+                ) : escrowLedgerEntries.length === 0 ? (
+                    <p className="text-sm text-gray-500">No events recorded yet.</p>
+                ) : (
+                    <ul className="space-y-2">
+                        {escrowLedgerEntries.map((e) => (
+                            <li key={e.id} className="border border-gray-100 rounded-lg p-3 text-xs">
+                                <div className="flex justify-between gap-2">
+                                    <span className="font-semibold">{ESCROW_EVENT_LABELS[e.event_type] ?? e.event_type}</span>
+                                    <span className="text-gray-400">{new Date(e.created_at).toLocaleString()}</span>
+                                </div>
+                                {e.note && <p className="text-gray-600 mt-1">{e.note}</p>}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </Modal>
             {confirmDialog}
         </DashboardLayout>
     );

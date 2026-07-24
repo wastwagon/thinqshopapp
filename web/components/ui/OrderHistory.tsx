@@ -6,6 +6,9 @@ import Link from 'next/link';
 import { Package } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { GroupedList, GroupedListItem, GroupedListEmpty } from '@/components/ui/GroupedList';
+import { StatusBadge } from '@/components/ui/Badge';
+import { buttonVariants } from '@/components/ui/Button';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface Order {
     id: number;
@@ -14,12 +17,6 @@ interface Order {
     status: string;
     created_at: string;
     items: unknown[];
-}
-
-function statusClass(status: string) {
-    if (status === 'delivered') return 'bg-green-50 text-green-700';
-    if (status === 'cancelled') return 'bg-red-50 text-red-600';
-    return 'bg-blue-50 text-blue-600';
 }
 
 export default function OrderHistory() {
@@ -43,7 +40,11 @@ export default function OrderHistory() {
     }, [user]);
 
     if (loading) {
-        return <div className="py-10 text-center text-sm text-gray-500">Loading orders…</div>;
+        return (
+            <div className="py-10 flex justify-center">
+                <LoadingSpinner size="sm" label="Loading orders…" />
+            </div>
+        );
     }
 
     if (orders.length === 0) {
@@ -53,10 +54,7 @@ export default function OrderHistory() {
                     icon={Package}
                     message="No orders yet. Start shopping to see orders here."
                     action={
-                        <Link
-                            href="/shop"
-                            className="inline-flex items-center px-5 py-2.5 text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors min-h-[44px]"
-                        >
+                        <Link href="/shop" className={buttonVariants({ variant: 'primary', size: 'md' })}>
                             Browse products
                         </Link>
                     }
@@ -80,11 +78,7 @@ export default function OrderHistory() {
                     })}
                     trailing={
                         <span className="flex flex-col items-end gap-1 shrink-0">
-                            <span
-                                className={`px-2 py-0.5 rounded-md text-xs font-semibold capitalize ${statusClass(order.status)}`}
-                            >
-                                {order.status.replace(/_/g, ' ')}
-                            </span>
+                            <StatusBadge status={order.status} className="capitalize" />
                             <span className="text-sm font-semibold text-gray-900 tabular-nums">
                                 ₵{Number(order.total).toFixed(2)}
                             </span>

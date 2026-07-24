@@ -4,7 +4,23 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
-import { Users, Shield, Search, Mail, Calendar, Activity, Eye, Phone, Plus, X, ChevronRight } from 'lucide-react';
+import AdminStatGrid from '@/components/admin/AdminStatGrid';
+import AdminToolbar from '@/components/admin/AdminToolbar';
+import AdminTable, {
+    AdminTableBody,
+    AdminTableEmpty,
+    AdminTableHead,
+    AdminTableLoading,
+    AdminTd,
+    AdminTh,
+    AdminTr,
+} from '@/components/admin/AdminTable';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import FormField from '@/components/ui/FormField';
+import Modal from '@/components/ui/Modal';
+import Badge from '@/components/ui/Badge';
+import { Users, Shield, Activity, ChevronRight, Plus } from 'lucide-react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 
@@ -76,7 +92,12 @@ export default function AdminUsers() {
 
     const handleAddUser = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!addUserForm.email.trim() || !addUserForm.password.trim() || !addUserForm.first_name.trim() || !addUserForm.last_name.trim()) {
+        if (
+            !addUserForm.email.trim() ||
+            !addUserForm.password.trim() ||
+            !addUserForm.first_name.trim() ||
+            !addUserForm.last_name.trim()
+        ) {
             toast.error('Email/phone, password, first name and last name are required');
             return;
         }
@@ -112,238 +133,283 @@ export default function AdminUsers() {
     );
 
     const stats = [
-        { label: 'Total', value: users.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
-        { label: 'Admins', value: users.filter((u) => u.role === 'admin' || u.role === 'superadmin').length, icon: Shield, color: 'text-orange-500', bg: 'bg-orange-50', border: 'border-orange-100' },
-        { label: 'Active', value: users.filter((u) => u.is_active !== false).length, icon: Activity, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
+        {
+            label: 'Total',
+            value: users.length,
+            icon: Users,
+            color: 'text-blue-600',
+            bg: 'bg-blue-50',
+            border: 'border-blue-200',
+        },
+        {
+            label: 'Admins',
+            value: users.filter((u) => u.role === 'admin' || u.role === 'superadmin').length,
+            icon: Shield,
+            color: 'text-orange-500',
+            bg: 'bg-orange-50',
+            border: 'border-orange-100',
+        },
+        {
+            label: 'Active',
+            value: users.filter((u) => u.is_active !== false).length,
+            icon: Activity,
+            color: 'text-green-600',
+            bg: 'bg-green-50',
+            border: 'border-green-100',
+        },
     ];
 
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <AdminPageHeader
-                icon={Users}
-                title="Users"
-                subtitle="Manage customer and team accounts"
-                actions={
-                    <>
-                        <button type="button" onClick={() => setAddUserOpen(true)} className="admin-btn-primary h-9 px-4 shrink-0">
-                            <Plus className="h-4 w-4" aria-hidden /> Add user
-                        </button>
-                        <form onSubmit={handleSearch} className="flex flex-wrap gap-2 min-w-0">
-                            <div className="relative flex-1 min-w-[12rem]">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" aria-hidden />
-                                <input
-                                    type="search"
-                                    placeholder="Search by name, email, or phone..."
-                                    value={searchInput}
-                                    onChange={(e) => setSearchInput(e.target.value)}
-                                    className="admin-input w-full pl-9"
-                                    aria-label="Search users"
-                                />
-                            </div>
-                            <button type="submit" className="admin-btn-primary h-9 px-4 shrink-0">Search</button>
-                            <button type="button" onClick={handleRefresh} className="admin-btn-secondary h-9 px-4 shrink-0">Refresh</button>
+                <AdminPageHeader
+                    icon={Users}
+                    title="Users"
+                    subtitle="Manage customer and team accounts"
+                    actions={
+                        <form onSubmit={handleSearch}>
+                            <AdminToolbar
+                                searchValue={searchInput}
+                                onSearchChange={setSearchInput}
+                                searchPlaceholder="Search name, email, phone…"
+                                searchAriaLabel="Search users"
+                            >
+                                <Button type="submit" size="sm">
+                                    Search
+                                </Button>
+                                <Button type="button" size="sm" variant="secondary" onClick={handleRefresh}>
+                                    Refresh
+                                </Button>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    leftIcon={<Plus className="h-3.5 w-3.5" />}
+                                    onClick={() => setAddUserOpen(true)}
+                                >
+                                    Add user
+                                </Button>
+                            </AdminToolbar>
                         </form>
-                    </>
-                }
-            />
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                {stats.map((stat, i) => (
-                    <div key={i} className="admin-stat-card">
-                        <div className={`w-9 h-9 rounded-lg ${stat.bg} ${stat.border} border flex items-center justify-center ${stat.color} mb-2`}>
-                            <stat.icon className="h-4 w-4" />
-                        </div>
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{stat.label}</p>
-                        <p className="text-xl font-bold text-gray-900">{stat.value}</p>
-                    </div>
-                ))}
-            </div>
-
-            <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-                <input
-                    type="text"
-                    placeholder="Quick filter within loaded users..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full h-9 bg-white border border-gray-100 rounded-lg pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    }
                 />
-            </div>
 
-            <div className="admin-table-wrap">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50/80 border-b border-gray-100">
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Email</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Phone</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Status</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Joined</th>
-                                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={7} className="px-4 py-12 text-center text-sm text-gray-500">
-                                        Loading users...
-                                    </td>
-                                </tr>
-                            ) : filteredUsers.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="px-4 py-12 text-center">
-                                        <Users className="h-10 w-10 mx-auto mb-2 text-gray-200" />
-                                        <p className="text-sm text-gray-500">No users found</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredUsers.map((user) => {
-                                    const name = displayName(user);
-                                    const isAdminRole = user.role === 'admin' || user.role === 'superadmin';
-                                    const isActive = user.is_active !== false;
-                                    const verified = user.is_verified === true;
-                                    const created = user.created_at ? new Date(user.created_at).toLocaleDateString() : '—';
-                                    const waUrl = toWhatsAppUrl(user.phone);
-                                    return (
-                                        <tr key={user.id} className="hover:bg-gray-50/50 transition-colors group">
-                                            <td className="px-4 py-3">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-100 shrink-0 group-hover:bg-blue-50 group-hover:border-blue-200 transition-colors">
-                                                        <Users className="h-4 w-4 text-gray-500 group-hover:text-blue-600 transition-colors" />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <p className="text-sm font-semibold text-gray-900 truncate">{name || 'No name'}</p>
-                                                        <p className="text-xs text-gray-500 truncate sm:hidden">{user.email}</p>
-                                                    </div>
+                <AdminStatGrid items={stats} columns={3} />
+
+                <div className="mb-4">
+                    <AdminToolbar
+                        searchValue={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        searchPlaceholder="Quick filter within loaded users…"
+                        searchAriaLabel="Filter loaded users"
+                        className="w-full [&>div]:flex-1 [&>div]:sm:flex-1 [&>div]:sm:w-full [&>div_input]:sm:w-full"
+                    />
+                </div>
+
+                <AdminTable>
+                    <AdminTableHead>
+                        <AdminTh>User</AdminTh>
+                        <AdminTh className="hidden sm:table-cell">Email</AdminTh>
+                        <AdminTh className="hidden md:table-cell">Phone</AdminTh>
+                        <AdminTh>Role</AdminTh>
+                        <AdminTh className="hidden lg:table-cell">Status</AdminTh>
+                        <AdminTh className="hidden md:table-cell">Joined</AdminTh>
+                        <AdminTh align="right">Action</AdminTh>
+                    </AdminTableHead>
+                    <AdminTableBody>
+                        {loading ? (
+                            <AdminTableLoading colSpan={7} label="Loading users…" />
+                        ) : filteredUsers.length === 0 ? (
+                            <AdminTableEmpty
+                                colSpan={7}
+                                icon={<Users className="h-10 w-10 mx-auto mb-2 text-gray-200" />}
+                                message="No users found"
+                            />
+                        ) : (
+                            filteredUsers.map((user) => {
+                                const name = displayName(user);
+                                const isAdminRole =
+                                    user.role === 'admin' || user.role === 'superadmin';
+                                const isActive = user.is_active !== false;
+                                const verified = user.is_verified === true;
+                                const created = user.created_at
+                                    ? new Date(user.created_at).toLocaleDateString()
+                                    : '—';
+                                const waUrl = toWhatsAppUrl(user.phone);
+                                return (
+                                    <AdminTr key={user.id} className="group">
+                                        <AdminTd>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-100 shrink-0 group-hover:bg-blue-50 group-hover:border-blue-200 transition-colors">
+                                                    <Users className="h-4 w-4 text-gray-500 group-hover:text-brand transition-colors" />
                                                 </div>
-                                            </td>
-                                            <td className="px-4 py-3 hidden sm:table-cell">
-                                                <a href={`mailto:${user.email}`} className="text-sm text-gray-600 hover:text-blue-600 truncate block max-w-[180px]">
-                                                    {user.email}
-                                                </a>
-                                            </td>
-                                            <td className="px-4 py-3 hidden md:table-cell">
-                                                {user.phone ? (
-                                                    waUrl ? (
-                                                        <a href={waUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-green-600 hover:underline">
-                                                            {user.phone}
-                                                        </a>
-                                                    ) : (
-                                                        <span className="text-sm text-gray-600">{user.phone}</span>
-                                                    )
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-semibold text-gray-900 truncate">
+                                                        {name || 'No name'}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 truncate sm:hidden">
+                                                        {user.email}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </AdminTd>
+                                        <AdminTd className="hidden sm:table-cell">
+                                            <a
+                                                href={`mailto:${user.email}`}
+                                                className="text-sm text-gray-600 hover:text-brand truncate block max-w-[180px]"
+                                            >
+                                                {user.email}
+                                            </a>
+                                        </AdminTd>
+                                        <AdminTd className="hidden md:table-cell">
+                                            {user.phone ? (
+                                                waUrl ? (
+                                                    <a
+                                                        href={waUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-sm text-emerald-600 hover:underline"
+                                                    >
+                                                        {user.phone}
+                                                    </a>
                                                 ) : (
-                                                    <span className="text-sm text-gray-400">—</span>
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold ${isAdminRole ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-600'}`}>
-                                                    {verified && <Shield className="h-3 w-3" />}
-                                                    {formatCmsLabel(user.role ?? 'user')}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 hidden lg:table-cell">
-                                                <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${isActive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
-                                                    {isActive ? 'Active' : 'Inactive'}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 hidden md:table-cell text-sm text-gray-500">
-                                                {created}
-                                            </td>
-                                            <td className="px-4 py-3 text-right">
-                                                <Link
-                                                    href={`/admin/users/${user.id}`}
-                                                    className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
-                                                >
-                                                    View <ChevronRight className="h-4 w-4" />
-                                                </Link>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                                    <span className="text-sm text-gray-600">
+                                                        {user.phone}
+                                                    </span>
+                                                )
+                                            ) : (
+                                                <span className="text-sm text-gray-400">—</span>
+                                            )}
+                                        </AdminTd>
+                                        <AdminTd>
+                                            <Badge variant={isAdminRole ? 'brand' : 'default'}>
+                                                {verified && <Shield className="h-3 w-3" />}
+                                                {formatCmsLabel(user.role ?? 'user')}
+                                            </Badge>
+                                        </AdminTd>
+                                        <AdminTd className="hidden lg:table-cell">
+                                            <Badge variant={isActive ? 'success' : 'danger'}>
+                                                {isActive ? 'Active' : 'Inactive'}
+                                            </Badge>
+                                        </AdminTd>
+                                        <AdminTd className="hidden md:table-cell text-sm text-gray-500">
+                                            {created}
+                                        </AdminTd>
+                                        <AdminTd className="text-right">
+                                            <Link
+                                                href={`/admin/users/${user.id}`}
+                                                className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand/80"
+                                            >
+                                                View <ChevronRight className="h-4 w-4" />
+                                            </Link>
+                                        </AdminTd>
+                                    </AdminTr>
+                                );
+                            })
+                        )}
+                    </AdminTableBody>
+                </AdminTable>
 
-            {addUserOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setAddUserOpen(false)}>
-                    <div className="admin-modal-panel max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-bold text-gray-900">Add new user</h2>
-                            <button type="button" onClick={() => setAddUserOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg">
-                                <X className="h-5 w-5" />
-                            </button>
+                <Modal
+                    open={addUserOpen}
+                    onClose={() => setAddUserOpen(false)}
+                    title="Add new user"
+                    footer={
+                        <>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={() => setAddUserOpen(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                form="add-user-form"
+                                loading={submitting}
+                                disabled={submitting}
+                            >
+                                Create user
+                            </Button>
+                        </>
+                    }
+                >
+                    <form id="add-user-form" onSubmit={handleAddUser} className="space-y-4">
+                        <FormField label="Email or phone" htmlFor="add-email" required>
+                            <Input
+                                id="add-email"
+                                type="text"
+                                value={addUserForm.email}
+                                onChange={(e) =>
+                                    setAddUserForm((f) => ({ ...f, email: e.target.value }))
+                                }
+                                placeholder="user@example.com or +233..."
+                                required
+                            />
+                        </FormField>
+                        <FormField
+                            label="Password"
+                            htmlFor="add-password"
+                            hint="Minimum 6 characters"
+                            required
+                        >
+                            <Input
+                                id="add-password"
+                                type="password"
+                                value={addUserForm.password}
+                                onChange={(e) =>
+                                    setAddUserForm((f) => ({ ...f, password: e.target.value }))
+                                }
+                                required
+                                minLength={6}
+                            />
+                        </FormField>
+                        <div className="grid grid-cols-2 gap-3">
+                            <FormField label="First name" htmlFor="add-first" required>
+                                <Input
+                                    id="add-first"
+                                    type="text"
+                                    value={addUserForm.first_name}
+                                    onChange={(e) =>
+                                        setAddUserForm((f) => ({
+                                            ...f,
+                                            first_name: e.target.value,
+                                        }))
+                                    }
+                                    required
+                                />
+                            </FormField>
+                            <FormField label="Last name" htmlFor="add-last" required>
+                                <Input
+                                    id="add-last"
+                                    type="text"
+                                    value={addUserForm.last_name}
+                                    onChange={(e) =>
+                                        setAddUserForm((f) => ({
+                                            ...f,
+                                            last_name: e.target.value,
+                                        }))
+                                    }
+                                    required
+                                />
+                            </FormField>
                         </div>
-                        <form onSubmit={handleAddUser} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Email or phone *</label>
-                                <input
-                                    type="text"
-                                    value={addUserForm.email}
-                                    onChange={(e) => setAddUserForm((f) => ({ ...f, email: e.target.value }))}
-                                    placeholder="user@example.com or +233..."
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Password * (min 6 characters)</label>
-                                <input
-                                    type="password"
-                                    value={addUserForm.password}
-                                    onChange={(e) => setAddUserForm((f) => ({ ...f, password: e.target.value }))}
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    required
-                                    minLength={6}
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">First name *</label>
-                                    <input
-                                        type="text"
-                                        value={addUserForm.first_name}
-                                        onChange={(e) => setAddUserForm((f) => ({ ...f, first_name: e.target.value }))}
-                                        className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Last name *</label>
-                                    <input
-                                        type="text"
-                                        value={addUserForm.last_name}
-                                        onChange={(e) => setAddUserForm((f) => ({ ...f, last_name: e.target.value }))}
-                                        className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Phone (optional, if email used above)</label>
-                                <input
-                                    type="text"
-                                    value={addUserForm.phone}
-                                    onChange={(e) => setAddUserForm((f) => ({ ...f, phone: e.target.value }))}
-                                    placeholder="+233..."
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                />
-                            </div>
-                            <div className="flex gap-3 pt-2">
-                                <button type="submit" disabled={submitting} className="flex-1 h-10 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 disabled:opacity-50">
-                                    {submitting ? 'Creating...' : 'Create user'}
-                                </button>
-                                <button type="button" onClick={() => setAddUserOpen(false)} className="h-10 px-4 border border-gray-200 rounded-lg font-semibold text-sm text-gray-600 hover:bg-gray-50">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                        <FormField
+                            label="Phone"
+                            htmlFor="add-phone"
+                            hint="Optional if email used above"
+                        >
+                            <Input
+                                id="add-phone"
+                                type="text"
+                                value={addUserForm.phone}
+                                onChange={(e) =>
+                                    setAddUserForm((f) => ({ ...f, phone: e.target.value }))
+                                }
+                                placeholder="+233..."
+                            />
+                        </FormField>
+                    </form>
+                </Modal>
             </div>
         </DashboardLayout>
     );

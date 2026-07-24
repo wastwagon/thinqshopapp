@@ -5,20 +5,23 @@ import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminStatGrid from '@/components/admin/AdminStatGrid';
+import AdminToolbar from '@/components/admin/AdminToolbar';
+import Button from '@/components/ui/Button';
+import Select from '@/components/ui/Select';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { StatusBadge } from '@/components/ui/Badge';
 import Link from 'next/link';
 import {
     ShoppingBag,
-    Search,
     Package,
     Clock,
     CheckCircle,
     User,
     Plus,
-    ChevronRight,
     FileText,
     Eye
 } from 'lucide-react';
-import { STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 interface ProcurementRequest {
@@ -114,23 +117,6 @@ export default function AdminProcurementPage() {
     const inProgress = requests.filter((r) => ['accepted', 'payment_received', 'processing'].includes(r.status)).length;
     const delivered = requests.filter((r) => r.status === 'delivered').length;
 
-    const StatusBadge = ({ status }: { status: string }) => {
-        const colors: Record<string, string> = {
-            submitted: 'bg-orange-50 text-orange-700 border-orange-200',
-            quote_provided: 'bg-blue-50 text-blue-600 border-blue-300',
-            accepted: 'bg-green-50 text-green-700 border-green-200',
-            payment_received: STATUS_PROGRESS_BADGE,
-            processing: 'bg-blue-50 text-blue-700 border-blue-200',
-            delivered: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-            cancelled: 'bg-red-50 text-red-700 border-red-200'
-        };
-        return (
-            <span className={`px-2 py-0.5 text-xs font-semibold rounded-lg border ${colors[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
-                {status.replace(/_/g, ' ')}
-            </span>
-        );
-    };
-
     const stats = [
         { label: 'Total', value: requests.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
         { label: 'Pending', value: pending, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
@@ -146,36 +132,20 @@ export default function AdminProcurementPage() {
                 title="Procurement"
                 subtitle="Sourcing requests"
                 actions={
-                    <div className="relative min-w-0 sm:w-56">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" aria-hidden />
-                        <input
-                            type="search"
-                            placeholder="Search requests..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="admin-input w-full sm:w-56 pl-9"
-                            aria-label="Search procurement requests"
-                        />
-                    </div>
+                    <AdminToolbar
+                        searchValue={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        searchPlaceholder="Search requests…"
+                        searchAriaLabel="Search procurement requests"
+                    />
                 }
             />
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                {stats.map((stat, i) => (
-                    <div key={i} className="admin-stat-card">
-                        <div className={`w-9 h-9 rounded-lg ${stat.bg} ${stat.border} border flex items-center justify-center ${stat.color} mb-2`}>
-                            <stat.icon className="h-4 w-4" />
-                        </div>
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{stat.label}</p>
-                        <p className="text-xl font-bold text-gray-900">{stat.value}</p>
-                    </div>
-                ))}
-            </div>
+            <AdminStatGrid items={stats} columns={4} />
 
             <div className="space-y-3">
                 {loading ? (
                     <div className="py-10 text-center admin-card">
-                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
-                        <p className="text-sm text-gray-500">Loading...</p>
+                        <LoadingSpinner size="sm" label="Loading" />
                     </div>
                 ) : filteredRequests.length === 0 ? (
                     <div className="py-10 text-center admin-card border-dashed">
@@ -184,7 +154,7 @@ export default function AdminProcurementPage() {
                     </div>
                 ) : (
                     filteredRequests.map((req) => (
-                        <div key={req.id} className="admin-table-wrap hover:border-gray-300/90 transition-colors">
+                        <div key={req.id} className="admin-card overflow-hidden hover:border-gray-300/90 transition-colors">
                             <div className="p-4 lg:p-5">
                                 <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                                     <div className="flex-1 min-w-0 space-y-3">
@@ -197,13 +167,13 @@ export default function AdminProcurementPage() {
                                             <span>{new Date(req.created_at).toLocaleDateString()}</span>
                                             <span className="font-medium text-gray-600">{req.request_number}</span>
                                             {Array.isArray(req.reference_images) && req.reference_images.length > 0 && (
-                                                <span className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
+                                                <span className="text-xs bg-blue-50 text-brand px-1.5 py-0.5 rounded">
                                                     {req.reference_images.length} image{req.reference_images.length !== 1 ? 's' : ''}
                                                 </span>
                                             )}
                                             <Link
                                                 href={`/admin/procurement/${req.id}`}
-                                                className="text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium"
+                                                className="text-brand hover:text-brand/80 flex items-center gap-1 font-medium"
                                             >
                                                 <Eye className="h-3.5 w-3.5" /> View details & images
                                             </Link>
@@ -230,37 +200,37 @@ export default function AdminProcurementPage() {
                                     <div className="lg:w-64 flex flex-col gap-3 shrink-0">
                                         <div>
                                             <p className="text-xs font-semibold text-gray-500 mb-1.5">Status</p>
-                                            <div className="relative">
-                                                <select
-                                                    disabled={updatingId === req.id}
-                                                    className="w-full h-9 bg-gray-50 border border-gray-100 text-xs font-semibold text-gray-700 rounded-lg pl-3 pr-8 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                                    value={req.status}
-                                                    onChange={(e) => void handleStatusUpdate(req.id, e.target.value)}
-                                                >
-                                                    <option value="submitted">Submitted</option>
-                                                    <option value="quote_provided">Quote provided</option>
-                                                    <option value="accepted">Accepted</option>
-                                                    <option value="payment_received">Payment received</option>
-                                                    <option value="processing">Processing</option>
-                                                    <option value="delivered">Delivered</option>
-                                                    <option value="cancelled">Cancelled</option>
-                                                </select>
-                                                <ChevronRight className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none rotate-90" aria-hidden />
-                                            </div>
+                                            <Select
+                                                disabled={updatingId === req.id}
+                                                value={req.status}
+                                                onChange={(e) => void handleStatusUpdate(req.id, e.target.value)}
+                                                className="h-9 min-h-[36px] text-xs py-1.5"
+                                                aria-label={`Update status for ${req.request_number}`}
+                                            >
+                                                <option value="submitted">Submitted</option>
+                                                <option value="quote_provided">Quote provided</option>
+                                                <option value="accepted">Accepted</option>
+                                                <option value="payment_received">Payment received</option>
+                                                <option value="processing">Processing</option>
+                                                <option value="delivered">Delivered</option>
+                                                <option value="cancelled">Cancelled</option>
+                                            </Select>
                                         </div>
 
                                         {req.status === 'submitted' && quoteDraft.requestId !== req.id && (
-                                            <button
+                                            <Button
                                                 type="button"
+                                                size="sm"
                                                 onClick={() => setQuoteDraft({ requestId: req.id, amount: '', details: '' })}
-                                                className="w-full h-9 bg-blue-600 text-white rounded-lg font-semibold text-xs hover:bg-blue-700 transition-all flex items-center justify-center gap-1.5"
+                                                leftIcon={<Plus className="h-3.5 w-3.5" />}
+                                                className="w-full h-9 min-h-[36px] text-xs"
                                             >
-                                                <Plus className="h-3.5 w-3.5" /> Add quote
-                                            </button>
+                                                Add quote
+                                            </Button>
                                         )}
 
                                         {quoteDraft.requestId === req.id && (
-                                            <div className="bg-blue-600 rounded-xl p-4 text-white relative">
+                                            <div className="bg-brand rounded-xl p-4 text-white relative">
                                                 <form onSubmit={handleAddQuote} className="space-y-3">
                                                     <div>
                                                         <label className="text-xs font-semibold text-white/90 block mb-1">Amount (GHS)</label>
@@ -285,17 +255,20 @@ export default function AdminProcurementPage() {
                                                         />
                                                     </div>
                                                     <div className="flex gap-2 pt-1">
-                                                        <button
+                                                        <Button
                                                             type="submit"
+                                                            size="sm"
                                                             disabled={updatingId === req.id}
-                                                            className="flex-1 h-9 bg-white text-blue-600 rounded-lg font-semibold text-xs hover:bg-blue-50 transition-all"
+                                                            loading={updatingId === req.id}
+                                                            className="flex-1 h-9 min-h-[36px] text-xs bg-white text-brand hover:bg-blue-50"
                                                         >
                                                             Submit
-                                                        </button>
+                                                        </Button>
                                                         <button
                                                             type="button"
                                                             onClick={() => setQuoteDraft({ requestId: null, amount: '', details: '' })}
                                                             className="h-9 w-9 flex items-center justify-center bg-white/10 text-white rounded-lg hover:bg-white/20 border border-white/20 shrink-0"
+                                                            aria-label="Cancel quote"
                                                         >
                                                             <Plus className="h-3.5 w-3.5 rotate-45" />
                                                         </button>
@@ -306,7 +279,7 @@ export default function AdminProcurementPage() {
 
                                         {req.quotes?.length > 0 && (
                                             <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                                                <p className="text-xs font-semibold text-blue-600 mb-1">Quote</p>
+                                                <p className="text-xs font-semibold text-brand mb-1">Quote</p>
                                                 <p className="text-lg font-bold text-gray-900">
                                                     ₵{Number(req.quotes[0].quote_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                 </p>

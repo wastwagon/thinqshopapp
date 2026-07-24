@@ -15,6 +15,10 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getMediaUrl } from '@/lib/media';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Badge, { StatusBadge } from '@/components/ui/Badge';
+import Select from '@/components/ui/Select';
+import Button from '@/components/ui/Button';
 
 const ORDER_STATUSES = ['pending', 'processing', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'];
 
@@ -158,9 +162,8 @@ export default function AdminOrderDetailPage() {
     if (loading) {
         return (
             <DashboardLayout isAdmin={true}>
-                <div className="p-6 pb-6 md:pb-8 text-center">
-                    <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">Loading order...</p>
+                <div className="p-6 pb-6 md:pb-8 flex justify-center">
+                    <LoadingSpinner label="Loading order…" />
                 </div>
             </DashboardLayout>
         );
@@ -186,7 +189,7 @@ export default function AdminOrderDetailPage() {
             <div className="mb-6 flex items-center justify-between gap-3">
                 <Link
                     href="/admin/orders"
-                    className="text-blue-600 hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
+                    className="text-brand hover:text-gray-900 flex items-center text-sm font-medium transition-colors"
                 >
                     <ArrowLeft className="h-4 w-4 mr-1.5" /> Orders
                 </Link>
@@ -194,7 +197,7 @@ export default function AdminOrderDetailPage() {
 
             <div className="space-y-6">
                 {/* Header card */}
-                <div className="admin-table-wrap">
+                <div className="admin-card overflow-hidden">
                     <div className="px-4 py-4 sm:px-6 border-b border-gray-50 flex flex-wrap justify-between items-start gap-4 bg-gray-50/50">
                         <div>
                             <h1 className="text-xl font-bold text-gray-900">#{order.order_number}</h1>
@@ -203,22 +206,22 @@ export default function AdminOrderDetailPage() {
                             </p>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 capitalize">
-                                {formatCmsLabel(order.payment_method)}
-                            </span>
-                            <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-600 capitalize">
+                            <Badge variant="outline">{formatCmsLabel(order.payment_method)}</Badge>
+                            <StatusBadge status={order.payment_status || 'pending'}>
                                 Payment: {formatCmsLabel(order.payment_status)}
-                            </span>
-                            <select
+                            </StatusBadge>
+                            <StatusBadge status={order.status || 'pending'}>{formatCmsLabel(order.status)}</StatusBadge>
+                            <Select
                                 value={order.status}
                                 onChange={(e) => handleStatusUpdate(e.target.value)}
                                 disabled={updating}
-                                className="text-xs font-semibold border border-gray-200 rounded-lg pl-3 pr-8 py-2 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                className="h-9 min-h-[36px] text-xs w-auto min-w-[9rem]"
+                                aria-label="Update order status"
                             >
                                 {ORDER_STATUSES.map((s) => (
                                     <option key={s} value={s}>{formatCmsLabel(s)}</option>
                                 ))}
-                            </select>
+                            </Select>
                         </div>
                     </div>
                 </div>
@@ -233,31 +236,33 @@ export default function AdminOrderDetailPage() {
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button
+                                <Button
                                     type="button"
+                                    size="sm"
                                     disabled={resolvingReturn}
                                     onClick={() => resolveReturn('approve')}
-                                    className="min-h-[44px] px-3 py-2 rounded-lg text-xs font-semibold bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
+                                    className="bg-emerald-600 hover:bg-emerald-700"
                                 >
                                     Approve
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="button"
+                                    size="sm"
+                                    variant="danger"
                                     disabled={resolvingReturn}
                                     onClick={() => resolveReturn('reject')}
-                                    className="min-h-[44px] px-3 py-2 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
                                 >
                                     Reject
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="button"
+                                    size="sm"
                                     disabled={resolvingReturn}
                                     onClick={() => resolveReturn('refund')}
-                                    className="min-h-[44px] px-3 py-2 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
                                     title="Credits buyer ThinQ Wallet — not Paystack"
                                 >
                                     Refund to wallet
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     )}
@@ -322,7 +327,7 @@ export default function AdminOrderDetailPage() {
                     {/* Main content */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Timeline */}
-                        <div className="admin-table-wrap">
+                        <div className="admin-card overflow-hidden">
                             <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                 <h3 className="text-sm font-semibold text-gray-900">Order timeline</h3>
                             </div>
@@ -344,7 +349,7 @@ export default function AdminOrderDetailPage() {
                         </div>
 
                         {/* Items */}
-                        <div className="admin-table-wrap">
+                        <div className="admin-card overflow-hidden">
                             <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                 <h3 className="text-sm font-semibold text-gray-900">Order items</h3>
                             </div>
@@ -402,7 +407,7 @@ export default function AdminOrderDetailPage() {
                     {/* Sidebar */}
                     <div className="space-y-6">
                         {/* Customer */}
-                        <div className="admin-table-wrap">
+                        <div className="admin-card overflow-hidden">
                             <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                 <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                     <User className="h-4 w-4" /> Customer
@@ -425,7 +430,7 @@ export default function AdminOrderDetailPage() {
 
                         {/* Shipping address */}
                         {addressLines.length > 0 && (
-                            <div className="admin-table-wrap">
+                            <div className="admin-card overflow-hidden">
                                 <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                                     <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                         <MapPin className="h-4 w-4" /> Shipping address

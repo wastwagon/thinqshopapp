@@ -9,6 +9,12 @@ import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import FormField from '@/components/ui/FormField';
+import { StatusBadge } from '@/components/ui/Badge';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { useRouter } from 'next/navigation';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
@@ -163,14 +169,17 @@ export default function ProcurementPage() {
                         Sourcing &amp; print
                     </span>
                 }
-                accent="green"
+                accent="brand"
                 action={
-                    <button
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant={isCreating ? 'secondary' : 'primary'}
+                        leftIcon={isCreating ? undefined : <Plus className="h-4 w-4" />}
                         onClick={() => setIsCreating(!isCreating)}
-                        className={`h-9 px-4 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-emerald-600 text-white hover:bg-emerald-700'}`}
                     >
-                        {isCreating ? 'Cancel' : <><Plus className="h-4 w-4" /> New request</>}
-                    </button>
+                        {isCreating ? 'Cancel' : 'New request'}
+                    </Button>
                 }
             />
 
@@ -204,63 +213,60 @@ export default function ProcurementPage() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Product / Item</label>
-                                <input
+                            <FormField label="Product / Item" htmlFor="proc-item" required>
+                                <Input
+                                    id="proc-item"
                                     type="text"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                    className="block w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-lg text-sm font-medium text-gray-900 focus:bg-white outline-none"
                                     placeholder={requestType === 'sourcing' ? 'e.g. PS5 controller' : 'e.g. Custom labels'}
                                     required
                                 />
-                            </div>
-                            <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Quantity</label>
-                                <input
+                            </FormField>
+                            <FormField label="Quantity" htmlFor="proc-qty">
+                                <Input
+                                    id="proc-qty"
                                     type="number"
                                     value={quantity}
                                     onChange={(e) => setQuantity(Number(e.target.value))}
-                                    className="block w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-lg text-sm font-medium text-gray-900 focus:bg-white outline-none"
-                                    min="1"
+                                    min={1}
                                 />
-                            </div>
-                            <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Budget (GHS)</label>
-                                <input
+                            </FormField>
+                            <FormField label="Budget (GHS)" htmlFor="proc-budget">
+                                <Input
+                                    id="proc-budget"
                                     type="text"
                                     value={budget}
                                     onChange={(e) => setBudget(e.target.value)}
-                                    className="block w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-lg text-sm font-medium text-gray-900 focus:bg-white outline-none"
                                     placeholder="e.g. 450"
                                 />
-                            </div>
-                            <div>
-                                <label className="text-xs font-medium text-gray-600 mb-1 block">Reference URL</label>
+                            </FormField>
+                            <FormField label="Reference URL" htmlFor="proc-url">
                                 <div className="flex">
-                                    <div className="h-9 px-2.5 bg-gray-100 border border-gray-100 rounded-l-lg flex items-center text-gray-400">
+                                    <div className="h-11 px-2.5 bg-gray-100 border border-gray-100 rounded-l-xl flex items-center text-gray-400">
                                         <LinkIcon className="h-3.5 w-3.5" />
                                     </div>
-                                    <input
+                                    <Input
+                                        id="proc-url"
                                         type="url"
                                         value={referenceLink}
                                         onChange={(e) => setReferenceLink(e.target.value)}
-                                        className="flex-1 min-w-0 h-9 px-3 bg-gray-50 border border-l-0 border-gray-100 rounded-r-lg text-xs font-medium text-gray-900 focus:bg-white outline-none"
+                                        className="rounded-l-none border-l-0"
                                         placeholder="Optional product link"
                                     />
                                 </div>
-                            </div>
+                            </FormField>
                         </div>
 
-                        <div>
-                            <label className="text-xs font-medium text-gray-600 mb-1 block">Specifications</label>
-                            <textarea
+                        <FormField label="Specifications" htmlFor="proc-specs">
+                            <Textarea
+                                id="proc-specs"
                                 value={specifications}
                                 onChange={(e) => setSpecifications(e.target.value)}
-                                className="block w-full px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-lg text-sm font-medium text-gray-900 focus:bg-white outline-none min-h-[60px]"
                                 placeholder="Color, size, material, etc."
+                                rows={3}
                             />
-                        </div>
+                        </FormField>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-3">
@@ -357,12 +363,17 @@ export default function ProcurementPage() {
                         </div>
 
                         <div className="flex justify-end gap-2 pt-2">
-                            <button className="h-9 px-4 rounded-lg font-semibold text-sm text-gray-500 hover:bg-gray-50" type="button" onClick={() => setIsCreating(false)}>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setIsCreating(false)}
+                            >
                                 Cancel
-                            </button>
-                            <button className="h-9 px-5 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700" type="submit">
+                            </Button>
+                            <Button type="submit" size="sm">
                                 Submit request
-                            </button>
+                            </Button>
                         </div>
                     </form>
                 </div>
@@ -378,11 +389,8 @@ export default function ProcurementPage() {
                     </div>
                     <div className="grid grid-cols-1 gap-3">
                         {loading && requests.length === 0 ? (
-                            <div className="py-10 text-center admin-card">
-                                <div className="animate-pulse flex flex-col items-center">
-                                    <div className="w-8 h-8 bg-gray-100 rounded-full mb-2" />
-                                    <p className="text-xs text-gray-400">Loading...</p>
-                                </div>
+                            <div className="py-10 flex justify-center admin-card">
+                                <LoadingSpinner size="sm" label="Loading…" />
                             </div>
                         ) : requests.length === 0 ? (
                             <div className="py-10 text-center admin-card">
@@ -395,15 +403,23 @@ export default function ProcurementPage() {
                                     <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
                                         <div className="space-y-2 flex-1">
                                             <div className="flex flex-wrap items-center gap-2">
-                                                <p className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{req.description}</p>
+                                                <p className="text-base font-bold text-gray-900 group-hover:text-brand transition-colors">{req.description}</p>
                                                 {req.request_type && (
                                                     <span className="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600">
                                                         {req.request_type === 'print' ? 'Print' : 'Sourcing'}
                                                     </span>
                                                 )}
-                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${req.status === 'submitted' ? 'bg-blue-50 text-blue-600' : req.status === 'quote_provided' ? 'bg-orange-50 text-orange-600' : req.status === 'accepted' ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'}`}>
-                                                    {req.status.replace('_', ' ')}
-                                                </span>
+                                                <StatusBadge
+                                                    status={
+                                                        req.status === 'accepted'
+                                                            ? 'completed'
+                                                            : req.status === 'quote_provided'
+                                                              ? 'pending'
+                                                              : req.status
+                                                    }
+                                                >
+                                                    {req.status.replace(/_/g, ' ')}
+                                                </StatusBadge>
                                             </div>
                                             <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
                                                 <span className="font-mono">{req.request_number}</span>
@@ -411,23 +427,25 @@ export default function ProcurementPage() {
                                                 {req.orders?.length > 0 && (
                                                     <span className="text-green-600 flex items-center gap-1"><CheckCircle className="h-3 w-3" /> {req.orders[0].order_number}</span>
                                                 )}
-                                                <Link href={`/dashboard/procurement/${req.id}/response`} className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                                <Link href={`/dashboard/procurement/${req.id}/response`} className="text-brand hover:text-brand/80 flex items-center gap-1">
                                                     <FileDown className="h-3 w-3" /> Download response
                                                 </Link>
                                             </div>
                                         </div>
                                         {req.quotes?.length > 0 && req.status !== 'accepted' ? (
-                                            <div className="flat-card border-l-4 border-l-blue-600 p-3 flex items-center gap-4 shrink-0">
+                                            <div className="flat-card border-l-4 border-l-brand p-3 flex items-center gap-4 shrink-0">
                                                 <div>
                                                     <p className="text-xs text-gray-500">Quote</p>
                                                     <p className="text-lg font-bold text-gray-900">₵{Number(req.quotes[0].quote_amount).toFixed(2)}</p>
                                                 </div>
-                                                <button
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
                                                     onClick={() => void handleAcceptQuote(req.quotes[0].id)}
-                                                    className="h-9 px-4 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 flex items-center gap-1"
+                                                    rightIcon={<ChevronRight className="h-3.5 w-3.5" />}
                                                 >
-                                                    Pay <ChevronRight className="h-3.5 w-3.5" />
-                                                </button>
+                                                    Pay
+                                                </Button>
                                             </div>
                                         ) : req.status === 'accepted' ? (
                                             <div className="bg-green-50 px-3 py-2 rounded-lg border border-green-100">

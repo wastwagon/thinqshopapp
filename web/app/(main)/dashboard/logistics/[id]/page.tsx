@@ -6,6 +6,7 @@ import api from '@/lib/axios';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Link from 'next/link';
 import { ArrowLeft, Package, Truck, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -52,7 +53,7 @@ export default function ShipmentDetailPage() {
         return (
             <DashboardLayout>
                 <div className="pb-20 md:pb-10 flex items-center justify-center min-h-[40vh]">
-                    <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full" />
+                    <LoadingSpinner label="Loading shipment" />
                 </div>
             </DashboardLayout>
         );

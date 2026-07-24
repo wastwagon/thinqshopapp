@@ -8,6 +8,7 @@ import { ArrowLeft, Package, CheckCircle } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import toast from 'react-hot-toast';
 
 interface OrderItem {
@@ -62,7 +63,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
         if (id) fetchOrder();
     }, [id]);
 
-    if (loading) return <DashboardLayout><div className="p-6 text-center text-sm text-gray-500">Loading...</div></DashboardLayout>;
+    if (loading) return <DashboardLayout><div className="p-10"><LoadingSpinner label="Loading order" /></div></DashboardLayout>;
     if (!order) return <DashboardLayout><div className="p-6 text-center text-sm text-gray-500">Order not found</div></DashboardLayout>;
     const canCancel = order.status === 'pending';
     const hasReturnRequest = (order.tracking || []).some((t) => t.status === 'return_requested');
@@ -105,7 +106,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
             <DashboardPageHeader
                 title={`#${order.order_number}`}
                 subtitle={new Date(order.created_at).toLocaleDateString()}
-                accent="orange"
+                accent="brand"
                 backHref="/dashboard/orders"
                 backLabel="Orders"
             />
