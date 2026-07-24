@@ -246,6 +246,7 @@ export default function Home() {
     if (!mounted) return null;
 
     const hasProducts = productsWithIds.length > 0;
+    const showFeaturedSections = fallbackFlash.length >= 4 && fallbackFeatured.length >= 4;
     const productSectionKeys = new Set(['flash_sales', 'featured', 'categories', 'testimonials', 'all_products']);
 
     const sectionNodes: Record<string, React.ReactNode> = {
@@ -382,6 +383,7 @@ export default function Home() {
                 {sectionOrder.map((key) => {
                     if (!sectionNodes[key]) return null;
                     if (productSectionKeys.has(key) && !hasProducts) return null;
+                    if ((key === 'flash_sales' || key === 'featured') && !showFeaturedSections) return null;
                     return (
                         <Fragment key={key}>
                             {sectionNodes[key]}
