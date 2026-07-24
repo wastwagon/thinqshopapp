@@ -272,7 +272,7 @@ export default function TransferPage() {
                 title="Transfers"
                 subtitle={
                     <span className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 bg-violet-500 rounded-full" aria-hidden />
+                        <span className="w-1.5 h-1.5 bg-brand rounded-full" aria-hidden />
                         Rate: 1 GHS = {rate.toFixed(4)} CNY
                     </span>
                 }
@@ -280,7 +280,7 @@ export default function TransferPage() {
                 action={
                     <button
                         onClick={() => setIsCreating(!isCreating)}
-                        className={`h-9 px-4 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-violet-600 text-white hover:bg-violet-700'}`}
+                        className={`h-9 px-4 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${isCreating ? 'bg-gray-100 text-gray-600' : 'bg-brand text-white hover:bg-brand/90'}`}
                     >
                         {isCreating ? 'Cancel' : <><Plus className="h-4 w-4" /> New transfer</>}
                     </button>

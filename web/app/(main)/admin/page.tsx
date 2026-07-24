@@ -214,13 +214,13 @@ export default function AdminDashboard() {
                             </Link>
                             <Link
                                 href="/admin/escrow"
-                                className="block p-3 rounded-xl border border-violet-100 bg-violet-50/50 hover:bg-violet-50 hover:border-violet-200 transition-colors group/item"
+                                className="block p-3 rounded-xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-200 transition-colors group/item"
                             >
                                 <div className="flex justify-between items-start">
-                                    <p className="text-2xl font-bold tracking-tight text-violet-900">{loading ? '—' : stats.pendingEscrow}</p>
-                                    <ArrowUpRight className="h-3.5 w-3.5 text-violet-300 group-hover/item:text-violet-700 transition-colors" aria-hidden />
+                                    <p className="text-2xl font-bold tracking-tight text-blue-900">{loading ? '—' : stats.pendingEscrow}</p>
+                                    <ArrowUpRight className="h-3.5 w-3.5 text-blue-300 group-hover/item:text-blue-700 transition-colors" aria-hidden />
                                 </div>
-                                <p className="text-xs font-semibold text-violet-700 mt-1">Escrow payouts</p>
+                                <p className="text-xs font-semibold text-blue-700 mt-1">Escrow payouts</p>
                             </Link>
                         </div>
                         <Link

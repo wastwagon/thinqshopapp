@@ -32,8 +32,8 @@ const CONTACT_CARDS = [
     },
     {
         icon: MessageSquare,
-        accent: 'border-l-violet-600',
-        iconBg: 'bg-violet-50 text-violet-600',
+        accent: 'border-l-blue-600',
+        iconBg: 'bg-blue-50 text-blue-600',
         title: 'Live chat',
         description: 'Available in your dashboard when logged in.',
         links: [{ href: '/dashboard', label: 'Open Dashboard →' }],

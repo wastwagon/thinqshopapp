@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { LucideIcon } from 'lucide-react';
+import { buttonVariants } from '@/components/ui/Button';
+import { cn } from '@/lib/cn';
 
 interface EmptyStateProps {
     icon: LucideIcon;
@@ -9,12 +11,23 @@ interface EmptyStateProps {
     description?: string;
     actionLabel?: string;
     actionHref?: string;
+    className?: string;
 }
 
-export default function EmptyState({ icon: Icon, title, description, actionLabel, actionHref }: EmptyStateProps) {
+export default function EmptyState({
+    icon: Icon,
+    title,
+    description,
+    actionLabel,
+    actionHref,
+    className,
+}: EmptyStateProps) {
     return (
         <div
-            className="flex flex-col items-center justify-center py-16 px-6 text-center flat-card"
+            className={cn(
+                'flex flex-col items-center justify-center py-16 px-6 text-center flat-card',
+                className
+            )}
             role="status"
         >
             <div
@@ -28,7 +41,11 @@ export default function EmptyState({ icon: Icon, title, description, actionLabel
             {actionLabel && actionHref && (
                 <Link
                     href={actionHref}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors min-h-[44px] inline-flex items-center justify-center"
+                    className={buttonVariants({
+                        variant: 'primary',
+                        size: 'md',
+                        className: 'px-6',
+                    })}
                 >
                     {actionLabel}
                 </Link>

@@ -263,11 +263,11 @@ export default function AdminOrderDetailPage() {
                     )}
 
                     {(order.consignment_escrow?.length ?? 0) > 0 && (
-                        <div className="bg-violet-50 border border-violet-200 rounded-2xl p-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
                             <div className="flex flex-wrap items-start justify-between gap-3">
                                 <div>
-                                    <p className="text-sm font-semibold text-violet-900">Sell for Me escrow</p>
-                                    <p className="text-xs text-violet-700 mt-0.5">
+                                    <p className="text-sm font-semibold text-blue-900">Sell for Me escrow</p>
+                                    <p className="text-xs text-blue-700 mt-0.5">
                                         Payout releases when you mark this order delivered (unless on dispute hold).
                                     </p>
                                 </div>
@@ -277,7 +277,7 @@ export default function AdminOrderDetailPage() {
                             </div>
                             <ul className="mt-3 space-y-2">
                                 {order.consignment_escrow!.map((row) => (
-                                    <li key={row.id} className="text-xs bg-white/80 rounded-lg px-3 py-2 border border-violet-100">
+                                    <li key={row.id} className="text-xs bg-white/80 rounded-lg px-3 py-2 border border-blue-100">
                                         <p className="font-semibold text-gray-900">{row.name}</p>
                                         <p className="text-gray-500">{row.submission_number} · {row.consignor_email}</p>
                                         {row.sale_amount_ghs != null ? (
@@ -288,7 +288,7 @@ export default function AdminOrderDetailPage() {
                                                 </div>
                                                 <div>
                                                     <p className="text-gray-500">Platform ({Number(row.commission_pct ?? 0).toFixed(1)}%)</p>
-                                                    <p className="font-semibold text-violet-800">
+                                                    <p className="font-semibold text-blue-800">
                                                         ₵{Number(row.commission_ghs ?? 0).toFixed(2)}
                                                     </p>
                                                 </div>
@@ -301,7 +301,7 @@ export default function AdminOrderDetailPage() {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <p className="text-violet-800 font-semibold mt-1">
+                                            <p className="text-blue-800 font-semibold mt-1">
                                                 {row.expected_payout_ghs != null
                                                     ? `₵${Number(row.expected_payout_ghs).toFixed(2)} pending`
                                                     : `Status: ${row.status.replace(/_/g, ' ')}`}

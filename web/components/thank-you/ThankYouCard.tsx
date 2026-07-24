@@ -32,14 +32,14 @@ const accentStyles = {
         btn: 'bg-emerald-600 text-white hover:bg-emerald-700',
     },
     violet: {
-        bar: 'bg-gradient-to-r from-violet-500 to-purple-700',
-        icon: 'bg-gradient-to-br from-violet-500 to-purple-700 shadow-[0_8px_24px_-6px_rgba(139,92,246,0.45)]',
-        btn: 'bg-violet-600 text-white hover:bg-violet-700',
+        bar: 'bg-gradient-to-r from-blue-600 to-brand',
+        icon: 'bg-gradient-to-br from-blue-600 to-brand shadow-[0_8px_24px_-6px_rgba(2,39,79,0.45)]',
+        btn: 'bg-brand text-white hover:bg-brand/90',
     },
     amber: {
-        bar: 'bg-gradient-to-r from-orange-400 to-amber-600',
-        icon: 'bg-gradient-to-br from-orange-400 to-amber-600 shadow-[0_8px_24px_-6px_rgba(245,158,11,0.45)]',
-        btn: 'bg-orange-500 text-white hover:bg-orange-600',
+        bar: 'bg-gradient-to-r from-blue-600 to-brand',
+        icon: 'bg-gradient-to-br from-blue-600 to-brand shadow-[0_8px_24px_-6px_rgba(2,39,79,0.45)]',
+        btn: 'bg-brand text-white hover:bg-brand/90',
     },
 };
 

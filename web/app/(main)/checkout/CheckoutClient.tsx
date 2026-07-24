@@ -21,6 +21,7 @@ import { cartItemUnitGhs } from '@/lib/product-utils';
 import { getMediaUrl } from '@/lib/media';
 import LiveRegion from '@/components/ui/LiveRegion';
 import { roundGhs } from '@/lib/money';
+import Button from '@/components/ui/Button';
 
 const PaystackTrigger = dynamic(
     () => import('@/components/payments/PaystackTrigger').then((m) => m.default),
@@ -190,7 +191,6 @@ export default function CheckoutClient() {
                 <PageHeader
                     title="Checkout"
                     subtitle="Complete your purchase"
-                    accent="amber"
                     breadcrumbs={[{ label: 'Cart', href: '/cart' }, { label: 'Checkout' }]}
                 />
                 <CheckoutProgress step={step as 1 | 2} />
@@ -226,13 +226,13 @@ export default function CheckoutClient() {
 
                             {selectedAddressId && step === 1 && (
                                 <div className="mt-6 flex justify-end">
-                                    <button
+                                    <Button
                                         onClick={() => setStep(2)}
-                                        className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center gap-2"
+                                        variant="primary"
+                                        rightIcon={<CheckCircle className="h-4 w-4" />}
                                     >
                                         Proceed to Payment
-                                        <CheckCircle className="h-4 w-4" />
-                                    </button>
+                                    </Button>
                                 </div>
                             )}
                         </section>
@@ -276,13 +276,16 @@ export default function CheckoutClient() {
 
                             {step === 2 && (
                                 <>
-                                    <button
+                                    <Button
                                         onClick={handlePlaceOrder}
                                         disabled={isProcessing || quoteLoading}
-                                        className="w-full min-h-[44px] bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 touch-manipulation"
+                                        variant="primary"
+                                        size="lg"
+                                        className="w-full"
+                                        loading={isProcessing || quoteLoading}
                                     >
                                         {isProcessing ? 'Processing…' : quoteLoading ? 'Calculating...' : <>Pay <PriceDisplay amountGhs={checkoutQuote?.total ?? cartTotal} forceGhs /></>}
-                                    </button>
+                                    </Button>
                                     <p className="mt-2 text-center text-xs text-gray-500">
                                         {publicSettings.free_shipping_threshold_ghs && Number(publicSettings.free_shipping_threshold_ghs) > 0 ? (
                                             <>Free delivery on orders over ₵{publicSettings.free_shipping_threshold_ghs}</>

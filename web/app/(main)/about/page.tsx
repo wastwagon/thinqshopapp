@@ -10,7 +10,7 @@ import ShopTrustRow from '@/components/shop/ShopTrustRow';
 const OFFERINGS = [
     { icon: Zap, accent: 'bg-amber-50 text-amber-600', title: 'Shop', text: 'Electronics and tech, vetted and delivered. Items ship internationally with 7–14 day estimated delivery.' },
     { icon: Truck, accent: 'bg-blue-50 text-blue-600', title: 'Digital Logistics', text: 'Ship and track packages and freight with transparency and reliability.' },
-    { icon: Globe, accent: 'bg-violet-50 text-violet-600', title: 'Money Transfer', text: 'Send to and receive from China and other corridors with secure, traceable transfers.' },
+    { icon: Globe, accent: 'bg-blue-50 text-blue-600', title: 'Money Transfer', text: 'Send to and receive from China and other corridors with secure, traceable transfers.' },
     { icon: Target, accent: 'bg-emerald-50 text-emerald-600', title: 'Tech Sourcing', text: 'Custom procurement and sourcing for businesses and professionals.' },
     { icon: Tag, accent: 'bg-orange-50 text-orange-600', title: 'Sell for Me', text: "List items you can't sell yourself; we list, sell, and pay you via your wallet." },
 ] as const;

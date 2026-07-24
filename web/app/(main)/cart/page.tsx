@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Trash2, Plus, Minus, ShoppingCart } from 'lucide-react';
+import { Trash2, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import ShopLayout from '@/components/layout/ShopLayout';
@@ -12,6 +12,9 @@ import ShopTrustRow from '@/components/shop/ShopTrustRow';
 import { cartItemUnitGhs } from '@/lib/product-utils';
 import { getMediaUrl } from '@/lib/media';
 import LiveRegion from '@/components/ui/LiveRegion';
+import EmptyState from '@/components/ui/EmptyState';
+import Button, { buttonVariants } from '@/components/ui/Button';
+import QuantityStepper from '@/components/ui/QuantityStepper';
 
 export default function CartPage() {
     const { cart, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -38,18 +41,15 @@ export default function CartPage() {
                     <div className="mt-5 rounded-2xl bg-white border border-gray-100 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.08)] overflow-hidden">
                         <ul role="list" className="divide-y divide-gray-100">
                             {cart.length === 0 && (
-                                <li className="py-16 text-center px-4">
-                                    <div className="inline-flex w-14 h-14 bg-blue-50 border border-blue-100 rounded-2xl items-center justify-center mb-4">
-                                        <ShoppingCart className="h-6 w-6 text-blue-500" />
-                                    </div>
-                                    <p className="text-gray-600 font-medium text-sm">Your bag is empty</p>
-                                    <p className="text-gray-400 text-xs mt-1">Add items to get started</p>
-                                    <Link
-                                        href="/shop"
-                                        className="inline-flex mt-5 min-h-[44px] px-6 items-center justify-center rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
-                                    >
-                                        Shop now
-                                    </Link>
+                                <li className="p-4 sm:p-6">
+                                    <EmptyState
+                                        icon={ShoppingCart}
+                                        title="Your bag is empty"
+                                        description="Add items to get started"
+                                        actionLabel="Shop now"
+                                        actionHref="/shop"
+                                        className="border-0 shadow-none"
+                                    />
                                 </li>
                             )}
                             {cart.map((item) => {
@@ -95,24 +95,10 @@ export default function CartPage() {
                                                 <PriceDisplay amountGhs={cartItemUnitGhs(item)} /> each
                                             </p>
                                             <div className="flex flex-1 items-end justify-between mt-3 flex-wrap gap-2">
-                                                <div className="flex items-center p-0.5 bg-gray-50 border border-gray-200/90 rounded-lg">
-                                                    <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                        className="min-w-[44px] min-h-[44px] w-9 h-9 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-600 disabled:opacity-30"
-                                                        disabled={item.quantity <= 1}
-                                                        aria-label="Decrease quantity"
-                                                    >
-                                                        <Minus className="h-3.5 w-3.5" aria-hidden />
-                                                    </button>
-                                                    <span className="w-8 text-center text-xs font-semibold text-gray-900">{item.quantity}</span>
-                                                    <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                        className="min-w-[44px] min-h-[44px] w-9 h-9 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-600"
-                                                        aria-label="Increase quantity"
-                                                    >
-                                                        <Plus className="h-3.5 w-3.5" aria-hidden />
-                                                    </button>
-                                                </div>
+                                                <QuantityStepper
+                                                    value={item.quantity}
+                                                    onChange={(next) => updateQuantity(item.id, next)}
+                                                />
                                                 <button
                                                     type="button"
                                                     onClick={() => removeFromCart(item.id)}
@@ -140,16 +126,18 @@ export default function CartPage() {
                             </div>
                             <p className="text-xs text-gray-400 mb-5">Tax and shipping calculated at checkout</p>
                             <div className="flex flex-col gap-2.5">
-                                <button
+                                <Button
                                     onClick={handleCheckout}
                                     disabled={cart.length === 0}
-                                    className="w-full min-h-[44px] bg-blue-600 text-white h-12 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-40 flex items-center justify-center"
+                                    variant="primary"
+                                    size="lg"
+                                    className="w-full"
                                 >
                                     Checkout
-                                </button>
+                                </Button>
                                 <Link
                                     href="/shop"
-                                    className="w-full min-h-[44px] h-12 rounded-xl border border-gray-200/90 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-colors flex items-center justify-center"
+                                    className={buttonVariants({ variant: 'secondary', size: 'lg', className: 'w-full' })}
                                 >
                                     Continue shopping
                                 </Link>
@@ -169,13 +157,15 @@ export default function CartPage() {
                                     <PriceDisplay amountGhs={cartTotal} />
                                 </p>
                             </div>
-                            <button
+                            <Button
                                 type="button"
                                 onClick={handleCheckout}
-                                className="w-full min-h-[48px] bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors touch-manipulation"
+                                variant="primary"
+                                size="lg"
+                                className="w-full min-h-[48px]"
                             >
                                 Checkout
-                            </button>
+                            </Button>
                         </div>
                     )}
                 </ShopContent>

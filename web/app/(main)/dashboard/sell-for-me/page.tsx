@@ -9,6 +9,7 @@ import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 interface Category {
     id: number;
@@ -73,6 +74,7 @@ const USER_EDITABLE_STATUSES = new Set(['submitted', 'changes_requested', 'rejec
 const USER_DELETABLE_STATUSES = new Set(['submitted', 'under_review', 'changes_requested', 'rejected', 'delisted', 'listed']);
 
 export default function SellForMePage() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
@@ -281,7 +283,12 @@ export default function SellForMePage() {
             toast.error('This listing cannot be deleted');
             return;
         }
-        if (!window.confirm(`Delete "${s.name}"? This cannot be undone.`)) return;
+        const ok = await confirm({
+            title: `Delete "${s.name}"?`,
+            description: 'This cannot be undone.',
+            confirmLabel: 'Delete',
+        });
+        if (!ok) return;
         try {
             await api.delete(`/consignment/submissions/${s.id}`);
             toast.success('Listing deleted');
@@ -512,7 +519,7 @@ export default function SellForMePage() {
                                     </p>
                                     <p className="text-xs text-blue-600 font-medium mt-1">{STATUS_LABELS[s.status] || s.status}</p>
                                     {s.status === 'sold' && s.expected_payout_ghs != null && (
-                                        <p className="text-xs text-violet-700 mt-1">
+                                        <p className="text-xs text-brand mt-1">
                                             ₵{Number(s.expected_payout_ghs).toFixed(2)} in escrow until delivery confirmed
                                             {s.escrow_on_hold && (
                                                 <span className="block text-amber-700">On hold — {s.escrow_hold_reason || 'under review'}</span>
@@ -539,7 +546,7 @@ export default function SellForMePage() {
                                     {USER_DELETABLE_STATUSES.has(s.status) && (
                                         <button
                                             type="button"
-                                            onClick={() => handleDelete(s)}
+                                            onClick={() => void handleDelete(s)}
                                             className="text-xs font-semibold text-red-600 hover:underline inline-flex items-center gap-1"
                                         >
                                             <Trash2 className="h-3 w-3" /> Delete
@@ -601,6 +608,7 @@ export default function SellForMePage() {
                     </div>
                 </div>
             )}
+            {confirmDialog}
         </DashboardLayout>
     );
 }

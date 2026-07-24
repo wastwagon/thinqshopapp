@@ -3,9 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
-import { Layers, Plus, Edit3, Trash2, FileText, X, Loader2 } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import FormField from '@/components/ui/FormField';
+import Modal from '@/components/ui/Modal';
+import { Layers, Plus, Edit3, Trash2, FileText, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 type VariationValue = { id: number; value: string; sort_order: number };
 type VariationOption = { id: number; name: string; slug: string; sort_order: number; values: VariationValue[] };
@@ -28,6 +33,7 @@ function formatApiError(e: unknown, fallback: string): string {
 }
 
 export default function AdminVariationsPage() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const [options, setOptions] = useState<VariationOption[]>([]);
     const [loading, setLoading] = useState(true);
     const [optionModalOpen, setOptionModalOpen] = useState(false);
@@ -95,7 +101,11 @@ export default function AdminVariationsPage() {
     };
 
     const deleteOption = async (id: number) => {
-        if (!confirm('Delete this option and all its values?')) return;
+        const ok = await confirm({
+            title: 'Delete this option and all its values?',
+            confirmLabel: 'Delete',
+        });
+        if (!ok) return;
         try {
             await api.delete(`/variations/admin/options/${id}`);
             toast.success('Deleted');
@@ -147,7 +157,8 @@ export default function AdminVariationsPage() {
     };
 
     const deleteValue = async (optionId: number, valueId: number) => {
-        if (!confirm('Delete this value?')) return;
+        const ok = await confirm({ title: 'Delete this value?', confirmLabel: 'Delete' });
+        if (!ok) return;
         try {
             await api.delete(`/variations/admin/values/${valueId}`);
             toast.success('Deleted');
@@ -169,9 +180,9 @@ export default function AdminVariationsPage() {
                     title="Variations"
                     subtitle="Options (e.g. Size, Color) and values for product variants"
                     actions={
-                        <button type="button" onClick={() => openOptionModal(null)} className="admin-btn-primary h-9 px-4 shrink-0">
-                            <Plus className="h-4 w-4" aria-hidden /> Add option
-                        </button>
+                        <Button type="button" size="sm" leftIcon={<Plus className="h-4 w-4" />} onClick={() => openOptionModal(null)}>
+                            Add option
+                        </Button>
                     }
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
@@ -194,13 +205,9 @@ export default function AdminVariationsPage() {
                             <Layers className="h-12 w-12 mx-auto mb-3 text-gray-200" />
                             <p className="text-sm font-medium">No variation options yet</p>
                             <p className="text-xs mt-1">Add options like Size or Color, then add values (e.g. S, M, L).</p>
-                            <button
-                                type="button"
-                                onClick={() => openOptionModal(null)}
-                                className="mt-4 min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold"
-                            >
+                            <Button type="button" size="sm" className="mt-4" onClick={() => openOptionModal(null)}>
                                 Add first option
-                            </button>
+                            </Button>
                         </div>
                     ) : (
                         <ul className="divide-y divide-gray-50">
@@ -222,7 +229,7 @@ export default function AdminVariationsPage() {
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() => deleteOption(opt.id)}
+                                                onClick={() => void deleteOption(opt.id)}
                                                 className="min-w-[44px] min-h-[44px] rounded-lg border border-red-100 text-red-600 flex items-center justify-center hover:bg-red-50"
                                                 aria-label="Delete option"
                                             >
@@ -247,7 +254,7 @@ export default function AdminVariationsPage() {
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => deleteValue(opt.id, v.id)}
+                                                    onClick={() => void deleteValue(opt.id, v.id)}
                                                     className="p-0.5 rounded hover:bg-red-100 text-red-500"
                                                     aria-label="Delete value"
                                                 >
@@ -270,95 +277,92 @@ export default function AdminVariationsPage() {
                 </div>
             </div>
 
-            {/* Option modal */}
-            {optionModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setOptionModalOpen(false)}>
-                    <div className="admin-modal-panel max-w-md w-full p-5" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">{editingOption ? 'Edit option' : 'New option'}</h2>
-                        <form onSubmit={saveOption} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Name (e.g. Size, Color)</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={optionForm.name}
-                                    onChange={(e) => setOptionForm((f) => ({ ...f, name: e.target.value }))}
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Slug (optional)</label>
-                                <input
-                                    type="text"
-                                    value={optionForm.slug}
-                                    onChange={(e) => setOptionForm((f) => ({ ...f, slug: e.target.value }))}
-                                    placeholder="e.g. size"
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Sort order</label>
-                                <input
-                                    type="number"
-                                    min={0}
-                                    value={optionForm.sort_order}
-                                    onChange={(e) => setOptionForm((f) => ({ ...f, sort_order: e.target.value }))}
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm"
-                                />
-                            </div>
-                            <div className="flex gap-2 pt-2">
-                                <button type="submit" disabled={saving} className="min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-60">
-                                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Save
-                                </button>
-                                <button type="button" onClick={() => setOptionModalOpen(false)} className="min-h-[44px] px-4 rounded-lg border border-gray-200 text-sm">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            <Modal
+                open={optionModalOpen}
+                onClose={() => setOptionModalOpen(false)}
+                title={editingOption ? 'Edit option' : 'New option'}
+                size="md"
+                footer={
+                    <>
+                        <Button type="button" variant="secondary" onClick={() => setOptionModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" form="variation-option-form" variant="primary" loading={saving}>
+                            Save
+                        </Button>
+                    </>
+                }
+            >
+                <form id="variation-option-form" onSubmit={saveOption} className="space-y-4">
+                    <FormField label="Name (e.g. Size, Color)" htmlFor="var-opt-name">
+                        <Input
+                            id="var-opt-name"
+                            required
+                            value={optionForm.name}
+                            onChange={(e) => setOptionForm((f) => ({ ...f, name: e.target.value }))}
+                        />
+                    </FormField>
+                    <FormField label="Slug (optional)" htmlFor="var-opt-slug">
+                        <Input
+                            id="var-opt-slug"
+                            value={optionForm.slug}
+                            onChange={(e) => setOptionForm((f) => ({ ...f, slug: e.target.value }))}
+                            placeholder="e.g. size"
+                        />
+                    </FormField>
+                    <FormField label="Sort order" htmlFor="var-opt-sort">
+                        <Input
+                            id="var-opt-sort"
+                            type="number"
+                            min={0}
+                            value={optionForm.sort_order}
+                            onChange={(e) => setOptionForm((f) => ({ ...f, sort_order: e.target.value }))}
+                        />
+                    </FormField>
+                </form>
+            </Modal>
 
-            {/* Value modal */}
-            {valueModalOpen && selectedOption && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setValueModalOpen(false)}>
-                    <div className="admin-modal-panel max-w-md w-full p-5" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">
-                            {editingValue ? 'Edit value' : 'Add value'} for {selectedOption.name}
-                        </h2>
-                        <form onSubmit={saveValue} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Value (e.g. S, M, L or Red, Blue)</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={valueForm.value}
-                                    onChange={(e) => setValueForm((f) => ({ ...f, value: e.target.value }))}
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Sort order</label>
-                                <input
-                                    type="number"
-                                    min={0}
-                                    value={valueForm.sort_order}
-                                    onChange={(e) => setValueForm((f) => ({ ...f, sort_order: e.target.value }))}
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm"
-                                />
-                            </div>
-                            <div className="flex gap-2 pt-2">
-                                <button type="submit" disabled={saving} className="min-h-[44px] px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-60">
-                                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Save
-                                </button>
-                                <button type="button" onClick={() => setValueModalOpen(false)} className="min-h-[44px] px-4 rounded-lg border border-gray-200 text-sm">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            <Modal
+                open={valueModalOpen && !!selectedOption}
+                onClose={() => setValueModalOpen(false)}
+                title={
+                    selectedOption
+                        ? `${editingValue ? 'Edit value' : 'Add value'} for ${selectedOption.name}`
+                        : 'Value'
+                }
+                size="md"
+                footer={
+                    <>
+                        <Button type="button" variant="secondary" onClick={() => setValueModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" form="variation-value-form" variant="primary" loading={saving}>
+                            Save
+                        </Button>
+                    </>
+                }
+            >
+                <form id="variation-value-form" onSubmit={saveValue} className="space-y-4">
+                    <FormField label="Value (e.g. S, M, L or Red, Blue)" htmlFor="var-val">
+                        <Input
+                            id="var-val"
+                            required
+                            value={valueForm.value}
+                            onChange={(e) => setValueForm((f) => ({ ...f, value: e.target.value }))}
+                        />
+                    </FormField>
+                    <FormField label="Sort order" htmlFor="var-val-sort">
+                        <Input
+                            id="var-val-sort"
+                            type="number"
+                            min={0}
+                            value={valueForm.sort_order}
+                            onChange={(e) => setValueForm((f) => ({ ...f, sort_order: e.target.value }))}
+                        />
+                    </FormField>
+                </form>
+            </Modal>
+            {confirmDialog}
         </DashboardLayout>
     );
 }

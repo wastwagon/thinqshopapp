@@ -10,6 +10,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
 import { useRouter } from 'next/navigation';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 interface Request {
     id: number;
@@ -24,6 +25,7 @@ interface Request {
 }
 
 export default function ProcurementPage() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const router = useRouter();
     const [requests, setRequests] = useState<Request[]>([]);
     const [loading, setLoading] = useState(true);
@@ -89,7 +91,12 @@ export default function ProcurementPage() {
     };
 
     const handleAcceptQuote = async (quoteId: number) => {
-        if (!confirm('Are you sure? This will deduct funds from your wallet.')) return;
+        const ok = await confirm({
+            title: 'Accept this quote?',
+            description: 'This will deduct funds from your wallet.',
+            confirmLabel: 'Accept quote',
+        });
+        if (!ok) return;
         try {
             await api.post('/procurement/accept-quote', { quoteId });
             toast.success('Order placed successfully!');
@@ -416,7 +423,7 @@ export default function ProcurementPage() {
                                                     <p className="text-lg font-bold text-gray-900">₵{Number(req.quotes[0].quote_amount).toFixed(2)}</p>
                                                 </div>
                                                 <button
-                                                    onClick={() => handleAcceptQuote(req.quotes[0].id)}
+                                                    onClick={() => void handleAcceptQuote(req.quotes[0].id)}
                                                     className="h-9 px-4 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 flex items-center gap-1"
                                                 >
                                                     Pay <ChevronRight className="h-3.5 w-3.5" />
@@ -441,6 +448,7 @@ export default function ProcurementPage() {
                 </div>
             )}
             </DashboardContent>
+            {confirmDialog}
         </DashboardLayout>
     );
 }

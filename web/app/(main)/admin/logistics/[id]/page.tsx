@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
 import toast from 'react-hot-toast';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 const SHIPMENT_STATUSES = ['booked', 'pickup_scheduled', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled'];
 
@@ -91,7 +92,7 @@ function StatusBadge({ status }: { status: string }) {
         booked: 'bg-orange-50 text-orange-700 border-orange-200',
         pickup_scheduled: 'bg-blue-50 text-blue-600 border-blue-300',
         picked_up: STATUS_PROGRESS_BADGE,
-        in_transit: 'bg-purple-50 text-purple-700 border-purple-200',
+        in_transit: 'bg-blue-50 text-blue-700 border-blue-200',
         out_for_delivery: 'bg-orange-50 text-orange-700 border-orange-200',
         delivered: 'bg-green-50 text-green-700 border-green-200',
         cancelled: 'bg-red-50 text-red-700 border-red-200',
@@ -104,6 +105,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function AdminShipmentDetailPage() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const params = useParams();
     const router = useRouter();
     const id = params?.id as string;
@@ -128,7 +130,12 @@ export default function AdminShipmentDetailPage() {
 
     const handleStatusUpdate = async (newStatus: string) => {
         if (!shipment) return;
-        if (!confirm(`Update status to ${formatCmsLabel(newStatus)}?`)) return;
+        const ok = await confirm({
+            title: `Update status to ${formatCmsLabel(newStatus)}?`,
+            confirmLabel: 'Update',
+            variant: 'primary',
+        });
+        if (!ok) return;
         setUpdating(true);
         try {
             await api.patch(`/logistics/admin/shipments/${shipment.id}/status`, { status: newStatus });
@@ -187,7 +194,7 @@ export default function AdminShipmentDetailPage() {
                                 <StatusBadge status={shipment.status} />
                                 <select
                                     value={shipment.status}
-                                    onChange={(e) => handleStatusUpdate(e.target.value)}
+                                    onChange={(e) => void handleStatusUpdate(e.target.value)}
                                     disabled={updating}
                                     className="text-xs font-semibold border border-gray-200 rounded-lg pl-3 pr-8 py-2 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                 >
@@ -357,6 +364,7 @@ export default function AdminShipmentDetailPage() {
                     </div>
                 </div>
             </div>
+            {confirmDialog}
         </DashboardLayout>
     );
 }

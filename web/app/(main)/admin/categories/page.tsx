@@ -3,17 +3,37 @@
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
-import { Search, Plus, FolderTree, Edit3, Trash2, FileText, CheckCircle, XCircle } from 'lucide-react';
+import AdminToolbar from '@/components/admin/AdminToolbar';
+import AdminTable, {
+    AdminTableBody,
+    AdminTableEmpty,
+    AdminTableHead,
+    AdminTableLoading,
+    AdminTd,
+    AdminTh,
+    AdminTr,
+} from '@/components/admin/AdminTable';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import Textarea from '@/components/ui/Textarea';
+import FormField from '@/components/ui/FormField';
+import Modal from '@/components/ui/Modal';
+import Badge from '@/components/ui/Badge';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
+import { Plus, FolderTree, Edit3, Trash2, FileText, CheckCircle, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import { flattenCategoryTree, getRootCategories, type CategoryNode } from '@/lib/category-utils';
 
 export default function AdminCategories() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<any>(null);
+    const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         slug: '',
@@ -62,6 +82,7 @@ export default function AdminCategories() {
             toast.error('Name is required');
             return;
         }
+        setSaving(true);
         try {
             const payload: Record<string, unknown> = {
                 name: formData.name.trim(),
@@ -85,11 +106,18 @@ export default function AdminCategories() {
             const raw = err?.response?.data?.message;
             const msg = Array.isArray(raw) ? raw.join(', ') : raw;
             toast.error(msg || 'Failed to save category');
+        } finally {
+            setSaving(false);
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Delete this category?')) return;
+        const ok = await confirm({
+            title: 'Delete this category?',
+            description: 'This cannot be undone. Categories with products may fail to delete.',
+            confirmLabel: 'Delete',
+        });
+        if (!ok) return;
         try {
             await api.delete(`/products/categories/${id}`);
             toast.success('Category deleted');
@@ -119,202 +147,196 @@ export default function AdminCategories() {
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
-            <AdminPageHeader
-                icon={FolderTree}
-                title="Categories"
-                subtitle="Product taxonomy"
-                actions={
-                    <>
-                        <div className="relative flex-1 min-w-0 sm:w-48">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" aria-hidden />
-                            <input
-                                type="search"
-                                placeholder="Search categories..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="admin-input w-full sm:w-48 pl-9"
-                                aria-label="Search categories"
+                <AdminPageHeader
+                    icon={FolderTree}
+                    title="Categories"
+                    subtitle="Product taxonomy"
+                    actions={
+                        <AdminToolbar
+                            searchValue={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            searchPlaceholder="Search categories..."
+                            searchAriaLabel="Search categories"
+                        >
+                            <Button
+                                type="button"
+                                size="sm"
+                                leftIcon={<Plus className="h-3.5 w-3.5" />}
+                                onClick={() => handleOpenModal()}
+                            >
+                                Add category
+                            </Button>
+                        </AdminToolbar>
+                    }
+                />
+
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                    {stats.map((s, i) => (
+                        <div key={i} className="admin-stat-card">
+                            <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
+                                <s.icon className="h-4 w-4" />
+                            </div>
+                            <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
+                            <p className="text-xl font-bold text-gray-900">{s.value}</p>
+                        </div>
+                    ))}
+                </div>
+
+                <AdminTable>
+                    <AdminTableHead>
+                        <AdminTh>Name</AdminTh>
+                        <AdminTh>Parent</AdminTh>
+                        <AdminTh>Slug</AdminTh>
+                        <AdminTh>Status</AdminTh>
+                        <AdminTh align="right">Actions</AdminTh>
+                    </AdminTableHead>
+                    <AdminTableBody>
+                        {loading ? (
+                            <AdminTableLoading colSpan={5} />
+                        ) : filtered.length === 0 ? (
+                            <AdminTableEmpty
+                                colSpan={5}
+                                icon={<FolderTree className="h-10 w-10 mx-auto mb-2 text-gray-200" />}
+                                message="No categories found"
                             />
-                        </div>
-                        <button type="button" onClick={() => handleOpenModal()} className="admin-btn-primary h-9 px-4 shrink-0">
-                            <Plus className="h-3.5 w-3.5" aria-hidden /> Add category
-                        </button>
-                    </>
-                }
-            />
-
-            <div className="grid grid-cols-3 gap-3 mb-4">
-                {stats.map((s, i) => (
-                    <div key={i} className="admin-stat-card">
-                        <div className={`w-9 h-9 rounded-lg ${s.bg} ${s.border} border flex items-center justify-center ${s.color} mb-2`}>
-                            <s.icon className="h-4 w-4" />
-                        </div>
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">{s.label}</p>
-                        <p className="text-xl font-bold text-gray-900">{s.value}</p>
-                    </div>
-                ))}
-            </div>
-
-            <div className="admin-table-wrap">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="admin-th">Name</th>
-                                <th className="admin-th">Parent</th>
-                                <th className="admin-th">Slug</th>
-                                <th className="admin-th">Status</th>
-                                <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={5} className="py-10 text-center">
-                                        <div className="animate-spin h-7 w-7 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
-                                        <p className="text-sm text-gray-500">Loading...</p>
-                                    </td>
-                                </tr>
-                            ) : filtered.length === 0 ? (
-                                <tr>
-                                    <td colSpan={4} className="py-10 text-center text-gray-500">
-                                        <FolderTree className="h-10 w-10 mx-auto mb-2 text-gray-200" />
-                                        <p className="text-sm">No categories found</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                filtered.map(({ cat: c, depth }) => (
-                                    <tr key={c.id} className="hover:bg-gray-50/50 transition-colors group">
-                                        <td className="px-3 py-2.5">
-                                            <div className="flex items-center gap-2" style={{ paddingLeft: depth * 16 }}>
-                                                <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
-                                                    <FolderTree className="h-3.5 w-3.5 text-gray-400" />
-                                                </div>
-                                                <span className="text-xs font-semibold text-gray-900">{depth > 0 ? `↳ ${c.name}` : c.name}</span>
+                        ) : (
+                            filtered.map(({ cat: c, depth }) => (
+                                <AdminTr key={c.id} className="group">
+                                    <AdminTd>
+                                        <div className="flex items-center gap-2" style={{ paddingLeft: depth * 16 }}>
+                                            <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
+                                                <FolderTree className="h-3.5 w-3.5 text-gray-400" />
                                             </div>
-                                        </td>
-                                        <td className="px-3 py-2.5 text-xs text-gray-500">
-                                            {c.parent?.name ?? (c.parent_id ? '—' : 'Main')}
-                                        </td>
-                                        <td className="px-3 py-2.5 text-xs font-mono text-gray-500">{c.slug}</td>
-                                        <td className="px-3 py-2.5">
-                                            <span className={`px-2 py-0.5 rounded-lg text-xs font-semibold border ${c.is_active ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-50 text-gray-500 border-gray-100'}`}>
-                                                {c.is_active ? 'Active' : 'Inactive'}
+                                            <span className="text-xs font-semibold text-gray-900">
+                                                {depth > 0 ? `↳ ${c.name}` : c.name}
                                             </span>
-                                        </td>
-                                        <td className="px-3 py-2.5 text-right">
-                                            <div className="flex justify-end gap-1.5">
-                                                <button type="button" onClick={() => handleOpenModal(c)} className="w-7 h-7 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all" aria-label="Edit"><Edit3 className="h-3 w-3" /></button>
-                                                <button type="button" onClick={() => handleDelete(c.id)} className="w-7 h-7 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-all" aria-label="Delete"><Trash2 className="h-3 w-3" /></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                        </div>
+                                    </AdminTd>
+                                    <AdminTd className="text-xs text-gray-500">
+                                        {c.parent?.name ?? (c.parent_id ? '—' : 'Main')}
+                                    </AdminTd>
+                                    <AdminTd className="text-xs font-mono text-gray-500">{c.slug}</AdminTd>
+                                    <AdminTd>
+                                        <Badge variant={c.is_active ? 'success' : 'default'}>
+                                            {c.is_active ? 'Active' : 'Inactive'}
+                                        </Badge>
+                                    </AdminTd>
+                                    <AdminTd className="text-right">
+                                        <div className="flex justify-end gap-1.5">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleOpenModal(c)}
+                                                className="w-7 h-7 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand transition-all"
+                                                aria-label="Edit"
+                                            >
+                                                <Edit3 className="h-3 w-3" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => void handleDelete(c.id)}
+                                                className="w-7 h-7 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-all"
+                                                aria-label="Delete"
+                                            >
+                                                <Trash2 className="h-3 w-3" />
+                                            </button>
+                                        </div>
+                                    </AdminTd>
+                                </AdminTr>
+                            ))
+                        )}
+                    </AdminTableBody>
+                </AdminTable>
 
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setIsModalOpen(false)}>
-                    <div className="admin-modal-panel max-w-md w-full max-h-[90vh] overflow-y-auto overscroll-y-contain scrollbar-thin p-5" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">
-                            {editingCategory ? 'Edit category' : 'New category'}
-                        </h2>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Name</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                <Modal
+                    open={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    title={editingCategory ? 'Edit category' : 'New category'}
+                    size="md"
+                    footer={
+                        <>
+                            <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" form="category-form" variant="primary" loading={saving}>
+                                {editingCategory ? 'Update' : 'Create'}
+                            </Button>
+                        </>
+                    }
+                >
+                    <form id="category-form" onSubmit={handleSubmit} className="space-y-4">
+                        <FormField label="Name" htmlFor="cat-name">
+                            <Input
+                                id="cat-name"
+                                required
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            />
+                        </FormField>
+                        <FormField
+                            label="Parent category"
+                            htmlFor="cat-parent"
+                            hint={
+                                editingCategory?.children?.length
+                                    ? 'Main categories with subcategories cannot be moved under another parent.'
+                                    : undefined
+                            }
+                        >
+                            <Select
+                                id="cat-parent"
+                                value={formData.parent_id}
+                                onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
+                                disabled={!!editingCategory?.children?.length}
+                            >
+                                <option value="">None (main category)</option>
+                                {roots
+                                    .filter((r) => !editingCategory || r.id !== editingCategory.id)
+                                    .map((r) => (
+                                        <option key={r.id} value={r.id}>
+                                            {r.name}
+                                        </option>
+                                    ))}
+                            </Select>
+                        </FormField>
+                        <FormField label="Slug (optional)" htmlFor="cat-slug" hint="Auto-generated from name if empty">
+                            <Input
+                                id="cat-slug"
+                                value={formData.slug}
+                                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                                placeholder="Auto-generated from name"
+                            />
+                        </FormField>
+                        <FormField label="Description" htmlFor="cat-desc">
+                            <Textarea
+                                id="cat-desc"
+                                rows={2}
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            />
+                        </FormField>
+                        <div className="grid grid-cols-2 gap-3">
+                            <FormField label="Sort order" htmlFor="cat-sort">
+                                <Input
+                                    id="cat-sort"
+                                    type="number"
+                                    min={0}
+                                    value={formData.sort_order}
+                                    onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Parent category</label>
-                                <select
-                                    value={formData.parent_id}
-                                    onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
-                                    disabled={!!(editingCategory?.children?.length)}
-                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 disabled:opacity-60"
+                            </FormField>
+                            <FormField label="Status" htmlFor="cat-status">
+                                <Select
+                                    id="cat-status"
+                                    value={formData.is_active}
+                                    onChange={(e) => setFormData({ ...formData, is_active: e.target.value })}
                                 >
-                                    <option value="">None (main category)</option>
-                                    {roots
-                                        .filter((r) => !editingCategory || r.id !== editingCategory.id)
-                                        .map((r) => (
-                                            <option key={r.id} value={r.id}>
-                                                {r.name}
-                                            </option>
-                                        ))}
-                                </select>
-                                {editingCategory?.children?.length ? (
-                                    <p className="text-xs text-gray-400 mt-1">Main categories with subcategories cannot be moved under another parent.</p>
-                                ) : null}
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Slug (optional)</label>
-                                <input
-                                    type="text"
-                                    value={formData.slug}
-                                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                                    placeholder="Auto-generated from name"
-                                    className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Description</label>
-                                <textarea
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    rows={2}
-                                    className="w-full px-3 py-2 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Sort order</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={formData.sort_order}
-                                        onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
-                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Status</label>
-                                    <select
-                                        value={formData.is_active}
-                                        onChange={(e) => setFormData({ ...formData, is_active: e.target.value })}
-                                        className="w-full h-10 px-3 border border-gray-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    >
-                                        <option value="true">Active</option>
-                                        <option value="false">Inactive</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="flex gap-2 pt-2">
-                                <button
-                                    type="submit"
-                                    className="flex-1 h-10 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700"
-                                >
-                                    {editingCategory ? 'Update' : 'Create'}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="h-10 px-4 border border-gray-200 rounded-lg font-semibold text-sm text-gray-600 hover:bg-gray-50"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                                    <option value="true">Active</option>
+                                    <option value="false">Inactive</option>
+                                </Select>
+                            </FormField>
+                        </div>
+                    </form>
+                </Modal>
+                {confirmDialog}
             </div>
         </DashboardLayout>
     );

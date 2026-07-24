@@ -5,6 +5,14 @@ import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminToolbar from '@/components/admin/AdminToolbar';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import FormField from '@/components/ui/FormField';
+import Modal from '@/components/ui/Modal';
+import Badge from '@/components/ui/Badge';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { Package, Plus, Pencil, Trash2, Plane, Ship, CheckCircle, FileText } from 'lucide-react';
 import { ADMIN_STAT_LOGISTICS } from '@/lib/status-styles';
 
@@ -26,11 +34,13 @@ function rateSymbol(r: ShippingRate): string {
 }
 
 export default function AdminShippingRatesPage() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const [rates, setRates] = useState<ShippingRate[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [modal, setModal] = useState<'add' | 'edit' | null>(null);
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [saving, setSaving] = useState(false);
     const [form, setForm] = useState({
         rate_id: '',
         method: 'air_freight',
@@ -97,6 +107,7 @@ export default function AdminShippingRatesPage() {
             toast.error('Fill rate ID, name and a valid price');
             return;
         }
+        setSaving(true);
         try {
             if (modal === 'add') {
                 await api.post('/logistics/admin/freight-rates', {
@@ -119,11 +130,18 @@ export default function AdminShippingRatesPage() {
             fetchRates();
         } catch (err: any) {
             toast.error(err.response?.data?.message || 'Failed to save');
+        } finally {
+            setSaving(false);
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Delete this rate?')) return;
+        const ok = await confirm({
+            title: 'Delete this rate?',
+            description: 'This shipping rate will be removed permanently.',
+            confirmLabel: 'Delete',
+        });
+        if (!ok) return;
         try {
             await api.delete(`/logistics/admin/freight-rates/${id}`);
             toast.success('Rate deleted');
@@ -186,16 +204,16 @@ export default function AdminShippingRatesPage() {
                                     <td className="px-3 py-2.5 text-xs font-semibold text-gray-600">{r.type}</td>
                                     <td className="px-3 py-2.5 text-xs text-gray-500">{r.duration || '—'}</td>
                                     <td className="px-3 py-2.5">
-                                        <span className={`inline-flex px-2 py-0.5 rounded-lg text-xs font-semibold ${r.is_active ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-gray-50 text-gray-500 border border-gray-100'}`}>
+                                        <Badge variant={r.is_active ? 'success' : 'default'}>
                                             {r.is_active ? 'Active' : 'Inactive'}
-                                        </span>
+                                        </Badge>
                                     </td>
                                     <td className="px-3 py-2.5 text-xs text-gray-500">{r.sort_order}</td>
                                     <td className="px-3 py-2.5 text-right">
-                                        <button type="button" onClick={() => openEdit(r)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg" aria-label="Edit">
+                                        <button type="button" onClick={() => openEdit(r)} className="p-1.5 text-gray-400 hover:text-brand rounded-lg" aria-label="Edit">
                                             <Pencil className="h-3.5 w-3.5" />
                                         </button>
-                                        <button type="button" onClick={() => handleDelete(r.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg ml-0.5" aria-label="Delete">
+                                        <button type="button" onClick={() => void handleDelete(r.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg ml-0.5" aria-label="Delete">
                                             <Trash2 className="h-3.5 w-3.5" />
                                         </button>
                                     </td>
@@ -216,19 +234,16 @@ export default function AdminShippingRatesPage() {
                 title="Shipping rates"
                 subtitle="Air & sea freight (Ship for Me). Does not affect shop checkout."
                 actions={
-                    <>
-                        <input
-                            type="search"
-                            placeholder="Search rates..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="admin-input w-40 sm:w-48"
-                            aria-label="Search shipping rates"
-                        />
-                        <button type="button" onClick={openAdd} className="admin-btn-primary h-9 px-4 shrink-0">
-                            <Plus className="h-3.5 w-3.5" aria-hidden /> Add rate
-                        </button>
-                    </>
+                    <AdminToolbar
+                        searchValue={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        searchPlaceholder="Search rates..."
+                        searchAriaLabel="Search shipping rates"
+                    >
+                        <Button type="button" size="sm" leftIcon={<Plus className="h-3.5 w-3.5" />} onClick={openAdd}>
+                            Add rate
+                        </Button>
+                    </AdminToolbar>
                 }
             />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
@@ -255,114 +270,109 @@ export default function AdminShippingRatesPage() {
                 </>
             )}
 
-            {modal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setModal(null)}>
-                    <div className="admin-modal-panel max-w-md p-5" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="text-base font-bold text-gray-900 mb-4">{modal === 'add' ? 'Add rate' : 'Edit rate'}</h3>
-                        <form onSubmit={handleSubmit} className="space-y-3">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Rate ID</label>
-                                <input
-                                    type="text"
-                                    value={form.rate_id}
-                                    onChange={(e) => setForm({ ...form, rate_id: e.target.value })}
-                                    placeholder="e.g. air_express"
-                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    required
-                                    disabled={modal === 'edit'}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Method</label>
-                                <select
-                                    value={form.method}
-                                    onChange={(e) => setForm({ ...form, method: e.target.value })}
-                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                >
-                                    <option value="air_freight">Air freight</option>
-                                    <option value="sea_freight">Sea freight</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Name</label>
-                                <input
-                                    type="text"
-                                    value={form.name}
-                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                    placeholder="e.g. Express (3-5 days)"
-                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    required
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Price</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        value={form.price}
-                                        onChange={(e) => setForm({ ...form, price: e.target.value })}
-                                        className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1">Type</label>
-                                    <select
-                                        value={form.type}
-                                        onChange={(e) => setForm({ ...form, type: e.target.value })}
-                                        className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    >
-                                        <option value="KG">KG</option>
-                                        <option value="UNIT">UNIT</option>
-                                        <option value="CBM">CBM</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Currency</label>
-                                <select
-                                    value={form.currency}
-                                    onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                >
-                                    <option value="USD">USD ($)</option>
-                                    <option value="RMB">RMB (¥)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Duration (optional)</label>
-                                <input
-                                    type="text"
-                                    value={form.duration}
-                                    onChange={(e) => setForm({ ...form, duration: e.target.value })}
-                                    placeholder="e.g. 3-5 days"
-                                    className="w-full h-9 px-3 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    id="is_active"
-                                    checked={form.is_active}
-                                    onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                />
-                                <label htmlFor="is_active" className="text-xs font-medium text-gray-700">Active</label>
-                            </div>
-                            <div className="flex justify-end gap-2 pt-2">
-                                <button type="button" onClick={() => setModal(null)} className="min-h-[44px] h-9 px-4 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-semibold flex items-center">
-                                    Cancel
-                                </button>
-                                <button type="submit" className="min-h-[44px] h-9 px-4 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 flex items-center">
-                                    {modal === 'add' ? 'Add' : 'Save'}
-                                </button>
-                            </div>
-                        </form>
+            <Modal
+                open={!!modal}
+                onClose={() => setModal(null)}
+                title={modal === 'add' ? 'Add rate' : 'Edit rate'}
+                size="md"
+                footer={
+                    <>
+                        <Button type="button" variant="secondary" onClick={() => setModal(null)}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" form="shipping-rate-form" variant="primary" loading={saving}>
+                            {modal === 'add' ? 'Add' : 'Save'}
+                        </Button>
+                    </>
+                }
+            >
+                <form id="shipping-rate-form" onSubmit={handleSubmit} className="space-y-3">
+                    <FormField label="Rate ID" htmlFor="rate-id">
+                        <Input
+                            id="rate-id"
+                            value={form.rate_id}
+                            onChange={(e) => setForm({ ...form, rate_id: e.target.value })}
+                            placeholder="e.g. air_express"
+                            required
+                            disabled={modal === 'edit'}
+                        />
+                    </FormField>
+                    <FormField label="Method" htmlFor="rate-method">
+                        <Select
+                            id="rate-method"
+                            value={form.method}
+                            onChange={(e) => setForm({ ...form, method: e.target.value })}
+                        >
+                            <option value="air_freight">Air freight</option>
+                            <option value="sea_freight">Sea freight</option>
+                        </Select>
+                    </FormField>
+                    <FormField label="Name" htmlFor="rate-name">
+                        <Input
+                            id="rate-name"
+                            value={form.name}
+                            onChange={(e) => setForm({ ...form, name: e.target.value })}
+                            placeholder="e.g. Express (3-5 days)"
+                            required
+                        />
+                    </FormField>
+                    <div className="grid grid-cols-2 gap-3">
+                        <FormField label="Price" htmlFor="rate-price">
+                            <Input
+                                id="rate-price"
+                                type="number"
+                                step="0.01"
+                                min={0}
+                                value={form.price}
+                                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                                required
+                            />
+                        </FormField>
+                        <FormField label="Type" htmlFor="rate-type">
+                            <Select
+                                id="rate-type"
+                                value={form.type}
+                                onChange={(e) => setForm({ ...form, type: e.target.value })}
+                            >
+                                <option value="KG">KG</option>
+                                <option value="UNIT">UNIT</option>
+                                <option value="CBM">CBM</option>
+                            </Select>
+                        </FormField>
                     </div>
-                </div>
-            )}
+                    <FormField label="Currency" htmlFor="rate-currency">
+                        <Select
+                            id="rate-currency"
+                            value={form.currency}
+                            onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                        >
+                            <option value="USD">USD ($)</option>
+                            <option value="RMB">RMB (¥)</option>
+                        </Select>
+                    </FormField>
+                    <FormField label="Duration (optional)" htmlFor="rate-duration">
+                        <Input
+                            id="rate-duration"
+                            value={form.duration}
+                            onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                            placeholder="e.g. 3-5 days"
+                        />
+                    </FormField>
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id="is_active"
+                            checked={form.is_active}
+                            onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
+                            className="rounded border-gray-300 text-brand focus:ring-brand/20"
+                        />
+                        <label htmlFor="is_active" className="text-xs font-medium text-gray-700">
+                            Active
+                        </label>
+                    </div>
+                </form>
+            </Modal>
+            {confirmDialog}
             </div>
         </DashboardLayout>
     );

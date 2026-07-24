@@ -18,7 +18,11 @@ import {
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import { GroupedListSection, GroupedListItem } from '@/components/ui/GroupedList';
-import { authInputClass, authLabelClass } from '@/components/auth/AuthScreen';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import Textarea from '@/components/ui/Textarea';
+import FormField from '@/components/ui/FormField';
 
 export default function SupportPage() {
     const [isCreatingTicket, setIsCreatingTicket] = useState(false);
@@ -48,9 +52,6 @@ export default function SupportPage() {
             setSubmittingTicket(false);
         }
     };
-
-    const inputClass = authInputClass;
-    const labelClass = authLabelClass;
 
     const helpArticles = [
         {
@@ -111,68 +112,61 @@ export default function SupportPage() {
                                 <p className="text-sm text-gray-500 mb-6 max-w-md leading-relaxed">
                                     Open a ticket and our team will respond within 2–4 hours.
                                 </p>
-                                <button
+                                <Button
                                     type="button"
                                     onClick={() => setIsCreatingTicket(true)}
-                                    className="h-10 px-5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center gap-2"
+                                    rightIcon={<ChevronRight className="h-4 w-4" />}
                                 >
                                     Open ticket
-                                    <ChevronRight className="h-4 w-4" />
-                                </button>
+                                </Button>
                             </div>
                         ) : (
                             <div>
                                 <div className="flex items-center justify-between mb-5">
                                     <h2 className="text-lg font-semibold text-gray-900">New ticket</h2>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsCreatingTicket(false)}
-                                        className="text-sm font-medium text-gray-500 hover:text-gray-700 min-h-[44px] px-2"
-                                    >
+                                    <Button type="button" variant="ghost" size="sm" onClick={() => setIsCreatingTicket(false)}>
                                         Cancel
-                                    </button>
+                                    </Button>
                                 </div>
                                 <form onSubmit={handleSubmitTicket} className="space-y-4">
-                                    <div>
-                                        <label className={labelClass}>Category</label>
-                                        <select
+                                    <FormField label="Category" htmlFor="support-category">
+                                        <Select
+                                            id="support-category"
                                             value={ticketCategory}
                                             onChange={(e) => setTicketCategory(e.target.value)}
-                                            className={inputClass}
                                         >
                                             <option value="logistics">Logistics</option>
                                             <option value="procurement">Procurement</option>
                                             <option value="wallet">Payments</option>
                                             <option value="account">Account</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className={labelClass}>Message</label>
-                                        <textarea
+                                        </Select>
+                                    </FormField>
+                                    <FormField label="Message" htmlFor="support-message">
+                                        <Textarea
+                                            id="support-message"
                                             value={ticketMessage}
                                             onChange={(e) => setTicketMessage(e.target.value)}
                                             placeholder="Describe your issue and include order or reference IDs if relevant..."
-                                            className={`${inputClass} min-h-[100px] resize-none py-3`}
+                                            className="min-h-[100px] resize-none"
                                             required
                                         />
-                                    </div>
-                                    <div>
-                                        <label className={labelClass}>Reference (optional)</label>
-                                        <input
+                                    </FormField>
+                                    <FormField label="Reference (optional)" htmlFor="support-ref">
+                                        <Input
+                                            id="support-ref"
                                             value={ticketReference}
                                             onChange={(e) => setTicketReference(e.target.value)}
                                             placeholder="Order or tracking ID (e.g. ORD-..., SHP-...)"
-                                            className={inputClass}
                                         />
-                                    </div>
-                                    <button
+                                    </FormField>
+                                    <Button
                                         type="submit"
-                                        disabled={submittingTicket}
-                                        className="w-full min-h-[44px] h-11 flex items-center justify-center gap-2 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-60"
+                                        className="w-full"
+                                        loading={submittingTicket}
+                                        rightIcon={!submittingTicket ? <Send className="h-4 w-4" /> : undefined}
                                     >
                                         {submittingTicket ? 'Submitting...' : 'Submit'}
-                                        {!submittingTicket && <Send className="h-4 w-4" />}
-                                    </button>
+                                    </Button>
                                 </form>
                             </div>
                         )}

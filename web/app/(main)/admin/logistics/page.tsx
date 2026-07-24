@@ -10,6 +10,7 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import BarcodeScanner from '@/components/ui/BarcodeScanner';
 import { Truck, Search, Package, User, Mail, Calendar, Clock, Zap, FileText, CheckCircle, ChevronRight, Camera, ExternalLink } from 'lucide-react';
 import { ADMIN_STAT_PROGRESS, STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 interface Shipment {
     id: number;
@@ -29,6 +30,7 @@ interface Shipment {
 }
 
 export default function AdminLogisticsPage() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const router = useRouter();
     const [shipments, setShipments] = useState<Shipment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -52,7 +54,12 @@ export default function AdminLogisticsPage() {
     };
 
     const handleStatusUpdate = async (id: number, newStatus: string) => {
-        if (!confirm(`Update status to ${newStatus.replace(/_/g, ' ')}?`)) return;
+        const ok = await confirm({
+            title: `Update status to ${newStatus.replace(/_/g, ' ')}?`,
+            confirmLabel: 'Update',
+            variant: 'primary',
+        });
+        if (!ok) return;
         setUpdatingId(id);
         try {
             await api.patch(`/logistics/admin/shipments/${id}/status`, { status: newStatus });
@@ -122,7 +129,7 @@ export default function AdminLogisticsPage() {
             booked: 'bg-orange-50 text-orange-700 border-orange-200',
             pickup_scheduled: 'bg-blue-50 text-blue-600 border-blue-300',
             picked_up: STATUS_PROGRESS_BADGE,
-            in_transit: 'bg-purple-50 text-purple-700 border-purple-200',
+            in_transit: 'bg-blue-50 text-blue-700 border-blue-200',
             out_for_delivery: 'bg-orange-50 text-orange-700 border-orange-200',
             delivered: 'bg-green-50 text-green-700 border-green-200',
             cancelled: 'bg-red-50 text-red-700 border-red-200',
@@ -278,7 +285,7 @@ export default function AdminLogisticsPage() {
                                                         disabled={updatingId === shipment.id}
                                                         className="appearance-none bg-gray-50 border border-gray-100 text-gray-700 text-xs font-semibold rounded-lg min-h-[44px] py-2 pl-2.5 pr-7 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
                                                         value={shipment.status}
-                                                        onChange={(e) => handleStatusUpdate(shipment.id, e.target.value)}
+                                                        onChange={(e) => void handleStatusUpdate(shipment.id, e.target.value)}
                                                     >
                                                         <option value="booked">Booked</option>
                                                         <option value="pickup_scheduled">Pickup scheduled</option>
@@ -315,6 +322,7 @@ export default function AdminLogisticsPage() {
                     }
                 }}
             />
+            {confirmDialog}
         </DashboardLayout>
     );
 }

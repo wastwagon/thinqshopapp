@@ -3,7 +3,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
-import { Search, Upload, Image as ImageIcon, Trash2, Loader2 } from 'lucide-react';
+import AdminToolbar from '@/components/admin/AdminToolbar';
+import Button from '@/components/ui/Button';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
+import { Upload, Image as ImageIcon, Trash2, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import { getMediaUrl } from '@/lib/media';
@@ -19,6 +22,7 @@ type MediaItem = {
 };
 
 export default function AdminMediaPage() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const [items, setItems] = useState<MediaItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -81,7 +85,12 @@ export default function AdminMediaPage() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Delete this file from the media library?')) return;
+        const ok = await confirm({
+            title: 'Delete this file?',
+            description: 'It will be removed from the media library.',
+            confirmLabel: 'Delete',
+        });
+        if (!ok) return;
         try {
             await api.delete(`/media/${id}`);
             toast.success('Deleted');
@@ -99,18 +108,15 @@ export default function AdminMediaPage() {
                 title="Media"
                 subtitle="Upload and reuse images across products"
                 actions={
-                    <>
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" aria-hidden />
-                            <input
-                                type="search"
-                                placeholder="Search files..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="admin-input w-48 pl-9"
-                                aria-label="Search media files"
-                            />
-                        </div>
+                    <AdminToolbar
+                        searchValue={search}
+                        onSearchChange={(v) => {
+                            setSearch(v);
+                            setPage(1);
+                        }}
+                        searchPlaceholder="Search files..."
+                        searchAriaLabel="Search media files"
+                    >
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -118,16 +124,16 @@ export default function AdminMediaPage() {
                             className="hidden"
                             onChange={handleUpload}
                         />
-                        <button
+                        <Button
                             type="button"
+                            size="sm"
                             onClick={() => fileInputRef.current?.click()}
-                            disabled={uploading}
-                            className="admin-btn-primary h-9 px-4 shrink-0 disabled:opacity-60"
+                            loading={uploading}
+                            leftIcon={!uploading ? <Upload className="h-4 w-4" /> : undefined}
                         >
-                            {uploading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Upload className="h-4 w-4" aria-hidden />}
                             Upload
-                        </button>
-                    </>
+                        </Button>
+                    </AdminToolbar>
                 }
             />
             <div className="admin-table-wrap">
@@ -140,13 +146,14 @@ export default function AdminMediaPage() {
                         <ImageIcon className="h-14 w-14 mx-auto mb-4 text-gray-200" />
                         <p className="text-gray-500 font-medium">No media yet</p>
                         <p className="text-sm text-gray-400 mt-1">Upload images to use in products and across the site.</p>
-                        <button
+                        <Button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="mt-4 h-10 px-5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700"
+                            className="mt-4"
+                            leftIcon={<Upload className="h-4 w-4" />}
                         >
                             Upload image
-                        </button>
+                        </Button>
                     </div>
                 ) : (
                     <div className="p-4 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
@@ -205,6 +212,7 @@ export default function AdminMediaPage() {
                     </div>
                 )}
             </div>
+            {confirmDialog}
             </div>
         </DashboardLayout>
     );

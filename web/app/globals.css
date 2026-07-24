@@ -10,7 +10,8 @@
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 221 83% 53%;
+    /* Primary / ring aligned to ThinQShop navy (same as --brand / blue-600 #02274f) */
+    --primary: 210 94% 16%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222 47% 11.2%;
@@ -22,7 +23,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221 83% 53%;
+    --ring: 210 94% 16%;
     --radius: 0.75rem;
 
     /* Brand-specific colors */
@@ -352,39 +353,6 @@
     background-color: hsl(var(--border));
     border-radius: 3px;
   }
-}
-
-.glass {
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.glass-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-hover:hover {
-  background-color: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.text-gradient {
-  background: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--blueblack)) 50%, hsl(var(--brand)) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.mesh-gradient {
-  background:
-    radial-gradient(circle at 20% 30%, hsl(var(--brand-muted)) 0%, transparent 45%),
-    radial-gradient(circle at 80% 70%, hsl(221 83% 53% / 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, #f1f5f9 0%, #f8fafc 100%);
 }
 
 /* E-commerce Utilities */

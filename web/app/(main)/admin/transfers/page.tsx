@@ -8,6 +8,7 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Send, Search, History, ChevronRight, Calendar, ArrowRight, QrCode, Upload, ImagePlus, Download, CheckCircle, Loader2, FileText, Clock, Package } from 'lucide-react';
 import { STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
 import { getMediaUrl } from '@/lib/media';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 type QrCodeEntry = { image: string; amount_ghs?: number; amount_cny?: number; recipient_name?: string };
 type QrFulfillment = { qr_index: number; status: string; confirmation_image?: string; admin_notes?: string; fulfilled_at?: string };
@@ -47,6 +48,7 @@ const formatCmsLabel = (value: string) =>
         .replace(/\b\w/g, (c) => c.toUpperCase());
 
 export default function AdminTransfersPage() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const [transfers, setTransfers] = useState<Transfer[]>([]);
     const [loading, setLoading] = useState(true);
     const [updatingId, setUpdatingId] = useState<number | null>(null);
@@ -137,7 +139,12 @@ export default function AdminTransfersPage() {
     const completionRate = transfers.length > 0 ? Math.round((completedCount / transfers.length) * 100) : 0;
 
     const handleStatusUpdate = async (id: number, newStatus: string, adminNotes?: string) => {
-        if (!confirm(`Update transfer status to ${formatCmsLabel(newStatus)}?`)) return;
+        const ok = await confirm({
+            title: `Update transfer status to ${formatCmsLabel(newStatus)}?`,
+            confirmLabel: 'Update',
+            variant: 'primary',
+        });
+        if (!ok) return;
 
         setUpdatingId(id);
         try {
@@ -176,7 +183,7 @@ export default function AdminTransfersPage() {
             pending: 'bg-orange-50 text-orange-700 border-orange-200',
             payment_received: 'bg-blue-50 text-blue-600 border-blue-300',
             processing: STATUS_PROGRESS_BADGE,
-            sent_to_partner: 'bg-purple-50 text-purple-700 border-purple-200',
+            sent_to_partner: 'bg-blue-50 text-blue-700 border-blue-200',
             completed: 'bg-green-50 text-green-700 border-green-200',
             failed: 'bg-red-50 text-red-700 border-red-200',
             cancelled: 'bg-gray-50 text-gray-600 border-gray-200'
@@ -191,7 +198,7 @@ export default function AdminTransfersPage() {
     const stats = [
         { label: 'Total', value: transfers.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
         { label: 'Pending', value: pendingCount, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
-        { label: 'In progress', value: inProgressCount, icon: Package, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
+        { label: 'In progress', value: inProgressCount, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
         { label: 'Completed', value: completedCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' }
     ];
 
@@ -375,7 +382,7 @@ export default function AdminTransfersPage() {
                                                     <button
                                                         type="button"
                                                         disabled={updatingId === transfer.id}
-                                                        onClick={() => handleStatusUpdate(transfer.id, 'payment_received')}
+                                                        onClick={() => void handleStatusUpdate(transfer.id, 'payment_received')}
                                                         className="h-8 px-3 bg-blue-600 text-white rounded-lg font-semibold text-xs hover:bg-blue-700 transition-all"
                                                     >
                                                         Approve payment
@@ -383,7 +390,7 @@ export default function AdminTransfersPage() {
                                                     <button
                                                         type="button"
                                                         disabled={updatingId === transfer.id}
-                                                        onClick={() => handleStatusUpdate(transfer.id, 'failed')}
+                                                        onClick={() => void handleStatusUpdate(transfer.id, 'failed')}
                                                         className="h-8 px-3 border border-gray-200 text-gray-500 rounded-lg font-semibold text-xs hover:text-red-600 hover:border-red-200 transition-all"
                                                     >
                                                         Decline
@@ -395,7 +402,7 @@ export default function AdminTransfersPage() {
                                                         disabled={updatingId === transfer.id}
                                                         className="appearance-none bg-gray-50 border border-gray-100 text-gray-700 text-xs font-semibold rounded-lg py-2 pl-2.5 pr-8 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
                                                         value={transfer.status}
-                                                        onChange={(e) => handleStatusUpdate(transfer.id, e.target.value)}
+                                                        onChange={(e) => void handleStatusUpdate(transfer.id, e.target.value)}
                                                     >
                                                         <option value="payment_received">Payment received</option>
                                                         <option value="processing">Processing</option>
@@ -545,6 +552,7 @@ export default function AdminTransfersPage() {
                 );
             })()}
             </div>
+            {confirmDialog}
         </DashboardLayout>
     );
 }

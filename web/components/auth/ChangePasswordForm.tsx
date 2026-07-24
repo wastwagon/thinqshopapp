@@ -5,7 +5,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
-import { authInputClass, authLabelClass, authPrimaryBtnClass } from '@/components/auth/AuthScreen';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import FormField from '@/components/ui/FormField';
 
 const schema = z
     .object({
@@ -52,61 +54,49 @@ export default function ChangePasswordForm({ onCancel }: ChangePasswordFormProps
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4 pt-4 border-t border-gray-100">
-            <div>
-                <label className={authLabelClass} htmlFor="current-password">
-                    Current password
-                </label>
-                <input
+            <FormField
+                label="Current password"
+                htmlFor="current-password"
+                error={errors.currentPassword?.message}
+            >
+                <Input
                     id="current-password"
                     {...register('currentPassword')}
                     type="password"
                     autoComplete="current-password"
-                    className={authInputClass}
+                    invalid={!!errors.currentPassword}
                 />
-                {errors.currentPassword && (
-                    <p className="text-red-500 text-xs mt-1">{errors.currentPassword.message}</p>
-                )}
-            </div>
-            <div>
-                <label className={authLabelClass} htmlFor="new-password">
-                    New password
-                </label>
-                <input
+            </FormField>
+            <FormField label="New password" htmlFor="new-password" error={errors.newPassword?.message}>
+                <Input
                     id="new-password"
                     {...register('newPassword')}
                     type="password"
                     autoComplete="new-password"
-                    className={authInputClass}
+                    invalid={!!errors.newPassword}
                 />
-                {errors.newPassword && <p className="text-red-500 text-xs mt-1">{errors.newPassword.message}</p>}
-            </div>
-            <div>
-                <label className={authLabelClass} htmlFor="confirm-password">
-                    Confirm new password
-                </label>
-                <input
+            </FormField>
+            <FormField
+                label="Confirm new password"
+                htmlFor="confirm-password"
+                error={errors.confirmPassword?.message}
+            >
+                <Input
                     id="confirm-password"
                     {...register('confirmPassword')}
                     type="password"
                     autoComplete="new-password"
-                    className={authInputClass}
+                    invalid={!!errors.confirmPassword}
                 />
-                {errors.confirmPassword && (
-                    <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>
-                )}
-            </div>
+            </FormField>
             <div className="flex flex-col sm:flex-row gap-2">
-                <button type="submit" disabled={isSubmitting} className={authPrimaryBtnClass}>
+                <Button type="submit" variant="primary" size="lg" className="w-full sm:w-auto" loading={isSubmitting}>
                     {isSubmitting ? 'Updating…' : 'Update password'}
-                </button>
+                </Button>
                 {onCancel && (
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        className="min-h-[44px] px-4 rounded-xl border border-gray-200/90 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
+                    <Button type="button" variant="secondary" size="lg" onClick={onCancel} className="w-full sm:w-auto">
                         Cancel
-                    </button>
+                    </Button>
                 )}
             </div>
         </form>

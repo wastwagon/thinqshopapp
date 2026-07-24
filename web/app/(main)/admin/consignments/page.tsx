@@ -17,6 +17,7 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from 'recharts';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 interface Submission {
     id: number;
@@ -90,6 +91,7 @@ const FINANCIAL_STATUSES = new Set(['sold', 'paid_out']);
 const NON_DELETABLE_STATUSES = new Set(['sold', 'paid_out']);
 
 export default function AdminConsignmentsPage() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const [rows, setRows] = useState<Submission[]>([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('submitted');
@@ -343,7 +345,12 @@ export default function AdminConsignmentsPage() {
             return;
         }
         const label = s.name || s.submission_number;
-        if (!window.confirm(`Permanently delete "${label}"? This removes the listing and shop product if present.`)) {
+        const ok = await confirm({
+            title: `Permanently delete "${label}"?`,
+            description: 'This removes the listing and shop product if present.',
+            confirmLabel: 'Delete',
+        });
+        if (!ok) {
             return;
         }
         setProcessing(true);
@@ -384,7 +391,7 @@ export default function AdminConsignmentsPage() {
                 />
 
                 <div className="admin-card p-5 mb-4 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-violet-500/5 blur-[60px] pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-brand/5 blur-[60px] pointer-events-none" />
                     <div className="relative z-10">
                         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-4">
                             <div>
@@ -426,12 +433,12 @@ export default function AdminConsignmentsPage() {
                         </div>
 
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-                            <div className="rounded-xl border border-violet-100 bg-violet-50/60 p-3">
-                                <p className="text-[10px] font-semibold text-violet-700 uppercase tracking-wide">Commission earned</p>
-                                <p className="text-xl font-bold text-violet-900 mt-1">
+                            <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-3">
+                                <p className="text-[10px] font-semibold text-blue-700 uppercase tracking-wide">Commission earned</p>
+                                <p className="text-xl font-bold text-blue-900 mt-1">
                                     {loadingCommission ? '—' : formatMoney(commissionStats?.totals.commission_ghs)}
                                 </p>
-                                <p className="text-[10px] text-violet-600 mt-0.5">
+                                <p className="text-[10px] text-blue-600 mt-0.5">
                                     {loadingCommission ? '' : `${commissionStats?.totals.transaction_count ?? 0} releases`}
                                 </p>
                             </div>
@@ -619,7 +626,7 @@ export default function AdminConsignmentsPage() {
                                                     <td className="px-3 py-2.5">
                                                         {FINANCIAL_STATUSES.has(s.status) && s.commission_ghs != null ? (
                                                             <div>
-                                                                <p className="text-xs font-semibold text-violet-700">{formatMoney(s.commission_ghs)}</p>
+                                                                <p className="text-xs font-semibold text-blue-700">{formatMoney(s.commission_ghs)}</p>
                                                                 <p className="text-[10px] text-gray-500">{Number(s.commission_pct ?? 0).toFixed(1)}%</p>
                                                             </div>
                                                         ) : (
@@ -703,7 +710,7 @@ export default function AdminConsignmentsPage() {
                                                         <button
                                                             type="button"
                                                             disabled={processing}
-                                                            onClick={() => handleDelete(s)}
+                                                            onClick={() => void handleDelete(s)}
                                                             className="px-2 py-1 text-[10px] font-semibold rounded-lg bg-red-50 text-red-700 border border-red-100 inline-flex items-center gap-1"
                                                         >
                                                             <Trash2 className="h-3 w-3" /> Delete
@@ -849,6 +856,7 @@ export default function AdminConsignmentsPage() {
                     </div>
                 )}
             </div>
+            {confirmDialog}
         </DashboardLayout>
     );
 }

@@ -8,7 +8,10 @@ import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import AuthScreen, { authInputClass, authLabelClass, authPrimaryBtnClass, authLinkClass } from '@/components/auth/AuthScreen';
+import AuthScreen, { authLinkClass } from '@/components/auth/AuthScreen';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import FormField from '@/components/ui/FormField';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 
 const emailOrPhone = z.string().min(1, 'Enter your email or phone number').refine(
@@ -58,9 +61,6 @@ export default function RegisterPage() {
         resolver: zodResolver(registerSchema),
     });
 
-    const inputCls = authInputClass;
-    const inputClsPr = `${authInputClass} pr-12`;
-
     const onSubmit = async (data: RegisterFormData) => {
         try {
             const { confirmPassword, ...rest } = data;
@@ -85,10 +85,7 @@ export default function RegisterPage() {
             footer={
                 <div className="pt-6 mt-6 border-t border-gray-100 text-center">
                     <p className="text-gray-500 text-sm mb-2">Already have an account?</p>
-                    <Link
-                        href="/login"
-                        className={`inline-flex items-center gap-2 text-sm ${authLinkClass}`}
-                    >
+                    <Link href="/login" className={`inline-flex items-center gap-2 text-sm ${authLinkClass}`}>
                         Sign in
                         <ArrowRight className="h-4 w-4" />
                     </Link>
@@ -97,44 +94,59 @@ export default function RegisterPage() {
         >
             <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label className={authLabelClass}>First name</label>
-                        <input {...register('first_name')} type="text" placeholder="John" className={inputCls} />
-                        {errors.first_name && <p className="text-red-500 text-xs mt-1.5">{errors.first_name.message}</p>}
-                    </div>
-                    <div>
-                        <label className={authLabelClass}>Last name</label>
-                        <input {...register('last_name')} type="text" placeholder="Doe" className={inputCls} />
-                        {errors.last_name && <p className="text-red-500 text-xs mt-1.5">{errors.last_name.message}</p>}
-                    </div>
+                    <FormField label="First name" htmlFor="reg-first" error={errors.first_name?.message}>
+                        <Input
+                            id="reg-first"
+                            {...register('first_name')}
+                            type="text"
+                            placeholder="John"
+                            invalid={!!errors.first_name}
+                        />
+                    </FormField>
+                    <FormField label="Last name" htmlFor="reg-last" error={errors.last_name?.message}>
+                        <Input
+                            id="reg-last"
+                            {...register('last_name')}
+                            type="text"
+                            placeholder="Doe"
+                            invalid={!!errors.last_name}
+                        />
+                    </FormField>
                 </div>
-                <div>
-                    <label className={authLabelClass}>Email or phone</label>
-                    <input
+                <FormField label="Email or phone" htmlFor="reg-email" error={errors.email?.message}>
+                    <Input
+                        id="reg-email"
                         {...register('email')}
                         type="text"
                         inputMode="email"
                         autoComplete="username"
                         placeholder="you@example.com or +233..."
-                        className={inputCls}
+                        invalid={!!errors.email}
                     />
-                    {errors.email && <p className="text-red-500 text-xs mt-1.5">{errors.email.message}</p>}
-                </div>
-                <div>
-                    <label className={authLabelClass}>
-                        WhatsApp / Phone <span className="text-gray-400 font-normal">(optional)</span>
-                    </label>
-                    <input {...register('phone')} type="tel" placeholder="+233... (optional)" className={inputCls} />
-                    {errors.phone && <p className="text-red-500 text-xs mt-1.5">{errors.phone.message}</p>}
-                </div>
-                <div>
-                    <label className={authLabelClass}>Password</label>
+                </FormField>
+                <FormField
+                    label="WhatsApp / Phone"
+                    htmlFor="reg-phone"
+                    hint="Optional"
+                    error={errors.phone?.message}
+                >
+                    <Input
+                        id="reg-phone"
+                        {...register('phone')}
+                        type="tel"
+                        placeholder="+233..."
+                        invalid={!!errors.phone}
+                    />
+                </FormField>
+                <FormField label="Password" htmlFor="reg-password" error={errors.password?.message}>
                     <div className="relative">
-                        <input
+                        <Input
+                            id="reg-password"
                             {...register('password')}
                             type={showPassword ? 'text' : 'password'}
                             placeholder="At least 8 characters"
-                            className={inputClsPr}
+                            invalid={!!errors.password}
+                            className="pr-12"
                         />
                         <button
                             type="button"
@@ -145,16 +157,16 @@ export default function RegisterPage() {
                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                     </div>
-                    {errors.password && <p className="text-red-500 text-xs mt-1.5">{errors.password.message}</p>}
-                </div>
-                <div>
-                    <label className={authLabelClass}>Confirm password</label>
+                </FormField>
+                <FormField label="Confirm password" htmlFor="reg-confirm" error={errors.confirmPassword?.message}>
                     <div className="relative">
-                        <input
+                        <Input
+                            id="reg-confirm"
                             {...register('confirmPassword')}
                             type={showConfirmPassword ? 'text' : 'password'}
                             placeholder="Re-enter your password"
-                            className={inputClsPr}
+                            invalid={!!errors.confirmPassword}
+                            className="pr-12"
                         />
                         <button
                             type="button"
@@ -165,13 +177,10 @@ export default function RegisterPage() {
                             {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                     </div>
-                    {errors.confirmPassword && (
-                        <p className="text-red-500 text-xs mt-1.5">{errors.confirmPassword.message}</p>
-                    )}
-                </div>
-                <button type="submit" disabled={isSubmitting} className={authPrimaryBtnClass}>
+                </FormField>
+                <Button type="submit" variant="primary" size="lg" className="w-full" loading={isSubmitting}>
                     {isSubmitting ? 'Creating account...' : 'Create account'}
-                </button>
+                </Button>
             </form>
         </AuthScreen>
     );

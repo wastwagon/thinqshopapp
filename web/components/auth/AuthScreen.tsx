@@ -4,6 +4,10 @@ import type { ReactNode } from 'react';
 import ShopLayout from '@/components/layout/ShopLayout';
 import AuthBrand, { AuthCard } from '@/components/auth/AuthBrand';
 import { ShieldCheck, Headphones, Truck, BadgeCheck } from 'lucide-react';
+import { inputClassName } from '@/components/ui/Input';
+import { labelClassName } from '@/components/ui/Label';
+import { buttonVariants } from '@/components/ui/Button';
+import { cn } from '@/lib/cn';
 
 type AuthScreenProps = {
     title: string;
@@ -26,7 +30,7 @@ export default function AuthScreen({ title, subtitle, children, footer }: AuthSc
                 <AuthBrand />
                 <AuthCard>
                     <header className="mb-8 text-center">
-                        <div className="w-10 h-1 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 mx-auto mb-4" />
+                        <div className="w-10 h-1 rounded-full bg-gradient-to-r from-blue-600 to-blue-800 mx-auto mb-4" />
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">{title}</h1>
                         <p className="text-sm text-gray-500 mt-2 leading-snug">{subtitle}</p>
                     </header>
@@ -36,7 +40,7 @@ export default function AuthScreen({ title, subtitle, children, footer }: AuthSc
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 max-w-md">
                     {TRUST_ITEMS.map(({ icon: Icon, label }) => (
                         <span key={label} className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400">
-                            <Icon className="h-3.5 w-3.5 text-blue-500" aria-hidden />
+                            <Icon className="h-3.5 w-3.5 text-brand" aria-hidden />
                             {label}
                         </span>
                     ))}
@@ -50,12 +54,17 @@ export default function AuthScreen({ title, subtitle, children, footer }: AuthSc
     );
 }
 
-export const authInputClass =
-    'block w-full px-4 py-3 bg-white border border-gray-200/90 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors';
+/** @deprecated Prefer `<Input />` — kept for auth/support pages mid-migration */
+export const authInputClass = inputClassName;
 
-export const authLabelClass = 'text-sm font-medium text-gray-700 mb-1.5 block';
+/** @deprecated Prefer `<Label />` */
+export const authLabelClass = labelClassName;
 
-export const authPrimaryBtnClass =
-    'w-full min-h-[44px] bg-blue-600 text-white h-12 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.99]';
+/** @deprecated Prefer `<Button variant="primary" size="lg" className="w-full" />` */
+export const authPrimaryBtnClass = buttonVariants({
+    variant: 'primary',
+    size: 'lg',
+    className: 'w-full',
+});
 
-export const authLinkClass = 'text-blue-600 hover:text-blue-700 font-medium';
+export const authLinkClass = cn('text-brand hover:text-brand/80 font-medium');

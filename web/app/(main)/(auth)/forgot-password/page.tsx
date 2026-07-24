@@ -7,7 +7,10 @@ import { z } from 'zod';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
-import AuthScreen, { authInputClass, authLabelClass, authPrimaryBtnClass, authLinkClass } from '@/components/auth/AuthScreen';
+import AuthScreen, { authLinkClass } from '@/components/auth/AuthScreen';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import FormField from '@/components/ui/FormField';
 import { Mail, ArrowLeft } from 'lucide-react';
 
 const forgotSchema = z.object({
@@ -37,14 +40,11 @@ export default function ForgotPasswordPage() {
             <AuthScreen title="Check your email" subtitle="If an account exists, we sent reset instructions. Check your inbox and spam folder.">
                 <div className="text-center py-4">
                     <div className="mb-6 flex justify-center">
-                        <div className="w-14 h-14 rounded-full bg-green-50 border border-green-100 flex items-center justify-center">
-                            <Mail className="h-7 w-7 text-green-600" />
+                        <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                            <Mail className="h-7 w-7 text-emerald-600" />
                         </div>
                     </div>
-                    <Link
-                        href="/login"
-                        className={`inline-flex items-center gap-2 text-sm ${authLinkClass}`}
-                    >
+                    <Link href="/login" className={`inline-flex items-center gap-2 text-sm ${authLinkClass}`}>
                         <ArrowLeft className="h-4 w-4" />
                         Back to sign in
                     </Link>
@@ -67,22 +67,22 @@ export default function ForgotPasswordPage() {
             }
         >
             <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-                <div>
-                    <label className={authLabelClass}>Email</label>
+                <FormField label="Email" htmlFor="forgot-email" error={errors.email?.message}>
                     <div className="relative">
-                        <input
+                        <Input
+                            id="forgot-email"
                             {...register('email')}
                             type="email"
                             placeholder="you@example.com"
-                            className={authInputClass}
+                            invalid={!!errors.email}
+                            className="pr-11"
                         />
                         <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
                     </div>
-                    {errors.email && <p className="text-red-500 text-xs mt-1.5">{errors.email.message}</p>}
-                </div>
-                <button type="submit" disabled={isSubmitting} className={authPrimaryBtnClass}>
+                </FormField>
+                <Button type="submit" variant="primary" size="lg" className="w-full" loading={isSubmitting}>
                     {isSubmitting ? 'Sending...' : 'Send reset instructions'}
-                </button>
+                </Button>
             </form>
         </AuthScreen>
     );

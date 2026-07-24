@@ -224,7 +224,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         </div>
                     )}
                     {product.is_consignment && (
-                        <div className={`absolute top-3 ${product.compare_price ? 'left-[4.5rem]' : 'left-3'} bg-violet-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10 pointer-events-none`}>
+                        <div className={`absolute top-3 ${product.compare_price ? 'left-[4.5rem]' : 'left-3'} bg-brand text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10 pointer-events-none`}>
                             CONSIGNMENT
                         </div>
                     )}

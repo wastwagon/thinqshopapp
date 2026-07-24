@@ -7,13 +7,20 @@ import { z } from 'zod';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import { Trash2, Edit2, Plus, MapPin } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import FormField from '@/components/ui/FormField';
+import Badge from '@/components/ui/Badge';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { cn } from '@/lib/cn';
 
 const addressSchema = z.object({
-    full_name: z.string().min(1, "Full name is required"),
-    phone: z.string().min(10, "Phone must be at least 10 characters"),
-    street: z.string().min(1, "Street is required"),
-    city: z.string().min(1, "City is required"),
-    region: z.string().min(1, "Region is required"),
+    full_name: z.string().min(1, 'Full name is required'),
+    phone: z.string().min(10, 'Phone must be at least 10 characters'),
+    street: z.string().min(1, 'Street is required'),
+    city: z.string().min(1, 'City is required'),
+    region: z.string().min(1, 'Region is required'),
     state: z.string().optional(),
     zip_code: z.string().optional(),
     country: z.string().optional(),
@@ -36,6 +43,8 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [deleting, setDeleting] = useState(false);
 
     const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<AddressFormData>({
         resolver: zodResolver(addressSchema),
@@ -45,7 +54,7 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
         try {
             const { data } = await api.get('/addresses');
             setAddresses(data);
-        } catch (error) {
+        } catch {
             toast.error('Failed to load addresses');
         }
     };
@@ -67,19 +76,23 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
             setEditingId(null);
             reset();
             fetchAddresses();
-        } catch (error) {
+        } catch {
             toast.error('Failed to save address');
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (!confirm('Are you sure?')) return;
+    const confirmDelete = async () => {
+        if (deleteId == null) return;
+        setDeleting(true);
         try {
-            await api.delete(`/addresses/${id}`);
+            await api.delete(`/addresses/${deleteId}`);
             toast.success('Address deleted');
+            setDeleteId(null);
             fetchAddresses();
-        } catch (error) {
+        } catch {
             toast.error('Failed to delete address');
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -101,110 +114,162 @@ export default function AddressBook({ onSelect, selectedId }: AddressBookProps) 
     return (
         <div className="mt-8">
             <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-                    <MapPin className="mr-3 h-4 w-4 text-blue-600" /> Saved Addresses
+                <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+                    <MapPin className="mr-3 h-4 w-4 text-brand" /> Saved Addresses
                 </h3>
                 {!isAdding && (
-                    <button
-                        onClick={() => { setIsAdding(true); reset(); setEditingId(null); }}
-                        className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700"
+                    <Button
+                        type="button"
+                        variant="link"
+                        size="sm"
+                        leftIcon={<Plus className="h-4 w-4" />}
+                        onClick={() => {
+                            setIsAdding(true);
+                            reset();
+                            setEditingId(null);
+                        }}
                     >
-                        <Plus className="mr-1.5 h-4 w-4" /> Add Address
-                    </button>
+                        Add Address
+                    </Button>
                 )}
             </div>
 
             {isAdding && (
-                <form onSubmit={handleSubmit(onSubmit)} className="flat-card bg-gray-50/50 p-8 mb-8 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="text-xs font-bold text-gray-400 font-medium ml-1 mb-2 block">Full Name</label>
-                            <input {...register('full_name')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium" />
-                            {errors.full_name && <p className="text-red-500 text-xs font-bold mt-2 ml-1 capitalize">{errors.full_name.message}</p>}
-                        </div>
-                        <div>
-                            <label className="text-xs font-bold text-gray-400 font-medium ml-1 mb-2 block">Phone Number</label>
-                            <input {...register('phone')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium" />
-                            {errors.phone && <p className="text-red-500 text-xs font-bold mt-2 ml-1 capitalize">{errors.phone.message}</p>}
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="text-xs font-bold text-gray-400 font-medium ml-1 mb-2 block">Delivery Address / Street</label>
-                            <input {...register('street')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium" />
-                            {errors.street && <p className="text-red-500 text-xs font-bold mt-2 ml-1 capitalize">{errors.street.message}</p>}
-                        </div>
-                        <div>
-                            <label className="text-xs font-bold text-gray-400 font-medium ml-1 mb-2 block">City / Town</label>
-                            <input {...register('city')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium" />
-                            {errors.city && <p className="text-red-500 text-xs font-bold mt-2 ml-1 capitalize">{errors.city.message}</p>}
-                        </div>
-                        <div>
-                            <label className="text-xs font-bold text-gray-400 font-medium ml-1 mb-2 block">Region</label>
-                            <select {...register('region')} className="block w-full px-5 py-3.5 bg-white border border-gray-100 rounded-2xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium">
+                <form onSubmit={handleSubmit(onSubmit)} className="flat-card bg-gray-50/50 p-6 sm:p-8 mb-8 space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <FormField label="Full name" htmlFor="addr-name" error={errors.full_name?.message}>
+                            <Input id="addr-name" {...register('full_name')} invalid={!!errors.full_name} />
+                        </FormField>
+                        <FormField label="Phone number" htmlFor="addr-phone" error={errors.phone?.message}>
+                            <Input id="addr-phone" {...register('phone')} invalid={!!errors.phone} />
+                        </FormField>
+                        <FormField
+                            label="Delivery address / street"
+                            htmlFor="addr-street"
+                            error={errors.street?.message}
+                            className="md:col-span-2"
+                        >
+                            <Input id="addr-street" {...register('street')} invalid={!!errors.street} />
+                        </FormField>
+                        <FormField label="City / town" htmlFor="addr-city" error={errors.city?.message}>
+                            <Input id="addr-city" {...register('city')} invalid={!!errors.city} />
+                        </FormField>
+                        <FormField label="Region" htmlFor="addr-region" error={errors.region?.message}>
+                            <Select id="addr-region" {...register('region')} invalid={!!errors.region}>
                                 <option value="">Select Region</option>
                                 <option value="Greater Accra">Greater Accra</option>
                                 <option value="Ashanti">Ashanti</option>
                                 <option value="Central">Central</option>
                                 <option value="Eastern">Eastern</option>
                                 <option value="Western">Western</option>
-                            </select>
-                            {errors.region && <p className="text-red-500 text-xs font-bold mt-2 ml-1 capitalize">{errors.region.message}</p>}
-                        </div>
+                            </Select>
+                        </FormField>
                     </div>
                     <div className="flex items-center gap-3">
-                        <input type="checkbox" {...register('is_default')} className="h-5 w-5 rounded-lg border-gray-300 text-blue-600 focus:ring-blue-500/20" />
-                        <label className="text-xs font-bold text-gray-500 capitalize">Set as primary destination</label>
+                        <input
+                            type="checkbox"
+                            id="addr-default"
+                            {...register('is_default')}
+                            className="h-5 w-5 rounded-lg border-gray-300 text-brand focus:ring-brand/20"
+                        />
+                        <label htmlFor="addr-default" className="text-sm font-medium text-gray-600">
+                            Set as primary destination
+                        </label>
                     </div>
-                    <div className="flex justify-end gap-3 pt-4">
-                        <button type="button" onClick={() => setIsAdding(false)} className="min-h-[44px] px-6 py-3 rounded-xl text-xs font-bold text-gray-500 font-medium hover:bg-gray-100 transition-all flex items-center">Cancel</button>
-                        <button type="submit" disabled={isSubmitting} className="min-h-[44px] px-8 py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center">
+                    <div className="flex justify-end gap-3 pt-2">
+                        <Button type="button" variant="secondary" onClick={() => setIsAdding(false)}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" variant="primary" loading={isSubmitting}>
                             {isSubmitting ? 'Saving...' : 'Save Address'}
-                        </button>
+                        </Button>
                     </div>
                 </form>
             )}
 
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 {addresses.map((address) => (
-                    <div key={address.id} className={`group bg-white border rounded-xl p-6 relative transition-colors duration-300 ${selectedId === address.id ? 'border-blue-600 ring-4 ring-blue-500/10' : 'border-gray-100'}`}>
+                    <div
+                        key={address.id}
+                        className={cn(
+                            'group flat-card p-6 relative transition-colors',
+                            selectedId === address.id && 'border-brand ring-4 ring-brand/10'
+                        )}
+                    >
                         {address.is_default && (
-                            <span className="absolute top-6 right-6 bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded-full font-medium">Primary</span>
+                            <Badge variant="brand" className="absolute top-6 right-6">
+                                Primary
+                            </Badge>
                         )}
                         <div className="flex items-start mb-6">
                             <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center mr-4 group-hover:bg-blue-50 transition-colors">
-                                <MapPin className={`h-5 w-5 ${selectedId === address.id ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
+                                <MapPin
+                                    className={cn(
+                                        'h-5 w-5',
+                                        selectedId === address.id ? 'text-brand' : 'text-gray-400 group-hover:text-brand'
+                                    )}
+                                />
                             </div>
                             <div>
                                 <p className="text-sm font-bold text-gray-900 mb-1">{address.street}</p>
-                                <p className="text-xs font-medium text-gray-500">{address.city}, {address.region}</p>
-                                <p className="text-xs font-bold text-gray-400 font-medium mt-2">{address.full_name} • {address.phone}</p>
+                                <p className="text-xs font-medium text-gray-500">
+                                    {address.city}, {address.region}
+                                </p>
+                                <p className="text-xs font-medium text-gray-400 mt-2">
+                                    {address.full_name} • {address.phone}
+                                </p>
                             </div>
                         </div>
 
                         <div className="flex gap-2">
                             {onSelect ? (
-                                <button
+                                <Button
+                                    type="button"
                                     onClick={() => onSelect(address)}
-                                    className={`flex-1 text-xs font-bold font-medium py-3 rounded-xl transition-all ${selectedId === address.id
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-blue-700 hover:text-white'
-                                        }`}
+                                    variant={selectedId === address.id ? 'primary' : 'secondary'}
+                                    size="sm"
+                                    className="flex-1"
                                 >
                                     {selectedId === address.id ? 'Selected' : 'Use this address'}
-                                </button>
+                                </Button>
                             ) : (
                                 <>
-                                    <button onClick={() => startEdit(address)} className="flex-1 flex items-center justify-center gap-2 bg-gray-50 hover:bg-blue-700 hover:text-white py-3 rounded-xl text-xs font-bold font-medium text-gray-500 transition-all">
-                                        <Edit2 className="h-3.5 w-3.5" /> Edit
-                                    </button>
-                                    <button onClick={() => handleDelete(address.id)} className="flex-1 flex items-center justify-center gap-2 bg-gray-50 hover:bg-red-50 hover:text-red-600 py-3 rounded-xl text-xs font-bold font-medium text-gray-500 transition-all">
-                                        <Trash2 className="h-3.5 w-3.5" /> Remove
-                                    </button>
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        size="sm"
+                                        className="flex-1"
+                                        leftIcon={<Edit2 className="h-3.5 w-3.5" />}
+                                        onClick={() => startEdit(address)}
+                                    >
+                                        Edit
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        size="sm"
+                                        className="flex-1 hover:bg-red-50 hover:text-red-600 hover:border-red-100"
+                                        leftIcon={<Trash2 className="h-3.5 w-3.5" />}
+                                        onClick={() => setDeleteId(address.id)}
+                                    >
+                                        Remove
+                                    </Button>
                                 </>
                             )}
                         </div>
                     </div>
                 ))}
             </div>
+
+            <ConfirmDialog
+                open={deleteId != null}
+                onClose={() => setDeleteId(null)}
+                onConfirm={confirmDelete}
+                title="Delete address?"
+                description="This address will be removed from your account."
+                confirmLabel="Delete"
+                loading={deleting}
+            />
         </div>
     );
 }

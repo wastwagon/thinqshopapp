@@ -30,6 +30,7 @@ import {
     cmsBtnDangerIcon,
     cmsAddRow,
 } from '@/components/admin/cms-classes';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 type HeroSlide = { id: number; title: string; subtitle?: string | null; cta_text?: string | null; cta_url?: string | null; image_path?: string | null; sort_order: number; is_active: boolean };
 type TrustBadge = { id: number; icon: string; label: string; optional_link?: string | null; sort_order: number; is_active: boolean };
@@ -179,6 +180,7 @@ function HeroSection({
     setSaving: (v: string | null) => void;
     saving: string | null;
 }) {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const [editing, setEditing] = useState<HeroSlide | null>(null);
     const [form, setForm] = useState({ title: '', subtitle: '', cta_text: '', cta_url: '', image_path: '', is_active: true });
     const [uploadingImage, setUploadingImage] = useState(false);
@@ -213,7 +215,8 @@ function HeroSection({
     };
 
     const deleteSlide = async (id: number) => {
-        if (!confirm('Delete this slide?')) return;
+        const ok = await confirm({ title: 'Delete this slide?', confirmLabel: 'Delete' });
+        if (!ok) return;
         setSaving('hero');
         try {
             await api.delete(`/content/admin/hero-slides/${id}`);
@@ -358,7 +361,7 @@ function HeroSection({
                                 <button type="button" className={cmsBtnIcon} onClick={() => { setEditing(s); setForm({ title: s.title, subtitle: s.subtitle ?? '', cta_text: s.cta_text ?? '', cta_url: s.cta_url ?? '', image_path: s.image_path ?? '', is_active: s.is_active }); }} aria-label="Edit slide">
                                     <Pencil className="h-4 w-4" />
                                 </button>
-                                <button type="button" className={cmsBtnDangerIcon} onClick={() => deleteSlide(s.id)} aria-label="Delete slide">
+                                <button type="button" className={cmsBtnDangerIcon} onClick={() => void deleteSlide(s.id)} aria-label="Delete slide">
                                     <Trash2 className="h-4 w-4" />
                                 </button>
                             </div>
@@ -375,6 +378,7 @@ function HeroSection({
                     <Plus className="h-5 w-5" /> Add slide
                 </button>
             )}
+            {confirmDialog}
         </div>
     );
 }

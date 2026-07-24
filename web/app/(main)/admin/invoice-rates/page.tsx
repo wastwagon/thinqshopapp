@@ -1,24 +1,31 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import FormField from '@/components/ui/FormField';
+import Modal from '@/components/ui/Modal';
+import Badge from '@/components/ui/Badge';
 import Link from 'next/link';
 import { DollarSign, Plus, Edit3, Trash2, Calculator, Info } from 'lucide-react';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 const UNITS = ['kg', 'CBM', 'pcs', 'hour', 'box', 'set'];
 const MODES = ['', 'sea', 'air', 'standard'];
 
 export default function AdminInvoiceRatesPage() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const [rates, setRates] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [unitFilter, setUnitFilter] = useState<string>('');
     const [modeFilter, setModeFilter] = useState<string>('');
     const [activeFilter, setActiveFilter] = useState<string>('');
     const [modalOpen, setModalOpen] = useState(false);
-    const modalPanelRef = useRef<HTMLDivElement>(null);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [form, setForm] = useState({
@@ -74,24 +81,6 @@ export default function AdminInvoiceRatesPage() {
         setEditingId(null);
     }, []);
 
-    useEffect(() => {
-        if (!modalOpen) return;
-        const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') closeModal();
-        };
-        document.addEventListener('keydown', onKey);
-        const t = window.setTimeout(() => {
-            const focusable = modalPanelRef.current?.querySelector<HTMLElement>(
-                'input:not([type="hidden"]), select, textarea, button:not([disabled])',
-            );
-            focusable?.focus();
-        }, 0);
-        return () => {
-            document.removeEventListener('keydown', onKey);
-            window.clearTimeout(t);
-        };
-    }, [modalOpen, closeModal]);
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const ratePerUnit = Number(form.rate_per_unit);
@@ -130,7 +119,8 @@ export default function AdminInvoiceRatesPage() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Delete this rate?')) return;
+        const ok = await confirm({ title: 'Delete this rate?', confirmLabel: 'Delete' });
+        if (!ok) return;
         try {
             await api.delete(`/invoice-rates/${id}`);
             toast.success('Rate deleted');
@@ -148,15 +138,9 @@ export default function AdminInvoiceRatesPage() {
                 title="Invoice rates"
                 subtitle="Pricing per unit for invoice line items"
                 actions={
-                    <>
-                        <button
-                        type="button"
-                        onClick={openCreate}
-                        className="min-h-[44px] h-9 px-4 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-all flex items-center justify-center gap-1.5 shrink-0"
-                    >
-                        <Plus className="h-4 w-4" /> Add rate
-                    </button>
-                    </>
+                    <Button type="button" size="sm" leftIcon={<Plus className="h-4 w-4" />} onClick={openCreate}>
+                        Add rate
+                    </Button>
                 }
             />
 
@@ -252,9 +236,9 @@ export default function AdminInvoiceRatesPage() {
                                             </td>
                                             <td className="px-4 py-3 text-sm text-gray-600">{r.mode || '—'}</td>
                                             <td className="px-4 py-3">
-                                                <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg border ${r.is_active ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                                                <Badge variant={r.is_active ? 'success' : 'default'}>
                                                     {r.is_active ? 'Active' : 'Inactive'}
-                                                </span>
+                                                </Badge>
                                             </td>
                                             <td className="px-4 py-3 text-right">
                                                 <button
@@ -267,7 +251,7 @@ export default function AdminInvoiceRatesPage() {
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleDelete(r.id)}
+                                                    onClick={() => void handleDelete(r.id)}
                                                     className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-100 text-gray-400 hover:text-red-600 hover:border-red-600 transition-all"
                                                     title="Delete"
                                                 >
@@ -283,107 +267,94 @@ export default function AdminInvoiceRatesPage() {
                 </div>
             </div>
 
-            {modalOpen && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-                    role="presentation"
-                    onClick={closeModal}
-                >
-                    <div
-                        ref={modalPanelRef}
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="invoice-rate-dialog-title"
-                        className="admin-modal-panel max-w-md w-full p-6 outline-none"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <h2 id="invoice-rate-dialog-title" className="text-lg font-bold text-gray-900 mb-4">
-                            {editingId ? 'Edit rate' : 'Add rate'}
-                        </h2>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Name *</label>
-                                <input
-                                    value={form.name}
-                                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                                    placeholder="e.g. Regular Goods, Sea – per CBM"
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Unit *</label>
-                                <select
-                                    value={form.unit}
-                                    onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                >
-                                    {UNITS.map((u) => (
-                                        <option key={u} value={u}>{u}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Rate per unit (GHS) *</label>
-                                <input
-                                    type="number"
-                                    min={0}
-                                    step={0.01}
-                                    value={form.rate_per_unit}
-                                    onChange={(e) => setForm((f) => ({ ...f, rate_per_unit: e.target.value }))}
-                                    placeholder="0.00"
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Mode (optional)</label>
-                                <select
-                                    value={form.mode}
-                                    onChange={(e) => setForm((f) => ({ ...f, mode: e.target.value }))}
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                >
-                                    {MODES.map((m) => (
-                                        <option key={m || '_'} value={m}>{m || '—'}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1">Sort order</label>
-                                <input
-                                    type="number"
-                                    min={0}
-                                    value={form.sort_order}
-                                    onChange={(e) => setForm((f) => ({ ...f, sort_order: e.target.value }))}
-                                    className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    id="is_active"
-                                    checked={form.is_active}
-                                    onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                />
-                                <label htmlFor="is_active" className="text-sm text-gray-700">Active</label>
-                            </div>
-                            <div className="flex gap-3 pt-2">
-                                <button
-                                    type="submit"
-                                    disabled={submitting}
-                                    className="min-h-[44px] px-6 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 disabled:opacity-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                >
-                                    {submitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
-                                </button>
-                                <button type="button" onClick={closeModal} className="min-h-[44px] px-6 border border-gray-200 rounded-xl font-semibold text-sm text-gray-700 hover:bg-gray-50">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
+            <Modal
+                open={modalOpen}
+                onClose={closeModal}
+                title={editingId ? 'Edit rate' : 'Add rate'}
+                size="md"
+                footer={
+                    <>
+                        <Button type="button" variant="secondary" onClick={closeModal}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" form="invoice-rate-form" variant="primary" loading={submitting}>
+                            {submitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
+                        </Button>
+                    </>
+                }
+            >
+                <form id="invoice-rate-form" onSubmit={handleSubmit} className="space-y-4">
+                    <FormField label="Name" htmlFor="inv-rate-name" required>
+                        <Input
+                            id="inv-rate-name"
+                            value={form.name}
+                            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                            placeholder="e.g. Regular Goods, Sea – per CBM"
+                            required
+                        />
+                    </FormField>
+                    <FormField label="Unit" htmlFor="inv-rate-unit" required>
+                        <Select
+                            id="inv-rate-unit"
+                            value={form.unit}
+                            onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
+                        >
+                            {UNITS.map((u) => (
+                                <option key={u} value={u}>
+                                    {u}
+                                </option>
+                            ))}
+                        </Select>
+                    </FormField>
+                    <FormField label="Rate per unit (GHS)" htmlFor="inv-rate-amount" required>
+                        <Input
+                            id="inv-rate-amount"
+                            type="number"
+                            min={0}
+                            step={0.01}
+                            value={form.rate_per_unit}
+                            onChange={(e) => setForm((f) => ({ ...f, rate_per_unit: e.target.value }))}
+                            placeholder="0.00"
+                            required
+                        />
+                    </FormField>
+                    <FormField label="Mode (optional)" htmlFor="inv-rate-mode">
+                        <Select
+                            id="inv-rate-mode"
+                            value={form.mode}
+                            onChange={(e) => setForm((f) => ({ ...f, mode: e.target.value }))}
+                        >
+                            {MODES.map((m) => (
+                                <option key={m || '_'} value={m}>
+                                    {m || '—'}
+                                </option>
+                            ))}
+                        </Select>
+                    </FormField>
+                    <FormField label="Sort order" htmlFor="inv-rate-sort">
+                        <Input
+                            id="inv-rate-sort"
+                            type="number"
+                            min={0}
+                            value={form.sort_order}
+                            onChange={(e) => setForm((f) => ({ ...f, sort_order: e.target.value }))}
+                        />
+                    </FormField>
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id="is_active"
+                            checked={form.is_active}
+                            onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
+                            className="rounded border-gray-300 text-brand focus:ring-brand/20"
+                        />
+                        <label htmlFor="is_active" className="text-sm text-gray-700">
+                            Active
+                        </label>
                     </div>
-                </div>
-            )}
+                </form>
+            </Modal>
+            {confirmDialog}
         </DashboardLayout>
     );
 }

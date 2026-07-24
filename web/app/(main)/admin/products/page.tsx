@@ -32,6 +32,7 @@ import {
 } from '@/lib/category-utils';
 import { getMediaUrl } from '@/lib/media';
 import MediaPickerModal from '@/components/admin/MediaPickerModal';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 type VariationOptionRow = { id: number; name: string; slug: string; values: { id: number; value: string }[] };
 
@@ -48,6 +49,7 @@ function resolveOptionSlug(variantType: string, options: VariationOptionRow[]): 
 }
 
 export default function AdminProducts() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const [products, setProducts] = useState<any[]>([]);
     const [categories, setCategories] = useState<CategoryNode[]>([]);
     const [loading, setLoading] = useState(true);
@@ -362,7 +364,8 @@ export default function AdminProducts() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Delete this product?')) return;
+        const ok = await confirm({ title: 'Delete this product?', confirmLabel: 'Delete' });
+        if (!ok) return;
         try {
             await api.delete(`/products/${id}`);
             toast.success('Product deleted');
@@ -496,7 +499,7 @@ export default function AdminProducts() {
                                             <div className="flex justify-end gap-1.5">
                                                 <button type="button" className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all" aria-label="View"><Eye className="h-4 w-4" /></button>
                                                 <button type="button" onClick={() => handleOpenModal(p)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-all" aria-label="Edit"><Edit3 className="h-4 w-4" /></button>
-                                                <button type="button" onClick={() => handleDelete(p.id)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-all" aria-label="Delete"><Trash2 className="h-4 w-4" /></button>
+                                                <button type="button" onClick={() => void handleDelete(p.id)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-all" aria-label="Delete"><Trash2 className="h-4 w-4" /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -900,6 +903,7 @@ export default function AdminProducts() {
                 }}
             />
             </div>
+            {confirmDialog}
         </DashboardLayout>
     );
 }

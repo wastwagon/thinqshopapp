@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import ShopContent from './ShopContent';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { buttonVariants } from '@/components/ui/Button';
 
 type ShopSuccessShellProps = {
     children: React.ReactNode;
@@ -18,8 +20,7 @@ export default function ShopSuccessShell({ children }: ShopSuccessShellProps) {
 export function ShopLoadingState({ message = 'Loading…' }: { message?: string }) {
     return (
         <div className="min-h-[60vh] flex flex-col items-center justify-center py-10">
-            <div className="animate-spin h-10 w-10 border-2 border-blue-600 border-t-transparent rounded-full mb-4" />
-            <p className="text-sm text-gray-500">{message}</p>
+            <LoadingSpinner size="md" label={message} />
         </div>
     );
 }
@@ -34,9 +35,9 @@ export function ShopEmptyState({
     linkLabel: string;
 }) {
     return (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 py-10 text-center">
+        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 py-10 text-center px-4">
             <p className="text-sm text-gray-500">{message}</p>
-            <Link href={href} className="text-blue-600 font-semibold text-sm hover:underline">
+            <Link href={href} className={buttonVariants({ variant: 'primary', size: 'md' })}>
                 {linkLabel}
             </Link>
         </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Star, Heart, Plus, Minus, Truck, RotateCcw, ZoomIn } from 'lucide-react';
+import { ShoppingCart, Star, Heart, Truck, RotateCcw, ZoomIn } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import ShopLayout from '@/components/layout/ShopLayout';
@@ -23,6 +23,9 @@ import { trackViewItem } from '@/lib/analytics';
 import { getMediaUrl } from '@/lib/media';
 import ProductReviewForm from '@/components/product/ProductReviewForm';
 import ProductImageLightbox from '@/components/ui/ProductImageLightbox';
+import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import QuantityStepper from '@/components/ui/QuantityStepper';
 
 function normalizeProductImages(product: any): string[] {
     let raw = product?.images ?? product?.gallery_images;
@@ -293,19 +296,31 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                     <div className="mt-6 px-4 sm:px-0 sm:mt-16 lg:mt-0">
                         <div className="mb-8">
                             <div className="flex flex-wrap gap-2 mb-4">
-                                <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${stockToShow > (product.low_stock_threshold ?? 10) ? 'bg-green-50 text-green-700 border border-green-100' : stockToShow > 0 ? 'bg-orange-50 text-orange-700 border border-orange-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
-                                    {stockToShow === 0 ? 'Out of stock' : stockToShow <= (product.low_stock_threshold ?? 10) ? `Only ${stockToShow} left` : 'In stock'}
-                                </span>
+                                <Badge
+                                    variant={
+                                        stockToShow === 0
+                                            ? 'danger'
+                                            : stockToShow <= (product.low_stock_threshold ?? 10)
+                                              ? 'warning'
+                                              : 'success'
+                                    }
+                                >
+                                    {stockToShow === 0
+                                        ? 'Out of stock'
+                                        : stockToShow <= (product.low_stock_threshold ?? 10)
+                                          ? `Only ${stockToShow} left`
+                                          : 'In stock'}
+                                </Badge>
                                 {product.is_consignment && (
-                                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-100">
-                                        Sell for Me listing
-                                    </span>
+                                    <Badge variant="info">Sell for Me listing</Badge>
                                 )}
                             </div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-xs font-medium text-blue-700 mb-4">
-                                {product.is_consignment
-                                    ? 'Sell for Me · Local pickup & handover'
-                                    : 'Ships from abroad · 7–14 day delivery'}
+                            <div className="mb-4">
+                                <Badge variant="brand">
+                                    {product.is_consignment
+                                        ? 'Sell for Me · Local pickup & handover'
+                                        : 'Ships from abroad · 7–14 day delivery'}
+                                </Badge>
                             </div>
                             <h1 className="text-xl font-bold text-gray-900 tracking-tight leading-snug">{product.name}</h1>
                         </div>
@@ -399,26 +414,12 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                         <div className="space-y-3 mb-10">
                             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                                 <div className="flex items-center gap-2 shrink-0">
-                                    <div className="flex items-center gap-1 p-1 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl">
-                                        <button
-                                            type="button"
-                                            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                                            className="min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all"
-                                            aria-label="Decrease quantity"
-                                        >
-                                            <Minus className="h-4 w-4" />
-                                        </button>
-                                        <span className="w-12 text-center text-sm font-bold text-gray-900">{quantity}</span>
-                                        <button
-                                            type="button"
-                                            onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
-                                            disabled={quantity >= maxQuantity}
-                                            className="min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-all disabled:opacity-40"
-                                            aria-label="Increase quantity"
-                                        >
-                                            <Plus className="h-4 w-4" />
-                                        </button>
-                                    </div>
+                                    <QuantityStepper
+                                        value={quantity}
+                                        onChange={setQuantity}
+                                        max={maxQuantity}
+                                        className="sm:rounded-xl"
+                                    />
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -443,9 +444,11 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                         />
                                     </button>
                                 </div>
-                                <button
+                                <Button
                                     type="button"
-                                    className="flex-1 min-w-[7.5rem] min-h-[44px] border border-blue-600 text-blue-700 bg-white rounded-xl font-semibold text-sm hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 py-2.5 px-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    variant="secondary"
+                                    className="flex-1 min-w-[7.5rem] border-brand text-brand hover:bg-blue-50"
+                                    leftIcon={<ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />}
                                     onClick={() => {
                                         if (isOwnConsignment) {
                                             toast.error('You cannot purchase your own Sell for Me listing');
@@ -459,7 +462,6 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     }}
                                     disabled={isOwnConsignment || stockToShow <= 0}
                                 >
-                                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" aria-hidden />
                                     <span className="whitespace-nowrap">
                                         {isOwnConsignment
                                             ? 'Your listing'
@@ -467,14 +469,16 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                               ? 'Out of stock'
                                               : 'Add to Cart'}
                                     </span>
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="button"
-                                    className="flex-1 min-w-[7.5rem] min-h-[44px] bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 py-2.5 px-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_8px_24px_-8px_rgba(2,39,79,0.35)]"
+                                    variant="primary"
+                                    className="flex-1 min-w-[7.5rem] shadow-[0_8px_24px_-8px_rgba(2,39,79,0.35)]"
+                                    leftIcon={<ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />}
                                     onClick={() => void handleExpressBuy()}
                                     disabled={buying || isOwnConsignment || stockToShow <= 0}
+                                    loading={buying}
                                 >
-                                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" aria-hidden />
                                     <span className="whitespace-nowrap">
                                         {buying
                                             ? 'Buying…'
@@ -484,10 +488,10 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                                 ? 'Out of stock'
                                                 : 'Buy'}
                                     </span>
-                                </button>
+                                </Button>
                             </div>
                             {isOwnConsignment && (
-                                <p className="text-xs text-violet-700 bg-violet-50 border border-violet-100 rounded-xl px-3 py-2">
+                                <p className="text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
                                     This is your Sell for Me listing. Buyers can add it to cart — you cannot purchase it yourself.
                                 </p>
                             )}

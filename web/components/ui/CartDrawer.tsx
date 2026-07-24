@@ -2,14 +2,15 @@
 
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X, Trash2, Plus, Minus, ShoppingCart } from 'lucide-react';
+import { X, Trash2, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import PriceDisplay from '@/components/ui/PriceDisplay';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { cartItemUnitGhs } from '@/lib/product-utils';
 import { getMediaUrl } from '@/lib/media';
+import Button from '@/components/ui/Button';
+import QuantityStepper from '@/components/ui/QuantityStepper';
 
 export default function CartDrawer() {
     const { cart, isCartOpen, toggleCart, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -111,24 +112,11 @@ export default function CartDrawer() {
                                                                             </p>
                                                                         </div>
                                                                         <div className="flex flex-1 items-end justify-between mt-3">
-                                                                            <div className="flex items-center gap-0 p-1 bg-gray-50 border border-gray-200 rounded-lg">
-                                                                                <button
-                                                                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                                                    className="min-w-[44px] min-h-[44px] w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-600 disabled:opacity-30 transition-all"
-                                                                                    disabled={item.quantity <= 1}
-                                                                                    aria-label="Decrease quantity"
-                                                                                >
-                                                                                    <Minus className="h-3 w-3" aria-hidden />
-                                                                                </button>
-                                                                                <span className="w-8 text-center text-xs font-semibold text-gray-900" aria-hidden>{item.quantity}</span>
-                                                                                <button
-                                                                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                                                    className="min-w-[44px] min-h-[44px] w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-600 transition-all"
-                                                                                    aria-label="Increase quantity"
-                                                                                >
-                                                                                    <Plus className="h-3 w-3" aria-hidden />
-                                                                                </button>
-                                                                            </div>
+                                                                            <QuantityStepper
+                                                                                value={item.quantity}
+                                                                                onChange={(next) => updateQuantity(item.id, next)}
+                                                                                size="sm"
+                                                                            />
 
                                                                             <button
                                                                                 type="button"
@@ -158,20 +146,18 @@ export default function CartDrawer() {
                                             </div>
 
                                             <div className="flex flex-col gap-3">
-                                                <button
+                                                <Button
                                                     onClick={handleCheckout}
                                                     disabled={cart.length === 0}
-                                                    className="w-full min-h-[44px] bg-blue-600 text-white h-12 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
+                                                    variant="primary"
+                                                    size="lg"
+                                                    className="w-full"
                                                 >
                                                     Checkout
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className="w-full min-h-[44px] h-12 rounded-xl border border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-all flex items-center justify-center"
-                                                    onClick={toggleCart}
-                                                >
+                                                </Button>
+                                                <Button type="button" variant="secondary" size="lg" className="w-full" onClick={toggleCart}>
                                                     Continue Shopping
-                                                </button>
+                                                </Button>
                                             </div>
                                         </div>
                                     </div>

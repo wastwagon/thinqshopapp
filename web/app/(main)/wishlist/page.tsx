@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { Heart, Trash2 } from 'lucide-react';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
@@ -8,6 +7,7 @@ import ShopPageShell from '@/components/shop/ShopContent';
 import ShopTrustRow from '@/components/shop/ShopTrustRow';
 import { useWishlist } from '@/context/WishlistContext';
 import ProductCard from '@/components/ui/ProductCard';
+import EmptyState from '@/components/ui/EmptyState';
 
 export default function WishlistPage() {
     const { wishlist, removeFromWishlist } = useWishlist();
@@ -19,26 +19,20 @@ export default function WishlistPage() {
                     <PageHeader
                         title="Wishlist"
                         subtitle="Items you've saved for later"
-                        accent="amber"
+                        accent="blue"
                         breadcrumbs={[{ label: 'Wishlist' }]}
                     />
                     <ShopTrustRow compact />
 
                     {wishlist.length === 0 ? (
-                        <div className="mt-5 rounded-2xl bg-white border border-gray-100 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.08)] py-16 px-6 text-center">
-                            <div className="inline-flex w-14 h-14 bg-orange-50 border border-orange-100 rounded-2xl items-center justify-center mb-4">
-                                <Heart className="h-7 w-7 text-orange-400" />
-                            </div>
-                            <h2 className="text-lg font-bold text-gray-900 mb-2">Your wishlist is empty</h2>
-                            <p className="text-gray-500 text-sm mb-6 max-w-sm mx-auto">
-                                Save products you like to revisit them later.
-                            </p>
-                            <Link
-                                href="/shop"
-                                className="inline-flex min-h-[44px] px-6 items-center justify-center rounded-xl bg-orange-500 text-white text-sm font-semibold hover:bg-orange-600 transition-colors"
-                            >
-                                Explore shop
-                            </Link>
+                        <div className="mt-5">
+                            <EmptyState
+                                icon={Heart}
+                                title="Your wishlist is empty"
+                                description="Save products you like to revisit them later."
+                                actionLabel="Explore shop"
+                                actionHref="/shop"
+                            />
                         </div>
                     ) : (
                         <div className="mt-5 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">

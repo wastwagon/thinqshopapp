@@ -80,7 +80,7 @@ export default function AdminOrdersPage() {
             pending: 'bg-orange-50 text-orange-700 border-orange-200',
             processing: 'bg-blue-50 text-blue-600 border-blue-300',
             packed: STATUS_PROGRESS_BADGE,
-            shipped: 'bg-purple-50 text-purple-700 border-purple-200',
+            shipped: 'bg-blue-50 text-blue-700 border-blue-200',
             out_for_delivery: 'bg-orange-50 text-orange-700 border-orange-200',
             delivered: 'bg-green-50 text-green-700 border-green-200',
             cancelled: 'bg-red-50 text-red-700 border-red-200',

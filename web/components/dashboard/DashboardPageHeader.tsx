@@ -3,16 +3,19 @@
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/cn';
 
-export type DashboardAccent = 'default' | 'blue' | 'green' | 'purple' | 'orange' | 'navy';
+/** Semantic accents only — purple/orange aliases map to brand navy */
+export type DashboardAccent = 'default' | 'blue' | 'green' | 'purple' | 'orange' | 'navy' | 'brand';
 
 const ACCENT_GRADIENTS: Record<DashboardAccent, string> = {
-    default: 'from-blue-600 to-blue-700',
-    blue: 'from-blue-500 to-blue-700',
-    green: 'from-emerald-500 to-green-700',
-    purple: 'from-violet-500 to-purple-700',
-    orange: 'from-orange-400 to-amber-600',
+    default: 'from-blue-600 to-blue-800',
+    blue: 'from-blue-600 to-blue-800',
+    brand: 'from-blue-600 to-blue-800',
     navy: 'from-blue-950 to-blue-800',
+    green: 'from-emerald-500 to-emerald-700',
+    purple: 'from-blue-600 to-blue-800',
+    orange: 'from-blue-600 to-blue-800',
 };
 
 type DashboardPageHeaderProps = {
@@ -39,12 +42,12 @@ export default function DashboardPageHeader({
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className={`mb-5 ${className}`}
+            className={cn('mb-5', className)}
         >
             {backHref && (
                 <Link
                     href={backHref}
-                    className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors mb-3 min-h-[44px] -ml-1 px-1"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-brand transition-colors mb-3 min-h-[44px] -ml-1 px-1"
                 >
                     <ChevronLeft className="h-4 w-4" aria-hidden />
                     {backLabel}

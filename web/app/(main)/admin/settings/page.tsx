@@ -189,7 +189,7 @@ export default function AdminSettings() {
 
                     <div className="admin-card p-5">
                         <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2.5 mb-4">
-                            <div className="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center text-violet-600 border border-violet-100">
+                            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-brand border border-blue-100">
                                 <Smartphone className="h-4 w-4" />
                             </div>
                             Transfer payment details (offline)
@@ -251,7 +251,7 @@ export default function AdminSettings() {
                                 type="button"
                                 onClick={handleSavePaymentDetails}
                                 disabled={savingPayment}
-                                className="h-9 px-4 rounded-lg bg-violet-600 text-white text-xs font-semibold hover:bg-violet-700 disabled:opacity-50"
+                                className="h-9 px-4 rounded-lg bg-brand text-white text-xs font-semibold hover:bg-brand/90 disabled:opacity-50"
                             >
                                 {savingPayment ? 'Saving…' : 'Save payment details'}
                             </button>
@@ -338,7 +338,7 @@ export default function AdminSettings() {
                                     type="button"
                                     onClick={() => runDbAction('migrate-seed')}
                                     disabled={dbAction !== 'idle'}
-                                    className="w-full h-9 border border-violet-200 text-violet-600 rounded-lg text-xs font-semibold hover:bg-violet-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="w-full h-9 border border-blue-200 text-brand rounded-lg text-xs font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
                                     {dbAction === 'migrate-seed' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
                                     Migrate + seed

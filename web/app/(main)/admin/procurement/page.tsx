@@ -19,6 +19,7 @@ import {
     Eye
 } from 'lucide-react';
 import { STATUS_PROGRESS_BADGE } from '@/lib/status-styles';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 interface ProcurementRequest {
     id: number;
@@ -38,6 +39,7 @@ interface ProcurementRequest {
 }
 
 export default function AdminProcurementPage() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const [requests, setRequests] = useState<ProcurementRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [updatingId, setUpdatingId] = useState<number | null>(null);
@@ -64,7 +66,12 @@ export default function AdminProcurementPage() {
     };
 
     const handleStatusUpdate = async (id: number, newStatus: string) => {
-        if (!confirm(`Update status to ${newStatus.replace(/_/g, ' ')}?`)) return;
+        const ok = await confirm({
+            title: `Update status to ${newStatus.replace(/_/g, ' ')}?`,
+            confirmLabel: 'Update',
+            variant: 'primary',
+        });
+        if (!ok) return;
         setUpdatingId(id);
         try {
             await api.patch(`/procurement/admin/${id}/status`, { status: newStatus });
@@ -113,7 +120,7 @@ export default function AdminProcurementPage() {
             quote_provided: 'bg-blue-50 text-blue-600 border-blue-300',
             accepted: 'bg-green-50 text-green-700 border-green-200',
             payment_received: STATUS_PROGRESS_BADGE,
-            processing: 'bg-purple-50 text-purple-700 border-purple-200',
+            processing: 'bg-blue-50 text-blue-700 border-blue-200',
             delivered: 'bg-emerald-50 text-emerald-700 border-emerald-200',
             cancelled: 'bg-red-50 text-red-700 border-red-200'
         };
@@ -127,7 +134,7 @@ export default function AdminProcurementPage() {
     const stats = [
         { label: 'Total', value: requests.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
         { label: 'Pending', value: pending, icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
-        { label: 'In progress', value: inProgress, icon: Package, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
+        { label: 'In progress', value: inProgress, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
         { label: 'Delivered', value: delivered, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' }
     ];
 
@@ -228,7 +235,7 @@ export default function AdminProcurementPage() {
                                                     disabled={updatingId === req.id}
                                                     className="w-full h-9 bg-gray-50 border border-gray-100 text-xs font-semibold text-gray-700 rounded-lg pl-3 pr-8 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                                     value={req.status}
-                                                    onChange={(e) => handleStatusUpdate(req.id, e.target.value)}
+                                                    onChange={(e) => void handleStatusUpdate(req.id, e.target.value)}
                                                 >
                                                     <option value="submitted">Submitted</option>
                                                     <option value="quote_provided">Quote provided</option>
@@ -316,6 +323,7 @@ export default function AdminProcurementPage() {
                 )}
             </div>
             </div>
+            {confirmDialog}
         </DashboardLayout>
     );
 }

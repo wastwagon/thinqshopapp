@@ -254,7 +254,7 @@ export default function AdminEscrowPage() {
                                 type="button"
                                 onClick={runAutoRelease}
                                 disabled={runningAuto || autoReleaseDays < 1}
-                                className="h-9 px-3 rounded-lg border border-violet-200 bg-violet-50 text-xs font-semibold text-violet-800 disabled:opacity-50"
+                                className="h-9 px-3 rounded-lg border border-blue-200 bg-blue-50 text-xs font-semibold text-blue-800 disabled:opacity-50"
                                 title={autoReleaseDays < 1 ? 'Enable in Sell for Me settings' : `Auto-deliver after ${autoReleaseDays} days shipped (also runs daily at 3:00 UTC)`}
                             >
                                 {runningAuto ? 'Running…' : `Auto-release (${autoReleaseDays || 'off'}d)`}
@@ -277,7 +277,7 @@ export default function AdminEscrowPage() {
                     <button
                         type="button"
                         onClick={() => setHoldOnly(false)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${!holdOnly ? 'bg-violet-50 border-violet-200 text-violet-800' : 'bg-white border-gray-200 text-gray-600'}`}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${!holdOnly ? 'bg-blue-50 border-blue-200 text-blue-800' : 'bg-white border-gray-200 text-gray-600'}`}
                     >
                         All escrow
                     </button>
@@ -307,7 +307,7 @@ export default function AdminEscrowPage() {
                     </div>
                     <div className="admin-card p-4">
                         <p className="text-xs text-gray-500">Total in escrow</p>
-                        <p className="text-2xl font-bold text-violet-700">₵{Number(totalPayout).toFixed(2)}</p>
+                        <p className="text-2xl font-bold text-blue-700">₵{Number(totalPayout).toFixed(2)}</p>
                     </div>
                     <div className="admin-card p-4">
                         <p className="text-xs text-gray-500">On dispute hold</p>
@@ -358,14 +358,14 @@ export default function AdminEscrowPage() {
                                                     <p className="text-[10px] text-gray-400 mt-0.5 capitalize">{r.order.status.replace(/_/g, ' ')}</p>
                                                 )}
                                             </td>
-                                            <td className="px-3 py-2.5 text-sm font-semibold text-violet-700">₵{Number(r.expected_payout_ghs).toFixed(2)}</td>
+                                            <td className="px-3 py-2.5 text-sm font-semibold text-blue-700">₵{Number(r.expected_payout_ghs).toFixed(2)}</td>
                                             <td className="px-3 py-2.5">
                                                 {r.escrow_on_hold ? (
                                                     <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-100">
                                                         <PauseCircle className="h-3 w-3" /> On hold
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100">
+                                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
                                                         <Clock className="h-3 w-3" /> Escrow
                                                     </span>
                                                 )}
@@ -546,7 +546,7 @@ export default function AdminEscrowPage() {
                                                 <span className="text-gray-400">{new Date(e.created_at).toLocaleString()}</span>
                                             </div>
                                             {e.amount_ghs != null && Number(e.amount_ghs) > 0 && (
-                                                <p className="text-violet-700 font-semibold mt-1">₵{Number(e.amount_ghs).toFixed(2)}</p>
+                                                <p className="text-blue-700 font-semibold mt-1">₵{Number(e.amount_ghs).toFixed(2)}</p>
                                             )}
                                             {e.note && <p className="text-gray-600 mt-1">{e.note}</p>}
                                         </li>

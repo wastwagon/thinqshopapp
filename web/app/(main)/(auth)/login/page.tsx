@@ -9,7 +9,11 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
-import AuthScreen, { authInputClass, authLabelClass, authPrimaryBtnClass, authLinkClass } from '@/components/auth/AuthScreen';
+import AuthScreen, { authLinkClass } from '@/components/auth/AuthScreen';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Label from '@/components/ui/Label';
+import FormField from '@/components/ui/FormField';
 import { Mail, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 const emailOrPhone = z.string().min(1, 'Enter your email or phone number').refine(
@@ -69,34 +73,44 @@ export default function LoginPage() {
             }
         >
             <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-                <div>
-                    <label className={authLabelClass}>Email or phone</label>
+                <FormField
+                    label="Email or phone"
+                    htmlFor="login-email"
+                    error={errors.email?.message}
+                >
                     <div className="relative">
-                        <input
+                        <Input
+                            id="login-email"
                             {...register('email')}
                             type="text"
                             inputMode="email"
                             autoComplete="username"
                             placeholder="you@example.com or +233..."
-                            className={authInputClass}
+                            invalid={!!errors.email}
+                            className="pr-11"
                         />
                         <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
                     </div>
-                    {errors.email && <p className="text-red-500 text-xs mt-1.5">{errors.email.message}</p>}
-                </div>
+                </FormField>
+
                 <div>
                     <div className="flex justify-between items-center mb-1.5">
-                        <label className={authLabelClass}>Password</label>
+                        <Label htmlFor="login-password" className="mb-0">
+                            Password
+                        </Label>
                         <Link href="/forgot-password" className={`text-xs font-medium ${authLinkClass}`}>
                             Forgot password?
                         </Link>
                     </div>
                     <div className="relative">
-                        <input
+                        <Input
+                            id="login-password"
                             {...register('password')}
                             type={showPassword ? 'text' : 'password'}
+                            autoComplete="current-password"
                             placeholder="••••••••"
-                            className={`${authInputClass} pr-12`}
+                            invalid={!!errors.password}
+                            className="pr-12"
                         />
                         <button
                             type="button"
@@ -107,12 +121,23 @@ export default function LoginPage() {
                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                     </div>
-                    {errors.password && <p className="text-red-500 text-xs mt-1.5">{errors.password.message}</p>}
+                    {errors.password && (
+                        <p className="text-red-500 text-xs mt-1.5" role="alert">
+                            {errors.password.message}
+                        </p>
+                    )}
                 </div>
-                <button type="submit" disabled={isSubmitting} className={authPrimaryBtnClass}>
+
+                <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    className="w-full"
+                    loading={isSubmitting}
+                    rightIcon={!isSubmitting ? <ArrowRight className="h-4 w-4" /> : undefined}
+                >
                     {isSubmitting ? 'Signing in...' : 'Sign in'}
-                    {!isSubmitting && <ArrowRight className="h-4 w-4" />}
-                </button>
+                </Button>
             </form>
         </AuthScreen>
     );

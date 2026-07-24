@@ -1,8 +1,11 @@
 'use client';
 
+import { cn } from '@/lib/cn';
+
 interface LoadingSpinnerProps {
     size?: 'sm' | 'md' | 'lg';
     label?: string;
+    className?: string;
 }
 
 const sizeClasses = {
@@ -11,11 +14,18 @@ const sizeClasses = {
     lg: 'w-16 h-16 border-2',
 };
 
-export default function LoadingSpinner({ size = 'md', label = 'Loading' }: LoadingSpinnerProps) {
+export default function LoadingSpinner({ size = 'md', label = 'Loading', className }: LoadingSpinnerProps) {
     return (
-        <div className="flex flex-col items-center justify-center gap-4" role="status" aria-label={label}>
+        <div
+            className={cn('flex flex-col items-center justify-center gap-4', className)}
+            role="status"
+            aria-label={label}
+        >
             <div
-                className={`${sizeClasses[size]} border-blue-200 border-t-blue-600 rounded-full animate-spin`}
+                className={cn(
+                    sizeClasses[size],
+                    'border-blue-100 border-t-brand rounded-full animate-spin'
+                )}
                 aria-hidden
             />
             {label && (

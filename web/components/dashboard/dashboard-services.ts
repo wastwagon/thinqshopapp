@@ -22,8 +22,8 @@ export const DASHBOARD_SERVICES: ServiceCardConfig[] = [
         description: 'Send money securely',
         href: '/dashboard/transfers',
         image: '/assets/dashboard/service-transfer.png',
-        gradient: 'bg-gradient-to-br from-violet-500 via-purple-600 to-violet-700',
-        accent: 'text-violet-600',
+        gradient: 'bg-gradient-to-br from-blue-600 via-brand to-blue-950',
+        accent: 'text-brand',
     },
     {
         title: 'Shopping',

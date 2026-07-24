@@ -118,7 +118,7 @@ export default function TransferConfirmationPage() {
                         <button
                             type="button"
                             onClick={handlePrint}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-colors print:hidden"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand/90 transition-colors print:hidden"
                         >
                             <Printer className="h-4 w-4" /> Print / Save as PDF
                         </button>

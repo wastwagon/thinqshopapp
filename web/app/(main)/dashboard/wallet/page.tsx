@@ -12,6 +12,7 @@ import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
 import DashboardWalletBalancePanel from '@/components/dashboard/DashboardWalletBalancePanel';
 import { useAuth } from '@/context/AuthContext';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 const PaystackTrigger = dynamic(
     () => import('@/components/payments/PaystackTrigger').then((m) => m.default),
@@ -62,6 +63,7 @@ interface WithdrawalRow {
 }
 
 export default function WalletPage() {
+    const { confirm, confirmDialog } = useConfirmDialog();
     const { user } = useAuth();
     const [balanceHidden, setBalanceHidden] = useState(false);
     const [balance, setBalance] = useState<number | null>(null);
@@ -240,7 +242,11 @@ export default function WalletPage() {
     };
 
     const cancelWithdrawal = async (id: number) => {
-        if (!confirm('Cancel this withdrawal request?')) return;
+        const ok = await confirm({
+            title: 'Cancel this withdrawal request?',
+            confirmLabel: 'Cancel withdrawal',
+        });
+        if (!ok) return;
         try {
             await api.delete(`/finance/wallet/withdrawals/${id}`);
             toast.success('Withdrawal cancelled');
@@ -296,7 +302,7 @@ export default function WalletPage() {
                                 </p>
                             )}
                             {pendingConsignmentPayout > 0 && (
-                                <p className="text-violet-200">
+                                <p className="text-blue-100/90">
                                     ₵{pendingConsignmentPayout.toFixed(2)} pending from Sell for Me sales (released when buyer delivery is confirmed)
                                 </p>
                             )}
@@ -331,9 +337,9 @@ export default function WalletPage() {
                 />
 
                 {pendingConsignmentSales.length > 0 && (
-                    <div className="flat-card p-4 mb-4 border border-violet-100 bg-violet-50/40">
-                        <p className="text-xs font-semibold text-violet-900 mb-1">Pending from sales (escrow)</p>
-                        <p className="text-[11px] text-violet-700/90 mb-3">
+                    <div className="flat-card p-4 mb-4 border border-blue-100 bg-blue-50/40">
+                        <p className="text-xs font-semibold text-blue-950 mb-1">Pending from sales (escrow)</p>
+                        <p className="text-[11px] text-blue-800/90 mb-3">
                             Not withdrawable yet. Admin marks the order delivered after verifying shipment with the buyer.
                         </p>
                         <ul className="space-y-2">
@@ -353,7 +359,7 @@ export default function WalletPage() {
                                         >
                                             History
                                         </button>
-                                        <span className="text-violet-800 font-semibold tabular-nums">
+                                        <span className="text-brand font-semibold tabular-nums">
                                             ₵{Number(sale.expected_payout_ghs).toFixed(2)}
                                         </span>
                                     </div>
@@ -400,7 +406,7 @@ export default function WalletPage() {
                                     <span className="text-gray-700">₵{Number(w.amount_ghs).toFixed(2)} · awaiting admin</span>
                                     <button
                                         type="button"
-                                        onClick={() => cancelWithdrawal(w.id)}
+                                        onClick={() => void cancelWithdrawal(w.id)}
                                         className="text-xs font-semibold text-red-600 hover:underline"
                                     >
                                         Cancel
@@ -605,6 +611,7 @@ export default function WalletPage() {
                     </div>
                 </div>
             )}
+            {confirmDialog}
         </DashboardLayout>
     );
 }

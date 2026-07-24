@@ -8,7 +8,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
-import AuthScreen, { authInputClass, authLabelClass, authPrimaryBtnClass, authLinkClass } from '@/components/auth/AuthScreen';
+import AuthScreen, { authLinkClass } from '@/components/auth/AuthScreen';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import FormField from '@/components/ui/FormField';
 import { ArrowLeft, Lock } from 'lucide-react';
 
 const resetSchema = z
@@ -87,36 +90,33 @@ function ResetPasswordForm() {
             }
         >
             <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-                <div>
-                    <label className={authLabelClass}>New password</label>
+                <FormField label="New password" htmlFor="reset-password" error={errors.password?.message}>
                     <div className="relative">
-                        <input
+                        <Input
+                            id="reset-password"
                             {...register('password')}
                             type="password"
                             autoComplete="new-password"
                             placeholder="At least 6 characters"
-                            className={authInputClass}
+                            invalid={!!errors.password}
+                            className="pr-11"
                         />
                         <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
                     </div>
-                    {errors.password && <p className="text-red-500 text-xs mt-1.5">{errors.password.message}</p>}
-                </div>
-                <div>
-                    <label className={authLabelClass}>Confirm password</label>
-                    <input
+                </FormField>
+                <FormField label="Confirm password" htmlFor="reset-confirm" error={errors.confirmPassword?.message}>
+                    <Input
+                        id="reset-confirm"
                         {...register('confirmPassword')}
                         type="password"
                         autoComplete="new-password"
                         placeholder="Repeat password"
-                        className={authInputClass}
+                        invalid={!!errors.confirmPassword}
                     />
-                    {errors.confirmPassword && (
-                        <p className="text-red-500 text-xs mt-1.5">{errors.confirmPassword.message}</p>
-                    )}
-                </div>
-                <button type="submit" disabled={isSubmitting} className={authPrimaryBtnClass}>
+                </FormField>
+                <Button type="submit" variant="primary" size="lg" className="w-full" loading={isSubmitting}>
                     {isSubmitting ? 'Saving…' : 'Update password'}
-                </button>
+                </Button>
             </form>
         </AuthScreen>
     );
