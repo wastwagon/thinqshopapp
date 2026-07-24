@@ -13,9 +13,6 @@ import { ArrowUpRight, Plus } from 'lucide-react';
 import DashboardWalletBalancePanel from '@/components/dashboard/DashboardWalletBalancePanel';
 import DashboardServiceCard from '@/components/dashboard/DashboardServiceCard';
 import DashboardTrustHighlights from '@/components/dashboard/DashboardTrustHighlights';
-import DashboardRecentActivity, {
-    type RecentActivityItem,
-} from '@/components/dashboard/DashboardRecentActivity';
 import { DASHBOARD_SERVICES } from '@/components/dashboard/dashboard-services';
 import { buttonVariants } from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -27,24 +24,12 @@ function getDisplayName(user: { first_name?: string; last_name?: string; email?:
     return user.email?.split('@')[0] || 'there';
 }
 
-function formatDate(iso?: string) {
-    if (!iso) return '';
-    return new Date(iso).toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-    });
-}
-
-type TimedActivity = RecentActivityItem & { at: string };
-
 export default function DashboardPage() {
     const { isAuthenticated, user, loading: authLoading } = useAuth();
     const router = useRouter();
     const [walletBalance, setWalletBalance] = useState('0.00');
     const [balanceHidden, setBalanceHidden] = useState(false);
-    const [activity, setActivity] = useState<RecentActivityItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activityLoading, setActivityLoading] = useState(true);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -69,83 +54,6 @@ export default function DashboardPage() {
                 console.error('Failed to fetch wallet', error);
             } finally {
                 setLoading(false);
-            }
-
-            try {
-                const [ordersRes, transfersRes, logisticsRes] = await Promise.all([
-                    api.get('/orders').catch(() => ({ data: [] })),
-                    api.get('/finance/transfers').catch(() => ({ data: [] })),
-                    api.get('/logistics/history').catch(() => ({ data: [] })),
-                ]);
-
-                const orders = Array.isArray(ordersRes.data) ? ordersRes.data : [];
-                const transfers = Array.isArray(transfersRes.data) ? transfersRes.data : [];
-                const shipments = Array.isArray(logisticsRes.data) ? logisticsRes.data : [];
-
-                const timed: TimedActivity[] = [
-                    ...orders.map(
-                        (o: {
-                            id: number;
-                            order_number?: string;
-                            total?: number;
-                            status?: string;
-                            created_at?: string;
-                        }) => ({
-                            id: `order-${o.id}`,
-                            kind: 'order' as const,
-                            title: o.order_number ?? `Order #${o.id}`,
-                            subtitle: `Order · ${formatDate(o.created_at)}`,
-                            href: `/dashboard/orders/${o.id}`,
-                            amount: `₵${Number(o.total ?? 0).toFixed(2)}`,
-                            status: o.status,
-                            at: o.created_at ?? '',
-                        })
-                    ),
-                    ...transfers.map(
-                        (t: {
-                            id: number;
-                            amount_ghs?: number;
-                            payment_status?: string;
-                            status?: string;
-                            created_at?: string;
-                            recipient_name?: string;
-                        }) => ({
-                            id: `transfer-${t.id}`,
-                            kind: 'transfer' as const,
-                            title: t.recipient_name ? `To ${t.recipient_name}` : `Transfer #${t.id}`,
-                            subtitle: `Transfer · ${formatDate(t.created_at)}`,
-                            href: `/dashboard/transfers/${t.id}/confirmation`,
-                            amount: `₵${Number(t.amount_ghs ?? 0).toFixed(2)}`,
-                            status: t.payment_status ?? t.status,
-                            at: t.created_at ?? '',
-                        })
-                    ),
-                    ...shipments.map(
-                        (s: {
-                            id: number;
-                            tracking_number?: string;
-                            status?: string;
-                            created_at?: string;
-                        }) => ({
-                            id: `ship-${s.id}`,
-                            kind: 'shipment' as const,
-                            title: s.tracking_number ?? `Shipment #${s.id}`,
-                            subtitle: `Logistics · ${formatDate(s.created_at)}`,
-                            href: `/dashboard/logistics/${s.id}`,
-                            status: s.status,
-                            at: s.created_at ?? '',
-                        })
-                    ),
-                ];
-
-                timed.sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
-                setActivity(
-                    timed.slice(0, 6).map(({ at: _at, ...item }) => item)
-                );
-            } catch (error) {
-                console.error('Failed to fetch activity', error);
-            } finally {
-                setActivityLoading(false);
             }
         };
 
@@ -233,8 +141,6 @@ export default function DashboardPage() {
                         }
                     />
                 </motion.section>
-
-                <DashboardRecentActivity items={activity} loading={activityLoading} />
 
                 <section aria-label="Main services" className="mb-2">
                     <div className="mb-3">
