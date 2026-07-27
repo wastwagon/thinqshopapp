@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Star, Heart, Truck, RotateCcw, ZoomIn } from 'lucide-react';
+import { ShoppingCart, Star, Heart, Truck, RotateCcw, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 import ShopLayout from '@/components/layout/ShopLayout';
@@ -23,7 +23,6 @@ import { trackViewItem } from '@/lib/analytics';
 import { getMediaUrl } from '@/lib/media';
 import ProductReviewForm from '@/components/product/ProductReviewForm';
 import ProductImageLightbox from '@/components/ui/ProductImageLightbox';
-import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import QuantityStepper from '@/components/ui/QuantityStepper';
 
@@ -56,6 +55,8 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [buying, setBuying] = useState(false);
     const [quantity, setQuantity] = useState(1);
+    const [stickyPurchase, setStickyPurchase] = useState(false);
+    const purchaseAnchorRef = useRef<HTMLDivElement>(null);
     const [reviews, setReviews] = useState<{ data: ReviewRow[]; meta: { total: number; totalPages: number } }>({ data: [], meta: { total: 0, totalPages: 0 } });
     const [policies, setPolicies] = useState<PolicyRow[]>([]);
     const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
@@ -152,6 +153,21 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
         }
     }, [product]);
 
+    useEffect(() => {
+        const el = purchaseAnchorRef.current;
+        if (!el || typeof IntersectionObserver === 'undefined') return;
+        const root =
+            el.closest('main') ??
+            document.getElementById('main-content') ??
+            null;
+        const io = new IntersectionObserver(
+            ([entry]) => setStickyPurchase(!entry.isIntersecting),
+            { root, threshold: 0, rootMargin: '0px' },
+        );
+        io.observe(el);
+        return () => io.disconnect();
+    }, [product]);
+
     if (loading) return (
         <ShopLayout>
             <ShopLoadingState message="Loading product…" />
@@ -210,6 +226,34 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
         selectedVariantId ??
         (variants.length > 0 && variants[0]?.id != null ? Number(variants[0].id) : undefined);
 
+    const purchaseDisabled = isOwnConsignment || stockToShow <= 0;
+    const addToCartLabel = isOwnConsignment ? 'Your listing' : stockToShow <= 0 ? 'Out of stock' : 'Add to cart';
+    const buyLabel = buying ? 'Buying…' : isOwnConsignment ? 'Your listing' : stockToShow <= 0 ? 'Out of stock' : 'Buy';
+
+    const handleWishlistToggle = () => {
+        toggleWishlist({
+            id: Number(product.id),
+            name: product.name,
+            price: listUnitBeforeWholesale,
+            slug: product.slug ?? slug,
+            images: product.images,
+            gallery_images: product.gallery_images,
+            category: product.category,
+        });
+    };
+
+    const handleAddToCart = () => {
+        if (isOwnConsignment) {
+            toast.error('You cannot purchase your own Sell for Me listing');
+            return;
+        }
+        if (variants.length > 0 && selectedVariantId == null) {
+            toast.error('Please select an option');
+            return;
+        }
+        addToCart(Number(product.id), quantity, selectedVariantId ?? undefined);
+    };
+
     const handleExpressBuy = async () => {
         if (isOwnConsignment) {
             toast.error('You cannot purchase your own Sell for Me listing');
@@ -217,6 +261,10 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
         }
         if (stockToShow <= 0) {
             toast.error('Out of stock');
+            return;
+        }
+        if (variants.length > 0 && selectedVariantId == null) {
+            toast.error('Please select an option');
             return;
         }
         if (!user) {
@@ -239,110 +287,207 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
         }
     };
 
+    const wishlisted = isInWishlist(Number(product.id));
+
+    const purchaseActions = (
+        <div className="flex items-center gap-2 sm:gap-3 w-full">
+            <QuantityStepper
+                value={quantity}
+                onChange={setQuantity}
+                max={maxQuantity}
+                size="sm"
+                className="shrink-0"
+            />
+            <div className="flex flex-1 min-w-0 rounded-xl overflow-hidden border border-brand/20 shadow-sm">
+                <button
+                    type="button"
+                    onClick={handleAddToCart}
+                    disabled={purchaseDisabled}
+                    className="flex-1 min-h-[44px] px-2 sm:px-3 bg-brand-muted text-brand text-xs sm:text-sm font-semibold hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center gap-1.5"
+                >
+                    <ShoppingCart className="h-4 w-4 shrink-0" aria-hidden />
+                    <span className="truncate">{addToCartLabel}</span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => void handleExpressBuy()}
+                    disabled={buying || purchaseDisabled}
+                    className="flex-1 min-h-[44px] px-2 sm:px-3 bg-brand text-white text-xs sm:text-sm font-semibold hover:bg-brand/90 transition-colors disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center gap-1.5"
+                >
+                    <span className="truncate">{buyLabel}</span>
+                </button>
+            </div>
+        </div>
+    );
+
     return (
         <ShopLayout>
-            <div className="bg-white min-h-full pb-8">
-            <ShopContent wide className="py-8 sm:py-12">
-                <PageHeader breadcrumbs={breadcrumbs} accent="amber" />
-                <ShopTrustRow compact />
-                <div className="lg:grid lg:grid-cols-2 lg:gap-x-16 lg:items-start">
-                    {/* Image Gallery */}
-                    <div className="px-4 sm:px-0">
-                        <div className="flex flex-col-reverse">
-                            {images.length > 1 && (
-                                <div className="mt-3 sm:mt-8 w-full max-w-2xl mx-auto lg:max-w-none">
-                                    <div className="flex sm:grid sm:grid-cols-4 gap-3 sm:gap-6 overflow-x-auto sm:overflow-visible pb-1 sm:pb-0">
-                                        {images.map((img: string, idx: number) => (
-                                            <button
-                                                key={idx}
-                                                type="button"
-                                                aria-label={`View image ${idx + 1} of ${images.length}`}
-                                                className={`relative h-20 w-20 sm:h-24 sm:w-auto shrink-0 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden border transition-all ${selectedImage === idx ? 'border-blue-500 ring-1 ring-blue-100' : 'border-gray-100 hover:border-gray-200'}`}
-                                                onClick={() => setSelectedImage(idx)}
-                                            >
-                                                <Image src={img} alt="" fill className="object-contain p-2" sizes="96px" unoptimized={imgUnoptimized(img)} />
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+            <div className="bg-white min-h-full pb-20 md:pb-8">
+            <ShopContent wide className="py-4 sm:py-8 lg:py-12">
+                <div className="hidden sm:block">
+                    <PageHeader breadcrumbs={breadcrumbs} accent="amber" />
+                    <ShopTrustRow compact />
+                </div>
+                <div className="sm:hidden px-4 mb-1 [&_header]:mb-2">
+                    <PageHeader breadcrumbs={breadcrumbs} accent="amber" />
+                </div>
 
+                <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 lg:items-start">
+                    {/* Image + under-image purchase (mobile layout matches customer reference) */}
+                    <div>
+                        <div className="sm:px-0">
                             <button
                                 type="button"
                                 onClick={() => canExpandGallery && setLightboxOpen(true)}
                                 disabled={!canExpandGallery}
-                                aria-label={`Expand image: ${product.name}`}
-                                className="group/image w-full aspect-[4/3] max-h-[42vh] lg:aspect-square lg:max-h-none relative rounded-lg lg:rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-default"
+                                aria-label={`View larger image: ${product.name}`}
+                                className="group/image w-full aspect-[4/5] max-h-[52vh] sm:aspect-square sm:max-h-[420px] lg:max-h-none relative overflow-hidden bg-gray-50 border-y border-gray-100 sm:border sm:rounded-lg cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-default"
                             >
                                 <Image
                                     src={images[selectedImage] || '/placeholder.svg'}
                                     alt={product.name}
                                     fill
-                                    className="object-contain p-2 sm:p-4 lg:p-8 transition-transform duration-700 group-hover/image:scale-[1.02] pointer-events-none"
+                                    className="object-contain p-1 sm:p-2 transition-transform duration-500 group-hover/image:scale-[1.02] pointer-events-none"
                                     sizes="(max-width: 1024px) 100vw, 50vw"
                                     unoptimized={imgUnoptimized(images[selectedImage] || '')}
+                                    priority
                                 />
-                                {canExpandGallery && (
-                                    <span className="pointer-events-none absolute bottom-2 right-2 lg:bottom-3 lg:right-3 flex items-center gap-1 lg:gap-1.5 rounded-lg lg:rounded-xl bg-black/50 px-2 py-1 lg:px-3 lg:py-1.5 text-[10px] lg:text-xs font-medium text-white backdrop-blur-sm">
-                                        <ZoomIn className="h-3 w-3 lg:h-3.5 lg:w-3.5" aria-hidden />
-                                        Tap to expand
-                                    </span>
-                                )}
                             </button>
+
+                            {images.length > 1 && (
+                                <div className="mt-2 px-4 sm:px-0">
+                                    <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+                                        {images.map((img: string, idx: number) => (
+                                            <button
+                                                key={idx}
+                                                type="button"
+                                                aria-label={`View image ${idx + 1} of ${images.length}`}
+                                                className={`relative h-12 w-12 shrink-0 bg-gray-50 rounded-md flex items-center justify-center overflow-hidden border transition-all ${selectedImage === idx ? 'border-blue-500 ring-1 ring-blue-100' : 'border-gray-100 hover:border-gray-200'}`}
+                                                onClick={() => setSelectedImage(idx)}
+                                            >
+                                                <Image src={img} alt="" fill className="object-contain p-0.5" sizes="48px" unoptimized={imgUnoptimized(img)} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Summary strip + CTAs directly under image */}
+                        <div className="mt-3 px-4 sm:px-0 space-y-3">
+                            <div className="flex items-start gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => canExpandGallery && setLightboxOpen(true)}
+                                    disabled={!canExpandGallery}
+                                    className="relative h-14 w-14 shrink-0 rounded-md overflow-hidden border border-gray-100 bg-gray-50"
+                                    aria-label="Open gallery"
+                                >
+                                    <Image
+                                        src={images[selectedImage] || '/placeholder.svg'}
+                                        alt=""
+                                        fill
+                                        className="object-contain p-0.5"
+                                        sizes="56px"
+                                        unoptimized={imgUnoptimized(images[selectedImage] || '')}
+                                    />
+                                </button>
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-baseline gap-2 flex-wrap">
+                                        <p className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">
+                                            <PriceDisplay amountGhs={unitPrice} className="font-bold" />
+                                        </p>
+                                        {product.compare_price != null && Number(product.compare_price) > unitPrice && (
+                                            <p className="text-sm font-medium text-gray-400 line-through">
+                                                ₵{Number(product.compare_price).toFixed(2)}
+                                            </p>
+                                        )}
+                                        {qualifiesWholesale && (
+                                            <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-bold">
+                                                −{discountPct}%
+                                            </span>
+                                        )}
+                                    </div>
+                                    <h1 className="mt-0.5 text-sm font-semibold text-gray-900 leading-snug line-clamp-2">
+                                        {product.name}
+                                    </h1>
+                                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                        <Badge
+                                            variant={
+                                                stockToShow === 0
+                                                    ? 'danger'
+                                                    : stockToShow <= (product.low_stock_threshold ?? 10)
+                                                      ? 'warning'
+                                                      : 'success'
+                                            }
+                                        >
+                                            {stockToShow === 0
+                                                ? 'Out of stock'
+                                                : stockToShow <= (product.low_stock_threshold ?? 10)
+                                                  ? `Only ${stockToShow} left`
+                                                  : 'In stock'}
+                                        </Badge>
+                                        <Badge variant="brand">
+                                            {product.is_consignment
+                                                ? 'Sell for Me'
+                                                : 'Ships abroad · 7–14 days'}
+                                        </Badge>
+                                    </div>
+                                </div>
+                                <a
+                                    href="#product-details"
+                                    className="shrink-0 inline-flex items-center gap-0.5 text-xs font-semibold text-brand pt-1"
+                                >
+                                    Details
+                                    <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                                </a>
+                            </div>
+
+                            <div ref={purchaseAnchorRef} className="flex items-center gap-2 lg:hidden">
+                                <button
+                                    type="button"
+                                    onClick={handleWishlistToggle}
+                                    className={`min-w-[44px] min-h-[44px] w-11 h-11 border rounded-xl flex items-center justify-center transition-all shrink-0 ${
+                                        wishlisted
+                                            ? 'bg-red-50 border-red-200 text-red-500'
+                                            : 'border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50'
+                                    }`}
+                                    aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                                >
+                                    <Heart className={`h-4 w-4 ${wishlisted ? 'fill-current' : ''}`} />
+                                </button>
+                                <div className="flex-1 min-w-0">{purchaseActions}</div>
+                            </div>
+
+                            {isOwnConsignment && (
+                                <p className="text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
+                                    This is your Sell for Me listing. Buyers can add it to cart — you cannot purchase it yourself.
+                                </p>
+                            )}
+                            {hasWholesale && (
+                                <div className={`text-sm font-medium px-3 py-2.5 rounded-xl ${qualifiesWholesale ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-orange-50 text-orange-800 border border-orange-200'}`}>
+                                    {qualifiesWholesale
+                                        ? `You qualify for wholesale! Save ${discountPct}% on this order.`
+                                        : `Add ${moreNeeded} more to get ${discountPct}% wholesale discount.`}
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* Product Info */}
-                    <div className="mt-6 px-4 sm:px-0 sm:mt-16 lg:mt-0">
-                        <div className="mb-8">
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                <Badge
-                                    variant={
-                                        stockToShow === 0
-                                            ? 'danger'
-                                            : stockToShow <= (product.low_stock_threshold ?? 10)
-                                              ? 'warning'
-                                              : 'success'
-                                    }
-                                >
-                                    {stockToShow === 0
-                                        ? 'Out of stock'
-                                        : stockToShow <= (product.low_stock_threshold ?? 10)
-                                          ? `Only ${stockToShow} left`
-                                          : 'In stock'}
-                                </Badge>
-                                {product.is_consignment && (
-                                    <Badge variant="info">Sell for Me listing</Badge>
-                                )}
-                            </div>
-                            <div className="mb-4">
-                                <Badge variant="brand">
-                                    {product.is_consignment
-                                        ? 'Sell for Me · Local pickup & handover'
-                                        : 'Ships from abroad · 7–14 day delivery'}
-                                </Badge>
-                            </div>
-                            <h1 className="text-xl font-bold text-gray-900 tracking-tight leading-snug">{product.name}</h1>
-                        </div>
-
-                        <div className="flex flex-wrap items-baseline gap-2 sm:gap-4 mb-6 sm:mb-8">
-                            <p className="text-base sm:text-lg md:text-xl font-bold text-gray-900 tracking-tight">
-                                <PriceDisplay amountGhs={unitPrice} className="font-bold" /> <span className="text-xs sm:text-sm font-normal text-gray-500">each</span>
+                    {/* Options + details (below purchase on mobile; right column on desktop) */}
+                    <div id="product-details" className="mt-6 px-4 sm:px-0 lg:mt-0 scroll-mt-24">
+                        <div className="hidden lg:block mb-6">
+                            <h2 className="text-xl font-bold text-gray-900 tracking-tight leading-snug">{product.name}</h2>
+                            <p className="mt-2 text-lg font-bold text-gray-900">
+                                <PriceDisplay amountGhs={unitPrice} className="font-bold" />{' '}
+                                <span className="text-sm font-normal text-gray-500">each</span>
                             </p>
-                            {qualifiesWholesale && (
-                                <span className="px-2 py-1 rounded-lg bg-green-100 text-green-700 text-xs font-bold">Wholesale {discountPct}% off</span>
-                            )}
-                            {product.compare_price != null && Number(product.compare_price) > unitPrice && (
-                                <p className="text-sm sm:text-base font-bold text-gray-400 line-through">₵{Number(product.compare_price).toFixed(2)}</p>
-                            )}
-                            {variants.length > 0 && (
-                                <p className="text-xs text-gray-500 w-full">Price updates when you select an option below.</p>
-                            )}
                         </div>
 
                         {variants.length > 0 && (
-                            <div className="mb-8 rounded-2xl border border-gray-100 bg-gray-50/80 p-4">
+                            <div className="mb-6 rounded-2xl border border-gray-100 bg-gray-50/80 p-4">
                                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Options</p>
+                                <p className="text-xs text-gray-500 mb-2">Price updates when you select an option.</p>
                                 <div className="flex flex-col gap-2">
                                     {variants.map((v: { id: number; variant_type: string; variant_value: string; price_adjust?: number; stock_quantity?: number }) => {
                                         const vid = Number(v.id);
@@ -370,7 +515,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             </div>
                         )}
 
-                        <div className="space-y-6 mb-10">
+                        <div className="space-y-6 mb-8">
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center">
                                     {[0, 1, 2, 3, 4].map((rating) => {
@@ -393,7 +538,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             )}
 
                             {product.description && (
-                                <div className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed font-medium space-y-4 sm:space-y-6" dangerouslySetInnerHTML={{ __html: product.description }} />
+                                <div className="text-sm sm:text-base text-gray-600 leading-relaxed font-medium space-y-4 sm:space-y-6" dangerouslySetInnerHTML={{ __html: product.description }} />
                             )}
 
                             {product.specifications && typeof product.specifications === 'object' && Object.keys(product.specifications).length > 0 && (
@@ -411,98 +556,23 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             )}
                         </div>
 
-                        <div className="space-y-3 mb-10">
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                                <div className="flex items-center gap-2 shrink-0">
-                                    <QuantityStepper
-                                        value={quantity}
-                                        onChange={setQuantity}
-                                        max={maxQuantity}
-                                        className="sm:rounded-xl"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            toggleWishlist({
-                                                id: Number(product.id),
-                                                name: product.name,
-                                                price: listUnitBeforeWholesale,
-                                                slug: product.slug ?? slug,
-                                                images: product.images,
-                                                gallery_images: product.gallery_images,
-                                                category: product.category,
-                                            })
-                                        }
-                                        className={`min-w-[44px] min-h-[44px] w-10 h-10 sm:w-12 sm:h-12 border rounded-lg sm:rounded-xl flex items-center justify-center transition-all shrink-0 ${
-                                            isInWishlist(Number(product.id))
-                                                ? 'bg-red-50 border-red-200 text-red-500'
-                                                : 'border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50'
-                                        }`}
-                                    >
-                                        <Heart
-                                            className={`h-4 w-4 sm:h-5 sm:w-5 ${isInWishlist(Number(product.id)) ? 'fill-current' : ''}`}
-                                        />
-                                    </button>
-                                </div>
-                                <Button
+                        {/* Desktop purchase row — right column (under-image CTAs cover mobile) */}
+                        <div className="hidden lg:block space-y-3 mb-8">
+                            <div className="flex items-center gap-3">
+                                <button
                                     type="button"
-                                    variant="secondary"
-                                    className="flex-1 min-w-[7.5rem] border-brand text-brand hover:bg-blue-50"
-                                    leftIcon={<ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />}
-                                    onClick={() => {
-                                        if (isOwnConsignment) {
-                                            toast.error('You cannot purchase your own Sell for Me listing');
-                                            return;
-                                        }
-                                        if (variants.length > 0 && selectedVariantId == null) {
-                                            toast.error('Please select an option');
-                                            return;
-                                        }
-                                        addToCart(Number(product.id), quantity, selectedVariantId ?? undefined);
-                                    }}
-                                    disabled={isOwnConsignment || stockToShow <= 0}
+                                    onClick={handleWishlistToggle}
+                                    className={`min-w-[44px] min-h-[44px] w-11 h-11 border rounded-xl flex items-center justify-center transition-all shrink-0 ${
+                                        wishlisted
+                                            ? 'bg-red-50 border-red-200 text-red-500'
+                                            : 'border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50'
+                                    }`}
+                                    aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                                 >
-                                    <span className="whitespace-nowrap">
-                                        {isOwnConsignment
-                                            ? 'Your listing'
-                                            : stockToShow <= 0
-                                              ? 'Out of stock'
-                                              : 'Add to Cart'}
-                                    </span>
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="primary"
-                                    className="flex-1 min-w-[7.5rem] shadow-[0_8px_24px_-8px_rgba(2,39,79,0.35)]"
-                                    leftIcon={<ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />}
-                                    onClick={() => void handleExpressBuy()}
-                                    disabled={buying || isOwnConsignment || stockToShow <= 0}
-                                    loading={buying}
-                                >
-                                    <span className="whitespace-nowrap">
-                                        {buying
-                                            ? 'Buying…'
-                                            : isOwnConsignment
-                                              ? 'Your listing'
-                                              : stockToShow <= 0
-                                                ? 'Out of stock'
-                                                : 'Buy'}
-                                    </span>
-                                </Button>
+                                    <Heart className={`h-5 w-5 ${wishlisted ? 'fill-current' : ''}`} />
+                                </button>
+                                <div className="flex-1">{purchaseActions}</div>
                             </div>
-                            {isOwnConsignment && (
-                                <p className="text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
-                                    This is your Sell for Me listing. Buyers can add it to cart — you cannot purchase it yourself.
-                                </p>
-                            )}
-                            {hasWholesale && (
-                                <div className={`text-sm font-medium px-4 py-3 rounded-xl ${qualifiesWholesale ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-orange-50 text-orange-800 border border-orange-200'}`}>
-                                    {qualifiesWholesale
-                                        ? `You qualify for wholesale! Save ${discountPct}% on this order.`
-                                        : `Add ${moreNeeded} more to get ${discountPct}% wholesale discount.`
-                                    }
-                                </div>
-                            )}
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -603,6 +673,42 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                     </div>
                 )}
             </ShopContent>
+
+            {/* Sticky purchase bar — only when under-image CTAs scroll away */}
+            {stickyPurchase && (
+            <div className="fixed left-0 right-0 z-[90] md:hidden bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] border-t border-gray-200 bg-white/95 backdrop-blur-xl px-3 py-2 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.1)]">
+                <div className="flex items-center gap-2 max-w-lg mx-auto">
+                    <button
+                        type="button"
+                        onClick={handleWishlistToggle}
+                        className={`min-w-[44px] min-h-[44px] w-11 h-11 border rounded-xl flex items-center justify-center transition-all shrink-0 ${
+                            wishlisted
+                                ? 'bg-red-50 border-red-200 text-red-500'
+                                : 'border-gray-200 text-gray-400'
+                        }`}
+                        aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                    >
+                        <Heart className={`h-4 w-4 ${wishlisted ? 'fill-current' : ''}`} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleAddToCart}
+                        disabled={purchaseDisabled}
+                        className="flex-1 min-h-[44px] rounded-xl bg-brand-muted text-brand text-sm font-semibold hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                        {addToCartLabel}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => void handleExpressBuy()}
+                        disabled={buying || purchaseDisabled}
+                        className="flex-1 min-h-[44px] rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand/90 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                        {buyLabel}
+                    </button>
+                </div>
+            </div>
+            )}
 
             <ProductImageLightbox
                 open={lightboxOpen}
