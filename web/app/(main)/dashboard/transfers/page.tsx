@@ -519,9 +519,9 @@ export default function TransferPage() {
                                                 <p className="text-xs text-gray-500 mb-2 ml-1">Add at least one QR: upload image, recipient name and amount (CNY). Total must equal converted amount above.</p>
                                                 <div className="space-y-3">
                                                     {qrEntries.map((entry) => (
-                                                        <div key={entry.id} className="flex flex-wrap items-start gap-2 p-2.5 bg-gray-50 rounded-lg border border-gray-100">
-                                                            <div className="flex items-center gap-2 shrink-0">
-                                                                <label className="cursor-pointer flex items-center gap-1.5 px-2.5 py-2 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 min-h-[44px]">
+                                                        <div key={entry.id} className="flex flex-col gap-2 p-2.5 bg-gray-50 rounded-lg border border-gray-100 min-w-0">
+                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                <label className="cursor-pointer flex items-center gap-1.5 px-2.5 py-2 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 min-h-[44px] shrink-0">
                                                                     <Upload className="h-3.5 w-3.5" /> Upload QR
                                                                     <input
                                                                         type="file"
@@ -535,32 +535,28 @@ export default function TransferPage() {
                                                                         <img src={entry.dataUrl} alt="QR" className="w-full h-full object-contain" />
                                                                     </div>
                                                                 )}
+                                                                {qrEntries.length > 1 && (
+                                                                    <button type="button" onClick={() => removeQrEntry(entry.id)} className="min-w-[44px] min-h-[44px] ml-auto flex items-center justify-center p-2 text-red-400 hover:text-red-600 shrink-0 rounded-lg hover:bg-red-50" aria-label="Remove">
+                                                                        <X className="h-4 w-4" />
+                                                                    </button>
+                                                                )}
                                                             </div>
-                                                            <div className="flex-1 min-w-[120px]">
-                                                                <input
-                                                                    type="text"
-                                                                    value={entry.recipientName}
-                                                                    onChange={(e) => setQrEntryRecipientName(entry.id, e.target.value)}
-                                                                    placeholder="Recipient / supplier name"
-                                                                    className="block w-full px-3 py-2 bg-white border border-gray-100 rounded-lg text-sm font-medium text-gray-900 focus:bg-white outline-none"
-                                                                />
-                                                            </div>
-                                                            <div className="flex-1 min-w-[100px]">
-                                                                <input
-                                                                    type="number"
-                                                                    step="0.01"
-                                                                    min="0"
-                                                                    value={entry.amount}
-                                                                    onChange={(e) => setQrEntryAmount(entry.id, e.target.value)}
-                                                                    placeholder="Amount (CNY)"
-                                                                    className="block w-full px-3 py-2 bg-white border border-gray-100 rounded-lg text-sm font-medium text-gray-900 focus:bg-white outline-none"
-                                                                />
-                                                            </div>
-                                                            {qrEntries.length > 1 && (
-                                                                <button type="button" onClick={() => removeQrEntry(entry.id)} className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-red-400 hover:text-red-600 shrink-0 rounded-lg hover:bg-red-50" aria-label="Remove">
-                                                                    <X className="h-4 w-4" />
-                                                                </button>
-                                                            )}
+                                                            <input
+                                                                type="text"
+                                                                value={entry.recipientName}
+                                                                onChange={(e) => setQrEntryRecipientName(entry.id, e.target.value)}
+                                                                placeholder="Recipient / supplier name"
+                                                                className="block w-full min-w-0 px-3 py-2 bg-white border border-gray-100 rounded-lg text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:bg-white outline-none"
+                                                            />
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                min="0"
+                                                                value={entry.amount}
+                                                                onChange={(e) => setQrEntryAmount(entry.id, e.target.value)}
+                                                                placeholder="Amount (CNY)"
+                                                                className="block w-full min-w-0 px-3 py-2 bg-white border border-gray-100 rounded-lg text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:bg-white outline-none"
+                                                            />
                                                         </div>
                                                     ))}
                                                     <button type="button" onClick={addQrEntry} className="text-xs font-semibold text-blue-600 hover:text-gray-900 flex items-center gap-1 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200 min-h-[44px]">

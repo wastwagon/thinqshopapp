@@ -289,7 +289,30 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
 
     const wishlisted = isInWishlist(Number(product.id));
 
-    const purchaseActions = (
+    const renderPurchaseCtAs = () => (
+        <div className="flex w-full min-w-0 rounded-xl overflow-hidden border border-brand/20 shadow-sm">
+            <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={purchaseDisabled}
+                className="flex-1 min-h-[44px] px-2.5 sm:px-3 bg-brand-muted text-brand text-xs sm:text-sm font-semibold hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center gap-1.5"
+            >
+                <ShoppingCart className="h-4 w-4 shrink-0" aria-hidden />
+                <span className="truncate">{addToCartLabel}</span>
+            </button>
+            <button
+                type="button"
+                onClick={() => void handleExpressBuy()}
+                disabled={buying || purchaseDisabled}
+                className="flex-1 min-h-[44px] px-2.5 sm:px-3 bg-brand text-white text-xs sm:text-sm font-semibold hover:bg-brand/90 transition-colors disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center gap-1.5"
+            >
+                <span className="truncate">{buyLabel}</span>
+            </button>
+        </div>
+    );
+
+    /** Desktop: qty + CTAs on one row (enough width). */
+    const renderPurchaseActions = () => (
         <div className="flex items-center gap-2 sm:gap-3 w-full">
             <QuantityStepper
                 value={quantity}
@@ -298,25 +321,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                 size="sm"
                 className="shrink-0"
             />
-            <div className="flex flex-1 min-w-0 rounded-xl overflow-hidden border border-brand/20 shadow-sm">
-                <button
-                    type="button"
-                    onClick={handleAddToCart}
-                    disabled={purchaseDisabled}
-                    className="flex-1 min-h-[44px] px-2 sm:px-3 bg-brand-muted text-brand text-xs sm:text-sm font-semibold hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center gap-1.5"
-                >
-                    <ShoppingCart className="h-4 w-4 shrink-0" aria-hidden />
-                    <span className="truncate">{addToCartLabel}</span>
-                </button>
-                <button
-                    type="button"
-                    onClick={() => void handleExpressBuy()}
-                    disabled={buying || purchaseDisabled}
-                    className="flex-1 min-h-[44px] px-2 sm:px-3 bg-brand text-white text-xs sm:text-sm font-semibold hover:bg-brand/90 transition-colors disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center gap-1.5"
-                >
-                    <span className="truncate">{buyLabel}</span>
-                </button>
-            </div>
+            <div className="flex-1 min-w-0">{renderPurchaseCtAs()}</div>
         </div>
     );
 
@@ -333,7 +338,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                 </div>
 
                 <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 lg:items-start">
-                    {/* Image + under-image purchase (mobile layout matches customer reference) */}
+                    {/* Image + compact under-image purchase (mobile) */}
                     <div>
                         <div className="sm:px-0">
                             <button
@@ -373,45 +378,37 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             )}
                         </div>
 
-                        {/* Summary strip + CTAs directly under image */}
-                        <div className="mt-3 px-4 sm:px-0 space-y-3">
-                            <div className="flex items-start gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => canExpandGallery && setLightboxOpen(true)}
-                                    disabled={!canExpandGallery}
-                                    className="relative h-14 w-14 shrink-0 rounded-md overflow-hidden border border-gray-100 bg-gray-50"
-                                    aria-label="Open gallery"
-                                >
-                                    <Image
-                                        src={images[selectedImage] || '/placeholder.svg'}
-                                        alt=""
-                                        fill
-                                        className="object-contain p-0.5"
-                                        sizes="56px"
-                                        unoptimized={imgUnoptimized(images[selectedImage] || '')}
-                                    />
-                                </button>
-                                <div className="min-w-0 flex-1">
-                                    <div className="flex items-baseline gap-2 flex-wrap">
-                                        <p className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">
-                                            <PriceDisplay amountGhs={unitPrice} className="font-bold" />
-                                        </p>
-                                        {product.compare_price != null && Number(product.compare_price) > unitPrice && (
-                                            <p className="text-sm font-medium text-gray-400 line-through">
-                                                ₵{Number(product.compare_price).toFixed(2)}
+                        {/* Compact summary + smart purchase layout under image */}
+                        <div className="mt-2.5 px-4 sm:px-0 space-y-2.5">
+                            <div className="min-w-0">
+                                    <div className="flex items-baseline justify-between gap-2">
+                                        <div className="flex items-baseline gap-2 flex-wrap min-w-0">
+                                            <p className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">
+                                                <PriceDisplay amountGhs={unitPrice} className="font-bold" />
                                             </p>
-                                        )}
-                                        {qualifiesWholesale && (
-                                            <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-bold">
-                                                −{discountPct}%
-                                            </span>
-                                        )}
+                                            {product.compare_price != null && Number(product.compare_price) > unitPrice && (
+                                                <p className="text-sm font-medium text-gray-400 line-through">
+                                                    ₵{Number(product.compare_price).toFixed(2)}
+                                                </p>
+                                            )}
+                                            {qualifiesWholesale && (
+                                                <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-bold">
+                                                    −{discountPct}%
+                                                </span>
+                                            )}
+                                        </div>
+                                        <a
+                                            href="#product-details"
+                                            className="shrink-0 inline-flex items-center gap-0.5 text-xs font-semibold text-brand"
+                                        >
+                                            Details
+                                            <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                                        </a>
                                     </div>
                                     <h1 className="mt-0.5 text-sm font-semibold text-gray-900 leading-snug line-clamp-2">
                                         {product.name}
                                     </h1>
-                                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                    <div className="mt-1 flex flex-wrap items-center gap-1">
                                         <Badge
                                             variant={
                                                 stockToShow === 0
@@ -433,30 +430,32 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                                 : 'Ships abroad · 7–14 days'}
                                         </Badge>
                                     </div>
-                                </div>
-                                <a
-                                    href="#product-details"
-                                    className="shrink-0 inline-flex items-center gap-0.5 text-xs font-semibold text-brand pt-1"
-                                >
-                                    Details
-                                    <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-                                </a>
                             </div>
 
-                            <div ref={purchaseAnchorRef} className="flex items-center gap-2 lg:hidden">
-                                <button
-                                    type="button"
-                                    onClick={handleWishlistToggle}
-                                    className={`min-w-[44px] min-h-[44px] w-11 h-11 border rounded-xl flex items-center justify-center transition-all shrink-0 ${
-                                        wishlisted
-                                            ? 'bg-red-50 border-red-200 text-red-500'
-                                            : 'border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50'
-                                    }`}
-                                    aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-                                >
-                                    <Heart className={`h-4 w-4 ${wishlisted ? 'fill-current' : ''}`} />
-                                </button>
-                                <div className="flex-1 min-w-0">{purchaseActions}</div>
+                            {/* Mobile: wishlist + qty on one row, full-width CTAs below */}
+                            <div ref={purchaseAnchorRef} className="space-y-2 lg:hidden">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={handleWishlistToggle}
+                                        className={`min-w-[40px] min-h-[40px] w-10 h-10 border rounded-xl flex items-center justify-center transition-all shrink-0 ${
+                                            wishlisted
+                                                ? 'bg-red-50 border-red-200 text-red-500'
+                                                : 'border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50'
+                                        }`}
+                                        aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                                    >
+                                        <Heart className={`h-4 w-4 ${wishlisted ? 'fill-current' : ''}`} />
+                                    </button>
+                                    <QuantityStepper
+                                        value={quantity}
+                                        onChange={setQuantity}
+                                        max={maxQuantity}
+                                        size="sm"
+                                        className="shrink-0"
+                                    />
+                                </div>
+                                {renderPurchaseCtAs()}
                             </div>
 
                             {isOwnConsignment && (
@@ -571,7 +570,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 >
                                     <Heart className={`h-5 w-5 ${wishlisted ? 'fill-current' : ''}`} />
                                 </button>
-                                <div className="flex-1">{purchaseActions}</div>
+                                <div className="flex-1">{renderPurchaseActions()}</div>
                             </div>
                         </div>
 

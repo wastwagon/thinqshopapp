@@ -59,7 +59,17 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative safe-area-inset-top">
                 <Topbar onMenuPress={toggleSidebar} variant={premiumShell ? 'dashboard-home' : 'default'} />
 
-                <main id="main-content" className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin p-3 md:p-6 relative z-10 safe-area-inset-bottom min-w-0 md:pb-6 ${isAdmin ? 'pb-[calc(10rem+env(safe-area-inset-bottom,0px))]' : 'pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))]'} ${premiumShell ? 'bg-white' : ''}`} tabIndex={-1} role="main">
+                {/* pb clears fixed MobileBottomNav + home-indicator; do not also use safe-area-inset-bottom (it overrides this padding). */}
+                <main
+                    id="main-content"
+                    className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin p-3 md:p-6 relative z-10 min-w-0 md:pb-6 ${
+                        isAdmin
+                            ? 'pb-[calc(10rem+env(safe-area-inset-bottom,0px))]'
+                            : 'pb-[calc(8.5rem+env(safe-area-inset-bottom,0px))]'
+                    } ${premiumShell ? 'bg-white' : ''}`}
+                    tabIndex={-1}
+                    role="main"
+                >
                     <div className={`max-w-7xl mx-auto min-w-0 w-full ${premiumShell ? '' : 'space-y-4 md:space-y-6'}`}>
                         {children}
                     </div>
