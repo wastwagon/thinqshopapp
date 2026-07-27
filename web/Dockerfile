@@ -1,6 +1,6 @@
 # ThinQShop Web - Coolify/VPS ready
 # Use Debian (slim) so sharp binaries match runner (Alpine/musl breaks sharp in standalone)
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 
@@ -10,6 +10,11 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY web/ ./web/
 COPY packages/ ./packages/
+
+# Cap Node heap so parallel Coolify builds are less likely to get OOM-killed (exit 255)
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV npm_config_audit=false
+ENV npm_config_fund=false
 
 # Install all deps (retry on transient network errors e.g. ECONNRESET from registry)
 RUN for i in 1 2 3; do npm ci && break; sleep 15; done
@@ -29,7 +34,7 @@ ENV NEXT_IGNORE_INCORRECT_LOCKFILE=1
 RUN npm run build -w web
 
 # Production stage - use Debian (slim) for sharp compatibility (Alpine/musl often fails)
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 

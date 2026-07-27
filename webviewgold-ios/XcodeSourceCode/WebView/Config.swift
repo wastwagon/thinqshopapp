@@ -48,6 +48,7 @@ let autoInjectVariable = false
 
 var disablecallout = true //Set to "true" to remove WKWebView 3D touch/callout window for links (recommended for most cases)
 
+// KEEP BOTH FALSE for production: clearing cache wipes cookies + localStorage and forces login on every launch.
 var deletecache = false //Set to "true" to clear the WebView cache & cookies on each app startup
 
 var deletecacheonexit = false //Set to "true" to clear WebView cache & cookies upon full app exit (you might also want to activate 'deletecache', as iOS version differences could affect reliability)

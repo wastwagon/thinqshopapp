@@ -1,6 +1,6 @@
 # ThinQShop Backend - Coolify/VPS ready
 # Use Debian (slim) for both stages so Prisma generates correct binaries for OpenSSL 3.x
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
@@ -13,6 +13,11 @@ COPY database/ ./database/
 COPY web/lib/data/scraped_products.json ./database/scraped_products.json
 COPY packages/ ./packages/
 
+# Cap Node heap so parallel Coolify builds are less likely to get OOM-killed (exit 255)
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV npm_config_audit=false
+ENV npm_config_fund=false
+
 # Install all deps (needed for workspace resolution); retry on transient network errors
 RUN for i in 1 2 3; do npm ci && break; sleep 15; done
 
@@ -24,7 +29,7 @@ RUN npx prisma generate --schema=database/schema.prisma
 RUN npm run build -w backend
 
 # Production stage
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 

@@ -1,6 +1,9 @@
 # ThinQShop — Coolify Docker Compose (full stack: db + backend + web)
 # Coolify looks for /docker-compose.yaml by default.
 #
+# If builds die mid npm ci with exit 255 / DeploymentException, the VPS is often OOM
+# from building web+backend in parallel. In Coolify env add: COMPOSE_PARALLEL_LIMIT=1
+#
 # Set these env vars in Coolify → Application → Environment:
 #   POSTGRES_PASSWORD, JWT_SECRET, PAYSTACK_SECRET_KEY, NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
 #   FRONTEND_URL, NEXT_PUBLIC_API_URL, NEXT_PUBLIC_SITE_URL (public URL for metadata/sitemap)

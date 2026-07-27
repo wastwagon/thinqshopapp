@@ -43,16 +43,51 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         const checkAuth = async () => {
             const token = localStorage.getItem('token');
-            if (token) {
-                try {
-                    const { data } = await api.get('/users/profile');
-                    setUser(data);
-                    setSessionCookies(data.role);
-                } catch (error) {
-                    console.error("Auth check failed", error);
+            if (!token) {
+                setLoading(false);
+                return;
+            }
+
+            // Hydrate from JWT immediately so relaunch does not look logged-out while profile loads.
+            try {
+                const decoded: { sub?: number; email?: string; role?: string; exp?: number } =
+                    jwtDecode(token);
+                if (decoded.exp && decoded.exp * 1000 < Date.now()) {
                     localStorage.removeItem('token');
                     clearSessionCookies();
                     setUser(null);
+                    setLoading(false);
+                    return;
+                }
+                const role = decoded.role || 'user';
+                setUser({
+                    id: Number(decoded.sub),
+                    email: decoded.email || '',
+                    role,
+                });
+                setSessionCookies(role);
+            } catch {
+                localStorage.removeItem('token');
+                clearSessionCookies();
+                setUser(null);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const { data } = await api.get('/users/profile');
+                setUser(data);
+                setSessionCookies(data.role);
+            } catch (error: unknown) {
+                const status = (error as { response?: { status?: number } })?.response?.status;
+                // Only wipe the session on hard auth failure — not offline / 5xx on app launch.
+                if (status === 401 || status === 403) {
+                    console.error('Auth check failed', error);
+                    localStorage.removeItem('token');
+                    clearSessionCookies();
+                    setUser(null);
+                } else {
+                    console.warn('Profile refresh failed; keeping existing session', error);
                 }
             }
             setLoading(false);

@@ -39,8 +39,17 @@ coverage
 **/__tests__
 **/*.test.ts
 **/*.spec.ts
+web/e2e
+web/playwright-report
+web/test-results
 
-# Misc
+# Docs (not needed in image builds)
+docs
 *.md
 !README.md
 .dockerignore
+
+# Native apps — never needed for Coolify web/backend images (large; can OOM builds)
+webviewgold-ios
+webviewgold-android
+shared-branding
