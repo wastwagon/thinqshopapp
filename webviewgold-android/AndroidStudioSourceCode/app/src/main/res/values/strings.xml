@@ -6,7 +6,7 @@
 
     <string name="default_notification_channel_id" translatable="false">Notification</string>
 
-    <string name="first_launch_message">Thank you for downloading the app!</string>
+    <string name="first_launch_message">Thank you for downloading ThinQShop app!</string>
 
     <!--Dialog buttons-->
     <string name="later">Maybe later</string>

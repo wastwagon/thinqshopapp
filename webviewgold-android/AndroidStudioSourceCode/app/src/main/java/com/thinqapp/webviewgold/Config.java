@@ -65,7 +65,7 @@ public class Config {
     // Add domains here that should NEVER be opened in the external browser, regardless of what the EXTERNAL_LINK_HANDLING_OPTIONS option is set to;
     // to add another domain, insert another host like so: {"www.alwaysopeninchrome.com", "www.google.com"}
     // please enter the host exactly how you link to it (with or without www, but always without http/https)
-    public static String[] BROWSER_BLACKLIST = new String[]{};
+    public static String[] BROWSER_BLACKLIST = new String[]{HOST};
 
 
     // Acts regardless of what the EXTERNAL_LINK_HANDLING_OPTIONS option is set to
@@ -82,6 +82,7 @@ public class Config {
     public static final boolean AUTO_INJECT_VARIABLES = false;
 
     // Set to "true" to clear the WebView cache & cookies on each app startup and do not use cached versions of your web app/website
+    // KEEP BOTH FALSE for production: clearing cache wipes cookies + localStorage and forces login on every launch.
     public static final boolean CLEAR_CACHE_ON_STARTUP = false;
 
     // Set to "true" to clear WebView cache & cookies upon full app exit (you might also want to activate CLEAR_CACHE_ON_STARTUP, as system differences could affect reliability)
@@ -107,7 +108,7 @@ public class Config {
 
     //Set the splash screen timeout time in milliseconds (set to 0 to allow infinite splash screen)
     //(the loading sign screen will show after this time duration if the home URL still has some loading to do)
-    public static final int SPLASH_TIMEOUT = 1300;
+    public static final int SPLASH_TIMEOUT = 2500;
 
     // Duration of the splash screen fade-out animation in milliseconds. This animation begins after all other delay timers have completed. Set to 0 to disable the fade-out effect.
     public static final int SPLASH_FADE_OUT = 250;
@@ -115,11 +116,11 @@ public class Config {
     // Minimum duration (in ms) the splash screen will be shown, used only if REMAIN_SPLASH_OPTION is set to "true"; if SPLASH_MIN_TIME exceeds this value, the splash screen will remain for SPLASH_MIN_TIME instead. In such cases, this value will be ignored in favor of the longer duration.
     public static final int SPLASH_MIN_TIME = 0;
 
-    //Set to "true" to show the splash screen until the home URL has finished loading
-    public static final boolean REMAIN_SPLASH_OPTION = false;
+    // Keep splash (logo on white) until homepage finishes loading — avoids dark/blue flash before content
+    public static final boolean REMAIN_SPLASH_OPTION = true;
 
-    //Set the splash screen image size with respect to the device's smallest width/height; range in percentage [0-100]; Caution: value  = 0 will hide the image completely
-    public static final double SCALE_SPLASH_IMAGE = 45;
+    // Splash logo size vs screen shortest side (%); lower = smaller centered logo (match iOS)
+    public static final double SCALE_SPLASH_IMAGE = 32;
 
     //Set to "true" for black status bar text; Set to "false" for white status bar text; Use 'colorPrimaryDark' in style.xml to choose the status bar background color
     static boolean blackStatusBarText = true;
@@ -149,7 +150,7 @@ public class Config {
     public static final boolean HIDE_HORIZONTAL_SCROLLBAR = true;
 
     //Set to "true" to disable dark mode (not working on all launchers)
-    public static final boolean DISABLE_DARK_MODE = false;
+    public static final boolean DISABLE_DARK_MODE = true;
 
     //Set to "true" to hide the navigation bar when in landscape mode
     public static final boolean HIDE_NAVIGATION_BAR_IN_LANDSCAPE = false;
@@ -220,7 +221,7 @@ public class Config {
      * OneSignal Push Notification Options
      */
     //Set to "true" to activate OneSignal Push (set the OneSignal App ID in the build.gradle file)
-    public static final boolean PUSH_ENABLED = true; // On — paste OneSignal App ID in app/build.gradle before shipping
+    public static final boolean PUSH_ENABLED = true; // ThinQ OneSignal App ID wired in app/build.gradle
 
     //Set to "true" if you want to extend URL request by ?onesignal_push_id=XYZ (set the OneSignal App ID in the build.gradle file)
     public static final boolean PUSH_ENHANCE_WEBVIEW_URL = false;
@@ -334,7 +335,7 @@ public class Config {
      * Android Permission Options
      */
     static boolean requireLocation = true; //Set to "false" if you do NOT require location services/GPS coordinates; don't forget to also remove relevant entries in AndroidManifest.xml if you want to ensure the complete removal of the permission capability for the app
-    static boolean requireBackgroundLocation = true; //Set to "true" if background (!) location services are also needed (also, ensure that you also uncomment the "android.permission.FOREGROUND_SERVICE_LOCATION" and ".GPSService" blocks in AndroidManifest.xml; search for these terms within); this setting is working only if "requireLocation" is also set to "true"
+    static boolean requireBackgroundLocation = false; // Off unless you need GPS while app is backgrounded (Play Store sensitive)
     static boolean requireStorage = true; //Set to "false" if you do NOT require APIs related to downloads or uploads; don't forget to also remove relevant entries in AndroidManifest.xml if you want to ensure the complete removal of the permission capability for the app
     static boolean requireCamera = true; //Set to "false" if you do NOT require APIs related to camera images / camera videos; don't forget to also remove relevant entries in AndroidManifest.xml if you want to ensure the complete removal of the permission capability for the app
     static boolean requireRecordAudio = true; //Set to "false" if you do NOT require APIs related to recording audio; don't forget to also remove relevant entries in AndroidManifest.xml if you want to ensure the complete removal of the permission capability for the app

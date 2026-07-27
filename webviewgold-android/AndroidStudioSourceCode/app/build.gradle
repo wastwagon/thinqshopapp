@@ -2,26 +2,42 @@ apply plugin: 'com.onesignal.androidsdk.onesignal-gradle-plugin'
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
 
     ext {
-        // TODO: paste ThinQShop OneSignal App ID, then sync and rebuild:
-        ONESIGNAL_APP_ID = '"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"'
+        // ThinQShop OneSignal App (same as iOS)
+        ONESIGNAL_APP_ID = '"99e88bca-84f4-49eb-822a-4be429928b04"'
     }
     compileSdk 35
     namespace "com.thinqapp.webviewgold"
     defaultConfig {
-        applicationId "com.thinqapp.webviewgold"
+        applicationId "com.thinqshopping.app"
         minSdk 23
         targetSdk 35
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "2.0.0"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
                 onesignal_app_id: ONESIGNAL_APP_ID,
                 onesignal_google_project_number: 'REMOTE'
         ]
+    }
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }
+        }
     }
     buildTypes {
         debug {
@@ -35,6 +51,9 @@ android {
             buildConfigField "Boolean", "IS_DEBUG_MODE", 'false'
             buildConfigField "String", "ONESIGNAL_APP_ID", ONESIGNAL_APP_ID
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
     }
     compileOptions {

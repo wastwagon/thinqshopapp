@@ -24,6 +24,9 @@ web/.env
 *.jks
 *.keystore
 webviewgold-android/signing/
+webviewgold-android/AndroidStudioSourceCode/keystore.properties
+webviewgold-android/AndroidStudioSourceCode/local.properties
+
 
 # Logs and OS
 *.log
