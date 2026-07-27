@@ -1,0 +1,40 @@
+# Uncomment the next line to define a global platform for your project
+ platform :ios, '12.0'
+
+target 'OneSignalNotificationServiceExtension' do
+  use_frameworks!
+  # NSE uses OneSignalExtension (via OneSignalXCFramework)
+  pod 'OneSignalXCFramework', '3.12.9'
+end
+
+target 'WebViewGold' do
+  use_frameworks!
+
+  # Main app needs OneSignal for push registration / player ID
+  pod 'OneSignalXCFramework', '3.12.9'
+  pod 'SwiftQRScanner'
+  pod 'SwiftyStoreKit'
+  pod 'SwiftyGif'
+end
+
+post_install do |installer|
+  installer.aggregate_targets.each do |target|
+      target.xcconfigs.each do |variant, xcconfig|
+          xcconfig_path = target.client_root + target.xcconfig_relative_path(variant)
+          IO.write(xcconfig_path, IO.read(xcconfig_path).gsub("DT_TOOLCHAIN_DIR", "TOOLCHAIN_DIR"))
+      end
+  end
+
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      if config.base_configuration_reference.is_a? Xcodeproj::Project::Object::PBXFileReference
+          xcconfig_path = config.base_configuration_reference.real_path
+          IO.write(xcconfig_path, IO.read(xcconfig_path).gsub("DT_TOOLCHAIN_DIR", "TOOLCHAIN_DIR"))
+      end
+
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
+      # Fixes Xcode 16 "Unable to find module dependency: 'OneSignal'"
+      config.build_settings['SWIFT_ENABLE_EXPLICIT_MODULES'] = 'NO'
+    end
+  end
+end

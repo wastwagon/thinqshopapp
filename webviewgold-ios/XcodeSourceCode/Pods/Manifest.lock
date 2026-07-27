@@ -1,0 +1,37 @@
+PODS:
+  - OneSignalXCFramework (3.12.9):
+    - OneSignalXCFramework/OneSignalCore (= 3.12.9)
+    - OneSignalXCFramework/OneSignalExtension (= 3.12.9)
+    - OneSignalXCFramework/OneSignalOutcomes (= 3.12.9)
+  - OneSignalXCFramework/OneSignalCore (3.12.9)
+  - OneSignalXCFramework/OneSignalExtension (3.12.9):
+    - OneSignalXCFramework/OneSignalCore
+    - OneSignalXCFramework/OneSignalOutcomes
+  - OneSignalXCFramework/OneSignalOutcomes (3.12.9):
+    - OneSignalXCFramework/OneSignalCore
+  - SwiftQRScanner (0.1.0)
+  - SwiftyGif (5.4.5)
+  - SwiftyStoreKit (0.16.1)
+
+DEPENDENCIES:
+  - OneSignalXCFramework (= 3.12.9)
+  - SwiftQRScanner
+  - SwiftyGif
+  - SwiftyStoreKit
+
+SPEC REPOS:
+  trunk:
+    - OneSignalXCFramework
+    - SwiftQRScanner
+    - SwiftyGif
+    - SwiftyStoreKit
+
+SPEC CHECKSUMS:
+  OneSignalXCFramework: 3c3ef25ecca5eae1bf80a3272c49fd1dbab96b35
+  SwiftQRScanner: fba218bce4e5ac5de8ab6b72c6c7fefa09d29c5b
+  SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
+  SwiftyStoreKit: 6b9c08810269f030586dac1fae8e75871a82e84a
+
+PODFILE CHECKSUM: 8a0fe376a4a5c520ddcc25771affb7fc2425d951
+
+COCOAPODS: 1.16.2

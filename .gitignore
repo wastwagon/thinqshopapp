@@ -21,6 +21,9 @@ database/*.d.ts
 backend/.env
 web/.env
 *.pem
+*.jks
+*.keystore
+webviewgold-android/signing/
 
 # Logs and OS
 *.log
