@@ -27,7 +27,7 @@ const dashboardNavItems = [
 ];
 
 const homeNavItems = [
-    { name: 'Home', href: '/dashboard', icon: Home },
+    { name: 'Home', href: '/', icon: Home },
     { name: 'Logistics', href: '/dashboard/logistics', icon: Truck },
     { name: 'Transfer', href: '/dashboard/transfers', icon: Send },
     { name: 'Sell', href: '/dashboard/sell-for-me', icon: Tag },
@@ -145,7 +145,7 @@ function HomeBottomNav() {
             {homeNavItems.map((item) => {
                 const isActive =
                     pathname === item.href ||
-                    (item.href !== '/dashboard' && pathname?.startsWith(item.href));
+                    (item.href !== '/' && pathname?.startsWith(item.href));
                 return (
                     <NavLink
                         key={item.name}

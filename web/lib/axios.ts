@@ -37,11 +37,22 @@ api.interceptors.response.use(
             }
         }
         if (typeof window !== 'undefined' && error.response?.status === 401) {
-            const isAuthRequest = error.config?.url?.includes('/auth/');
+            const url = String(error.config?.url || '');
+            const isAuthRequest = url.includes('/auth/');
+            // Clear bad session, but do NOT bounce public pages (home/shop) to login.
+            // Login only when the user is already on a protected flow.
             if (!isAuthRequest) {
                 localStorage.removeItem('token');
                 clearSessionCookies();
-                window.location.href = '/login?session=expired';
+                const path = window.location.pathname || '';
+                const onProtected =
+                    path.startsWith('/dashboard') ||
+                    path.startsWith('/admin') ||
+                    path.startsWith('/checkout') ||
+                    path.startsWith('/account');
+                if (onProtected) {
+                    window.location.href = `/login?session=expired&from=${encodeURIComponent(path)}`;
+                }
             }
         }
         return Promise.reject(error);
