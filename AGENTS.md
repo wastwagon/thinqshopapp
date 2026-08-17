@@ -21,7 +21,7 @@ Read **[docs/PROJECT_UNDERSTANDING.md](docs/PROJECT_UNDERSTANDING.md)** first fo
 
 ## Useful entry files
 
-- `web/app/(main)/layout.tsx` — client providers
+- `web/components/AppProviders.tsx` — client providers (root layout)
 - `web/lib/axios.ts` — HTTP client + 401 handling
 - `web/middleware.ts` — route protection
 - `backend/src/app.module.ts` — module registry

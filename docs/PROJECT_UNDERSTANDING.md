@@ -110,7 +110,7 @@ React Context only — no Redux/Zustand:
 
 Layouts: `web/components/layout/ShopLayout.tsx` (storefront), `web/components/layout/DashboardLayout.tsx` (dashboard/admin + mobile bottom nav).
 
-Provider tree: `web/app/(main)/layout.tsx` wraps Auth → Currency → Wishlist → Cart.
+Provider tree: `web/components/AppProviders.tsx` (root `app/layout.tsx`) wraps Auth → Currency → Wishlist → Cart so `/_not-found` is included.
 
 ---
 

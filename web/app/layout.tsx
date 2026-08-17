@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import AppChrome from "@/components/AppChrome";
+import AppProviders from "@/components/AppProviders";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
@@ -187,7 +188,7 @@ export default function RootLayout({
                         }).replace(/</g, '\\u003c'),
                     }}
                 />
-                {children}
+                <AppProviders>{children}</AppProviders>
             </body>
         </html>
     );
