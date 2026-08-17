@@ -115,16 +115,17 @@ export class TrackService {
     private async trackShipment(ref: string): Promise<TrackResult> {
         try {
             const shipment = await this.logisticsService.trackShipment(ref);
-            const timeline = (shipment.tracking || []).map((e: any) => ({
+            const publicShipment = this.logisticsService.toPublicTrack(shipment);
+            const timeline = (publicShipment.tracking || []).map((e) => ({
                 date: toIso(e.created_at),
                 status: e.status,
-                notes: e.notes,
-                location: e.location,
+                notes: e.notes ?? undefined,
+                location: e.location ?? undefined,
             }));
 
-            if (timeline.length === 0 && shipment.created_at) {
+            if (timeline.length === 0 && publicShipment.created_at) {
                 timeline.push({
-                    date: toIso(shipment.created_at as any),
+                    date: toIso(publicShipment.created_at as Date),
                     status: 'Booked',
                     notes: 'Your package is being prepared.',
                     location: undefined,
@@ -133,14 +134,12 @@ export class TrackService {
 
             return {
                 type: 'shipment',
-                reference: shipment.tracking_number,
-                status: shipment.status,
+                reference: publicShipment.tracking_number,
+                status: publicShipment.status,
                 label: 'Logistics Shipment',
-                created_at: toIso(shipment.created_at as any),
+                created_at: toIso(publicShipment.created_at as Date),
                 data: {
-                    carrier_tracking_number: shipment.carrier_tracking_number,
-                    delivery_address: shipment.delivery_address,
-                    pickup_address: shipment.pickup_address,
+                    carrier_tracking_number: publicShipment.carrier_tracking_number,
                 },
                 timeline,
             };
@@ -152,25 +151,26 @@ export class TrackService {
     private async trackTransfer(ref: string): Promise<TrackResult> {
         const transfer = await this.transferService.getTransferByToken(ref);
         if (!transfer) return null as any;
+        const publicTransfer = this.transferService.toPublicTrack(transfer);
 
-        const timeline = (transfer.tracking || []).map((e: any) => ({
+        const timeline = (publicTransfer.tracking || []).map((e) => ({
             date: toIso(e.created_at),
             status: e.status,
-            notes: e.notes,
+            notes: e.notes ?? undefined,
         }));
 
         return {
             type: 'transfer',
-            reference: transfer.token,
-            status: transfer.status,
+            reference: publicTransfer.token,
+            status: publicTransfer.status,
             label: 'Money Transfer',
-            created_at: toIso(transfer.created_at as any),
+            created_at: toIso(publicTransfer.created_at as Date),
             data: {
-                amount_ghs: Number(transfer.amount_ghs),
-                transfer_direction: (transfer as any).transfer_type ?? (transfer as any).transfer_direction,
-                status: transfer.status,
+                amount_ghs: publicTransfer.amount_ghs,
+                transfer_direction: publicTransfer.transfer_type,
+                status: publicTransfer.status,
             },
-            timeline: timeline.length > 0 ? timeline : [{ date: toIso(transfer.created_at as any), status: transfer.status }],
+            timeline: timeline.length > 0 ? timeline : [{ date: toIso(publicTransfer.created_at as Date), status: publicTransfer.status }],
         };
     }
 

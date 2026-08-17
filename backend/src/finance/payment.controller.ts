@@ -1,6 +1,8 @@
-import { Controller, Post, Body, UseGuards, Request, Headers, UnauthorizedException, Inject, forwardRef } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Headers, UnauthorizedException, Inject, forwardRef, BadRequestException } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { PaymentService } from './payment.service';
+import { WalletService } from './wallet.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Public } from '../auth/public.decorator';
 import { OrderService } from '../order/order.service';
@@ -9,21 +11,18 @@ import { OrderService } from '../order/order.service';
 export class PaymentController {
     constructor(
         private paymentService: PaymentService,
+        private walletService: WalletService,
         @Inject(forwardRef(() => OrderService)) private orderService: OrderService,
     ) { }
 
     @Post('init')
     @UseGuards(AuthGuard)
-    async initPayment(@Request() req: any, @Body() body: { amount: number; serviceType: string; serviceId: number }) {
-        return this.paymentService.initializePayment(
-            req.user.sub,
-            body.amount,
-            body.serviceType,
-            body.serviceId,
-        );
+    async initPayment() {
+        throw new BadRequestException('Start payment from checkout or wallet top-up.');
     }
 
     @Public()
+    @SkipThrottle()
     @Post('webhook')
     async handleWebhook(
         @Request() req: any,
@@ -44,16 +43,24 @@ export class PaymentController {
         if (sigBuf.length !== digestBuf.length || !timingSafeEqual(sigBuf, digestBuf)) {
             throw new UnauthorizedException('Invalid webhook signature');
         }
-        // Basic Paystack webhook structure: data.reference, data.status
         const reference = body?.data?.reference;
-        const status = body?.data?.status;
-        if (!reference || !status) {
+        if (!reference) {
             throw new UnauthorizedException('Invalid webhook payload');
         }
-        const payment = await this.paymentService.verifyWebhook(reference, status, body);
-        if (payment?.status === 'success' && payment.service_type === 'ecommerce') {
-            await this.orderService.completeEcommercePaymentFromWebhook(payment);
+        const result = await this.paymentService.verifyWithPaystack(reference);
+        if (!result) return { received: true };
+        if (result.wasPending && result.payment.service_type === 'ecommerce') {
+            await this.orderService.completeEcommercePaymentFromWebhook(result.payment);
         }
-        return payment;
+        if (result.wasPending && result.payment.service_type === 'wallet_topup') {
+            await this.walletService.credit(
+                result.payment.user_id,
+                Number(result.payment.amount),
+                'wallet_topup',
+                'Wallet top-up via Paystack',
+                result.payment.id,
+            );
+        }
+        return result.payment;
     }
 }

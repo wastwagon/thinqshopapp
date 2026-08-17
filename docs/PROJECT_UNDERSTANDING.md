@@ -67,8 +67,8 @@ flowchart TB
 
 1. Browser uses Axios with `baseURL: '/api'` (`web/lib/axios.ts`)
 2. Next.js catch-all proxy forwards to NestJS (`web/app/api/[...path]/route.ts`) using `BACKEND_URL` or `NEXT_PUBLIC_API_URL`
-3. JWT in `localStorage` (`token`); cookies `thinq_session` + `thinq_role` for `web/middleware.ts` route guards
-4. 401 → clear session, redirect to `/login?session=expired`
+3. JWT in an **httpOnly** `thinq_access` cookie (set by `POST /api/session`). Next.js middleware verifies the signature with `JWT_SECRET`. The API proxy attaches `Authorization: Bearer` from that cookie. Do not trust client-writable session flags.
+4. 401 → clear the access cookie, redirect to `/login?session=expired` on protected pages
 
 ---
 

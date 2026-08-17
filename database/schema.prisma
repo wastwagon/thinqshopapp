@@ -443,10 +443,11 @@ model CartItem {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  user       User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+    user       User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
   product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
   variant    ProductVariant? @relation(fields: [variant_id], references: [id], onDelete: Cascade)
 
+  @@index([user_id])
   @@map("cart")
 }
 
@@ -521,6 +522,8 @@ model OrderItem {
   product         Product  @relation(fields: [product_id], references: [id])
   variant         ProductVariant? @relation(fields: [variant_id], references: [id])
 
+  @@index([order_id])
+  @@index([product_id])
   @@map("order_items")
 }
 
@@ -535,6 +538,7 @@ model OrderTracking {
 
   order      Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
 
+  @@index([order_id])
   @@map("order_tracking")
 }
 
@@ -619,6 +623,7 @@ model MoneyTransfer {
   user               User               @relation(fields: [user_id], references: [id])
   tracking           TransferTracking[]
 
+  @@index([user_id, created_at])
   @@map("money_transfers")
 }
 
@@ -793,6 +798,7 @@ model Shipment {
   destination_warehouse Warehouse?   @relation("DestinationWarehouse", fields: [destination_warehouse_id], references: [id])
   tracking           ShipmentTracking[]
 
+  @@index([user_id, created_at])
   @@map("shipments")
 }
 
@@ -949,6 +955,9 @@ model Payment {
 
   user               User?         @relation(fields: [user_id], references: [id], onDelete: SetNull)
 
+  @@index([user_id, created_at])
+  @@index([status])
+  @@index([service_type, service_id])
   @@map("payments")
 }
 

@@ -3,8 +3,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '@/lib/axios';
 import { useRouter } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode';
-import { clearSessionCookies, setSessionCookies } from '@/lib/session-cookies';
 
 interface User {
     id: number;
@@ -20,7 +18,8 @@ interface User {
 interface AuthContextType {
     user: User | null;
     loading: boolean;
-    login: (token: string, redirectPath?: string) => void;
+    login: (token: string, redirectPath?: string) => Promise<void>;
+    completeLogin: (redirectPath?: string) => Promise<void>;
     logout: () => void;
     refreshUser: () => Promise<void>;
     isAuthenticated: boolean;
@@ -29,11 +28,31 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
     user: null,
     loading: true,
-    login: () => {},
+    login: async () => {},
+    completeLogin: async () => {},
     logout: () => { },
     refreshUser: async () => { },
     isAuthenticated: false,
 });
+
+async function persistAccessToken(token: string): Promise<boolean> {
+    const res = await fetch('/api/session', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+    });
+    return res.ok;
+}
+
+async function clearAccessSession() {
+    localStorage.removeItem('token');
+    try {
+        await fetch('/api/session', { method: 'DELETE', credentials: 'same-origin' });
+    } catch {
+        // ignore
+    }
+}
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
@@ -42,53 +61,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const checkAuth = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                setLoading(false);
-                return;
-            }
-
-            // Hydrate from JWT immediately so relaunch does not look logged-out while profile loads.
             try {
-                const decoded: { sub?: number; email?: string; role?: string; exp?: number } =
-                    jwtDecode(token);
-                if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+                const legacy = localStorage.getItem('token');
+                if (legacy) {
+                    await persistAccessToken(legacy);
                     localStorage.removeItem('token');
-                    clearSessionCookies();
+                }
+                const sessionRes = await fetch('/api/session', { credentials: 'same-origin' });
+                if (!sessionRes.ok) {
                     setUser(null);
                     setLoading(false);
                     return;
                 }
-                const role = decoded.role || 'user';
+                const session = await sessionRes.json();
                 setUser({
-                    id: Number(decoded.sub),
-                    email: decoded.email || '',
-                    role,
+                    id: Number(session.sub),
+                    email: session.email || '',
+                    role: session.role || 'user',
                 });
-                setSessionCookies(role);
-            } catch {
-                localStorage.removeItem('token');
-                clearSessionCookies();
-                setUser(null);
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const { data } = await api.get('/users/profile');
-                setUser(data);
-                setSessionCookies(data.role);
-            } catch (error: unknown) {
-                const status = (error as { response?: { status?: number } })?.response?.status;
-                // Only wipe the session on hard auth failure — not offline / 5xx on app launch.
-                if (status === 401 || status === 403) {
-                    console.error('Auth check failed', error);
-                    localStorage.removeItem('token');
-                    clearSessionCookies();
-                    setUser(null);
-                } else {
-                    console.warn('Profile refresh failed; keeping existing session', error);
+                try {
+                    const { data } = await api.get('/users/profile');
+                    setUser(data);
+                } catch (error: unknown) {
+                    const status = (error as { response?: { status?: number } })?.response?.status;
+                    if (status === 401 || status === 403) {
+                        await clearAccessSession();
+                        setUser(null);
+                    }
                 }
+            } catch {
+                setUser(null);
             }
             setLoading(false);
         };
@@ -100,40 +102,57 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const { data } = await api.get('/users/profile');
             setUser(data);
-            setSessionCookies(data.role);
         } catch (e) {
             console.error('Refresh profile failed', e);
         }
     };
 
-    const login = (token: string, redirectPath?: string) => {
-        localStorage.setItem('token', token);
-        const decoded: any = jwtDecode(token);
-        const userRole = decoded.role || 'user';
-        setSessionCookies(userRole);
-        setUser({ id: decoded.sub, email: decoded.email, role: userRole });
-        api.get('/users/profile').then(({ data }) => {
-            setUser(data);
-            setSessionCookies(data.role);
-        }).catch(console.error);
-        // Safe redirect: only /dashboard or /admin (and subpaths)
-        const safe = redirectPath && /^\/(dashboard|admin)(\/|$)/.test(redirectPath) ? redirectPath : null;
-        const target = userRole === 'admin' || userRole === 'superadmin'
-            ? (safe && safe.startsWith('/admin') ? safe : '/admin')
-            : (safe && safe.startsWith('/dashboard') ? safe : '/dashboard');
-        // Use window.location for full reload so middleware sees the new cookie (router.push can fail)
+    const redirectAfterLogin = (userRole: string, redirectPath?: string) => {
+        const safe =
+            redirectPath &&
+            /^\/(dashboard|admin|checkout|cart|wishlist|track)(\/|$)/.test(redirectPath)
+                ? redirectPath
+                : null;
+        const target =
+            userRole === 'admin' || userRole === 'superadmin'
+                ? safe && safe.startsWith('/admin')
+                    ? safe
+                    : '/admin'
+                : safe && !safe.startsWith('/admin')
+                  ? safe
+                  : '/dashboard';
         window.location.href = target;
     };
 
-    const logout = () => {
+    const completeLogin = async (redirectPath?: string) => {
+        const sessionRes = await fetch('/api/session', { credentials: 'same-origin' });
+        const session = sessionRes.ok ? await sessionRes.json() : {};
+        const userRole = session.role || 'user';
+        setUser({ id: Number(session.sub), email: session.email || '', role: userRole });
+        api.get('/users/profile').then(({ data }) => {
+            setUser(data);
+        }).catch(console.error);
+        redirectAfterLogin(userRole, redirectPath);
+    };
+
+    const login = async (token: string, redirectPath?: string) => {
+        const ok = await persistAccessToken(token);
+        if (!ok) {
+            throw new Error('Could not start a secure session');
+        }
         localStorage.removeItem('token');
-        clearSessionCookies();
-        setUser(null);
-        router.push('/');
+        await completeLogin(redirectPath);
+    };
+
+    const logout = () => {
+        void clearAccessSession().finally(() => {
+            setUser(null);
+            router.push('/');
+        });
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, refreshUser, isAuthenticated: !!user }}>
+        <AuthContext.Provider value={{ user, loading, login, completeLogin, logout, refreshUser, isAuthenticated: !!user }}>
             {children}
         </AuthContext.Provider>
     );

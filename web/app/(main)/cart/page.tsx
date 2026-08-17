@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Trash2, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
@@ -13,16 +14,27 @@ import { cartItemPricing, cartItemPurchaseMin } from '@/lib/product-utils';
 import { getMediaUrl } from '@/lib/media';
 import LiveRegion from '@/components/ui/LiveRegion';
 import EmptyState from '@/components/ui/EmptyState';
+import { ShopLoadingState } from '@/components/shop/ShopSuccessShell';
 import Button, { buttonVariants } from '@/components/ui/Button';
 import QuantityStepper from '@/components/ui/QuantityStepper';
 
 export default function CartPage() {
-    const { cart, updateQuantity, removeFromCart, cartTotal } = useCart();
+    const { cart, updateQuantity, removeFromCart, cartTotal, loading } = useCart();
+    const { user } = useAuth();
     const router = useRouter();
 
     const handleCheckout = () => {
-        if (cart.length > 0) router.push('/checkout');
+        if (cart.length === 0) return;
+        router.push(user ? '/checkout' : '/login?from=/checkout');
     };
+
+    if (loading) {
+        return (
+            <ShopLayout>
+                <ShopLoadingState message="Loading bag…" />
+            </ShopLayout>
+        );
+    }
 
     return (
         <ShopLayout>
@@ -140,7 +152,7 @@ export default function CartPage() {
                                     size="lg"
                                     className="w-full"
                                 >
-                                    Checkout
+                                    {user ? 'Checkout' : 'Sign in to checkout'}
                                 </Button>
                                 <Link
                                     href="/shop"
@@ -171,7 +183,7 @@ export default function CartPage() {
                                 size="lg"
                                 className="w-full min-h-[48px]"
                             >
-                                Checkout
+                                {user ? 'Checkout' : 'Sign in to checkout'}
                             </Button>
                         </div>
                     )}

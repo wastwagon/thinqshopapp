@@ -13,6 +13,7 @@ import CategoryBadges from '@/components/shop/CategoryBadges';
 import { findCategoryBySlug, type CategoryNode } from '@/lib/category-utils';
 import staticProducts from '@/lib/data/scraped_products.json';
 import { normalizeProduct, STATIC_CATEGORIES } from '@/lib/product-utils';
+import { ShopLoadingState } from '@/components/shop/ShopSuccessShell';
 
 const PAGE_SIZE = 24;
 
@@ -148,7 +149,7 @@ function CategoryShopContent() {
 
 export default function CategoryShopPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-12 text-gray-500 font-medium">Loading...</div>}>
+        <Suspense fallback={<ShopLayout><ShopLoadingState message="Loading shop…" /></ShopLayout>}>
             <CategoryShopContent />
         </Suspense>
     );

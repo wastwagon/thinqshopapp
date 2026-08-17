@@ -11,19 +11,20 @@ import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import ShopContent from '@/components/shop/ShopContent';
 import ShopTrustRow from '@/components/shop/ShopTrustRow';
-import { ShopLoadingState } from '@/components/shop/ShopSuccessShell';
+import { ShopLoadingState, ShopEmptyState } from '@/components/shop/ShopSuccessShell';
 import ProductCard from '@/components/ui/ProductCard';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import localProducts from '@/lib/data/scraped_products.json';
 import { toSlug, parsePrice, normalizeProduct } from '@/lib/product-utils';
 import { purchaseQtyForAddToCart, resolveProductLinePricing } from '@/lib/wholesale-pricing';
+import { sanitizeProductHtml } from '@/lib/sanitize-html';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
 import { trackViewItem } from '@/lib/analytics';
 import { getMediaUrl } from '@/lib/media';
 import ProductReviewForm from '@/components/product/ProductReviewForm';
-import ProductImageLightbox from '@/components/ui/ProductImageLightbox';
+import { shouldUnoptimizeProductImage } from '@/components/ui/ProductImage';
 import Badge from '@/components/ui/Badge';
 import QuantityStepper from '@/components/ui/QuantityStepper';
 
@@ -179,9 +180,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
 
     if (!product) return (
         <ShopLayout>
-            <div className="min-h-[60vh] flex items-center justify-center bg-white">
-                <div className="text-gray-900 font-bold tracking-tight">Product not found</div>
-            </div>
+            <ShopEmptyState message="This product is unavailable." href="/shop" linkLabel="Back to shop" />
         </ShopLayout>
     );
 
@@ -191,7 +190,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const variants = Array.isArray(product.variants) ? product.variants : [];
     const selectedVariant =
         variants.find((v: { id: number }) => Number(v.id) === selectedVariantId) ?? (variants[0] as { id?: number } | undefined) ?? null;
-    const imgUnoptimized = (src: string) => src.startsWith('/api') || src.startsWith('http');
+    const imgUnoptimized = (src: string) => shouldUnoptimizeProductImage(src);
 
     const catName = typeof product.category === 'object' ? product.category?.name : product.category;
     const catSlug = typeof product.category === 'object' ? product.category?.slug : (product.category?.toString?.() || '').toLowerCase().replace(/\s+/g, '-');
@@ -230,6 +229,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                 Number(user.id) === Number(product.consignor_user_id),
         );
     const maxQuantity = product.is_consignment ? 1 : Math.max(purchaseMin, stockToShow);
+    const safeDescription = sanitizeProductHtml(product.description);
     const moreNeeded = hasWholesale && quantity < minQty ? minQty - quantity : 0;
 
     const expressVariantId =
@@ -283,7 +283,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
             toast.error(linePricing.error);
             return;
         }
-        addToCart(Number(product.id), quantity, selectedVariantId ?? undefined);
+        addToCart(Number(product.id), quantity, selectedVariantId ?? undefined, { product });
     };
 
     const handleExpressBuy = async () => {
@@ -303,17 +303,12 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
             toast.error('Please select an option');
             return;
         }
-        if (!user) {
-            toast.error('Please login to continue');
-            setLightboxOpen(false);
-            router.push('/login?from=/checkout');
-            return;
-        }
         setBuying(true);
         try {
             const ok = await addToCart(Number(product.id), Math.max(purchaseMin, quantity), expressVariantId, {
                 openDrawer: false,
                 successMessage: 'Added — going to checkout',
+                product,
             });
             if (!ok) return;
             setLightboxOpen(false);
@@ -572,29 +567,31 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                         )}
 
                         <div className="space-y-6 mb-8">
+                            {product.rating_aggregate != null && (
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center">
-                                    {[0, 1, 2, 3, 4].map((rating) => {
-                                        const r = product.rating_aggregate != null ? Number(product.rating_aggregate) : 4;
+                                    {[0, 1, 2, 3, 4].map((star) => {
+                                        const r = Number(product.rating_aggregate);
                                         return (
                                             <Star
-                                                key={rating}
-                                                className={`h-4 w-4 fill-current ${rating < Math.round(r) ? 'text-yellow-400' : 'text-gray-200'}`}
+                                                key={star}
+                                                className={`h-4 w-4 fill-current ${star < Math.round(r) ? 'text-yellow-400' : 'text-gray-200'}`}
                                             />
                                         );
                                     })}
                                 </div>
                                 <span className="text-xs font-medium text-gray-500">
-                                    {product.rating_aggregate != null ? Number(product.rating_aggregate).toFixed(1) : '4.8'} / {product.review_count ?? reviews.meta.total ?? 0} Reviews
+                                    {Number(product.rating_aggregate).toFixed(1)} / {product.review_count ?? reviews.meta.total ?? 0} reviews
                                 </span>
                             </div>
+                            )}
 
                             {product.short_description && (
                                 <p className="text-sm sm:text-base text-gray-600 leading-relaxed font-medium">{product.short_description}</p>
                             )}
 
-                            {product.description && (
-                                <div className="text-sm sm:text-base text-gray-600 leading-relaxed font-medium space-y-4 sm:space-y-6" dangerouslySetInnerHTML={{ __html: product.description }} />
+                            {safeDescription && (
+                                <div className="text-sm sm:text-base text-gray-600 leading-relaxed font-medium space-y-4 sm:space-y-6" dangerouslySetInnerHTML={{ __html: safeDescription }} />
                             )}
 
                             {product.specifications && typeof product.specifications === 'object' && Object.keys(product.specifications).length > 0 && (
@@ -639,7 +636,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     </p>
                                     <p className="text-xs sm:text-sm font-medium text-gray-900">{p.short_text || '7–14 days (international)'}</p>
                                     {p.full_text && (
-                                        <Link href="/privacy" className="text-xs font-semibold text-blue-600 mt-2 inline-block touch-manipulation">Full delivery info</Link>
+                                        <Link href="/terms" className="text-xs font-semibold text-blue-600 mt-2 inline-block touch-manipulation">Full delivery info</Link>
                                     )}
                                 </div>
                             ))}

@@ -13,6 +13,7 @@ import {
     UploadedFile,
     BadRequestException,
 } from '@nestjs/common';
+import { NoStoreInterceptor } from '../common/no-store.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { UserService } from './user.service';
@@ -45,6 +46,7 @@ export class UserController {
 
     @Get('profile')
     @UseGuards(AuthGuard)
+    @UseInterceptors(NoStoreInterceptor)
     async getProfile(@Request() req) {
         return this.userService.findOne(req.user.sub);
     }

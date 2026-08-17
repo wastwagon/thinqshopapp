@@ -10,8 +10,6 @@ import ProductImageLightbox, { ProductImageTapHint } from './ProductImageLightbo
 import PriceDisplay from './PriceDisplay';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
-import { useAuth } from '@/context/AuthContext';
-import toast from 'react-hot-toast';
 import { purchaseQtyForAddToCart, resolveProductLinePricing } from '@/lib/wholesale-pricing';
 
 interface ProductVariantRow {
@@ -67,7 +65,6 @@ function collectGalleryImages(product: Product, imagesList: string[], fallback: 
 export default function ProductCard({ product }: ProductCardProps) {
     const { addToCart } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
-    const { user } = useAuth();
     const router = useRouter();
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [buying, setBuying] = useState(false);
@@ -143,17 +140,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     const handleExpressBuy = async () => {
         if (!productId) return;
-        if (!user) {
-            toast.error('Please login to continue');
-            setLightboxOpen(false);
-            router.push('/login?from=/checkout');
-            return;
-        }
         setBuying(true);
         try {
             const ok = await addToCart(productId, addQty, firstVariantId, {
                 openDrawer: false,
                 successMessage: 'Added — going to checkout',
+                product,
             });
             if (!ok) return;
             setLightboxOpen(false);
@@ -169,7 +161,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         : 'border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white hover:border-blue-600';
     const actionBtnBase =
         'bg-white shadow-sm border rounded-full flex items-center justify-center transition-all';
-    const actionBtnCompact = `${actionBtnBase} w-8 h-8`;
+    const actionBtnCompact = `${actionBtnBase} min-w-[44px] min-h-[44px] w-10 h-10`;
     const actionBtnDesktop = `${actionBtnBase} min-w-[44px] min-h-[44px] w-10 h-10`;
     const iconCompact = 'h-3.5 w-3.5';
     const iconDesktop = 'h-4 w-4';
@@ -197,7 +189,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 type="button"
                 onClick={(e) => {
                     e.stopPropagation();
-                    productId && addToCart(productId, addQty, firstVariantId);
+                    productId && addToCart(productId, addQty, firstVariantId, { product });
                 }}
                 className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white`}
                 title={hasVariants ? 'Add first option to cart (choose options on product page)' : 'Add to Cart'}
@@ -260,14 +252,16 @@ export default function ProductCard({ product }: ProductCardProps) {
 
             {/* Content */}
             <div className="p-4 flex flex-col flex-1">
-                <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
                     <span className="text-xs font-medium text-blue-600 truncate">
                         {typeof product.category === 'string' ? product.category : product.category?.name || 'Vetted Asset'}
                     </span>
+                    {product.rating != null && Number(product.rating) > 0 && (
                     <div className="flex items-center gap-0.5 shrink-0">
                         <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs text-gray-500">{product.rating || 4.8}</span>
+                        <span className="text-xs text-gray-500">{Number(product.rating).toFixed(1)}</span>
                     </div>
+                    )}
                 </div>
 
                 <Link href={productHref}>
@@ -325,7 +319,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         ? product.category
                         : product.category?.name || 'Vetted Asset'
                 }
-                rating={Number(product.rating) || 4.8}
+                rating={product.rating != null && Number(product.rating) > 0 ? Number(product.rating) : undefined}
                 description={descPreview}
             />
         </>

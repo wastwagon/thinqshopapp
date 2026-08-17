@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import ShopLayout from '@/components/layout/ShopLayout';
+import { ShopLoadingState } from '@/components/shop/ShopSuccessShell';
 
-export default function ProductsPage() {
+function ProductsRedirect() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
@@ -21,8 +23,22 @@ export default function ProductsPage() {
     }, [searchParams, router]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center">
-            <p className="text-gray-500 font-medium">Redirecting...</p>
-        </div>
+        <ShopLayout>
+            <ShopLoadingState message="Redirecting…" />
+        </ShopLayout>
+    );
+}
+
+export default function ProductsPage() {
+    return (
+        <Suspense
+            fallback={
+                <ShopLayout>
+                    <ShopLoadingState message="Redirecting…" />
+                </ShopLayout>
+            }
+        >
+            <ProductsRedirect />
+        </Suspense>
     );
 }

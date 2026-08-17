@@ -16,7 +16,7 @@ type Badge = { id: number; icon: string; label: string; optional_link?: string |
 
 const FALLBACK_BADGES: Badge[] = [
     { id: 1, icon: 'shield', label: 'Secure checkout', optional_link: null },
-    { id: 2, icon: 'truck', label: 'Global shipping 7–14 days', optional_link: '/privacy' },
+    { id: 2, icon: 'truck', label: 'Global shipping 7–14 days', optional_link: '/terms' },
     { id: 3, icon: 'rotate-ccw', label: 'Easy returns', optional_link: '/terms' },
     { id: 4, icon: 'star', label: 'Rated 4.8 by customers', optional_link: null },
     { id: 5, icon: 'lock', label: 'Paystack protected', optional_link: 'https://paystack.com' },

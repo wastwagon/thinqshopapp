@@ -121,7 +121,7 @@ export default function AdminMediaPage() {
                         <input
                             ref={fileInputRef}
                             type="file"
-                            accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+                            accept="image/jpeg,image/png,image/gif,image/webp"
                             className="hidden"
                             onChange={handleUpload}
                         />

@@ -75,7 +75,9 @@ export class LogisticsController {
     @Public()
     @Get('track/:trackingNumber')
     async trackShipment(@Param('trackingNumber') trackingNumber: string) {
-        return this.logisticsService.trackShipment(trackingNumber);
+        return this.logisticsService.toPublicTrack(
+            await this.logisticsService.trackShipment(trackingNumber),
+        );
     }
 
     @Public()

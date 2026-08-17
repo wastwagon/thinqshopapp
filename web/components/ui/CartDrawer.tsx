@@ -4,6 +4,7 @@ import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { X, Trash2, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -14,16 +15,17 @@ import QuantityStepper from '@/components/ui/QuantityStepper';
 
 export default function CartDrawer() {
     const { cart, isCartOpen, toggleCart, updateQuantity, removeFromCart, cartTotal } = useCart();
+    const { user } = useAuth();
     const router = useRouter();
 
     const handleCheckout = () => {
         toggleCart();
-        router.push('/checkout');
-    }
+        router.push(user ? '/checkout' : '/login?from=/checkout');
+    };
 
     return (
         <Transition.Root show={isCartOpen} as={Fragment}>
-            <Dialog as="div" className="relative z-50" onClose={toggleCart}>
+            <Dialog as="div" className="relative z-[110]" onClose={toggleCart}>
                 <Transition.Child
                     as={Fragment}
                     enter="ease-in-out duration-500"
@@ -71,12 +73,23 @@ export default function CartDrawer() {
                                                 <div className="flow-root">
                                                     <ul role="list" className="-my-6 divide-y divide-gray-100">
                                                         {cart.length === 0 && (
-                                                            <li className="py-20 text-center">
+                                                            <li className="py-16 text-center">
                                                                 <div className="inline-flex w-16 h-16 bg-gray-50 border border-gray-100 rounded-2xl items-center justify-center mb-6">
                                                                     <ShoppingCart className="h-6 w-6 text-gray-300" />
                                                                 </div>
                                                                 <p className="text-gray-500 font-medium text-sm">Your bag is empty</p>
-                                                                <p className="text-gray-400 text-xs mt-2">Add items to get started</p>
+                                                                <p className="text-gray-400 text-xs mt-2 mb-6">Add items to get started</p>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="primary"
+                                                                    size="md"
+                                                                    onClick={() => {
+                                                                        toggleCart();
+                                                                        router.push('/shop');
+                                                                    }}
+                                                                >
+                                                                    Shop now
+                                                                </Button>
                                                             </li>
                                                         )}
                                                         {cart.map((item) => {
@@ -160,9 +173,18 @@ export default function CartDrawer() {
                                                     size="lg"
                                                     className="w-full"
                                                 >
-                                                    Checkout
+                                                    {user ? 'Checkout' : 'Sign in to checkout'}
                                                 </Button>
-                                                <Button type="button" variant="secondary" size="lg" className="w-full" onClick={toggleCart}>
+                                                <Button
+                                                    type="button"
+                                                    variant="secondary"
+                                                    size="lg"
+                                                    className="w-full"
+                                                    onClick={() => {
+                                                        toggleCart();
+                                                        router.push('/shop');
+                                                    }}
+                                                >
                                                     Continue Shopping
                                                 </Button>
                                             </div>

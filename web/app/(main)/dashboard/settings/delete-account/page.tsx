@@ -7,11 +7,8 @@ import DashboardContent from '@/components/dashboard/DashboardContent';
 import { Trash2 } from 'lucide-react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 export default function DeleteAccountPage() {
-    const router = useRouter();
     const [confirmText, setConfirmText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
     const expectedText = 'DELETE';
@@ -24,9 +21,10 @@ export default function DeleteAccountPage() {
         setIsDeleting(true);
         try {
             await api.delete('/auth/account');
+            await fetch('/api/session', { method: 'DELETE', credentials: 'same-origin' });
             localStorage.removeItem('token');
             toast.success('Your account has been deleted.');
-            router.push('/');
+            window.location.href = '/';
         } catch (error: unknown) {
             const err = error as { response?: { data?: { message?: string } } };
             toast.error(err?.response?.data?.message || 'Failed to delete account');

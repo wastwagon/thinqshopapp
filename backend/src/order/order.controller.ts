@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards, Request, ParseIntPipe, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Request, ParseIntPipe, Query, BadRequestException, UseInterceptors } from '@nestjs/common';
+import { NoStoreInterceptor } from '../common/no-store.interceptor';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/order.dto';
 import { AuthGuard } from '../auth/auth.guard';
@@ -9,6 +10,7 @@ import { AuditService } from '../audit/audit.service';
 import { ConfirmOrderPaymentDto, ResolveReturnDto, ReturnRequestDto, UpdateOrderStatusDto } from './dto/order-admin.dto';
 
 @Controller('orders')
+@UseInterceptors(NoStoreInterceptor)
 export class OrderController {
     constructor(
         private readonly orderService: OrderService,

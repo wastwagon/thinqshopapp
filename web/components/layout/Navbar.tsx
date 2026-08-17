@@ -86,6 +86,21 @@ export default function Navbar() {
 
     useEffect(() => () => { if (megaTimeoutRef.current) clearTimeout(megaTimeoutRef.current); }, []);
 
+    useEffect(() => {
+        setShopMegaOpen(false);
+    }, [pathname]);
+
+    useEffect(() => {
+        if (!shopMegaOpen) return;
+        const onKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setShopMegaOpen(false);
+            }
+        };
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, [shopMegaOpen]);
+
     const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
 
     return (
@@ -116,18 +131,41 @@ export default function Navbar() {
                                 className="relative"
                                 onMouseEnter={openMega}
                                 onMouseLeave={closeMega}
+                                onFocus={openMega}
+                                onBlur={(event) => {
+                                    if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+                                        setShopMegaOpen(false);
+                                    }
+                                }}
                             >
-                                <Link
-                                    href={item.href}
-                                    role="menuitem"
-                                    className={`py-2 px-1 -mx-1 rounded-lg hover:text-blue-600 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors inline-flex items-center gap-1 ${pathname === '/shop' || pathname.startsWith('/shop/') ? 'text-blue-600 bg-blue-50' : ''}`}
-                                >
-                                    {item.label}
-                                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${shopMegaOpen ? 'rotate-180' : ''}`} />
-                                </Link>
+                                <div className="inline-flex items-center">
+                                    <Link
+                                        href={item.href}
+                                        role="menuitem"
+                                        className={`py-2 px-1 -mx-1 rounded-lg hover:text-blue-600 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors ${pathname === '/shop' || pathname.startsWith('/shop/') ? 'text-blue-600 bg-blue-50' : ''}`}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        aria-haspopup="true"
+                                        aria-expanded={shopMegaOpen}
+                                        aria-controls="shop-mega-menu"
+                                        aria-label={shopMegaOpen ? 'Close shop menu' : 'Open shop menu'}
+                                        className={`p-2 -ml-0.5 rounded-lg hover:text-blue-600 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 ${pathname === '/shop' || pathname.startsWith('/shop/') ? 'text-blue-600' : ''}`}
+                                        onClick={(event) => {
+                                            event.preventDefault();
+                                            setShopMegaOpen((open) => !open);
+                                        }}
+                                    >
+                                        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${shopMegaOpen ? 'rotate-180' : ''}`} />
+                                    </button>
+                                </div>
                                 {/* Mega menu dropdown */}
                                 <div
+                                    id="shop-mega-menu"
                                     ref={megaRef}
+                                    role="menu"
                                     onMouseEnter={cancelCloseMega}
                                     onMouseLeave={closeMega}
                                     className={`absolute left-0 top-full pt-2 -ml-4 z-50 transition-all duration-200 ease-out ${shopMegaOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
@@ -243,25 +281,10 @@ export default function Navbar() {
                     >
                         <Heart className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden />
                     </Link>
-                    <Link
-                        href="/cart"
-                        className="md:hidden touch-target min-w-[44px] min-h-[44px] w-10 h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors relative"
-                        aria-label={`Shopping cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
-                    >
-                        <ShoppingCart className="h-4 w-4" aria-hidden />
-                        {cartCount > 0 && (
-                            <span
-                                className="absolute top-1 right-1 min-w-[1.25rem] h-5 px-1 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center ring-2 ring-white shadow-sm"
-                                aria-hidden
-                            >
-                                {cartCount > 99 ? '99+' : cartCount}
-                            </span>
-                        )}
-                    </Link>
                     <button
                         type="button"
                         onClick={toggleCart}
-                        className="hidden md:flex touch-target min-w-[44px] min-h-[44px] w-10 h-10 rounded-xl items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors relative"
+                        className="touch-target min-w-[44px] min-h-[44px] w-10 h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors relative"
                         aria-label={`Shopping cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
                     >
                         <ShoppingCart className="h-4 w-4" aria-hidden />

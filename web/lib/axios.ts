@@ -1,32 +1,29 @@
 import axios from 'axios';
-import { clearSessionCookies } from '@/lib/session-cookies';
 
-// In browser use /api so Next.js rewrites proxy to the backend (avoids CORS and wrong port)
 const api = axios.create({
     baseURL: typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000'),
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true,
 });
 
-api.interceptors.request.use(
-    (config) => {
-        if (typeof window !== 'undefined') {
-            const token = localStorage.getItem('token');
-            if (token) config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+async function clearAccessSession() {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('token');
+    try {
+        await fetch('/api/session', { method: 'DELETE', credentials: 'same-origin' });
+    } catch {
+        // Cookie clear is best-effort; 401 handling still continues.
+    }
+}
 
-// One-time toast for 502 so user sees "Backend unavailable" instead of only console errors
 let last502Toast = 0;
 const BACKEND_502_COOLDOWN_MS = 15000;
 
 api.interceptors.response.use(
     (res) => res,
-    (error) => {
+    async (error) => {
         if (typeof window !== 'undefined' && error.response?.status === 502) {
             const now = Date.now();
             if (now - last502Toast > BACKEND_502_COOLDOWN_MS) {
@@ -38,12 +35,9 @@ api.interceptors.response.use(
         }
         if (typeof window !== 'undefined' && error.response?.status === 401) {
             const url = String(error.config?.url || '');
-            const isAuthRequest = url.includes('/auth/');
-            // Clear bad session, but do NOT bounce public pages (home/shop) to login.
-            // Login only when the user is already on a protected flow.
+            const isAuthRequest = url.includes('/auth/') || url.includes('/session');
             if (!isAuthRequest) {
-                localStorage.removeItem('token');
-                clearSessionCookies();
+                await clearAccessSession();
                 const path = window.location.pathname || '';
                 const onProtected =
                     path.startsWith('/dashboard') ||

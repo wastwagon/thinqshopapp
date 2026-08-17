@@ -42,7 +42,7 @@ export default function Modal({
 }: ModalProps) {
     return (
         <Transition.Root show={open} as={Fragment}>
-            <Dialog as="div" className="relative z-[100]" onClose={onClose} initialFocus={initialFocus}>
+            <Dialog as="div" className="relative z-[110]" onClose={onClose} initialFocus={initialFocus}>
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-200"
@@ -55,7 +55,7 @@ export default function Modal({
                     <div className="fixed inset-0 bg-black/40 transition-opacity" aria-hidden />
                 </Transition.Child>
 
-                <div className="fixed inset-0 z-[100] overflow-y-auto overscroll-y-contain">
+                <div className="fixed inset-0 z-[110] overflow-y-auto overscroll-y-contain">
                     <div className="flex min-h-full items-end sm:items-center justify-center p-4 sm:p-6">
                         <Transition.Child
                             as={Fragment}

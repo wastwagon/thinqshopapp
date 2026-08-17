@@ -8,7 +8,7 @@ Read **[docs/PROJECT_UNDERSTANDING.md](docs/PROJECT_UNDERSTANDING.md)** first fo
 |------|--------|
 | Monorepo | `backend/` (NestJS :7000), `web/` (Next.js :7001), `database/` (Prisma) |
 | API from browser | Axios `baseURL: '/api'` → `web/app/api/[...path]/route.ts` → NestJS |
-| Auth | JWT in `localStorage`; cookies for middleware on `/dashboard`, `/admin` |
+| Auth | httpOnly `thinq_access` cookie (JWT); middleware verifies with `JWT_SECRET` |
 | Payments | Paystack + in-app wallet (GHS) |
 | DB | PostgreSQL via Prisma |
 

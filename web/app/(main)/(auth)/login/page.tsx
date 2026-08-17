@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import AuthScreen, { authLinkClass } from '@/components/auth/AuthScreen';
@@ -36,7 +35,7 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const searchParams = useSearchParams();
     const from = searchParams.get('from') || '/dashboard';
-    const { login } = useAuth();
+    const { completeLogin } = useAuth();
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
     });
@@ -49,12 +48,21 @@ export default function LoginPage() {
                 emailOrPhoneVal = digits.length >= 10 ? `+${digits}` : emailOrPhoneVal;
             }
             const payload = { email: emailOrPhoneVal, password: data.password };
-            const response = await api.post('/auth/login', payload);
-            login(response.data.access_token, from);
+            const res = await fetch('/api/session/login', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const body = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(body?.message || 'Invalid email, phone or password');
+            }
+            await completeLogin(from);
             toast.success('Welcome back!');
-        } catch (error: any) {
-            const msg = error.response?.data?.message || 'Invalid email, phone or password';
-            toast.error(msg);
+        } catch (error: unknown) {
+            const err = error as { message?: string };
+            toast.error(err?.message || 'Invalid email, phone or password');
         }
     };
 

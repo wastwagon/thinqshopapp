@@ -7,6 +7,7 @@ import { SmsService } from '../sms/sms.service';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { BookShipmentDto } from './dto/logistics.dto';
+import { randomPublicId } from '../common/secure-id';
 
 @Injectable()
 export class LogisticsService implements OnModuleInit {
@@ -223,7 +224,7 @@ export class LogisticsService implements OnModuleInit {
             priceDetails.total = 0;
         }
 
-        const tracking_number = `SHP-${Date.now()}`;
+        const tracking_number = randomPublicId('SHP');
 
         const shipment = await this.prisma.shipment.create({
             data: {
@@ -288,12 +289,26 @@ export class LogisticsService implements OnModuleInit {
             where: { tracking_number: trackingNumber },
             include: {
                 tracking: { orderBy: { created_at: 'desc' } },
-                pickup_address: true,
-                delivery_address: true
             },
         });
         if (!shipment) throw new NotFoundException('Shipment not found');
         return shipment;
+    }
+
+    toPublicTrack(shipment: Awaited<ReturnType<LogisticsService['trackShipment']>>) {
+        return {
+            tracking_number: shipment.tracking_number,
+            status: shipment.status,
+            carrier_tracking_number: shipment.carrier_tracking_number,
+            estimated_delivery: shipment.estimated_delivery,
+            created_at: shipment.created_at,
+            tracking: (shipment.tracking || []).map((entry) => ({
+                status: entry.status,
+                notes: entry.notes,
+                location: entry.location,
+                created_at: entry.created_at,
+            })),
+        };
     }
 
     async getZones() {

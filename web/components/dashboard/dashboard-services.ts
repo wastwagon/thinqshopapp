@@ -2,7 +2,7 @@ import type { ServiceCardConfig } from './DashboardServiceCard';
 
 export const DASHBOARD_SERVICES: ServiceCardConfig[] = [
     {
-        title: 'Logistic',
+        title: 'Logistics',
         description: 'Ship packages worldwide',
         href: '/dashboard/logistics',
         image: '/assets/dashboard/service-logistic.png',

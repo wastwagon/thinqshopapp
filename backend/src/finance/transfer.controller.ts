@@ -62,7 +62,7 @@ export class TransferController {
     async trackByToken(@Param('token') token: string) {
         const transfer = await this.transferService.getTransferByToken(token);
         if (!transfer) throw new NotFoundException('Transfer not found');
-        return transfer;
+        return this.transferService.toPublicTrack(transfer);
     }
 
     @Post('upload-payment-proof')
@@ -71,7 +71,7 @@ export class TransferController {
             storage: memoryStorage(),
             limits: { fileSize: MAX_FILE_SIZE },
             fileFilter: (_req, file, cb) => {
-                if (!file.mimetype || ALLOWED_MIMES.includes(file.mimetype)) {
+                if (file.mimetype && ALLOWED_MIMES.includes(file.mimetype)) {
                     cb(null, true);
                 } else {
                     cb(new Error('Invalid file type. Allowed: JPEG, PNG, GIF, WebP'), false);

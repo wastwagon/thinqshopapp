@@ -56,6 +56,9 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      BACKEND_URL: http://backend:7000
+      JWT_SECRET: ${JWT_SECRET}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
     env_file:
       - .env
     depends_on:

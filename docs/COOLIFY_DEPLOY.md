@@ -29,7 +29,7 @@ In the application's **Environment** / **Variables** section, add:
 | Variable | Required | Example / Notes |
 |----------|----------|-----------------|
 | `POSTGRES_PASSWORD` | Yes | Strong password for the database (e.g. `openssl rand -base64 24`) |
-| `JWT_SECRET` | Yes | Random secret (e.g. `openssl rand -hex 32`) |
+| `JWT_SECRET` | Yes | Random secret (e.g. `openssl rand -hex 32`). Required on **backend and web** so middleware can verify the httpOnly session cookie. |
 | `PAYSTACK_SECRET_KEY` | Yes | `sk_live_...` or `sk_test_...` |
 | `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Yes | `pk_live_...` or `pk_test_...` |
 | `FRONTEND_URL` | Yes | `https://thinqshopping.app` (no trailing slash; for CORS) |

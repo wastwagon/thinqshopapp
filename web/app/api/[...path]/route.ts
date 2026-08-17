@@ -41,11 +41,23 @@ async function proxy(request: NextRequest, pathSegments: string[]) {
         const headers: HeadersInit = {};
         request.headers.forEach((value, key) => {
             const lower = key.toLowerCase();
-            if (lower === 'host' || lower === 'connection' || lower === 'content-length' || lower === 'accept-encoding') return;
+            if (
+                lower === 'host'
+                || lower === 'connection'
+                || lower === 'content-length'
+                || lower === 'accept-encoding'
+                || lower === 'cookie'
+                || lower === 'authorization'
+            ) return;
             headers[key] = value;
         });
         // Avoid upstream compression/header mismatches in proxy responses.
         headers['accept-encoding'] = 'identity';
+
+        const access = request.cookies.get('thinq_access')?.value;
+        if (access) {
+            headers['Authorization'] = `Bearer ${access}`;
+        }
 
         const init: RequestInit = {
             method: request.method,

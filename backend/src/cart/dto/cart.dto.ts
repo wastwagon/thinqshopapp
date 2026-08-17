@@ -1,4 +1,5 @@
-import { IsNumber, IsNotEmpty, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ArrayMaxSize, IsArray, IsNotEmpty, IsNumber, IsOptional, ValidateNested } from 'class-validator';
 
 export class AddToCartDto {
     @IsNumber()
@@ -20,3 +21,12 @@ export class UpdateCartItemDto {
     @IsNotEmpty()
     quantity: number;
 }
+
+export class MergeCartDto {
+    @IsArray()
+    @ArrayMaxSize(40)
+    @ValidateNested({ each: true })
+    @Type(() => AddToCartDto)
+    items: AddToCartDto[];
+}
+

@@ -19,14 +19,14 @@ export class ProductController {
 
     @Public()
     @Get()
-    @Header('Cache-Control', 'public, max-age=60')
+    @Header('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=300')
     findAll(@Query() query: { category?: string; search?: string; page?: number; limit?: number }) {
         return this.productService.findAll(query);
     }
 
     @Public()
     @Get('categories')
-    @Header('Cache-Control', 'public, max-age=60')
+    @Header('Cache-Control', 'public, max-age=120, s-maxage=300, stale-while-revalidate=600')
     getCategories(@Query('tree') tree?: string) {
         return this.productService.getCategories(tree === '1' || tree === 'true');
     }
@@ -127,6 +127,7 @@ export class ProductController {
 
     @Public()
     @Get(':slug')
+    @Header('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=300')
     findOne(@Param('slug') slug: string) {
         return this.productService.findOne(slug);
     }

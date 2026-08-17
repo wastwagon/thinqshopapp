@@ -28,6 +28,7 @@ import TrustStrip from '@/components/home/TrustStrip';
 import HomeServicesSection from '@/components/home/HomeServicesSection';
 import SellForMeCta from '@/components/home/SellForMeCta';
 import TestimonialsBlock from '@/components/home/TestimonialsBlock';
+import { ShopLoadingState } from '@/components/shop/ShopSuccessShell';
 import { STATIC_CATEGORIES as CATEGORY_CATALOG } from '@/lib/product-utils';
 import { getRootCategories, type CategoryNode } from '@/lib/category-utils';
 
@@ -243,7 +244,13 @@ export default function Home() {
     }, [allProducts, categories]);
 
 
-    if (!mounted) return null;
+    if (!mounted) {
+        return (
+            <ShopLayout>
+                <ShopLoadingState message="Loading…" />
+            </ShopLayout>
+        );
+    }
 
     const hasProducts = productsWithIds.length > 0;
     const showFeaturedSections = fallbackFlash.length >= 4 && fallbackFeatured.length >= 4;

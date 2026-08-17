@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Delete, UnauthorizedException, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -11,11 +12,15 @@ import { Public } from './public.decorator';
 import { RequirePermission } from './require-permission.decorator';
 import { PERMISSION_MAP } from './permissions';
 
+const AUTH_THROTTLE = { default: { limit: 10, ttl: 60000 } };
+const AUTH_EMAIL_THROTTLE = { default: { limit: 5, ttl: 60000 } };
+
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) { }
 
     @Public()
+    @Throttle(AUTH_THROTTLE)
     @Post('login')
     @HttpCode(HttpStatus.OK)
     async login(@Body() dto: LoginDto) {
@@ -27,6 +32,7 @@ export class AuthController {
     }
 
     @Public()
+    @Throttle(AUTH_THROTTLE)
     @Post('register')
     async register(@Body() dto: RegisterDto) {
         return this.authService.register(dto);
@@ -40,6 +46,7 @@ export class AuthController {
     }
 
     @Public()
+    @Throttle(AUTH_EMAIL_THROTTLE)
     @Post('forgot-password')
     @HttpCode(HttpStatus.OK)
     async forgotPassword(@Body() dto: ForgotPasswordDto) {
@@ -49,6 +56,7 @@ export class AuthController {
     }
 
     @Public()
+    @Throttle(AUTH_EMAIL_THROTTLE)
     @Post('reset-password')
     @HttpCode(HttpStatus.OK)
     async resetPassword(@Body() dto: ResetPasswordDto) {

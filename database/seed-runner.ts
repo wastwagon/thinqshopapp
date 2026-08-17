@@ -38,28 +38,35 @@ export async function runSeed(prisma: PrismaClient) {
 
     // --- Admin user (admin panel + API) ---
     // update ensures password works after re-seed (fixes bad hashes from old seeds)
-    await prisma.user.upsert({
-        where: { email: ADMIN_EMAIL },
-        update: { password: adminHash, role: 'admin' },
-        create: {
-            email: ADMIN_EMAIL,
-            password: adminHash,
-            phone: '+233540000001',
-            is_verified: true,
-            role: 'admin',
-            profile: {
-                create: {
-                    first_name: 'Admin',
-                    last_name: 'User',
+    const existingAdmin = await prisma.user.findUnique({ where: { email: ADMIN_EMAIL } });
+    const canResetAdminPassword = !isProductionDb() || process.env.SEED_ALLOW_PRODUCTION === 'true';
+    if (!existingAdmin) {
+        await prisma.user.create({
+            data: {
+                email: ADMIN_EMAIL,
+                password: adminHash,
+                phone: '+233540000001',
+                is_verified: true,
+                role: 'admin',
+                profile: {
+                    create: {
+                        first_name: 'Admin',
+                        last_name: 'User',
+                    },
+                },
+                wallet: {
+                    create: {
+                        balance_ghs: 1000.00,
+                    },
                 },
             },
-            wallet: {
-                create: {
-                    balance_ghs: 1000.00,
-                },
-            },
-        },
-    });
+        });
+    } else if (canResetAdminPassword) {
+        await prisma.user.update({
+            where: { email: ADMIN_EMAIL },
+            data: { password: adminHash, role: 'admin' },
+        });
+    }
 
     // --- Test user (regular customer) ---
     const testUser = await prisma.user.upsert({

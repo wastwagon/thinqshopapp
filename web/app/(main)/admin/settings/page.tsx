@@ -7,10 +7,8 @@ import api from '@/lib/axios';
 import {
     Settings,
     Globe,
-    Lock,
     Zap,
     Save,
-    Database,
     RefreshCw,
     Percent,
     Shield,
@@ -120,12 +118,6 @@ export default function AdminSettings() {
         }
     };
 
-    const toggles = [
-        { id: 'maintenanceMode', label: 'Maintenance mode', desc: 'When on, users cannot place orders or use the dashboard.', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100', icon: Lock },
-        { id: 'allowAutomaticPayouts', label: 'Auto-approve small payouts', desc: 'Automatically approve transfer payouts under ₵5,000.', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', icon: Database },
-        { id: 'debugLogs', label: 'Debug logging', desc: 'Save detailed logs for troubleshooting.', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', icon: Settings },
-    ];
-
     return (
         <DashboardLayout isAdmin={true}>
             <div className="pb-6 md:pb-8">
@@ -188,7 +180,7 @@ export default function AdminSettings() {
                                     />
                                     <Percent className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                 </div>
-                                <p className="text-xs text-gray-400">Applied to procurement request pricing.</p>
+                                <p className="text-xs text-gray-400">Not saved yet — display only until the fee API is wired.</p>
                             </div>
                         </div>
                     </div>
@@ -271,100 +263,57 @@ export default function AdminSettings() {
                             </div>
                             Safety & access
                         </h3>
-                        <div className="space-y-2">
-                            {toggles.map((t) => (
-                                <div key={t.id} className="flex items-center justify-between py-3 px-4 bg-gray-50/50 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
-                                    <div className="flex gap-3 items-center min-w-0">
-                                        <div className={`p-2 rounded-lg ${t.bg} ${t.border} border shrink-0 ${t.color}`}>
-                                            <t.icon className="h-4 w-4" />
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-semibold text-gray-900">{t.label}</p>
-                                            <p className="text-xs text-gray-500 mt-0.5">{t.desc}</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => setSettings({ ...settings, [t.id]: !settings[t.id as keyof typeof settings] })}
-                                        className={`w-12 h-6 rounded-full transition-all relative shrink-0 ${settings[t.id as keyof typeof settings] ? 'bg-blue-600' : 'bg-gray-200'}`}
-                                    >
-                                        <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${settings[t.id as keyof typeof settings] ? 'left-6' : 'left-0.5'}`} />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+                        <p className="text-sm text-gray-600">
+                            Maintenance mode, auto-payouts, and debug logging are not wired to the API yet. They are omitted here so they cannot be mistaken for live controls.
+                        </p>
                     </div>
                 </div>
 
                 {/* Status & audit – right column: stack cards with clear separation */}
                 <div className="lg:sticky lg:top-6 flex flex-col gap-5 min-w-0">
-                    <section className="admin-card p-5" aria-label="System status">
-                        <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-4">
-                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" aria-hidden />
-                            System status
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <p className="text-xs font-semibold text-gray-500 mb-1">Uptime</p>
-                                <p className="text-2xl font-bold text-gray-900">99.9%</p>
-                            </div>
-                            <div>
-                                <p className="text-xs font-semibold text-gray-500 mb-2">Services</p>
-                                <div className="flex gap-1.5">
-                                    {[1, 2, 3, 4, 5].map((n) => (
-                                        <div key={n} className="flex-1 h-8 bg-gray-100 rounded-md overflow-hidden relative">
-                                            <div className="absolute bottom-0 left-0 w-full h-2/3 bg-blue-500 rounded-b-md" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            {/* Database migration & seeding */}
-                        <div className="space-y-2">
-                            <p className="text-xs font-semibold text-gray-500 mb-2">Database</p>
-                            <div className="flex flex-col gap-2">
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="secondary"
-                                    onClick={() => runDbAction('migrate')}
-                                    disabled={dbAction !== 'idle'}
-                                    loading={dbAction === 'migrate'}
-                                    leftIcon={dbAction !== 'migrate' ? <DatabaseIcon className="h-3.5 w-3.5" /> : undefined}
-                                    className="w-full border-blue-300 text-brand"
-                                >
-                                    Run migrations
-                                </Button>
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="secondary"
-                                    onClick={() => runDbAction('seed')}
-                                    disabled={dbAction !== 'idle'}
-                                    loading={dbAction === 'seed'}
-                                    leftIcon={dbAction !== 'seed' ? <Play className="h-3.5 w-3.5" /> : undefined}
-                                    className="w-full border-emerald-200 text-emerald-600"
-                                >
-                                    Run seed
-                                </Button>
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="secondary"
-                                    onClick={() => runDbAction('migrate-seed')}
-                                    disabled={dbAction !== 'idle'}
-                                    loading={dbAction === 'migrate-seed'}
-                                    leftIcon={dbAction !== 'migrate-seed' ? <RefreshCw className="h-3.5 w-3.5" /> : undefined}
-                                    className="w-full"
-                                >
-                                    Migrate + seed
-                                </Button>
-                            </div>
-                            <p className="text-xs text-gray-400">Apply migrations and/or seed data. Admin only.</p>
+                    <section className="admin-card p-5" aria-label="System tools">
+                        <h3 className="text-sm font-bold text-gray-900 mb-1">System tools</h3>
+                        <p className="text-xs text-gray-500 mb-4">Database actions require runtime admin to be enabled on the server.</p>
+                        <p className="text-xs font-semibold text-gray-500 mb-2">Database</p>
+                        <div className="flex flex-col gap-2">
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => runDbAction('migrate')}
+                                disabled={dbAction !== 'idle'}
+                                loading={dbAction === 'migrate'}
+                                leftIcon={dbAction !== 'migrate' ? <DatabaseIcon className="h-3.5 w-3.5" /> : undefined}
+                                className="w-full border-blue-300 text-brand"
+                            >
+                                Run migrations
+                            </Button>
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => runDbAction('seed')}
+                                disabled={dbAction !== 'idle'}
+                                loading={dbAction === 'seed'}
+                                leftIcon={dbAction !== 'seed' ? <Play className="h-3.5 w-3.5" /> : undefined}
+                                className="w-full border-emerald-200 text-emerald-600"
+                            >
+                                Run seed
+                            </Button>
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => runDbAction('migrate-seed')}
+                                disabled={dbAction !== 'idle'}
+                                loading={dbAction === 'migrate-seed'}
+                                leftIcon={dbAction !== 'migrate-seed' ? <RefreshCw className="h-3.5 w-3.5" /> : undefined}
+                                className="w-full"
+                            >
+                                Migrate + seed
+                            </Button>
                         </div>
-                        <Button type="button" size="sm" variant="secondary" className="w-full border-red-200 text-red-600 hover:bg-red-50">
-                            Clear cache
-                        </Button>
-                        </div>
+                        <p className="text-xs text-gray-400 mt-2">Apply migrations and/or seed data. Admin only.</p>
                     </section>
 
                     <section className="bg-gray-900 rounded-xl p-5 text-white" aria-label="Audit log">

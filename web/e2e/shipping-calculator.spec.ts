@@ -1,4 +1,25 @@
 import { test, expect } from '@playwright/test';
+import { SignJWT } from 'jose';
+
+function jwtSecret() {
+    return (process.env.JWT_SECRET || 'your_secret_key').replace(/^["']|["']$/g, '');
+}
+
+async function adminAccessCookie() {
+    const token = await new SignJWT({ role: 'admin', email: 'e2e@example.com' })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setSubject('1')
+        .setExpirationTime('2h')
+        .sign(new TextEncoder().encode(jwtSecret()));
+    return {
+        name: 'thinq_access',
+        value: token,
+        domain: 'localhost',
+        path: '/',
+        httpOnly: true,
+        sameSite: 'Lax' as const,
+    };
+}
 
 /**
  * Intercept all /api/* calls so nothing hits the real backend (401 → session expired).
@@ -13,6 +34,9 @@ async function installApiMocks(page: import('@playwright/test').Page) {
                 body: JSON.stringify(data),
             });
 
+        if (url.includes('/api/session')) {
+            return json({ authenticated: true, sub: 1, role: 'admin', email: 'e2e@example.com' });
+        }
         if (url.includes('/users/profile') && !url.includes('/avatar')) {
             return json({ id: 1, email: 'e2e@example.com', role: 'admin' });
         }
@@ -58,13 +82,7 @@ async function installApiMocks(page: import('@playwright/test').Page) {
 
 test.describe('Shipping calculator (admin)', () => {
     test.beforeEach(async ({ page, context }) => {
-        await context.addCookies([
-            { name: 'thinq_session', value: 'e2e', domain: 'localhost', path: '/' },
-            { name: 'thinq_role', value: 'admin', domain: 'localhost', path: '/' },
-        ]);
-        await page.addInitScript(() => {
-            localStorage.setItem('token', 'e2e-mock-jwt');
-        });
+        await context.addCookies([await adminAccessCookie()]);
         await installApiMocks(page);
     });
 

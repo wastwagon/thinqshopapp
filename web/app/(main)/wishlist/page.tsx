@@ -8,9 +8,18 @@ import ShopTrustRow from '@/components/shop/ShopTrustRow';
 import { useWishlist } from '@/context/WishlistContext';
 import ProductCard from '@/components/ui/ProductCard';
 import EmptyState from '@/components/ui/EmptyState';
+import { ShopLoadingState } from '@/components/shop/ShopSuccessShell';
 
 export default function WishlistPage() {
-    const { wishlist, removeFromWishlist } = useWishlist();
+    const { wishlist, removeFromWishlist, loading, syncedToAccount } = useWishlist();
+
+    if (loading) {
+        return (
+            <ShopLayout>
+                <ShopLoadingState message="Loading wishlist…" />
+            </ShopLayout>
+        );
+    }
 
     return (
         <ShopLayout>
@@ -38,7 +47,7 @@ export default function WishlistPage() {
                         <div className="mt-5 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                             {wishlist.map((product) => (
                                 <div key={product.id} className="relative group">
-                                    <ProductCard product={product as any} />
+                                    <ProductCard product={{ ...product, category: product.category ?? 'Uncategorized' }} />
                                     <button
                                         type="button"
                                         onClick={() => removeFromWishlist(product.id)}
@@ -54,7 +63,8 @@ export default function WishlistPage() {
 
                     {wishlist.length > 0 && (
                         <p className="mt-10 text-center text-xs text-gray-400">
-                            {wishlist.length} item{wishlist.length !== 1 ? 's' : ''} · saved on this device
+                            {wishlist.length} item{wishlist.length !== 1 ? 's' : ''} ·{' '}
+                            {syncedToAccount ? 'saved to your account' : 'saved on this device'}
                         </p>
                     )}
                 </ShopPageShell>

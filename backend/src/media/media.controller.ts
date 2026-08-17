@@ -21,7 +21,7 @@ import { PERMISSION_MAP } from '../auth/permissions';
 import { AuditService } from '../audit/audit.service';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 @Controller('media')
 export class MediaController {
@@ -38,10 +38,10 @@ export class MediaController {
             storage: memoryStorage(),
             limits: { fileSize: MAX_FILE_SIZE },
             fileFilter: (_req, file, cb) => {
-                if (!file.mimetype || ALLOWED_MIMES.includes(file.mimetype)) {
+                if (file.mimetype && ALLOWED_MIMES.includes(file.mimetype)) {
                     cb(null, true);
                 } else {
-                    cb(new Error('Invalid file type. Allowed: JPEG, PNG, GIF, WebP, SVG'), false);
+                    cb(new Error('Invalid file type. Allowed: JPEG, PNG, GIF, WebP'), false);
                 }
             },
         }),

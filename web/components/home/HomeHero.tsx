@@ -42,7 +42,7 @@ const FALLBACK_SLIDES: Slide[] = [
         title: 'International shipping to Ghana',
         subtitle: 'Reliable delivery in 7–14 days. Track your order from dispatch to your door.',
         cta_text: 'View delivery info',
-        cta_url: '/privacy',
+        cta_url: '/terms',
         image_path: HERO_IMAGES[1],
     },
     {

@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import AddressBook from '@/components/ui/AddressBook';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
-import { CreditCard, Truck, CheckCircle } from 'lucide-react';
+import { CreditCard, Truck, CheckCircle, Wallet, Shield } from 'lucide-react';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import ShopContent from '@/components/shop/ShopContent';
@@ -251,8 +251,8 @@ export default function CheckoutClient() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6" role="radiogroup" aria-label="Payment method">
                                 {[
-                                    { id: 'wallet', label: walletBalance !== null ? `Wallet Balance (₵${walletBalance.toFixed(2)})` : 'Wallet Balance', icon: '💰' },
-                                    { id: 'paystack', label: 'Secure payment on Paystack', icon: '🔒' }
+                                    { id: 'wallet', label: walletBalance !== null ? `Wallet Balance (₵${walletBalance.toFixed(2)})` : 'Wallet Balance', Icon: Wallet },
+                                    { id: 'paystack', label: 'Secure payment on Paystack', Icon: Shield }
                                 ].map((method) => (
                                     <label key={method.id} htmlFor={`payment-${method.id}`} className={`flex items-center justify-between p-4 rounded-xl border-2 transition-colors cursor-pointer group min-h-[44px] touch-manipulation ${paymentMethod === method.id ? 'bg-blue-50 border-blue-500' : 'bg-gray-50 border-gray-200/90 hover:border-gray-300'}`}>
                                         <div className="flex items-center gap-3">
@@ -264,7 +264,7 @@ export default function CheckoutClient() {
                                                 onChange={() => setPaymentMethod(method.id)}
                                                 className="sr-only"
                                             />
-                                            <span className="text-lg" aria-hidden>{method.icon}</span>
+                                            <method.Icon className="h-5 w-5 text-gray-500 shrink-0" aria-hidden />
                                             <span className={`text-sm font-medium ${paymentMethod === method.id ? 'text-blue-700' : 'text-gray-600 group-hover:text-gray-900'}`}>{method.label}</span>
                                         </div>
                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${paymentMethod === method.id ? 'border-blue-600 bg-blue-600' : 'border-gray-300'}`}>

@@ -1,4 +1,6 @@
-import { Controller, Get, Post, Body, Query, UseGuards, Request, BadRequestException, Param, Patch, Delete, Inject, forwardRef } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards, Request, BadRequestException, Param, Patch, Delete, Inject, forwardRef, UseInterceptors } from '@nestjs/common';
+import { NoStoreInterceptor } from '../common/no-store.interceptor';
+import { randomPublicId } from '../common/secure-id';
 import { WalletService } from './wallet.service';
 import { PaymentService } from './payment.service';
 import { AuthGuard } from '../auth/auth.guard';
@@ -9,6 +11,7 @@ import { AuditService } from '../audit/audit.service';
 import { ApproveWithdrawalDto, CreateWithdrawalDto, RejectWithdrawalDto } from './dto/wallet.dto';
 import { ConsignmentService } from '../consignment/consignment.service';
 
+@UseInterceptors(NoStoreInterceptor)
 @Controller('finance/wallet')
 export class WalletController {
     constructor(
@@ -66,7 +69,7 @@ export class WalletController {
         if (!Number.isFinite(amount) || amount <= 0) {
             throw new BadRequestException('Invalid amount');
         }
-        const ref = `PAY-WLT-${Date.now()}-${req.user.sub}`;
+        const ref = randomPublicId('PAYWLT');
         const payment = await this.paymentService.initializePayment(
             req.user.sub,
             amount,

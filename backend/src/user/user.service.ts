@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { clampLimit, clampPage } from '../common/pagination';
 
 const PROFILE_UPLOAD_SUBDIR = 'profile-images';
 const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
@@ -92,8 +93,10 @@ export class UserService {
     }
 
     async findAllForAdmin(query: { page?: number; limit?: number; search?: string }) {
-        const { page = 1, limit = 50, search } = query;
+        const page = clampPage(query.page);
+        const limit = clampLimit(query.limit, 50, 100);
         const skip = (page - 1) * limit;
+        const search = query.search;
         const where: any = {};
         if (search) {
             where.OR = [
@@ -105,12 +108,12 @@ export class UserService {
             this.prisma.user.findMany({
                 where,
                 include: { profile: true },
-                skip: Number(skip),
-                take: Number(limit),
+                skip,
+                take: limit,
                 orderBy: { created_at: 'desc' },
             }),
             this.prisma.user.count({ where }),
         ]);
-        return { data: users.map((u) => ({ ...u, password: undefined })), meta: { total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) } };
+        return { data: users.map((u) => ({ ...u, password: undefined })), meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
     }
 }

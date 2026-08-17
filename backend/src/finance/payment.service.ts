@@ -1,5 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { paystackAmountMatches } from './paystack-amount';
+import { randomPublicId } from '../common/secure-id';
 
 @Injectable()
 export class PaymentService {
@@ -14,7 +16,7 @@ export class PaymentService {
     }
 
     async initializePayment(userId: number, amount: number, serviceType: any, serviceId: number, transactionRef?: string) {
-        const transaction_ref = transactionRef ?? `PAY-${Date.now()}`;
+        const transaction_ref = transactionRef ?? randomPublicId('PAY');
         return this.prisma.payment.create({
             data: {
                 user_id: userId,
@@ -28,7 +30,10 @@ export class PaymentService {
         });
     }
 
-    /** Verify with Paystack API using reference (transaction_ref we gave to frontend). Returns updated payment or null. wasPending: true if we just transitioned from pending to success (for idempotent credit). */
+    /**
+     * Verify with Paystack API. Amount and currency must match the stored payment.
+     * wasPending is true only if this caller atomically claimed pending → success.
+     */
     async verifyWithPaystack(reference: string): Promise<{ payment: any; paystackData: any; wasPending: boolean } | null> {
         const payment = await this.prisma.payment.findFirst({
             where: { transaction_ref: reference },
@@ -37,6 +42,7 @@ export class PaymentService {
         if (payment.status === 'success') {
             return { payment, paystackData: (payment as any).paystack_response, wasPending: false };
         }
+        if (payment.status !== 'pending') return null;
 
         const secret = this.getPaystackSecret();
         const res = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
@@ -44,33 +50,20 @@ export class PaymentService {
         });
         const json = await res.json();
         if (!json.status || json.data?.status !== 'success') return null;
+        if (!paystackAmountMatches(payment.amount, json.data?.amount, json.data?.currency)) {
+            return null;
+        }
 
-        const updated = await this.prisma.payment.update({
-            where: { id: payment.id },
+        const claimed = await this.prisma.payment.updateMany({
+            where: { id: payment.id, status: 'pending' },
             data: {
                 status: 'success',
                 paystack_reference: reference,
                 paystack_response: json,
             },
         });
-        return { payment: updated, paystackData: json, wasPending: true };
-    }
-
-    async verifyWebhook(reference: string, status: any, response: any) {
-        const payment = await this.prisma.payment.findFirst({
-            where: { transaction_ref: reference },
-        });
-
-        if (!payment) return null;
-        if (payment.status === 'success') return payment;
-
-        return this.prisma.payment.update({
-            where: { id: payment.id },
-            data: {
-                status: status === 'success' ? 'success' : 'failed',
-                paystack_reference: reference,
-                paystack_response: response,
-            },
-        });
+        const updated = await this.prisma.payment.findUnique({ where: { id: payment.id } });
+        if (!updated) return null;
+        return { payment: updated, paystackData: json, wasPending: claimed.count === 1 };
     }
 }

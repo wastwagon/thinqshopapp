@@ -14,6 +14,7 @@
 | `FATAL: DATABASE_URL is not set` | Set `POSTGRES_PASSWORD` in Coolify (compose builds `DATABASE_URL` for backend) |
 | `FATAL: Migration failed after 5 attempts` | See migration / password rows below |
 | `JWT_SECRET environment variable is required` (from Nest) | Same as first row |
+| Login works but dashboard/admin redirect to `/login` | Set `JWT_SECRET` on the **web** service too (same value as backend) → redeploy |
 | Prisma `P1001` / authentication failed | `POSTGRES_PASSWORD` in Coolify **does not match** the existing `postgres_data` volume (password was changed after first deploy). Restore the original password **or** reset the DB volume (data loss) |
 | Prisma `P3009` failed migration | Backend shell: `npx prisma migrate resolve --rolled-back <migration_name>` then redeploy |
 
@@ -95,7 +96,9 @@ FRONTEND_URL=https://yourdomain.com,https://www.yourdomain.com
 ```
 
 ### 4. **JWT_SECRET**
-Ensure `JWT_SECRET` is set in the backend and is the same across restarts (do not change it or existing tokens will fail).
+Ensure `JWT_SECRET` is set on **backend and web** to the **same** value, and is unchanged across restarts (changing it signs everyone out). Coolify’s default compose (`docker-compose.yaml`) now passes it into both services.
+
+If login succeeds but `/dashboard` and `/admin` bounce back to `/login`, the **web** container is missing `JWT_SECRET` (middleware cannot verify the httpOnly cookie).
 
 ---
 

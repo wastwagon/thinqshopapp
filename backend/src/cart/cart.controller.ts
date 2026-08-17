@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, ParseIntPipe, UseInterceptors } from '@nestjs/common';
+import { NoStoreInterceptor } from '../common/no-store.interceptor';
 import { CartService } from './cart.service';
-import { AddToCartDto, UpdateCartItemDto } from './dto/cart.dto';
+import { AddToCartDto, MergeCartDto, UpdateCartItemDto } from './dto/cart.dto';
 import { AuthGuard } from '../auth/auth.guard';
 
 @UseGuards(AuthGuard)
+@UseInterceptors(NoStoreInterceptor)
 @Controller('cart')
 export class CartController {
     constructor(private readonly cartService: CartService) { }
@@ -16,6 +18,11 @@ export class CartController {
     @Post()
     addToCart(@Request() req, @Body() dto: AddToCartDto) {
         return this.cartService.addToCart(req.user.sub, dto);
+    }
+
+    @Post('merge')
+    mergeCart(@Request() req, @Body() dto: MergeCartDto) {
+        return this.cartService.mergeCart(req.user.sub, dto.items || []);
     }
 
     @Patch(':id')

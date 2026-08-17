@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SmsService } from '../sms/sms.service';
 import { TransferDirection, RecipientType, PaymentMethod, PaymentStatus, Prisma } from '@prisma/client';
 import { CreateTransferDto, UpdateTransferPaymentDetailsDto } from './dto/transfer.dto';
+import { randomPublicId } from '../common/secure-id';
 
 export type TransferPaymentDetails = {
     momo_agent_number: string;
@@ -172,7 +173,7 @@ export class TransferService {
 
         const transfer_fee = 0;
         const total_amount = Number(amount_ghs) + transfer_fee;
-        const token = `TRF-${Date.now()}`;
+        const token = randomPublicId('TRF');
 
         const transfer = await this.prisma.moneyTransfer.create({
             data: {
@@ -221,6 +222,21 @@ export class TransferService {
                 tracking: { orderBy: { created_at: 'asc' } }
             }
         });
+    }
+
+    toPublicTrack(transfer: NonNullable<Awaited<ReturnType<TransferService['getTransferByToken']>>>) {
+        return {
+            token: transfer.token,
+            status: transfer.status,
+            amount_ghs: Number(transfer.amount_ghs),
+            transfer_type: transfer.transfer_type,
+            created_at: transfer.created_at,
+            tracking: (transfer.tracking || []).map((entry) => ({
+                status: entry.status,
+                notes: entry.notes,
+                created_at: entry.created_at,
+            })),
+        };
     }
 
     async getUserTransfers(userId: number) {

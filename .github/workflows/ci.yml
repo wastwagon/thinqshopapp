@@ -34,6 +34,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://user:pass@localhost:5432/test
 
+      - name: Test web
+        run: npm run test -w web
+        env:
+          JWT_SECRET: test-ci-jwt-secret-not-for-production
+
       - name: Build web
         run: npm run build -w web
         env:

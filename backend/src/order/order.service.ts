@@ -12,6 +12,8 @@ import { NotificationService } from '../notification/notification.service';
 import { WalletService } from '../finance/wallet.service';
 import { ConsignmentService } from '../consignment/consignment.service';
 import { resolveProductLinePricing } from '../product/wholesale-pricing';
+import { randomPublicId } from '../common/secure-id';
+import { clampLimit, clampPage } from '../common/pagination';
 
 type TxClient = Prisma.TransactionClient;
 type CartLine = Awaited<ReturnType<CartService['getCart']>>[number];
@@ -183,7 +185,7 @@ export class OrderService {
     async create(userId: number, dto: CreateOrderDto) {
         const pricing = await this.getCheckoutPricing(userId, dto.shipping_address_id);
         const cartItems = await this.cartService.getCart(userId);
-        const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const orderNumber = randomPublicId('ORD');
         const authoritativeTotal = pricing.total;
         const clientTotal = Number(dto.total);
         if (!Number.isFinite(clientTotal) || Math.abs(clientTotal - authoritativeTotal) > 0.01) {
@@ -234,7 +236,7 @@ export class OrderService {
                         service_type: 'ecommerce',
                         service_id: order.id,
                         status: 'success',
-                        transaction_ref: `WLT-ORD-${Date.now()}`,
+                        transaction_ref: randomPublicId('WLTORD'),
                     },
                 });
             }
@@ -456,6 +458,7 @@ export class OrderService {
             where: { user_id: userId },
             include: { items: true }, // Correct relation name 'items'
             orderBy: { created_at: 'desc' },
+            take: 100,
         });
     }
 
@@ -510,20 +513,22 @@ export class OrderService {
 
     async findAllForAdmin(query: { page?: number; limit?: number; status?: string }) {
         const { page = 1, limit = 50, status } = query;
-        const skip = (page - 1) * limit;
+        const safePage = clampPage(page);
+        const safeLimit = clampLimit(limit, 50, 100);
+        const skip = (safePage - 1) * safeLimit;
         const where: any = {};
         if (status) where.status = status;
         const [orders, total] = await Promise.all([
             this.prisma.order.findMany({
                 where,
                 include: { items: true, user: { include: { profile: true } }, shipping_address: true },
-                skip: Number(skip),
-                take: Number(limit),
+                skip: safePage > 0 ? (safePage - 1) * safeLimit : 0,
+                take: safeLimit,
                 orderBy: { created_at: 'desc' },
             }),
             this.prisma.order.count({ where }),
         ]);
-        return { data: orders, meta: { total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) } };
+        return { data: orders, meta: { total, page: safePage, limit: safeLimit, totalPages: Math.ceil(total / safeLimit) } };
     }
 
     async updateOrderStatus(

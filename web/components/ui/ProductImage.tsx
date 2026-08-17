@@ -18,6 +18,25 @@ function isExternalUrl(url: string): boolean {
     return typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'));
 }
 
+const OPTIMIZABLE_HOSTS = new Set([
+    'images.unsplash.com',
+    'www.bhphotovideo.com',
+    'static.bhphoto.com',
+    'thinqshopping.app',
+    'www.thinqshopping.app',
+    'api.thinqshopping.app',
+]);
+
+function shouldUnoptimize(url: string): boolean {
+    if (!url) return true;
+    if (!isExternalUrl(url)) return false;
+    try {
+        return !OPTIMIZABLE_HOSTS.has(new URL(url).hostname);
+    } catch {
+        return true;
+    }
+}
+
 function resolveImageUrl(url: string): string {
     if (!url || typeof url !== 'string') return '';
     if (isExternalUrl(url)) return url;
@@ -25,10 +44,14 @@ function resolveImageUrl(url: string): string {
     return getMediaUrl(url);
 }
 
+export function shouldUnoptimizeProductImage(url: string): boolean {
+    return shouldUnoptimize(url);
+}
+
 export default function ProductImage({ src, alt, width = 400, height = 400, className = '', fill }: ProductImageProps) {
     const [error, setError] = useState(false);
     const resolvedSrc = resolveImageUrl(src);
-    const unoptimized = isExternalUrl(resolvedSrc) || resolvedSrc.startsWith('/api/');
+    const unoptimized = shouldUnoptimize(resolvedSrc);
 
     if (error || !resolvedSrc) {
         return (

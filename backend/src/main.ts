@@ -25,9 +25,12 @@ async function bootstrap() {
     app.useBodyParser('json', { limit: '10mb', verify: rawBodySaver });
     app.useBodyParser('urlencoded', { limit: '10mb', extended: true });
     // Allow media on this API host to load in <img>/next/image on the storefront (different origin).
+    const isProd = process.env.NODE_ENV === 'production';
     app.use(
         helmet({
-            contentSecurityPolicy: false,
+            contentSecurityPolicy: isProd
+                ? { directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] } }
+                : false,
             crossOriginResourcePolicy: { policy: 'cross-origin' },
         }),
     );
@@ -35,8 +38,17 @@ async function bootstrap() {
     app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
         const start = Date.now();
         res.on('finish', () => {
-            const duration = Date.now() - start;
-            console.log(`${new Date().toISOString()} ${req.method} ${req.url} ${res.statusCode} ${duration}ms`);
+            const pathOnly = (req.originalUrl || req.url || '').split('?')[0];
+            if (pathOnly === '/health' || pathOnly === '/ready') return;
+            console.log(
+                JSON.stringify({
+                    ts: new Date().toISOString(),
+                    method: req.method,
+                    path: pathOnly,
+                    status: res.statusCode,
+                    ms: Date.now() - start,
+                }),
+            );
         });
         next();
     });
@@ -54,24 +66,30 @@ async function bootstrap() {
     if (frontendUrl) {
         const origins = frontendUrl.split(',').map((o) => o.trim().replace(/\/$/, ''));
         app.enableCors({ origin: origins, credentials: true });
+    } else if (isProd) {
+        throw new Error('FRONTEND_URL environment variable is required in production (CORS).');
     } else {
         app.enableCors();
     }
 
-    const config = new DocumentBuilder()
-        .setTitle('ThinQShop API')
-        .setDescription('ThinQShop e-commerce and services API')
-        .setVersion('1.0')
-        .addBearerAuth()
-        .build();
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
+    if (!isProd || process.env.SWAGGER_ENABLED === 'true') {
+        const config = new DocumentBuilder()
+            .setTitle('ThinQShop API')
+            .setDescription('ThinQShop e-commerce and services API')
+            .setVersion('1.0')
+            .addBearerAuth()
+            .build();
+        const document = SwaggerModule.createDocument(app, config);
+        SwaggerModule.setup('api/docs', app, document);
+    }
 
     app.use('/media', express.static(join(process.cwd(), 'uploads')));
     const port = process.env.PORT || 7000;
     await app.listen(port);
     console.log(`Application is running on port ${port}`);
-    console.log(`Swagger docs: http://localhost:${port}/api/docs`);
+    if (!isProd || process.env.SWAGGER_ENABLED === 'true') {
+        console.log(`Swagger docs: http://localhost:${port}/api/docs`);
+    }
 }
 bootstrap().catch((err) => {
     console.error('Bootstrap failed:', err);

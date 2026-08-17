@@ -138,4 +138,16 @@ export class CartService {
             where: { user_id: userId },
         });
     }
+
+    async mergeCart(userId: number, items: AddToCartDto[]) {
+        let failed = 0;
+        for (const dto of items.slice(0, 40)) {
+            try {
+                await this.addToCart(userId, dto);
+            } catch {
+                failed += 1;
+            }
+        }
+        return { cart: await this.getCart(userId), failed };
+    }
 }

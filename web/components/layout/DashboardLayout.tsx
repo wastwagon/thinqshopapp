@@ -64,7 +64,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
                     id="main-content"
                     className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin p-3 md:p-6 relative z-10 min-w-0 md:pb-6 ${
                         isAdmin
-                            ? 'pb-[calc(10rem+env(safe-area-inset-bottom,0px))]'
+                            ? 'pb-8'
                             : 'pb-[calc(8.5rem+env(safe-area-inset-bottom,0px))]'
                     } ${premiumShell ? 'bg-white' : ''}`}
                     tabIndex={-1}
@@ -86,7 +86,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
                 />
             )}
 
-            <MobileBottomNav variant={isAdmin ? 'dashboard' : 'home'} />
+            {!isAdmin && <MobileBottomNav variant="home" />}
         </div>
     );
 }

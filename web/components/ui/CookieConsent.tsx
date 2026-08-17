@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { setAnalyticsConsent, isAnalyticsEnabledInEnv, hasAnalyticsConsent } from '@/lib/analytics';
+import { setAnalyticsConsent, isAnalyticsEnabledInEnv, hasAnalyticsDecision } from '@/lib/analytics';
 
 export default function CookieConsent() {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
         if (!isAnalyticsEnabledInEnv()) return;
-        if (hasAnalyticsConsent()) return;
+        if (hasAnalyticsDecision()) return;
         setVisible(true);
     }, []);
 

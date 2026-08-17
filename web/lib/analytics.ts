@@ -23,6 +23,13 @@ export function isAnalyticsEnabledInEnv(): boolean {
     return key === 'true' || key === '1';
 }
 
+export function hasAnalyticsDecision(): boolean {
+    if (typeof window === 'undefined') return false;
+    if (!isAnalyticsEnabledInEnv()) return true;
+    const value = window.localStorage.getItem(CONSENT_KEY);
+    return value === 'accepted' || value === 'declined';
+}
+
 export function hasAnalyticsConsent(): boolean {
     if (typeof window === 'undefined') return false;
     if (!isAnalyticsEnabledInEnv()) return true;

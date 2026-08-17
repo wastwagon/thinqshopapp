@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProductModule } from './product/product.module';
 import { OrderModule } from './order/order.module';
 import { CartModule } from './cart/cart.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 import { FinanceModule } from './finance/finance.module';
 import { AddressModule } from './address/address.module';
 import { LogisticsModule } from './logistics/logistics.module';
@@ -45,6 +46,7 @@ import { ConsignmentModule } from './consignment/consignment.module';
         ProductModule,
         MediaModule,
         CartModule,
+        WishlistModule,
         OrderModule,
         AddressModule,
         FinanceModule,

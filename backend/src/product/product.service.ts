@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { CreateReviewDto } from './dto/review.dto';
+import { clampLimit, clampPage } from '../common/pagination';
 
 /**
  * Extra flat slugs rolled into a New/Used tree root (no product reassignment).
@@ -107,8 +108,10 @@ export class ProductService {
     }
 
     async findAllForAdmin(query: { page?: number; limit?: number; search?: string }) {
-        const { page = 1, limit = 100, search } = query;
+        const page = clampPage(query.page);
+        const limit = clampLimit(query.limit, 50, 100);
         const skip = (page - 1) * limit;
+        const search = query.search;
         const where: any = {};
         if (search) {
             where.OR = [
@@ -121,17 +124,19 @@ export class ProductService {
             this.prisma.product.findMany({
                 where,
                 include: { category: true, variants: true },
-                skip: Number(skip),
-                take: Number(limit),
+                skip,
+                take: limit,
                 orderBy: { created_at: 'desc' },
             }),
             this.prisma.product.count({ where }),
         ]);
-        return { data: products, meta: { total, page: Number(page), limit: Number(limit), totalPages: Math.ceil(total / Number(limit)) } };
+        return { data: products, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
     }
 
     async findAll(query: { category?: string; search?: string; page?: number; limit?: number }) {
-        const { category, search, page = 1, limit = 100 } = query;
+        const { category, search } = query;
+        const page = clampPage(query.page);
+        const limit = clampLimit(query.limit, 24, 48);
         const skip = (page - 1) * limit;
 
         const where: any = { is_active: true };
@@ -169,27 +174,34 @@ export class ProductService {
             data: products,
             meta: {
                 total,
-                page: Number(page),
-                limit: Number(limit),
-                totalPages: Math.ceil(total / Number(limit)),
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
             },
         };
     }
 
-    async findOne(slug: string) {
-        const product = await this.prisma.product.findUnique({
-            where: { slug },
-            include: { category: true, variants: true },
+    async findOne(slugOrId: string) {
+        const include = { category: true, variants: true } as const;
+        let product = await this.prisma.product.findUnique({
+            where: { slug: slugOrId },
+            include,
         });
-        if (!product) throw new NotFoundException(`Product with slug ${slug} not found`);
+        if (!product && /^\d+$/.test(slugOrId)) {
+            product = await this.prisma.product.findUnique({
+                where: { id: Number(slugOrId) },
+                include,
+            });
+        }
+        if (!product) throw new NotFoundException(`Product with slug ${slugOrId} not found`);
         return product;
     }
 
     async getReviewsByProductSlug(slug: string, page: number | string = 1, limit: number | string = 10) {
         const product = await this.prisma.product.findUnique({ where: { slug }, select: { id: true } });
         if (!product) throw new NotFoundException(`Product with slug ${slug} not found`);
-        const p = Number(page) || 1;
-        const l = Number(limit) || 10;
+        const p = clampPage(page);
+        const l = clampLimit(limit, 10, 50);
         const skip = (p - 1) * l;
         const [reviews, total] = await Promise.all([
             this.prisma.productReview.findMany({
