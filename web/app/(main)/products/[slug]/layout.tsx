@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { purchaseQtyForAddToCart } from '@/lib/wholesale-pricing';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app';
 const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000';
@@ -67,6 +68,7 @@ export default async function ProductLayout({
     const product = await getProduct(slug);
     const siteUrlBase = siteUrl;
 
+    const packMin = product ? purchaseQtyForAddToCart(product) : 1;
     const jsonLd = product
         ? {
               '@context': 'https://schema.org',
@@ -80,6 +82,14 @@ export default async function ProductLayout({
                   price: product.price ?? product.price_ghs,
                   priceCurrency: 'GHS',
                   availability: product.is_active !== false ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                  ...(packMin >= 2
+                      ? {
+                            eligibleQuantity: {
+                                '@type': 'QuantitativeValue',
+                                minValue: packMin,
+                            },
+                        }
+                      : {}),
               },
           }
         : null;

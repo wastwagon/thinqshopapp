@@ -20,7 +20,7 @@ android {
         applicationId "com.thinqshopping.app"
         minSdk 23
         targetSdk 35
-        versionCode 2
+        versionCode 4
         versionName "2.0.0"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

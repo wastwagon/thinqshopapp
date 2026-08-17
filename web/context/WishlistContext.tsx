@@ -11,6 +11,10 @@ interface WishlistProduct {
     images?: string[];
     gallery_images?: string[];
     category?: string | { name: string };
+    wholesale_min_quantity?: number | string | null;
+    wholesale_discount_pct?: number | string | null;
+    enforce_min_quantity?: boolean;
+    is_consignment?: boolean;
 }
 
 interface WishlistContextType {

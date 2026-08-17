@@ -48,8 +48,29 @@ export class ProductService {
         children: { orderBy: { sort_order: 'asc' as const } },
     };
 
+    private assertWholesaleConfig(
+        dto: CreateProductDto | UpdateProductDto,
+        existing?: { is_consignment: boolean; wholesale_min_quantity: number | null; enforce_min_quantity: boolean },
+    ) {
+        const isConsignment = existing?.is_consignment === true;
+        const enforce = dto.enforce_min_quantity ?? existing?.enforce_min_quantity ?? false;
+        if (isConsignment && enforce) {
+            throw new BadRequestException('Sell for Me listings cannot require a minimum purchase quantity');
+        }
+        const min =
+            dto.wholesale_min_quantity !== undefined
+                ? dto.wholesale_min_quantity
+                : existing?.wholesale_min_quantity ?? null;
+        if (enforce && (min == null || Number(min) < 2)) {
+            throw new BadRequestException(
+                'Set a minimum quantity of at least 2 to block purchases below that quantity',
+            );
+        }
+    }
+
     async create(createProductDto: CreateProductDto) {
         await this.assertLeafCategory(createProductDto.category_id);
+        this.assertWholesaleConfig(createProductDto);
         const slug = createProductDto.slug || this.slugify(createProductDto.name);
         const { variants, ...rest } = createProductDto as CreateProductDto & { variants?: Array<{ variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number; image?: string }> };
         const data = { ...rest, slug } as any;
@@ -282,6 +303,7 @@ export class ProductService {
         if (updateProductDto.category_id != null) {
             await this.assertLeafCategory(updateProductDto.category_id);
         }
+        this.assertWholesaleConfig(updateProductDto, existing);
         const { variants, ...rest } = updateProductDto as UpdateProductDto & { variants?: Array<{ variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number; image?: string }> };
 
         if (existing.is_consignment) {

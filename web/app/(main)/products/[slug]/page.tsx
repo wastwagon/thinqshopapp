@@ -16,6 +16,7 @@ import ProductCard from '@/components/ui/ProductCard';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import localProducts from '@/lib/data/scraped_products.json';
 import { toSlug, parsePrice, normalizeProduct } from '@/lib/product-utils';
+import { purchaseQtyForAddToCart, resolveProductLinePricing } from '@/lib/wholesale-pricing';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
@@ -68,6 +69,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                 const { data } = await api.get(`/products/${slug}`);
                 if (data) {
                     setProduct(data);
+                    setQuantity(purchaseQtyForAddToCart(data));
                     const v = Array.isArray(data.variants) ? data.variants : [];
                     setSelectedVariantId(v.length && v[0]?.id != null ? Number(v[0].id) : null);
                     setLoading(false);
@@ -78,6 +80,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
             if (found) {
                 const id = typeof found.id === 'number' ? found.id : (localProducts as any[]).indexOf(found) + 1;
                 setProduct({ ...found, id, slug, images: found.gallery_images ?? found.images ?? [] });
+                setQuantity(purchaseQtyForAddToCart(found));
                 setSelectedVariantId(null);
             } else {
                 setSelectedVariantId(null);
@@ -198,20 +201,27 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
         { label: product.name },
     ];
 
-    const minQty = product.wholesale_min_quantity != null ? Number(product.wholesale_min_quantity) : 0;
-    const discountPct = product.wholesale_discount_pct != null ? Number(product.wholesale_discount_pct) : 0;
-    const hasWholesale = minQty > 0 && discountPct > 0;
-    const qualifiesWholesale = hasWholesale && quantity >= minQty;
     const basePrice = parsePrice(product.price);
     const variantAdjust = selectedVariant != null ? Number((selectedVariant as { price_adjust?: number }).price_adjust ?? 0) : 0;
     const listUnitBeforeWholesale = basePrice + variantAdjust;
-    const unitPrice = qualifiesWholesale ? listUnitBeforeWholesale * (1 - discountPct / 100) : listUnitBeforeWholesale;
     const stockToShow =
         product.is_consignment
             ? Number(product.stock_quantity ?? 0)
             : selectedVariant != null && (selectedVariant as { stock_quantity?: number }).stock_quantity != null
               ? Number((selectedVariant as { stock_quantity: number }).stock_quantity)
               : Number(product.stock_quantity ?? 0);
+    const linePricing = resolveProductLinePricing(product, {
+        listPrice: listUnitBeforeWholesale,
+        quantity,
+        stock: stockToShow,
+    });
+    const minQty = linePricing.minQty;
+    const discountPct = linePricing.discountPct;
+    const hasWholesale = linePricing.hasWholesaleDiscount;
+    const qualifiesWholesale = linePricing.qualifiesWholesale;
+    const unitPrice = linePricing.unitPrice;
+    const purchaseMin = linePricing.purchaseMin;
+    const insufficientForMin = stockToShow < purchaseMin;
     const isOwnConsignment =
         Boolean(
             product.is_consignment &&
@@ -219,16 +229,30 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                 product.consignor_user_id != null &&
                 Number(user.id) === Number(product.consignor_user_id),
         );
-    const maxQuantity = product.is_consignment ? 1 : Math.max(1, stockToShow);
+    const maxQuantity = product.is_consignment ? 1 : Math.max(purchaseMin, stockToShow);
     const moreNeeded = hasWholesale && quantity < minQty ? minQty - quantity : 0;
 
     const expressVariantId =
         selectedVariantId ??
         (variants.length > 0 && variants[0]?.id != null ? Number(variants[0].id) : undefined);
 
-    const purchaseDisabled = isOwnConsignment || stockToShow <= 0;
-    const addToCartLabel = isOwnConsignment ? 'Your listing' : stockToShow <= 0 ? 'Out of stock' : 'Add to cart';
-    const buyLabel = buying ? 'Buying…' : isOwnConsignment ? 'Your listing' : stockToShow <= 0 ? 'Out of stock' : 'Buy';
+    const purchaseDisabled = isOwnConsignment || stockToShow <= 0 || insufficientForMin;
+    const addToCartLabel = isOwnConsignment
+        ? 'Your listing'
+        : stockToShow <= 0
+          ? 'Out of stock'
+          : insufficientForMin
+            ? `Min ${purchaseMin}`
+            : 'Add to cart';
+    const buyLabel = buying
+        ? 'Buying…'
+        : isOwnConsignment
+          ? 'Your listing'
+          : stockToShow <= 0
+            ? 'Out of stock'
+            : insufficientForMin
+              ? `Min ${purchaseMin}`
+              : 'Buy';
 
     const handleWishlistToggle = () => {
         toggleWishlist({
@@ -239,6 +263,10 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
             images: product.images,
             gallery_images: product.gallery_images,
             category: product.category,
+            wholesale_min_quantity: product.wholesale_min_quantity ?? null,
+            wholesale_discount_pct: product.wholesale_discount_pct ?? null,
+            enforce_min_quantity: Boolean(product.enforce_min_quantity),
+            is_consignment: Boolean(product.is_consignment),
         });
     };
 
@@ -249,6 +277,10 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
         }
         if (variants.length > 0 && selectedVariantId == null) {
             toast.error('Please select an option');
+            return;
+        }
+        if (linePricing.error) {
+            toast.error(linePricing.error);
             return;
         }
         addToCart(Number(product.id), quantity, selectedVariantId ?? undefined);
@@ -263,6 +295,10 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
             toast.error('Out of stock');
             return;
         }
+        if (linePricing.error) {
+            toast.error(linePricing.error);
+            return;
+        }
         if (variants.length > 0 && selectedVariantId == null) {
             toast.error('Please select an option');
             return;
@@ -275,7 +311,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
         }
         setBuying(true);
         try {
-            const ok = await addToCart(Number(product.id), Math.max(1, quantity), expressVariantId, {
+            const ok = await addToCart(Number(product.id), Math.max(purchaseMin, quantity), expressVariantId, {
                 openDrawer: false,
                 successMessage: 'Added — going to checkout',
             });
@@ -317,6 +353,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
             <QuantityStepper
                 value={quantity}
                 onChange={setQuantity}
+                min={purchaseMin}
                 max={maxQuantity}
                 size="sm"
                 className="shrink-0"
@@ -429,6 +466,9 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                                 ? 'Sell for Me'
                                                 : 'Ships abroad · 7–14 days'}
                                         </Badge>
+                                        {linePricing.enforceMin && (
+                                            <Badge variant="warning">Min {purchaseMin}</Badge>
+                                        )}
                                     </div>
                             </div>
 
@@ -450,6 +490,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     <QuantityStepper
                                         value={quantity}
                                         onChange={setQuantity}
+                                        min={purchaseMin}
                                         max={maxQuantity}
                                         size="sm"
                                         className="shrink-0"
@@ -463,11 +504,23 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                     This is your Sell for Me listing. Buyers can add it to cart — you cannot purchase it yourself.
                                 </p>
                             )}
-                            {hasWholesale && (
+                            {insufficientForMin && !isOwnConsignment && (
+                                <div className="text-sm font-medium px-3 py-2.5 rounded-xl bg-orange-50 text-orange-800 border border-orange-200">
+                                    Not enough stock for the minimum order of {purchaseMin}.
+                                </div>
+                            )}
+                            {!insufficientForMin && linePricing.enforceMin && quantity < purchaseMin && !hasWholesale && (
+                                <div className="text-sm font-medium px-3 py-2.5 rounded-xl bg-orange-50 text-orange-800 border border-orange-200">
+                                    Minimum order is {purchaseMin}.
+                                </div>
+                            )}
+                            {!insufficientForMin && hasWholesale && (
                                 <div className={`text-sm font-medium px-3 py-2.5 rounded-xl ${qualifiesWholesale ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-orange-50 text-orange-800 border border-orange-200'}`}>
                                     {qualifiesWholesale
                                         ? `You qualify for wholesale! Save ${discountPct}% on this order.`
-                                        : `Add ${moreNeeded} more to get ${discountPct}% wholesale discount.`}
+                                        : linePricing.enforceMin
+                                          ? `Buy at least ${minQty} to get ${discountPct}% wholesale discount.`
+                                          : `Add ${moreNeeded} more to get ${discountPct}% wholesale discount.`}
                                 </div>
                             )}
                         </div>
@@ -490,7 +543,11 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 <div className="flex flex-col gap-2">
                                     {variants.map((v: { id: number; variant_type: string; variant_value: string; price_adjust?: number; stock_quantity?: number }) => {
                                         const vid = Number(v.id);
-                                        const vUnit = basePrice + Number(v.price_adjust ?? 0);
+                                        const vList = basePrice + Number(v.price_adjust ?? 0);
+                                        const vUnit = resolveProductLinePricing(product, {
+                                            listPrice: vList,
+                                            quantity,
+                                        }).unitPrice;
                                         const sel = selectedVariantId === vid;
                                         const oos = product.is_consignment
                                             ? Number(product.stock_quantity ?? 0) <= 0

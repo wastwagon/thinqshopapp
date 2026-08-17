@@ -12,6 +12,7 @@ import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
+import { purchaseQtyForAddToCart, resolveProductLinePricing } from '@/lib/wholesale-pricing';
 
 interface ProductVariantRow {
     id?: number;
@@ -37,6 +38,9 @@ interface Product {
     description?: string | null;
     variants?: ProductVariantRow[];
     is_consignment?: boolean;
+    wholesale_min_quantity?: number | string | null;
+    wholesale_discount_pct?: number | string | null;
+    enforce_min_quantity?: boolean;
 }
 
 interface ProductCardProps {
@@ -79,6 +83,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     const hasVariants = variantUnitPrices.length > 0;
     const fromPrice = hasVariants ? Math.min(...variantUnitPrices) : basePrice;
     const firstVariantId = hasVariants && variants[0]?.id != null ? variants[0].id : undefined;
+    const addQty = purchaseQtyForAddToCart(product);
+    const packPricing = resolveProductLinePricing(product, { listPrice: fromPrice, quantity: addQty });
+    const displayPrice =
+        packPricing.enforceMin && packPricing.hasWholesaleDiscount ? packPricing.unitPrice : fromPrice;
 
     let imgs: unknown = product.images;
     if (typeof imgs === 'string') {
@@ -120,6 +128,10 @@ export default function ProductCard({ product }: ProductCardProps) {
             images: wishImages,
             gallery_images: product.gallery_images,
             category: product.category,
+            wholesale_min_quantity: product.wholesale_min_quantity ?? null,
+            wholesale_discount_pct: product.wholesale_discount_pct ?? null,
+            enforce_min_quantity: Boolean(product.enforce_min_quantity),
+            is_consignment: Boolean(product.is_consignment),
         });
     };
 
@@ -139,7 +151,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         }
         setBuying(true);
         try {
-            const ok = await addToCart(productId, 1, firstVariantId, {
+            const ok = await addToCart(productId, addQty, firstVariantId, {
                 openDrawer: false,
                 successMessage: 'Added — going to checkout',
             });
@@ -185,7 +197,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 type="button"
                 onClick={(e) => {
                     e.stopPropagation();
-                    productId && addToCart(productId, 1, firstVariantId);
+                    productId && addToCart(productId, addQty, firstVariantId);
                 }}
                 className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white`}
                 title={hasVariants ? 'Add first option to cart (choose options on product page)' : 'Add to Cart'}
@@ -226,6 +238,12 @@ export default function ProductCard({ product }: ProductCardProps) {
                     {product.is_consignment && (
                         <div className={`absolute top-3 ${product.compare_price ? 'left-[4.5rem]' : 'left-3'} bg-brand text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10 pointer-events-none`}>
                             CONSIGNMENT
+                        </div>
+                    )}
+
+                    {addQty >= 2 && (
+                        <div className="absolute bottom-3 left-3 bg-gray-900 text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10 pointer-events-none">
+                            Min {addQty}
                         </div>
                     )}
 
@@ -275,7 +293,10 @@ export default function ProductCard({ product }: ProductCardProps) {
                             {hasVariants && (
                                 <span className="text-xs font-medium text-gray-500">From</span>
                             )}
-                            <PriceDisplay amountGhs={fromPrice} className="text-base font-semibold text-gray-900" />
+                            <PriceDisplay amountGhs={displayPrice} className="text-base font-semibold text-gray-900" />
+                            {addQty >= 2 && (
+                                <span className="text-[10px] font-semibold text-gray-500">Min {addQty}</span>
+                            )}
                         </div>
                     </div>
                     <Link
@@ -298,7 +319,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 onBuy={handleExpressBuy}
                 buying={buying}
                 buyLabel="Buy"
-                priceGhs={fromPrice}
+                priceGhs={displayPrice}
                 categoryLabel={
                     typeof product.category === 'string'
                         ? product.category

@@ -240,6 +240,7 @@ model Product {
   low_stock_threshold    Int              @default(10)
   wholesale_min_quantity Int?
   wholesale_discount_pct Decimal?         @db.Decimal(5, 2)
+  enforce_min_quantity   Boolean          @default(false)
   category_id            Int
   images              Json?            // Array of image paths
   specifications      Json?            // Object

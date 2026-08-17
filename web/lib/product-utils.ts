@@ -1,3 +1,5 @@
+import { purchaseQtyForAddToCart, resolveProductLinePricing, type LinePricing } from './wholesale-pricing';
+
 /** Normalize product for consistent display across pages */
 export function normalizeProduct(p: any, index: number = 0) {
     const categoryName = typeof p.category === 'object' ? p.category?.name : p.category;
@@ -38,17 +40,40 @@ export function productMatchesSlug(product: any, slug: string): boolean {
     return pSlug === slug;
 }
 
-/** Unit price in GHS for a cart line (base product price + variant adjustment). */
-export function cartItemUnitGhs(item: {
-    product?: { price?: unknown };
+/** Full line pricing for a cart item (list + wholesale rules). */
+export function cartItemPricing(item: {
+    quantity?: number;
+    product?: {
+        price?: unknown;
+        wholesale_min_quantity?: unknown;
+        wholesale_discount_pct?: unknown;
+        enforce_min_quantity?: unknown;
+        is_consignment?: unknown;
+    };
     variant?: { price_adjust?: unknown } | null;
-}): number {
+}): LinePricing {
     const base = parsePrice(item.product?.price);
     const adj =
         item.variant != null && item.variant.price_adjust != null
             ? Number(item.variant.price_adjust)
             : 0;
-    return base + (Number.isFinite(adj) ? adj : 0);
+    const listPrice = base + (Number.isFinite(adj) ? adj : 0);
+    return resolveProductLinePricing(item.product, {
+        listPrice,
+        quantity: item.quantity ?? 1,
+    });
+}
+
+export function cartItemUnitGhs(item: Parameters<typeof cartItemPricing>[0]): number {
+    return cartItemPricing(item).unitPrice;
+}
+
+export function cartItemLineTotalGhs(item: Parameters<typeof cartItemPricing>[0]): number {
+    return cartItemPricing(item).lineTotal;
+}
+
+export function cartItemPurchaseMin(item: Parameters<typeof cartItemPricing>[0]): number {
+    return purchaseQtyForAddToCart(item.product);
 }
 
 /** Parse price from API or static format ($1,234.56 or 1234.56) */

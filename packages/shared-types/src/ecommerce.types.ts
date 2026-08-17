@@ -6,6 +6,9 @@ export interface Product {
     description?: string;
     category_id: number;
     images?: string[];
+    wholesale_min_quantity?: number | null;
+    wholesale_discount_pct?: number | null;
+    enforce_min_quantity?: boolean;
 }
 
 export interface Order {

@@ -180,6 +180,13 @@ async function main() {
         const specs = parseSpecifications(cellStr(row, 'Specifications'));
         const images = parseImages(cellStr(row, 'Featured image'), cellStr(row, 'Gallery images'));
 
+        const wholesaleMin = parseOptionalInt(cellStr(row, 'Minimum quantity for wholesale'));
+        const wholesaleDiscount = parseOptionalNumber(cellStr(row, 'Wholesale discount (%)'));
+        const wantsPack =
+            parseYesNo(cellStr(row, 'Cannot buy below minimum quantity')) ||
+            parseYesNo(cellStr(row, 'Wholesale pack'));
+        const enforceMin = wantsPack && wholesaleMin != null && wholesaleMin >= 2;
+
         const productData = {
             name,
             slug,
@@ -193,11 +200,10 @@ async function main() {
             specifications: specs ? (specs as Prisma.InputJsonValue) : Prisma.JsonNull,
             is_featured: parseYesNo(cellStr(row, 'Show in Featured')),
             is_active: parseActive(cellStr(row, 'Status')),
-            wholesale_min_quantity: parseOptionalInt(cellStr(row, 'Minimum quantity for wholesale')),
+            wholesale_min_quantity: wholesaleMin,
             wholesale_discount_pct:
-                parseOptionalNumber(cellStr(row, 'Wholesale discount (%)')) != null
-                    ? new Prisma.Decimal(parseOptionalNumber(cellStr(row, 'Wholesale discount (%)'))!)
-                    : null,
+                wholesaleDiscount != null ? new Prisma.Decimal(wholesaleDiscount) : null,
+            enforce_min_quantity: enforceMin,
         };
 
         const existing = await prisma.product.findUnique({ where: { slug }, select: { id: true } });

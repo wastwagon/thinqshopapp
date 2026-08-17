@@ -5,7 +5,7 @@ import api from '@/lib/axios';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
 import { trackAddToCart } from '@/lib/analytics';
-import { cartItemUnitGhs } from '@/lib/product-utils';
+import { cartItemLineTotalGhs } from '@/lib/product-utils';
 
 interface Product {
     id: number;
@@ -13,6 +13,11 @@ interface Product {
     price: number;
     images: string[];
     gallery_images?: string[];
+    slug?: string;
+    wholesale_min_quantity?: number | null;
+    wholesale_discount_pct?: number | string | null;
+    enforce_min_quantity?: boolean;
+    is_consignment?: boolean;
 }
 
 interface CartItem {
@@ -99,7 +104,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             await api.patch(`/cart/${itemId}`, { quantity });
             fetchCart();
         } catch (error) {
-            toast.error('Failed to update cart');
+            toast.error(error.response?.data?.message || 'Failed to update cart');
         }
     };
 
@@ -124,7 +129,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     const toggleCart = () => setIsCartOpen(!isCartOpen);
 
     const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
-    const cartTotal = cart.reduce((total, item) => total + item.quantity * cartItemUnitGhs(item), 0);
+    const cartTotal = cart.reduce((total, item) => total + cartItemLineTotalGhs(item), 0);
 
     return (
         <CartContext.Provider value={{

@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddToCartDto, UpdateCartItemDto } from './dto/cart.dto';
+import { resolveProductLinePricing } from '../product/wholesale-pricing';
 
 @Injectable()
 export class CartService {
@@ -14,8 +15,17 @@ export class CartService {
     }
 
     private assertQuantityAllowed(
-        product: { is_active: boolean; is_consignment: boolean; stock_quantity: number; consignor_user_id: number | null },
-        variant: { stock_quantity: number } | null,
+        product: {
+            is_active: boolean;
+            is_consignment: boolean;
+            stock_quantity: number;
+            consignor_user_id: number | null;
+            wholesale_min_quantity: number | null;
+            wholesale_discount_pct: unknown;
+            enforce_min_quantity: boolean;
+            price: unknown;
+        },
+        variant: { stock_quantity: number; price_adjust?: unknown } | null,
         quantity: number,
         userId: number,
     ) {
@@ -34,10 +44,15 @@ export class CartService {
             : variant
               ? Number(variant.stock_quantity)
               : Number(product.stock_quantity);
-        if (quantity > stock) {
-            throw new BadRequestException(
-                stock <= 0 ? 'This item is out of stock' : `Only ${stock} available`,
-            );
+        const listPrice =
+            Number(product.price) + (variant != null ? Number(variant.price_adjust ?? 0) : 0);
+        const pricing = resolveProductLinePricing(product, {
+            listPrice,
+            quantity,
+            stock,
+        });
+        if (pricing.error) {
+            throw new BadRequestException(pricing.error);
         }
     }
 

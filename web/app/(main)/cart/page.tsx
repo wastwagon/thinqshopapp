@@ -9,7 +9,7 @@ import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
 import ShopContent from '@/components/shop/ShopContent';
 import ShopTrustRow from '@/components/shop/ShopTrustRow';
-import { cartItemUnitGhs } from '@/lib/product-utils';
+import { cartItemPricing, cartItemPurchaseMin } from '@/lib/product-utils';
 import { getMediaUrl } from '@/lib/media';
 import LiveRegion from '@/components/ui/LiveRegion';
 import EmptyState from '@/components/ui/EmptyState';
@@ -59,6 +59,7 @@ export default function CartPage() {
                                     '';
                                 const mainImage = rawImg ? getMediaUrl(String(rawImg)) : '/placeholder.svg';
                                 const productSlug = (item.product as { slug?: string }).slug || item.product.id;
+                                const pricing = cartItemPricing(item);
                                 return (
                                     <li key={item.id} className="flex py-5 gap-4 px-4 sm:px-5">
                                         <Link
@@ -82,7 +83,7 @@ export default function CartPage() {
                                                     </Link>
                                                 </h2>
                                                 <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
-                                                    <PriceDisplay amountGhs={cartItemUnitGhs(item) * item.quantity} />
+                                                    <PriceDisplay amountGhs={pricing.lineTotal} />
                                                 </p>
                                             </div>
                                             {(item as { variant?: { variant_type: string; variant_value: string } }).variant && (
@@ -92,12 +93,18 @@ export default function CartPage() {
                                                 </p>
                                             )}
                                             <p className="text-xs text-gray-400 mt-1">
-                                                <PriceDisplay amountGhs={cartItemUnitGhs(item)} /> each
+                                                <PriceDisplay amountGhs={pricing.unitPrice} /> each
+                                                {pricing.qualifiesWholesale && (
+                                                    <span className="ml-1 text-green-700 font-medium">
+                                                        −{pricing.discountPct}% wholesale
+                                                    </span>
+                                                )}
                                             </p>
                                             <div className="flex flex-1 items-end justify-between mt-3 flex-wrap gap-2">
                                                 <QuantityStepper
                                                     value={item.quantity}
                                                     onChange={(next) => updateQuantity(item.id, next)}
+                                                    min={cartItemPurchaseMin(item)}
                                                 />
                                                 <button
                                                     type="button"

@@ -11,6 +11,7 @@ import { SmsService } from '../sms/sms.service';
 import { NotificationService } from '../notification/notification.service';
 import { WalletService } from '../finance/wallet.service';
 import { ConsignmentService } from '../consignment/consignment.service';
+import { resolveProductLinePricing } from '../product/wholesale-pricing';
 
 type TxClient = Prisma.TransactionClient;
 type CartLine = Awaited<ReturnType<CartService['getCart']>>[number];
@@ -20,6 +21,26 @@ type OrderItemLine = {
     quantity: number;
     product?: { is_consignment: boolean; name?: string } | null;
 };
+
+function cartLineListPrice(item: CartLine): number {
+    return item.variant
+        ? Number(item.product.price) + Number(item.variant.price_adjust)
+        : Number(item.product.price);
+}
+
+function cartLineStock(item: CartLine): number {
+    if (item.product.is_consignment) return Number(item.product.stock_quantity);
+    if (item.variant) return Number(item.variant.stock_quantity);
+    return Number(item.product.stock_quantity);
+}
+
+function cartLinePricing(item: CartLine) {
+    return resolveProductLinePricing(item.product, {
+        listPrice: cartLineListPrice(item),
+        quantity: item.quantity,
+        stock: cartLineStock(item),
+    });
+}
 
 @Injectable()
 export class OrderService {
@@ -46,6 +67,10 @@ export class OrderService {
             }
             if (product.is_consignment && item.quantity > 1) {
                 throw new BadRequestException('Consignment items can only be purchased one at a time');
+            }
+            const pricing = cartLinePricing(item);
+            if (pricing.error) {
+                throw new BadRequestException(`${product.name}: ${pricing.error}`);
             }
 
             if (item.variant_id && !product.is_consignment) {
@@ -121,10 +146,11 @@ export class OrderService {
         }
 
         const subtotal = cartItems.reduce((sum, item) => {
-            const unitPrice = item.variant
-                ? Number(item.product.price) + Number(item.variant.price_adjust)
-                : Number(item.product.price);
-            return sum + unitPrice * item.quantity;
+            const pricing = cartLinePricing(item);
+            if (pricing.error) {
+                throw new BadRequestException(`${item.product.name}: ${pricing.error}`);
+            }
+            return sum + pricing.lineTotal;
         }, 0);
 
         const settings = await this.prisma.setting.findMany({
@@ -214,9 +240,7 @@ export class OrderService {
             }
 
             const orderItemsData = cartItems.map((item) => {
-                const unitPrice = item.variant
-                    ? Number(item.product.price) + Number(item.variant.price_adjust)
-                    : Number(item.product.price);
+                const pricing = cartLinePricing(item);
                 const variantDetails = item.variant
                     ? `${item.variant.variant_type}: ${item.variant.variant_value}`.replace(/_/g, ' ')
                     : null;
@@ -225,10 +249,10 @@ export class OrderService {
                     product_id: item.product_id,
                     variant_id: item.variant_id ?? undefined,
                     quantity: item.quantity,
-                    price: unitPrice,
+                    price: pricing.unitPrice,
                     product_name: item.product.name,
                     variant_details: variantDetails,
-                    total: unitPrice * item.quantity,
+                    total: pricing.lineTotal,
                 };
             });
 

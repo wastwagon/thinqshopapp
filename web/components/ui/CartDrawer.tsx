@@ -7,7 +7,7 @@ import { useCart } from '@/context/CartContext';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { cartItemUnitGhs } from '@/lib/product-utils';
+import { cartItemPricing, cartItemPurchaseMin } from '@/lib/product-utils';
 import { getMediaUrl } from '@/lib/media';
 import Button from '@/components/ui/Button';
 import QuantityStepper from '@/components/ui/QuantityStepper';
@@ -49,7 +49,7 @@ export default function CartDrawer() {
                                 leaveTo="translate-y-full md:translate-x-full"
                             >
                                 <Dialog.Panel className="pointer-events-auto w-full max-w-md md:h-full max-h-[min(92vh,720px)] md:max-h-none rounded-t-2xl md:rounded-none overflow-hidden">
-                                    <div className="flex h-full max-h-[inherit] flex-col overflow-hidden bg-white border-t border-gray-200/90 md:border-t-0 md:border-l relative">
+                                    <div className="flex h-full max-h-[inherit] flex-col overflow-hidden bg-white border-t border-gray-200/90 md:border-t-0 md:border-l relative md:pt-[var(--app-sat,env(safe-area-inset-top,0px))]">
                                         <div className="mx-auto mt-2 mb-1 h-1 w-10 shrink-0 rounded-full bg-gray-300 md:hidden" aria-hidden />
                                         <div className="flex-1 overflow-y-auto overscroll-y-contain scrollbar-thin px-6 py-6 md:py-8 relative z-10 min-h-0">
                                             <div className="flex items-start justify-between mb-8">
@@ -82,6 +82,7 @@ export default function CartDrawer() {
                                                         {cart.map((item) => {
                                                             const rawImg = item.product.gallery_images?.[0] || (Array.isArray(item.product.images) ? item.product.images[0] : item.product.images) || '';
                                                             const mainImage = rawImg ? getMediaUrl(String(rawImg)) : '/placeholder.svg';
+                                                            const pricing = cartItemPricing(item);
                                                             return (
                                                                 <li key={item.id} className="flex py-6 gap-4 group">
                                                                     <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-gray-50 border border-gray-100 relative">
@@ -99,7 +100,7 @@ export default function CartDrawer() {
                                                                                     <Link href={`/products/${(item.product as { slug?: string }).slug || item.product.id}`} onClick={toggleCart} className="hover:text-blue-600 transition-colors">{item.product.name}</Link>
                                                                                 </h3>
                                                                                 <p className="text-sm font-bold text-gray-900 whitespace-nowrap">
-                                                                                    <PriceDisplay amountGhs={cartItemUnitGhs(item) * item.quantity} />
+                                                                                    <PriceDisplay amountGhs={pricing.lineTotal} />
                                                                                 </p>
                                                                             </div>
                                                                             {(item as { variant?: { variant_type: string; variant_value: string } }).variant && (
@@ -108,13 +109,19 @@ export default function CartDrawer() {
                                                                                 </p>
                                                                             )}
                                                                             <p className="text-xs text-gray-400 mt-1">
-                                                                                <PriceDisplay amountGhs={cartItemUnitGhs(item)} /> each
+                                                                                <PriceDisplay amountGhs={pricing.unitPrice} /> each
+                                                                                {pricing.qualifiesWholesale && (
+                                                                                    <span className="ml-1 text-green-700 font-medium">
+                                                                                        −{pricing.discountPct}%
+                                                                                    </span>
+                                                                                )}
                                                                             </p>
                                                                         </div>
                                                                         <div className="flex flex-1 items-end justify-between mt-3">
                                                                             <QuantityStepper
                                                                                 value={item.quantity}
                                                                                 onChange={(next) => updateQuantity(item.id, next)}
+                                                                                min={cartItemPurchaseMin(item)}
                                                                                 size="sm"
                                                                             />
 

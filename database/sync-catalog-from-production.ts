@@ -81,6 +81,7 @@ type ProdProduct = {
     stock_quantity?: number;
     wholesale_min_quantity?: number | null;
     wholesale_discount_pct?: string | number | null;
+    enforce_min_quantity?: boolean;
     is_featured?: boolean;
     is_active?: boolean;
     images?: unknown;
@@ -253,6 +254,7 @@ async function main() {
             stock_quantity: p.stock_quantity ?? 0,
             wholesale_min_quantity: p.wholesale_min_quantity ?? null,
             wholesale_discount_pct: toDecimal(p.wholesale_discount_pct ?? null),
+            enforce_min_quantity: p.enforce_min_quantity === true,
             category_id: categoryId,
             images: images.length ? images : Prisma.JsonNull,
             specifications:

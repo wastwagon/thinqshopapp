@@ -86,6 +86,7 @@ export default function AdminProducts() {
         gallery: [] as string[],
         wholesale_min_quantity: '',
         wholesale_discount_pct: '',
+        enforce_min_quantity: false,
         short_description: '',
         description: '',
         specifications_json: '', // JSON text for specs (e.g. {"Screen": "14\"", "RAM": "8GB"})
@@ -192,6 +193,7 @@ export default function AdminProducts() {
                 gallery: imgs.slice(1),
                 wholesale_min_quantity: String(product.wholesale_min_quantity ?? ''),
                 wholesale_discount_pct: String(product.wholesale_discount_pct ?? ''),
+                enforce_min_quantity: !!product.enforce_min_quantity,
                 short_description: product.short_description ?? '',
                 description: product.description ?? '',
                 specifications_json: (() => {
@@ -218,6 +220,7 @@ export default function AdminProducts() {
                 gallery: [],
                 wholesale_min_quantity: '',
                 wholesale_discount_pct: '',
+                enforce_min_quantity: false,
                 short_description: '',
                 description: '',
                 specifications_json: '',
@@ -309,6 +312,13 @@ export default function AdminProducts() {
                 return;
             }
         }
+        if (formData.enforce_min_quantity) {
+            const min = parseInt(formData.wholesale_min_quantity, 10);
+            if (!Number.isFinite(min) || min < 2) {
+                toast.error('Set a minimum quantity of at least 2 to block purchases below that quantity');
+                return;
+            }
+        }
         try {
             const images = [formData.featuredImage, ...formData.gallery].filter(Boolean);
             const payload: Record<string, unknown> = {
@@ -322,8 +332,13 @@ export default function AdminProducts() {
                 images
             };
             if (formData.compare_price) payload.compare_price = parseFloat(formData.compare_price);
-            if (formData.wholesale_min_quantity) payload.wholesale_min_quantity = parseInt(formData.wholesale_min_quantity, 10);
-            if (formData.wholesale_discount_pct) payload.wholesale_discount_pct = parseFloat(formData.wholesale_discount_pct);
+            payload.enforce_min_quantity = !!formData.enforce_min_quantity;
+            payload.wholesale_min_quantity = formData.wholesale_min_quantity
+                ? parseInt(formData.wholesale_min_quantity, 10)
+                : null;
+            payload.wholesale_discount_pct = formData.wholesale_discount_pct
+                ? parseFloat(formData.wholesale_discount_pct)
+                : null;
             if (formData.short_description !== undefined) payload.short_description = formData.short_description.trim() || null;
             if (formData.description !== undefined) payload.description = formData.description.trim() || null;
             // Parse specifications: accept JSON object or "Key: Value" lines; only send valid object (backend rejects null)
@@ -482,6 +497,21 @@ export default function AdminProducts() {
                                     <span className="text-xs font-semibold text-gray-900">
                                         ₵{Number(p.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </span>
+                                    {p.enforce_min_quantity && Number(p.wholesale_min_quantity) >= 2 ? (
+                                        <p className="text-[10px] font-medium text-amber-700 mt-0.5">
+                                            Min {p.wholesale_min_quantity}
+                                            {p.wholesale_discount_pct != null && Number(p.wholesale_discount_pct) > 0
+                                                ? ` · ${Number(p.wholesale_discount_pct)}% off`
+                                                : ''}
+                                        </p>
+                                    ) : p.wholesale_min_quantity != null &&
+                                      Number(p.wholesale_min_quantity) > 0 &&
+                                      p.wholesale_discount_pct != null &&
+                                      Number(p.wholesale_discount_pct) > 0 ? (
+                                        <p className="text-[10px] text-gray-400 mt-0.5">
+                                            {p.wholesale_min_quantity}+ for {Number(p.wholesale_discount_pct)}% off
+                                        </p>
+                                    ) : null}
                                 </AdminTd>
                                 <AdminTd>
                                     <span className={`inline-flex items-center gap-1 text-xs font-semibold ${p.is_active !== false ? 'text-green-600' : 'text-gray-500'}`}>
@@ -764,12 +794,31 @@ export default function AdminProducts() {
                         </div>
                     </div>
                     )}
+                    {!editingProduct?.is_consignment && (
+                    <div className="flex items-start gap-3 py-1">
+                        <input
+                            type="checkbox"
+                            id="enforce_min_quantity"
+                            checked={formData.enforce_min_quantity}
+                            onChange={(e) => setFormData({ ...formData, enforce_min_quantity: e.target.checked })}
+                            className="mt-0.5 w-4 h-4 rounded border-gray-200 text-brand focus:ring-brand"
+                        />
+                        <label htmlFor="enforce_min_quantity" className="text-sm font-medium text-gray-700">
+                            Cannot purchase below the minimum quantity
+                            <span className="block text-xs font-normal text-gray-500 mt-0.5">
+                                {formData.enforce_min_quantity
+                                    ? 'Customers must buy at least the wholesale minimum. They cannot buy a single item.'
+                                    : 'Customers can buy any quantity. Discount still applies at the wholesale minimum and above.'}
+                            </span>
+                        </label>
+                    </div>
+                    )}
                     <div className="grid grid-cols-2 gap-3">
                         <FormField label="Minimum quantity for wholesale" htmlFor="product-wholesale-min">
                             <Input
                                 id="product-wholesale-min"
                                 type="number"
-                                min={0}
+                                min={formData.enforce_min_quantity ? 2 : 0}
                                 value={formData.wholesale_min_quantity}
                                 onChange={(e) => setFormData({ ...formData, wholesale_min_quantity: e.target.value })}
                                 placeholder="e.g. 10"

@@ -1,6 +1,11 @@
 import { IsString, IsNumber, IsOptional, IsBoolean, IsArray, IsObject, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { PartialType } from '@nestjs/mapped-types';
+
+function emptyToNull({ value }: { value: unknown }) {
+    if (value === null || value === '' || value === 0 || value === '0') return null;
+    return value;
+}
 
 export class ProductVariantDto {
     @IsString()
@@ -69,12 +74,18 @@ export class CreateProductDto {
     is_featured?: boolean;
 
     @IsOptional()
+    @Transform(emptyToNull)
     @IsNumber()
-    wholesale_min_quantity?: number;
+    wholesale_min_quantity?: number | null;
 
     @IsOptional()
+    @Transform(emptyToNull)
     @IsNumber()
-    wholesale_discount_pct?: number;
+    wholesale_discount_pct?: number | null;
+
+    @IsOptional()
+    @IsBoolean()
+    enforce_min_quantity?: boolean;
 
     @IsOptional()
     @IsArray()

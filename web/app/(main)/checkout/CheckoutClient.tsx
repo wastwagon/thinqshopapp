@@ -17,7 +17,7 @@ import ShopTrustRow from '@/components/shop/ShopTrustRow';
 import { ShopLoadingState } from '@/components/shop/ShopSuccessShell';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import { trackBeginCheckout, trackPurchase } from '@/lib/analytics';
-import { cartItemUnitGhs } from '@/lib/product-utils';
+import { cartItemPricing } from '@/lib/product-utils';
 import { getMediaUrl } from '@/lib/media';
 import LiveRegion from '@/components/ui/LiveRegion';
 import { roundGhs } from '@/lib/money';
@@ -308,6 +308,7 @@ export default function CheckoutClient() {
                                             (Array.isArray(item.product.images) ? item.product.images[0] : item.product.images) ||
                                             '';
                                         const mainImage = rawImg ? getMediaUrl(String(rawImg)) : '/placeholder.svg';
+                                        const pricing = cartItemPricing(item);
                                         return (
                                             <li key={item.id} className="flex py-4 gap-4 group">
                                                 <div className="h-20 w-20 rounded-xl bg-white/10 flex-shrink-0 relative overflow-hidden border border-white/15">
@@ -326,7 +327,7 @@ export default function CheckoutClient() {
                                                     )}
                                                     <div className="flex items-center justify-between mt-1">
                                                         <p className="text-xs text-blue-100/60">Qty {item.quantity}</p>
-                                                        <p className="text-sm font-bold text-white"><PriceDisplay amountGhs={cartItemUnitGhs(item) * item.quantity} forceGhs /></p>
+                                                        <p className="text-sm font-bold text-white"><PriceDisplay amountGhs={pricing.lineTotal} forceGhs /></p>
                                                     </div>
                                                 </div>
                                             </li>
