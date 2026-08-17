@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
-import AppLoadedMarker from "@/components/AppLoadedMarker";
+import AppChrome from "@/components/AppChrome";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
@@ -11,17 +11,22 @@ const webViewGoldForceBridge = process.env.NEXT_PUBLIC_WEBVIEWGOLD_FORCE_BRIDGE 
 const webViewGoldPtrOffIframe = process.env.NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_IFRAME === '1';
 
 /**
- * Before React: mark .webview-gold for CSS overscroll only.
- * Do NOT navigate via <a>/location to disablepulltorefresh:// — that can leave
- * Android WebView on a non-http last URL so relaunch fails after first close.
- * Optional PTR_OFF_IFRAME: one hidden iframe, once (never on pageshow).
+ * Before React: paint status-bar chrome and ping wrapper schemes via hidden
+ * iframes (do not wait for hydration). No native store rebuild required —
+ * existing WebViewGold already intercepts statusbarcolor://.
+ *
+ * statusbarcolor / statusbartextcolor: always (Safari/Chrome ignore unknown
+ * schemes; Android WebViewGold paints the native bar white).
+ * hidebars://: iOS wrapper only (on Android it hides the clock).
+ * Do NOT navigate the top frame to custom schemes on Android.
  */
 const webViewGoldBootScript = `
 (function(){
   var FORCE=${webViewGoldForceBridge ? 'true' : 'false'};
   var IFRAME_PTR=${webViewGoldPtrOffIframe ? 'true' : 'false'};
-  var SCHEME='disablepulltorefresh://';
-  var sent=false;
+  var PTR_SCHEME='disablepulltorefresh://';
+  var ptrSent=false;
+  var chromeSent=false;
   function isWG(){
     try {
       if (window.__WEBVIEWGOLD__===true) return true;
@@ -29,42 +34,65 @@ const webViewGoldBootScript = `
       return /WebViewGold/i.test(navigator.userAgent||'');
     } catch(e){ return false; }
   }
-  if (!isWG()) return;
+  function isIOS(){
+    try {
+      var ua=navigator.userAgent||'';
+      if (/iPad|iPhone|iPod/i.test(ua)) return true;
+      return navigator.platform==='MacIntel' && navigator.maxTouchPoints>1;
+    } catch(e){ return false; }
+  }
+  function isAndroidWV(){
+    try {
+      var ua=navigator.userAgent||'';
+      return /Android/i.test(ua) && /; wv\\)/i.test(ua);
+    } catch(e){ return false; }
+  }
+  function ping(url){
+    try {
+      var f=document.createElement('iframe');
+      f.setAttribute('src',url);
+      f.setAttribute('aria-hidden','true');
+      f.style.cssText='position:absolute;width:0;height:0;border:0;visibility:hidden;pointer-events:none';
+      (document.body||document.documentElement).appendChild(f);
+      setTimeout(function(){ if(f.parentNode)f.parentNode.removeChild(f); },400);
+    } catch(e){}
+    try { var img=new Image(); img.src=url; } catch(e){}
+  }
   function mark(){
     try {
       document.documentElement.classList.add('webview-gold');
       if (document.body) document.body.classList.add('webview-gold');
     } catch(e){}
   }
-  function iframeOnce(){
-    if (!IFRAME_PTR || sent || !document.body) return;
-    sent=true;
-    try {
-      var f=document.createElement('iframe');
-      f.setAttribute('src',SCHEME);
-      f.setAttribute('title','WebViewGold disable pull to refresh');
-      f.style.cssText='position:absolute;width:0;height:0;border:0;visibility:hidden;pointer-events:none';
-      document.body.appendChild(f);
-      setTimeout(function(){ if(f.parentNode)f.parentNode.removeChild(f);},400);
-    } catch(e){}
+  function iframePtrOnce(){
+    if (!IFRAME_PTR || ptrSent || !document.body) return;
+    ptrSent=true;
+    ping(PTR_SCHEME);
   }
-  mark();
-  iframeOnce();
-  document.addEventListener('DOMContentLoaded',function(){ mark(); iframeOnce(); });
-})();`;
-/** If React never adds .app-loaded (hydration error / broken navigation), exit slate splash after 5s. */
-const appLoadedFallbackScript = `
-(function(){
-  function ensure(){
-    if (!document.documentElement.classList.contains('app-loaded')) {
-      document.documentElement.classList.add('app-loaded');
-      if (document.body) document.body.classList.add('app-loaded');
-    }
+  function chromePings(){
+    if (chromeSent) return;
+    chromeSent=true;
+    ping('statusbarcolor://255,255,255');
+    ping('statusbartextcolor://black');
+    if (isIOS() && isWG()) ping('hidebars://on');
   }
-  function arm(){ setTimeout(ensure, 5000); }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arm);
-  else arm();
+  chromePings();
+  if (isWG() || isAndroidWV()) {
+    mark();
+    iframePtrOnce();
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    chromePings();
+    if (isWG() || isAndroidWV()) { mark(); iframePtrOnce(); }
+  });
 })();`;
+
+export const viewport: Viewport = {
+    width: 'device-width',
+    initialScale: 1,
+    viewportFit: 'cover',
+    themeColor: '#ffffff',
+};
 
 export const metadata: Metadata = {
     metadataBase: new URL(siteUrl),
@@ -74,6 +102,14 @@ export const metadata: Metadata = {
     },
     description: "Shop electronics and imaging systems delivered to Ghana. Order online, pay in GHS. Logistics, money transfer, and procurement support.",
     keywords: ["ThinQShop", "Ghana", "e-commerce", "electronics", "imaging", "shipping", "procurement"],
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: 'black-translucent',
+        title: 'ThinQShop',
+    },
+    other: {
+        'mobile-web-app-capable': 'yes',
+    },
     openGraph: {
         type: "website",
         locale: "en",
@@ -107,12 +143,16 @@ export default function RootLayout({
     return (
         <html lang="en" className={outfit.variable}>
             <head>
-                {/* Single viewport meta: viewport-fit=cover enables safe-area insets on notched iOS / WebView apps */}
-                <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-                {/* Match app splash background so no white flash when WebView loads (smooth launch) */}
+                {/* First paint: white chrome matching Navbar/Topbar. */}
                 <style
                     dangerouslySetInnerHTML={{
-                        __html: 'html,body{background-color:#0f172a;min-height:100vh}',
+                        __html:
+                            ':root{--app-chrome-bg:#ffffff;--app-sat:env(safe-area-inset-top,0px)}' +
+                            'html,body{background-color:var(--app-chrome-bg);height:100%;overscroll-behavior:none}' +
+                            '@supports (height:100svh){html,body{height:100svh}}' +
+                            '#status-bar-cover{position:fixed;top:0;left:0;right:0;pointer-events:none;z-index:2000;' +
+                            'height:constant(safe-area-inset-top);height:var(--app-sat,env(safe-area-inset-top,0px));' +
+                            'background:var(--app-chrome-bg)}',
                     }}
                 />
             </head>
@@ -122,12 +162,8 @@ export default function RootLayout({
                         __html: webViewGoldBootScript,
                     }}
                 />
-                <script
-                    dangerouslySetInnerHTML={{
-                        __html: appLoadedFallbackScript,
-                    }}
-                />
-                <AppLoadedMarker />
+                <div id="status-bar-cover" aria-hidden="true" />
+                <AppChrome />
                 <a href="#main-content" className="skip-link">Skip to main content</a>
                 <script
                     type="application/ld+json"

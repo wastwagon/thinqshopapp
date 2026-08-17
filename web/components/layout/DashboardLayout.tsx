@@ -28,7 +28,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
 
     if (loading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-app text-gray-500">
+            <div className="flex h-screen items-center justify-center bg-white text-gray-500 safe-area-inset-top">
                 <div className="flex flex-col items-center gap-6">
                     <div className="w-16 h-16 bg-blue-50 border border-blue-200 rounded-2xl flex items-center justify-center animate-pulse">
                         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center animate-spin">
@@ -56,7 +56,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
                 toggleSidebar={toggleSidebar}
             />
 
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative safe-area-inset-top">
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
                 <Topbar onMenuPress={toggleSidebar} variant={premiumShell ? 'dashboard-home' : 'default'} />
 
                 {/* pb clears fixed MobileBottomNav + home-indicator; do not also use safe-area-inset-bottom (it overrides this padding). */}

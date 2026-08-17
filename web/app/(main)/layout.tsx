@@ -23,6 +23,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     <AnalyticsProvider />
                     <Toaster
                         position="top-center"
+                        containerStyle={{
+                            top: 'calc(12px + var(--app-sat, env(safe-area-inset-top, 0px)))',
+                        }}
                         toastOptions={{
                             className: '!bg-white !text-gray-900 !text-sm !font-medium !rounded-xl !border !border-gray-200/90 !shadow-none',
                             duration: 3500,

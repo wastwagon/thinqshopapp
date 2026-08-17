@@ -21,7 +21,7 @@ export default function ErrorPage({
         : error.message || 'An unexpected error occurred.';
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6 safe-area-inset-top">
             <div className="w-12 h-1 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 mb-6" aria-hidden />
             <h1 className="text-2xl font-semibold text-gray-900 mb-2">Something went wrong</h1>
             <p className="text-gray-500 mb-8 max-w-md text-center text-sm">{message}</p>

@@ -44,7 +44,7 @@ function NavShell({ children, elevated }: { children: React.ReactNode; elevated?
             aria-label="Mobile navigation"
             className={`fixed bottom-0 left-0 right-0 z-[100] md:hidden bg-white/95 backdrop-blur-xl border-t border-gray-200/90 ${elevated ? 'shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.12)]' : ''}`}
         >
-            <div className="flex items-end justify-between px-1 sm:px-2 pt-1 pb-[calc(0.35rem+env(safe-area-inset-bottom,0px))]">
+            <div className="flex items-end justify-between px-1 sm:px-2 pt-1 pb-[max(12px,env(safe-area-inset-bottom,0px))]">
                 {children}
             </div>
         </nav>

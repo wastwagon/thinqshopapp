@@ -10,8 +10,8 @@ export default function manifest(): MetadataRoute.Manifest {
         start_url: '/',
         scope: '/',
         display: 'standalone',
-        background_color: '#f8fafc',
-        theme_color: '#02274f',
+        background_color: '#ffffff',
+        theme_color: '#ffffff',
         orientation: 'portrait-primary',
         icons: [
             { src: '/thinqshop-icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

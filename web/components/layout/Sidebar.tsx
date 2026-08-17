@@ -115,8 +115,8 @@ export default function Sidebar({ isAdmin, isOpen, toggleSidebar }: SidebarProps
                 aria-label="Dashboard navigation"
             >
                 <div className="h-full flex flex-col min-h-0">
-                    {/* Header: safe area top so close button isn't under notch */}
-                    <div className="flex items-center justify-between min-h-16 h-16 px-4 border-b border-gray-50 safe-area-inset-top flex-shrink-0">
+                    {/* Header: pad into the inset (do not lock h-16 — padding would crush the close button) */}
+                    <div className="flex items-center justify-between min-h-16 px-4 border-b border-gray-50 app-chrome-header flex-shrink-0">
                         <Link href="/" className="hidden md:flex items-center min-w-0" aria-label="ThinQShopping home">
                             <div className="relative h-8 w-[134px] lg:h-9 lg:w-[151px] shrink-0">
                                 <Image src="/thinqshop-logo.webp" alt="ThinQShopping" fill className="object-contain object-left" priority sizes="151px" />

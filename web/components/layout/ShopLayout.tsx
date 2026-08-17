@@ -15,7 +15,7 @@ export default function ShopLayout({ children }: ShopLayoutProps) {
             <Navbar />
 
             <main id="main-content" className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden scrollbar-thin relative pb-[calc(8.5rem+env(safe-area-inset-bottom,0px))] md:pb-0" tabIndex={-1} role="main">
-                <div className="relative z-10 pt-14 sm:pt-16">
+                <div className="relative z-10 app-chrome-navbar-offset">
                     {children}
                 </div>
                 <Footer />

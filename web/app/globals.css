@@ -48,6 +48,10 @@
     --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
     --touch-min: 44px;
     --touch-min-desktop: 40px;
+
+    /* Status-bar / notch fill — matches opaque Navbar/Topbar (not brand navy) */
+    --app-chrome-bg: #ffffff;
+    --app-sat: env(safe-area-inset-top, 0px);
   }
 }
 
@@ -58,6 +62,8 @@
 
   html {
     scroll-behavior: smooth;
+    height: 100%;
+    background-color: var(--app-chrome-bg);
   }
 
   body {
@@ -65,6 +71,15 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "rlig" 1, "calt" 1;
+    height: 100%;
+    background-color: var(--app-chrome-bg);
+  }
+
+  @supports (height: 100svh) {
+    html,
+    body {
+      height: 100svh;
+    }
   }
 
   body.font-brand {
@@ -76,19 +91,13 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
   }
-  /* After app shell is ready, switch to normal background (smooth transition from splash) */
-  html.app-loaded,
-  body.app-loaded {
-    background-color: hsl(210 40% 98%);
-    transition: background-color 0.35s ease-out;
-  }
 
   /* Skip link - visible on focus only */
   .skip-link {
     position: absolute;
     top: -100px;
     left: 1rem;
-    z-index: 100;
+    z-index: 2010;
     padding: 0.75rem 1.5rem;
     background: hsl(var(--primary));
     color: white;
@@ -99,7 +108,7 @@
     transition: top 0.2s var(--transition-smooth);
   }
   .skip-link:focus {
-    top: 1rem;
+    top: max(1rem, var(--app-sat, env(safe-area-inset-top, 0px)));
     outline: 2px solid hsl(var(--primary));
     outline-offset: 2px;
   }
@@ -131,7 +140,7 @@
   /* Mobile: visible scrollbar for position clarity, prevent horizontal scroll, disable pull-to-refresh */
   @media (max-width: 767px) {
     html, body {
-      overflow-x: hidden;
+      overflow: hidden;
       max-width: 100vw;
       overscroll-behavior: none;
     }
@@ -281,9 +290,10 @@
     transform: translateY(0);
   }
 
-  /* iOS / notched devices: use with viewport-fit=cover so env() is defined */
+  /* iOS / notched devices: use with viewport-fit=cover so env() is defined.
+     --app-sat is a measured px fallback when WKWebView reports 0. */
   .safe-area-inset-top {
-    padding-top: env(safe-area-inset-top, 0px);
+    padding-top: var(--app-sat, env(safe-area-inset-top, 0px));
   }
   .safe-area-inset-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -324,7 +334,7 @@
   }
   /* Mobile menu button: keep in safe area on notched devices (use with Tailwind "fixed") */
   .menu-button-safe {
-    top: max(1rem, env(safe-area-inset-top, 0px));
+    top: max(1rem, var(--app-sat, env(safe-area-inset-top, 0px)));
     left: max(1rem, env(safe-area-inset-left, 0px));
   }
   /* Sidebar nav scrollbar - visible when list overflows (e.g. admin has many links) */
@@ -371,6 +381,35 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* WebViewGold / iOS notch: opaque fill behind the native clock (not frost). */
+#status-bar-cover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 2000;
+  height: constant(safe-area-inset-top);
+  height: var(--app-sat, env(safe-area-inset-top, 0px));
+  background: var(--app-chrome-bg);
+}
+
+.app-chrome-header {
+  padding-top: var(--app-sat, env(safe-area-inset-top, 0px));
+  box-sizing: border-box;
+  background-color: var(--app-chrome-bg);
+}
+
+.app-chrome-navbar-offset {
+  padding-top: calc(3.5rem + var(--app-sat, env(safe-area-inset-top, 0px)));
+}
+
+@media (min-width: 640px) {
+  .app-chrome-navbar-offset {
+    padding-top: calc(4rem + var(--app-sat, env(safe-area-inset-top, 0px)));
+  }
 }
 
 /* Hero: progress bar (fills over autoplay interval) */

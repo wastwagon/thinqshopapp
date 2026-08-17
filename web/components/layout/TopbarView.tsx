@@ -90,7 +90,7 @@ export default function TopbarView(props: TopbarViewProps) {
     const isDashboardHome = variant === 'dashboard-home';
 
     return (
-        <div role="banner" className="min-h-14 bg-white border-b border-gray-200 flex flex-col sticky top-0 z-30">
+        <div role="banner" className="min-h-14 app-chrome-header bg-white border-b border-gray-200 flex flex-col sticky top-0 z-30">
             <div className={`h-14 flex items-center gap-2 px-3 md:px-6 ${isDashboardHome ? 'justify-between' : 'justify-between gap-3'}`}>
                 {onMenuPress && (
                     <button
