@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
     ArrayMaxSize,
     IsArray,
@@ -73,6 +73,9 @@ export class CreateOrderDto {
     shipping_address_id?: number;
 
     @IsOptional()
+    @Transform(({ value }) =>
+        typeof value === 'string' && !value.trim() ? undefined : typeof value === 'string' ? value.trim() : value,
+    )
     @IsEmail()
     @MaxLength(255)
     guest_email?: string;

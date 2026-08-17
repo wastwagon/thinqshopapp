@@ -22,7 +22,7 @@ export default function PaystackTrigger({ config, userEmail, onSuccess, onClose 
     const initializePaystack = usePaystackPayment({
         reference: config.reference,
         amount: config.amount,
-        email: userEmail ?? 'customer@example.com',
+        email: userEmail?.trim() || 'guest@thinqshopping.app',
         publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_placeholder',
         currency: 'GHS',
     });

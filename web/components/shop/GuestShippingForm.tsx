@@ -9,7 +9,12 @@ import FormField from '@/components/ui/FormField';
 import Button from '@/components/ui/Button';
 
 const guestShippingSchema = z.object({
-    guest_email: z.string().email('Enter a valid email'),
+    guest_email: z
+        .string()
+        .trim()
+        .refine((val) => val === '' || z.string().email().safeParse(val).success, {
+            message: 'Enter a valid email',
+        }),
     full_name: z.string().min(1, 'Full name is required'),
     phone: z.string().min(10, 'Phone must be at least 10 characters'),
     street: z.string().min(1, 'Street is required'),
@@ -39,8 +44,9 @@ export default function GuestShippingForm({ defaultValues, onSubmit }: GuestShip
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FormField
-                    label="Email"
+                    label="Email (optional)"
                     htmlFor="guest-email"
+                    hint="Add it if you want a receipt. You can track with your order number."
                     error={errors.guest_email?.message}
                     className="md:col-span-2"
                 >

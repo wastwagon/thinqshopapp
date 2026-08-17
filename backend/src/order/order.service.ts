@@ -198,8 +198,8 @@ export class OrderService {
             if (dto.payment_method === 'wallet') {
                 throw new BadRequestException('Sign in to pay with wallet');
             }
-            if (!dto.guest_email?.trim() || !dto.shipping_address) {
-                throw new BadRequestException('Guest checkout requires an email and shipping address');
+            if (!dto.shipping_address) {
+                throw new BadRequestException('Guest checkout requires a shipping address');
             }
         } else if (!dto.shipping_address_id) {
             throw new BadRequestException('Please select a shipping address');
@@ -218,7 +218,7 @@ export class OrderService {
         }
         const isPaystack = dto.payment_method === 'card' || dto.payment_method === 'mobile_money';
         const guestToken = isGuest ? createGuestAccessToken() : null;
-        const guestEmail = isGuest ? dto.guest_email!.trim().toLowerCase() : null;
+        const guestEmail = isGuest && dto.guest_email?.trim() ? dto.guest_email.trim().toLowerCase() : null;
 
         return this.prisma.$transaction(async (prisma) => {
             await this.reserveStockForCartItems(prisma, cartItems, userId);

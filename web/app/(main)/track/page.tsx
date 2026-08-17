@@ -17,7 +17,7 @@ const TRACKABLE_SERVICES = [
         icon: Package,
         title: 'E-commerce Orders',
         refExample: 'ORD-',
-        description: 'Product orders from ThinQShop. Use your order number from the confirmation email.',
+        description: 'Product orders from ThinQShop. Use your order number from checkout.',
         gradient: 'from-orange-400 to-amber-600',
         iconBg: 'bg-orange-50 text-orange-600',
     },

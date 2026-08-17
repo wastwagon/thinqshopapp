@@ -127,7 +127,7 @@ export default function OrderSuccessPage() {
                 <ShopSuccessShell>
                     <ThankYouCard
                         title="Order confirmed"
-                        subtitle="Thank you for your purchase. Your order has been received and is being processed for shipment. We will notify you when it ships."
+                        subtitle="Thank you for your purchase. Your order has been received and is being processed for shipment. Save your order number to track it."
                         details={[
                             { label: 'Order number', value: order.order_number },
                             { label: 'Items', value: `${itemCount} item${itemCount === 1 ? '' : 's'}` },

@@ -155,7 +155,9 @@ export default function CheckoutClient() {
                 : {
                       total: payableTotal,
                       payment_method: 'card',
-                      guest_email: guestShipping!.guest_email,
+                      ...(guestShipping!.guest_email?.trim()
+                          ? { guest_email: guestShipping!.guest_email.trim() }
+                          : {}),
                       shipping_address: {
                           full_name: guestShipping!.full_name,
                           phone: guestShipping!.phone,
@@ -241,7 +243,7 @@ export default function CheckoutClient() {
         );
     }
 
-    const paystackEmail = user?.email || guestShipping?.guest_email;
+    const paystackEmail = (user?.email || guestShipping?.guest_email || '').trim() || undefined;
     const paymentOptions = user
         ? [
               { id: 'wallet', label: walletBalance !== null ? `Wallet Balance (₵${walletBalance.toFixed(2)})` : 'Wallet Balance', Icon: Wallet },
@@ -313,8 +315,12 @@ export default function CheckoutClient() {
                                     {guestShipping.full_name} · {guestShipping.phone}
                                     <br />
                                     {guestShipping.street}, {guestShipping.city}, {guestShipping.region}
-                                    <br />
-                                    {guestShipping.guest_email}
+                                    {guestShipping.guest_email?.trim() ? (
+                                        <>
+                                            <br />
+                                            {guestShipping.guest_email.trim()}
+                                        </>
+                                    ) : null}
                                 </p>
                             ) : null}
 
