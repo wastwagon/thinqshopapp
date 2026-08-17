@@ -24,6 +24,7 @@ import { useAuth } from '@/context/AuthContext';
 import { trackViewItem } from '@/lib/analytics';
 import { getMediaUrl } from '@/lib/media';
 import ProductReviewForm from '@/components/product/ProductReviewForm';
+import ProductImageLightbox from '@/components/ui/ProductImageLightbox';
 import { shouldUnoptimizeProductImage } from '@/components/ui/ProductImage';
 import Badge from '@/components/ui/Badge';
 import QuantityStepper from '@/components/ui/QuantityStepper';
