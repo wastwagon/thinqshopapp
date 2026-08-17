@@ -9,6 +9,7 @@ import { GroupedList, GroupedListItem, GroupedListEmpty } from '@/components/ui/
 import { StatusBadge } from '@/components/ui/Badge';
 import { buttonVariants } from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import PriceDisplay from '@/components/ui/PriceDisplay';
 
 interface Order {
     id: number;
@@ -80,7 +81,7 @@ export default function OrderHistory() {
                         <span className="flex flex-col items-end gap-1 shrink-0">
                             <StatusBadge status={order.status} className="capitalize" />
                             <span className="text-sm font-semibold text-gray-900 tabular-nums">
-                                ₵{Number(order.total).toFixed(2)}
+                                <PriceDisplay amountGhs={Number(order.total)} />
                             </span>
                         </span>
                     }

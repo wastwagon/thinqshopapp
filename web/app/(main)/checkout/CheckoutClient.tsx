@@ -6,6 +6,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import AddressBook from '@/components/ui/AddressBook';
 import GuestShippingForm, { type GuestShippingFormData } from '@/components/shop/GuestShippingForm';
 import api from '@/lib/axios';
@@ -41,6 +42,7 @@ function cartAsCheckoutItems(cart: { product_id: number; quantity: number; varia
 export default function CheckoutClient() {
     const { cart, cartTotal, clearCart, loading: cartLoading } = useCart();
     const { user, loading: authLoading } = useAuth();
+    const { currency } = useCurrency();
     const router = useRouter();
 
     const [step, setStep] = useState(1);
@@ -373,11 +375,16 @@ export default function CheckoutClient() {
                                         className="w-full"
                                         loading={isProcessing || quoteLoading}
                                     >
-                                        {isProcessing ? 'Processing…' : quoteLoading ? 'Calculating...' : <>Pay <PriceDisplay amountGhs={checkoutQuote?.total ?? cartTotal} forceGhs /></>}
+                                        {isProcessing ? 'Processing…' : quoteLoading ? 'Calculating...' : <>Pay <PriceDisplay amountGhs={checkoutQuote?.total ?? cartTotal} /></>}
                                     </Button>
+                                    {currency !== 'GHS' && (
+                                        <p className="mt-2 text-center text-xs text-gray-500">
+                                            Charged as <PriceDisplay amountGhs={checkoutQuote?.total ?? cartTotal} forceGhs /> GHS
+                                        </p>
+                                    )}
                                     <p className="mt-2 text-center text-xs text-gray-500">
                                         {publicSettings.free_shipping_threshold_ghs && Number(publicSettings.free_shipping_threshold_ghs) > 0 ? (
-                                            <>Free delivery on orders over ₵{publicSettings.free_shipping_threshold_ghs}</>
+                                            <>Free delivery on orders over <PriceDisplay amountGhs={Number(publicSettings.free_shipping_threshold_ghs)} /></>
                                         ) : null}
                                     </p>
                                 </>
@@ -416,7 +423,7 @@ export default function CheckoutClient() {
                                                     )}
                                                     <div className="flex items-center justify-between mt-1">
                                                         <p className="text-xs text-blue-100/60">Qty {item.quantity}</p>
-                                                        <p className="text-sm font-bold text-white"><PriceDisplay amountGhs={pricing.lineTotal} forceGhs /></p>
+                                                        <p className="text-sm font-bold text-white"><PriceDisplay amountGhs={pricing.lineTotal} /></p>
                                                     </div>
                                                 </div>
                                             </li>
@@ -427,19 +434,27 @@ export default function CheckoutClient() {
                                 <div className="space-y-3 border-t border-white/15 pt-6">
                                     <div className="flex items-center justify-between">
                                         <dt className="text-sm text-blue-100/80">Subtotal</dt>
-                                        <dd className="text-sm font-semibold text-white"><PriceDisplay amountGhs={checkoutQuote?.subtotal ?? cartTotal} forceGhs /></dd>
+                                        <dd className="text-sm font-semibold text-white"><PriceDisplay amountGhs={checkoutQuote?.subtotal ?? cartTotal} /></dd>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <dt className="text-sm text-blue-100/80">Shipping</dt>
                                         <dd className="text-sm font-semibold text-white">
-                                            <PriceDisplay amountGhs={checkoutQuote?.shipping_fee ?? 0} forceGhs />
+                                            <PriceDisplay amountGhs={checkoutQuote?.shipping_fee ?? 0} />
                                         </dd>
                                     </div>
                                     <div className="flex items-center justify-between border-t border-white/15 pt-4 mt-2">
                                         <dt className="text-sm font-semibold text-white">Total</dt>
                                         <dd className="text-right">
-                                            <span className="text-xl font-bold text-white"><PriceDisplay amountGhs={checkoutQuote?.total ?? cartTotal} forceGhs /></span>
-                                            <p className="text-xs text-blue-100/70 mt-0.5 font-medium">Amount charged in GHS</p>
+                                            <span className="text-xl font-bold text-white"><PriceDisplay amountGhs={checkoutQuote?.total ?? cartTotal} /></span>
+                                            <p className="text-xs text-blue-100/70 mt-0.5 font-medium">
+                                                {currency === 'GHS' ? (
+                                                    'Amount charged in GHS'
+                                                ) : (
+                                                    <>
+                                                        Charged as <PriceDisplay amountGhs={checkoutQuote?.total ?? cartTotal} forceGhs /> GHS
+                                                    </>
+                                                )}
+                                            </p>
                                         </dd>
                                     </div>
                                 </div>

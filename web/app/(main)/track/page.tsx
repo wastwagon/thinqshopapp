@@ -10,6 +10,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import ShopPageShell from '@/components/shop/ShopContent';
 import ShopTrustRow from '@/components/shop/ShopTrustRow';
 import { STATUS_PROGRESS_BADGE_STRONG } from '@/lib/status-styles';
+import PriceDisplay from '@/components/ui/PriceDisplay';
 
 const TRACKABLE_SERVICES = [
     {
@@ -179,7 +180,7 @@ export default function TrackPage() {
                                 <div className="px-6 py-4 sm:px-8 border-b border-gray-100 bg-white">
                                     {result.type === 'order' && result.data && (
                                         <div className="flex flex-wrap gap-4 text-sm">
-                                            <span><strong>Total:</strong> ₵{Number(result.data.total || 0).toFixed(2)}</span>
+                                            <span><strong>Total:</strong> <PriceDisplay amountGhs={Number(result.data.total || 0)} /></span>
                                             <span><strong>Items:</strong> {Number(result.data.items_count || 0)}</span>
                                             {result.data.payment_method ? (
                                                 <span><strong>Payment:</strong> {String(result.data.payment_method).replace(/_/g, ' ')}</span>

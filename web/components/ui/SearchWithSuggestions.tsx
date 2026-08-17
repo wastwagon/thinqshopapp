@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import api from '@/lib/axios';
-import { normalizeProduct, toSlug } from '@/lib/product-utils';
+import { normalizeProduct, parsePrice, toSlug } from '@/lib/product-utils';
+import PriceDisplay from '@/components/ui/PriceDisplay';
 import staticProducts from '@/lib/data/scraped_products.json';
 
 interface SearchWithSuggestionsProps {
@@ -186,7 +187,7 @@ export default function SearchWithSuggestions({ id = 'nav-search', listboxId = '
                         <ul className="py-2">
                             {suggestions.map((p, idx) => {
                                 const slug = p.slug ?? toSlug(p.name);
-                                const price = typeof p.price === 'string' ? p.price : `₵${Number(p.price || 0).toFixed(2)}`;
+                                const priceGhs = parsePrice(p.price);
                                 return (
                                     <li key={p.id ?? idx} role="option" aria-selected={activeIndex === idx}>
                                         <Link
@@ -199,7 +200,7 @@ export default function SearchWithSuggestions({ id = 'nav-search', listboxId = '
                                             }}
                                         >
                                             <p className="font-medium text-gray-900 truncate">{p.name}</p>
-                                            <p className="text-xs text-gray-500 truncate">{p.category} · {price}</p>
+                                            <p className="text-xs text-gray-500 truncate">{p.category} · <PriceDisplay amountGhs={priceGhs} /></p>
                                         </Link>
                                     </li>
                                 );

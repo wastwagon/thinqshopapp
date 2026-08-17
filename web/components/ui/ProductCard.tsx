@@ -280,7 +280,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     <div className="flex flex-col">
                         {product.compare_price && (
                             <span className="text-xs text-gray-400 line-through">
-                                ₵{Number(product.compare_price).toFixed(2)}
+                                <PriceDisplay amountGhs={Number(product.compare_price)} />
                             </span>
                         )}
                         <div className="flex flex-col items-start gap-0">

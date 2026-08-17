@@ -11,6 +11,7 @@ import ShopSuccessShell, { ShopLoadingState, ShopEmptyState } from '@/components
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import api from '@/lib/axios';
 import { useCart } from '@/context/CartContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import { getMediaUrl } from '@/lib/media';
 import toast from 'react-hot-toast';
 
@@ -68,6 +69,7 @@ export default function OrderSuccessPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { clearCart } = useCart();
+    const { currency } = useCurrency();
     const orderParam = searchParams.get('order');
     const guestToken = searchParams.get('token');
     const [order, setOrder] = useState<OrderDetail | null>(null);
@@ -129,7 +131,16 @@ export default function OrderSuccessPage() {
                         details={[
                             { label: 'Order number', value: order.order_number },
                             { label: 'Items', value: `${itemCount} item${itemCount === 1 ? '' : 's'}` },
-                            { label: 'Total paid', value: <PriceDisplay amountGhs={Number(order.total)} forceGhs /> },
+                            { label: 'Total paid', value: (
+                                <span>
+                                    <PriceDisplay amountGhs={Number(order.total)} />
+                                    {currency !== 'GHS' && (
+                                        <span className="block text-xs font-normal text-gray-500 mt-0.5">
+                                            Charged <PriceDisplay amountGhs={Number(order.total)} forceGhs /> GHS
+                                        </span>
+                                    )}
+                                </span>
+                            ) },
                             { label: 'Payment', value: paymentLabel },
                             {
                                 label: 'Date',
@@ -228,7 +239,7 @@ export default function OrderSuccessPage() {
                                             <p className="text-xs text-gray-500 mt-1">Qty {item.quantity}</p>
                                         </div>
                                         <p className="text-sm font-semibold text-gray-900 shrink-0">
-                                            <PriceDisplay amountGhs={Number(item.total)} forceGhs />
+                                            <PriceDisplay amountGhs={Number(item.total)} />
                                         </p>
                                     </li>
                                 ))}
@@ -238,18 +249,25 @@ export default function OrderSuccessPage() {
                                     {order.subtotal != null && (
                                         <div className="flex justify-between text-gray-600">
                                             <span>Subtotal</span>
-                                            <PriceDisplay amountGhs={Number(order.subtotal)} forceGhs />
+                                            <PriceDisplay amountGhs={Number(order.subtotal)} />
                                         </div>
                                     )}
                                     {order.shipping_fee != null && (
                                         <div className="flex justify-between text-gray-600">
                                             <span>Shipping</span>
-                                            <PriceDisplay amountGhs={Number(order.shipping_fee)} forceGhs />
+                                            <PriceDisplay amountGhs={Number(order.shipping_fee)} />
                                         </div>
                                     )}
                                     <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t border-gray-100">
                                         <span>Total</span>
-                                        <PriceDisplay amountGhs={Number(order.total)} forceGhs />
+                                        <span className="text-right">
+                                            <PriceDisplay amountGhs={Number(order.total)} />
+                                            {currency !== 'GHS' && (
+                                                <span className="block text-xs font-normal text-gray-500 mt-0.5">
+                                                    Charged <PriceDisplay amountGhs={Number(order.total)} forceGhs /> GHS
+                                                </span>
+                                            )}
+                                        </span>
                                     </div>
                                 </div>
                             )}

@@ -10,6 +10,8 @@ import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import toast from 'react-hot-toast';
+import PriceDisplay from '@/components/ui/PriceDisplay';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface OrderItem {
     id: number;
@@ -44,6 +46,7 @@ const statusSteps = ['pending', 'processing', 'shipped', 'delivered'];
 
 export default function OrderDetailsPage({ params }: { params: { id: string } }) {
     const { id } = params;
+    const { currency } = useCurrency();
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const [cancelling, setCancelling] = useState(false);
@@ -176,14 +179,14 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                                 <div className="min-w-0 flex-1">
                                     <div className="flex justify-between gap-2">
                                         <h4 className="text-sm font-semibold text-gray-900 truncate">{item.product_name}</h4>
-                                        <p className="text-sm font-semibold text-gray-900 shrink-0">₵{Number(item.total).toFixed(2)}</p>
+                                        <p className="text-sm font-semibold text-gray-900 shrink-0"><PriceDisplay amountGhs={Number(item.total)} /></p>
                                     </div>
                                     {(item.variant_details || item.variant) && (
                                         <p className="text-xs text-gray-600 mt-0.5">
                                             {item.variant_details ?? `${item.variant!.variant_type}: ${item.variant!.variant_value}`.replace(/_/g, ' ')}
                                         </p>
                                     )}
-                                    <p className="text-xs text-gray-500 mt-0.5">Qty {item.quantity} × ₵{Number(item.price).toFixed(2)}</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">Qty {item.quantity} × <PriceDisplay amountGhs={Number(item.price)} /></p>
                                 </div>
                             </li>
                         ))}
@@ -195,15 +198,22 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                         <div className="w-full sm:w-64 space-y-2">
                             <div className="flex justify-between text-sm">
                                 <dt className="text-gray-500">Subtotal</dt>
-                                <dd className="font-medium text-gray-900">₵{Number(order.subtotal || order.total).toFixed(2)}</dd>
+                                <dd className="font-medium text-gray-900"><PriceDisplay amountGhs={Number(order.subtotal || order.total)} /></dd>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <dt className="text-gray-500">Shipping</dt>
-                                <dd className="font-medium text-gray-900">₵{Number(order.shipping_fee || 0).toFixed(2)}</dd>
+                                <dd className="font-medium text-gray-900"><PriceDisplay amountGhs={Number(order.shipping_fee || 0)} /></dd>
                             </div>
                             <div className="flex justify-between text-sm pt-2 border-t border-gray-100">
                                 <dt className="font-semibold text-gray-900">Total</dt>
-                                <dd className="font-bold text-gray-900">₵{Number(order.total).toFixed(2)}</dd>
+                                <dd className="font-bold text-gray-900 text-right">
+                                    <PriceDisplay amountGhs={Number(order.total)} />
+                                    {currency !== 'GHS' && (
+                                        <span className="block text-xs font-normal text-gray-500 mt-0.5">
+                                            Charged <PriceDisplay amountGhs={Number(order.total)} forceGhs /> GHS
+                                        </span>
+                                    )}
+                                </dd>
                             </div>
                         </div>
                     </div>

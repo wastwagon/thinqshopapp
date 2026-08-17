@@ -421,7 +421,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                             </p>
                                             {product.compare_price != null && Number(product.compare_price) > unitPrice && (
                                                 <p className="text-sm font-medium text-gray-400 line-through">
-                                                    ₵{Number(product.compare_price).toFixed(2)}
+                                                    <PriceDisplay amountGhs={Number(product.compare_price)} />
                                                 </p>
                                             )}
                                             {qualifiesWholesale && (
@@ -559,7 +559,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                                 <span className="font-semibold text-gray-900 capitalize">
                                                     {String(v.variant_type).replace(/_/g, ' ')}: <span className="text-gray-600">{v.variant_value}</span>
                                                 </span>
-                                                <span className="font-bold text-gray-900 tabular-nums">₵{vUnit.toFixed(2)}</span>
+                                                <span className="font-bold text-gray-900 tabular-nums"><PriceDisplay amountGhs={vUnit} /></span>
                                             </button>
                                         );
                                     })}

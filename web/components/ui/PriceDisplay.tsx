@@ -6,28 +6,22 @@ import { roundGhs } from '@/lib/money';
 
 interface PriceDisplayProps {
     amountGhs: number;
-    showAlternates?: boolean;
-    /** For checkout: always show GHS (the amount that will be charged) */
+    /** Show the GHS amount (e.g. what Paystack will charge). Display conversion still uses CurrencyContext by default. */
     forceGhs?: boolean;
-    /** @deprecated use forceGhs */
-    checkoutStyle?: boolean;
     className?: string;
 }
 
 export default function PriceDisplay({
     amountGhs,
-    showAlternates = true,
     forceGhs = false,
-    checkoutStyle = false,
     className = '',
 }: PriceDisplayProps) {
     const rates = useCurrencyRates();
     const { currency } = useCurrency();
 
-    const alwaysGhs = forceGhs || checkoutStyle;
     const ghs = roundGhs(amountGhs);
 
-    if (alwaysGhs) {
+    if (forceGhs) {
         return (
             <span className={className}>
                 ₵{ghs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
