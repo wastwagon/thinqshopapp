@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Trash2, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/AuthContext';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import ShopLayout from '@/components/layout/ShopLayout';
 import PageHeader from '@/components/ui/PageHeader';
@@ -20,12 +19,11 @@ import QuantityStepper from '@/components/ui/QuantityStepper';
 
 export default function CartPage() {
     const { cart, updateQuantity, removeFromCart, cartTotal, loading } = useCart();
-    const { user } = useAuth();
     const router = useRouter();
 
     const handleCheckout = () => {
         if (cart.length === 0) return;
-        router.push(user ? '/checkout' : '/login?from=/checkout');
+        router.push('/checkout');
     };
 
     if (loading) {
@@ -152,7 +150,7 @@ export default function CartPage() {
                                     size="lg"
                                     className="w-full"
                                 >
-                                    {user ? 'Checkout' : 'Sign in to checkout'}
+                                    Checkout
                                 </Button>
                                 <Link
                                     href="/shop"
@@ -183,7 +181,7 @@ export default function CartPage() {
                                 size="lg"
                                 className="w-full min-h-[48px]"
                             >
-                                {user ? 'Checkout' : 'Sign in to checkout'}
+                                Checkout
                             </Button>
                         </div>
                     )}

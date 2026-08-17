@@ -27,12 +27,12 @@ export class CartService {
         },
         variant: { stock_quantity: number; price_adjust?: unknown } | null,
         quantity: number,
-        userId: number,
+        userId: number | null,
     ) {
         if (!product.is_active) {
             throw new BadRequestException('This product is no longer available');
         }
-        if (product.is_consignment && product.consignor_user_id === userId) {
+        if (userId != null && product.is_consignment && product.consignor_user_id === userId) {
             throw new BadRequestException('You cannot purchase your own consignment listing');
         }
         if (product.is_consignment && quantity > 1) {
@@ -137,6 +137,49 @@ export class CartService {
         return this.prisma.cartItem.deleteMany({
             where: { user_id: userId },
         });
+    }
+
+    async resolveCheckoutLines(userId: number | null, items?: AddToCartDto[]) {
+        if (userId) {
+            return this.getCart(userId);
+        }
+        const raw = (items || []).slice(0, 40);
+        if (!raw.length) {
+            throw new BadRequestException('Cart is empty');
+        }
+
+        const lines = [];
+        for (const dto of raw) {
+            const product = await this.prisma.product.findUnique({
+                where: { id: dto.productId },
+                include: { variants: true },
+            });
+            if (!product) throw new NotFoundException('Product not found');
+
+            let variant: (typeof product.variants)[number] | null = null;
+            let variantId: number | null = null;
+            if (dto.variantId != null) {
+                const v = product.variants.find((x) => x.id === dto.variantId);
+                if (!v) throw new BadRequestException('Variant does not belong to this product');
+                variant = v;
+                variantId = v.id;
+            }
+
+            this.assertQuantityAllowed(product, variant, dto.quantity, null);
+            lines.push({
+                id: 0,
+                user_id: null,
+                session_id: null,
+                product_id: product.id,
+                variant_id: variantId,
+                quantity: dto.quantity,
+                created_at: new Date(),
+                updated_at: new Date(),
+                product,
+                variant,
+            });
+        }
+        return lines as Awaited<ReturnType<CartService['getCart']>>;
     }
 
     async mergeCart(userId: number, items: AddToCartDto[]) {

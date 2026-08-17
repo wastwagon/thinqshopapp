@@ -1,13 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, UseGuards, Request, ParseIntPipe, Query, BadRequestException, UseInterceptors } from '@nestjs/common';
 import { NoStoreInterceptor } from '../common/no-store.interceptor';
 import { OrderService } from './order.service';
-import { CreateOrderDto } from './dto/order.dto';
+import { CreateOrderDto, QuoteCheckoutDto } from './dto/order.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { PermissionGuard } from '../auth/permission.guard';
 import { RequirePermission } from '../auth/require-permission.decorator';
 import { PERMISSION_MAP } from '../auth/permissions';
 import { AuditService } from '../audit/audit.service';
 import { ConfirmOrderPaymentDto, ResolveReturnDto, ReturnRequestDto, UpdateOrderStatusDto } from './dto/order-admin.dto';
+import { OptionalAuth, Public } from '../auth/public.decorator';
 
 @Controller('orders')
 @UseInterceptors(NoStoreInterceptor)
@@ -60,16 +61,29 @@ export class OrderController {
     @UseGuards(AuthGuard)
     @Get('quote/checkout')
     getCheckoutQuote(@Request() req: any, @Query('shipping_address_id', ParseIntPipe) shippingAddressId: number) {
-        return this.orderService.quoteCheckout(req.user.sub, shippingAddressId);
+        return this.orderService.quoteCheckout(req.user.sub, { shipping_address_id: shippingAddressId });
     }
 
-    @UseGuards(AuthGuard)
+    @OptionalAuth()
+    @Post('quote/checkout')
+    quoteCheckout(@Request() req: any, @Body() dto: QuoteCheckoutDto) {
+        return this.orderService.quoteCheckout(req.user?.sub ?? null, dto);
+    }
+
+    @Public()
+    @Get('guest/:id')
+    findGuest(@Param('id', ParseIntPipe) id: number, @Query('token') token?: string) {
+        if (!token?.trim()) throw new BadRequestException('token is required');
+        return this.orderService.findGuestOrder(id, token.trim());
+    }
+
+    @OptionalAuth()
     @Post()
     create(@Request() req, @Body() createOrderDto: CreateOrderDto) {
-        return this.orderService.create(req.user.sub, createOrderDto);
+        return this.orderService.create(req.user?.sub ?? null, createOrderDto);
     }
 
-    @UseGuards(AuthGuard)
+    @OptionalAuth()
     @Post(':id/confirm-payment')
     async confirmPayment(
         @Request() req,
@@ -78,7 +92,7 @@ export class OrderController {
     ) {
         const ref = body?.paystack_reference?.trim();
         if (!ref) throw new BadRequestException('paystack_reference is required');
-        return this.orderService.confirmOrderPayment(id, req.user.sub, ref);
+        return this.orderService.confirmOrderPayment(id, req.user?.sub ?? null, ref, body.guest_token);
     }
 
     @UseGuards(AuthGuard)

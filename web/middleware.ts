@@ -6,7 +6,7 @@ import { CONTENT_SECURITY_POLICY } from '@/lib/csp';
 const LOGIN_PATH = '/login';
 
 function isProtectedPath(pathname: string): boolean {
-    return pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/checkout');
+    return pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
 }
 
 function isAdminPath(pathname: string): boolean {

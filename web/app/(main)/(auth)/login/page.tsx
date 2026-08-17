@@ -69,9 +69,21 @@ export default function LoginPage() {
     return (
         <AuthScreen
             title="Sign in"
-            subtitle="Sign in to your account to continue shopping."
+            subtitle={
+                from === '/checkout'
+                    ? 'Sign in for saved addresses and wallet, or continue as a guest.'
+                    : 'Sign in to your account to continue shopping.'
+            }
             footer={
                 <div className="pt-6 mt-6 border-t border-gray-100 text-center">
+                    {from === '/checkout' && (
+                        <p className="text-gray-500 text-sm mb-4">
+                            <Link href="/checkout" className={`inline-flex items-center gap-2 ${authLinkClass}`}>
+                                Continue as guest
+                                <ArrowRight className="h-4 w-4" />
+                            </Link>
+                        </p>
+                    )}
                     <p className="text-gray-500 text-sm mb-2">Don&apos;t have an account?</p>
                     <Link href="/register" className={`inline-flex items-center gap-2 text-sm ${authLinkClass}`}>
                         Create account

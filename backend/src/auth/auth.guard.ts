@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY } from './public.decorator';
+import { IS_OPTIONAL_AUTH_KEY, IS_PUBLIC_KEY } from './public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -23,9 +23,15 @@ export class AuthGuard implements CanActivate {
         ]);
         if (isPublic) return true;
 
+        const isOptionalAuth = this.reflector.getAllAndOverride<boolean>(IS_OPTIONAL_AUTH_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+
         const request = context.switchToHttp().getRequest();
         const token = this.extractTokenFromHeader(request);
         if (!token) {
+            if (isOptionalAuth) return true;
             throw new UnauthorizedException();
         }
         try {
@@ -39,6 +45,7 @@ export class AuthGuard implements CanActivate {
             // so that we can access it in our route handlers
             request['user'] = payload;
         } catch {
+            if (isOptionalAuth) return true;
             throw new UnauthorizedException();
         }
         return true;

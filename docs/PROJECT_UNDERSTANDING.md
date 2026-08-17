@@ -76,7 +76,7 @@ flowchart TB
 
 ### Public storefront (`web/app/(main)/`)
 
-- Home, shop/categories, product detail, cart, checkout (wallet or Paystack)
+- Home, shop/categories, product detail, cart, **guest or signed-in checkout** (Paystack; wallet if logged in)
 - Wishlist, order tracking, static pages (terms, privacy, about, contact)
 - CMS-driven content (hero, trust badges, testimonials) from backend `content` module
 
@@ -104,7 +104,7 @@ React Context only — no Redux/Zustand:
 | Context | File | Notes |
 |---------|------|-------|
 | Auth | `web/context/AuthContext.tsx` | JWT login; admins → `/admin`, users → `/dashboard` |
-| Cart | `web/context/CartContext.tsx` | Server-synced when logged in (`CartItem` in DB) |
+| Cart | `web/context/CartContext.tsx` | **localStorage** when guest; server-synced (`CartItem`) after login |
 | Wishlist | `web/context/WishlistContext.tsx` | **localStorage only** (not synced to Prisma `Wishlist`) |
 | Currency | `web/context/CurrencyContext.tsx` | GHS / USD / CNY display |
 
@@ -116,7 +116,7 @@ Provider tree: `web/components/AppProviders.tsx` (root `app/layout.tsx`) wraps A
 
 ## Auth and roles
 
-**Backend** (`backend/src/auth/`): `POST /auth/login`, `/register`, forgot/reset password; global `AuthGuard` + `PermissionGuard` with `@RequirePermission()` for admin RBAC.
+**Backend** (`backend/src/auth/`): `POST /auth/login`, `/register`, forgot/reset password; global `AuthGuard` + `PermissionGuard` with `@RequirePermission()` for admin RBAC. Shop checkout is optional-auth (`@OptionalAuth()`): guests pay with Paystack; wallet, dashboard, and admin still require a JWT.
 
 **Roles** (`User.role` in `database/schema.prisma`):
 
@@ -132,7 +132,7 @@ Provider tree: `web/components/AppProviders.tsx` (root `app/layout.tsx`) wraps A
 Prisma schema is the source of truth (~40 models). Core domains:
 
 - **Users:** `User`, `UserProfile`, `UserWallet`, `Address`
-- **Shop:** `Product`, `Category`, variants, `CartItem`, `Order`, `OrderItem`, `Coupon`, `ProductReview`
+- **Shop:** `Product`, `Category`, variants, `CartItem`, `Order` (nullable `user_id` for guests), `OrderItem`, `Coupon`, `ProductReview`
 - **Finance:** `MoneyTransfer`, `Payment`, `ExchangeRate`, `ShopCurrencyRate`
 - **Logistics:** `Shipment`, warehouses, shipping zones/rates
 - **Procurement:** `ProcurementRequest`, quotes, orders, tracking
@@ -149,10 +149,10 @@ sequenceDiagram
   participant API as NestJS
   participant PS as Paystack
 
-  User->>Web: Checkout
-  Web->>API: GET /orders/quote/checkout
+  User->>Web: Checkout (guest or signed in)
+  Web->>API: POST /orders/quote/checkout
   Web->>API: POST /orders
-  alt Wallet
+  alt Wallet (signed-in only)
     API->>API: Debit UserWallet
   else Paystack
     API-->>Web: paystack_reference

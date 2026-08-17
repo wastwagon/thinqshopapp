@@ -17,6 +17,10 @@ export class ConfirmOrderPaymentDto {
     @IsString()
     @IsOptional()
     paystack_reference?: string;
+
+    @IsString()
+    @IsOptional()
+    guest_token?: string;
 }
 
 export class ResolveReturnDto {

@@ -4,7 +4,6 @@ import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { X, Trash2, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/AuthContext';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,12 +14,11 @@ import QuantityStepper from '@/components/ui/QuantityStepper';
 
 export default function CartDrawer() {
     const { cart, isCartOpen, toggleCart, updateQuantity, removeFromCart, cartTotal } = useCart();
-    const { user } = useAuth();
     const router = useRouter();
 
     const handleCheckout = () => {
         toggleCart();
-        router.push(user ? '/checkout' : '/login?from=/checkout');
+        router.push('/checkout');
     };
 
     return (
@@ -173,7 +171,7 @@ export default function CartDrawer() {
                                                     size="lg"
                                                     className="w-full"
                                                 >
-                                                    {user ? 'Checkout' : 'Sign in to checkout'}
+                                                    Checkout
                                                 </Button>
                                                 <Button
                                                     type="button"

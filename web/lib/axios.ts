@@ -42,7 +42,6 @@ api.interceptors.response.use(
                 const onProtected =
                     path.startsWith('/dashboard') ||
                     path.startsWith('/admin') ||
-                    path.startsWith('/checkout') ||
                     path.startsWith('/account');
                 if (onProtected) {
                     window.location.href = `/login?session=expired&from=${encodeURIComponent(path)}`;

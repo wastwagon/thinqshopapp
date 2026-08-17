@@ -69,6 +69,7 @@ export default function OrderSuccessPage() {
     const router = useRouter();
     const { clearCart } = useCart();
     const orderParam = searchParams.get('order');
+    const guestToken = searchParams.get('token');
     const [order, setOrder] = useState<OrderDetail | null>(null);
     const [loading, setLoading] = useState(!!orderParam);
 
@@ -86,14 +87,17 @@ export default function OrderSuccessPage() {
             setLoading(false);
             return;
         }
-        api.get(`/orders/${id}`)
+        const request = guestToken
+            ? api.get(`/orders/guest/${id}`, { params: { token: guestToken } })
+            : api.get(`/orders/${id}`);
+        request
             .then((res) => setOrder(res.data))
             .catch(() => {
                 toast.error('Order not found');
                 router.replace('/shop');
             })
             .finally(() => setLoading(false));
-    }, [orderParam, router]);
+    }, [orderParam, guestToken, router]);
 
     if (!orderParam) {
         return (
@@ -135,12 +139,24 @@ export default function OrderSuccessPage() {
                                 }),
                             },
                         ]}
-                        primaryAction={{
-                            label: 'View order details',
-                            href: `/dashboard/orders/${order.id}`,
-                            icon: ShoppingBag,
-                        }}
-                        secondaryAction={{ label: 'Continue shopping', href: '/shop', icon: ArrowRight }}
+                        primaryAction={
+                            guestToken
+                                ? {
+                                      label: 'Track order',
+                                      href: `/track?n=${encodeURIComponent(order.order_number)}`,
+                                      icon: Package,
+                                  }
+                                : {
+                                      label: 'View order details',
+                                      href: `/dashboard/orders/${order.id}`,
+                                      icon: ShoppingBag,
+                                  }
+                        }
+                        secondaryAction={
+                            guestToken
+                                ? { label: 'Create an account', href: '/register', icon: ArrowRight }
+                                : { label: 'Continue shopping', href: '/shop', icon: ArrowRight }
+                        }
                         accentColor="amber"
                     />
 
@@ -242,8 +258,11 @@ export default function OrderSuccessPage() {
 
                     <p className="text-center text-xs text-gray-500 pb-2">
                         Track your order anytime from{' '}
-                        <Link href="/dashboard/orders" className="text-blue-600 font-semibold hover:underline">
-                            Order history
+                        <Link
+                            href={guestToken ? `/track?n=${encodeURIComponent(order.order_number)}` : '/dashboard/orders'}
+                            className="text-blue-600 font-semibold hover:underline"
+                        >
+                            {guestToken ? 'Order tracking' : 'Order history'}
                         </Link>
                         .
                     </p>

@@ -68,6 +68,7 @@ interface Order {
     created_at: string;
     items: OrderItem[];
     user?: { email: string; phone?: string | null; profile?: { first_name?: string; last_name?: string } };
+    guest_email?: string | null;
     shipping_address?: {
         full_name?: string;
         phone?: string;
@@ -157,7 +158,9 @@ export default function AdminOrderDetailPage() {
 
     const userName = order?.user?.profile
         ? `${order.user.profile.first_name || ''} ${order.user.profile.last_name || ''}`.trim() || order.user.email
-        : order?.user?.email ?? '—';
+        : order?.user?.email
+          ?? (order?.shipping_address?.full_name ? `${order.shipping_address.full_name} (Guest)` : null)
+          ?? (order?.guest_email ? `${order.guest_email} (Guest)` : 'Guest');
 
     if (loading) {
         return (
@@ -418,6 +421,11 @@ export default function AdminOrderDetailPage() {
                                 {order.user?.email && (
                                     <a href={`mailto:${order.user.email}`} className="flex items-center gap-2 text-xs text-blue-600 hover:underline">
                                         <Mail className="h-3.5 w-3.5" /> {order.user.email}
+                                    </a>
+                                )}
+                                {!order.user?.email && order.guest_email && (
+                                    <a href={`mailto:${order.guest_email}`} className="flex items-center gap-2 text-xs text-blue-600 hover:underline">
+                                        <Mail className="h-3.5 w-3.5" /> {order.guest_email}
                                     </a>
                                 )}
                                 {order.user?.phone && (

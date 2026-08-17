@@ -177,7 +177,7 @@ enum WalletWithdrawalStatus {
 
 model Address {
   id             Int         @id @default(autoincrement())
-  user_id        Int
+  user_id        Int?
   address_type   AddressType @default(home)
   full_name      String      @db.VarChar(255)
   phone          String      @db.VarChar(20)
@@ -190,7 +190,7 @@ model Address {
   created_at     DateTime    @default(now())
   updated_at     DateTime    @updatedAt
 
-  user           User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user           User?       @relation(fields: [user_id], references: [id], onDelete: Cascade)
   orders         Order[]
   pickup_shipments Shipment[] @relation("PickupAddress")
   delivery_shipments Shipment[] @relation("DeliveryAddress")
@@ -452,32 +452,35 @@ model CartItem {
 }
 
 model Order {
-  id                 Int           @id @default(autoincrement())
-  user_id            Int
-  order_number       String        @unique @db.VarChar(50)
-  subtotal           Decimal       @db.Decimal(10, 2)
-  tax                Decimal       @default(0.00) @db.Decimal(10, 2)
-  shipping_fee       Decimal       @default(0.00) @db.Decimal(10, 2)
-  discount           Decimal       @default(0.00) @db.Decimal(10, 2)
-  total              Decimal       @db.Decimal(10, 2)
-  status             OrderStatus   @default(pending)
-  payment_method     PaymentMethod
-  payment_status     PaymentStatus @default(pending)
-  paystack_reference String?       @db.VarChar(255)
-  shipping_address_id Int
-  notes              String?
-  created_at         DateTime      @default(now())
-  updated_at         DateTime      @updatedAt
+  id                      Int           @id @default(autoincrement())
+  user_id                 Int?
+  order_number            String        @unique @db.VarChar(50)
+  subtotal                Decimal       @db.Decimal(10, 2)
+  tax                     Decimal       @default(0.00) @db.Decimal(10, 2)
+  shipping_fee            Decimal       @default(0.00) @db.Decimal(10, 2)
+  discount                Decimal       @default(0.00) @db.Decimal(10, 2)
+  total                   Decimal       @db.Decimal(10, 2)
+  status                  OrderStatus   @default(pending)
+  payment_method          PaymentMethod
+  payment_status          PaymentStatus @default(pending)
+  paystack_reference      String?       @db.VarChar(255)
+  shipping_address_id     Int
+  notes                   String?
+  guest_email             String?       @db.VarChar(255)
+  guest_access_token_hash String?       @unique @db.VarChar(64)
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
 
-  user               User          @relation(fields: [user_id], references: [id])
-  shipping_address   Address       @relation(fields: [shipping_address_id], references: [id])
-  items              OrderItem[]
-  tracking           OrderTracking[]
-  reviews            ProductReview[]
-  coupon_usages      CouponUsage[]
+  user                    User?         @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  shipping_address        Address       @relation(fields: [shipping_address_id], references: [id])
+  items                   OrderItem[]
+  tracking                OrderTracking[]
+  reviews                 ProductReview[]
+  coupon_usages           CouponUsage[]
 
   @@index([user_id, created_at])
   @@index([status])
+  @@index([guest_email])
   @@map("orders")
 }
 

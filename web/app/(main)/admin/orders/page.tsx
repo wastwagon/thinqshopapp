@@ -73,14 +73,18 @@ export default function AdminOrdersPage() {
     const userName = (o: any) => {
         const p = o?.user?.profile;
         if (p?.first_name || p?.last_name) return `${p.first_name || ''} ${p.last_name || ''}`.trim();
-        return o?.user?.email ?? '—';
+        if (o?.user?.email) return o.user.email;
+        if (o?.shipping_address?.full_name) return `${o.shipping_address.full_name} (Guest)`;
+        if (o?.guest_email) return `${o.guest_email} (Guest)`;
+        return 'Guest';
     };
 
     const filteredOrders = orders.filter(
         (o) =>
             (o.order_number ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
             userName(o).toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (o.user?.email ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+            (o.user?.email ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (o.guest_email ?? '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const pendingCount = orders.filter((o) => o.status === 'pending').length;

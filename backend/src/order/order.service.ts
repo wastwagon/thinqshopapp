@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateOrderDto } from './dto/order.dto';
+import { CreateOrderDto, QuoteCheckoutDto } from './dto/order.dto';
 import { CartService } from '../cart/cart.service';
 import { PaymentMethod } from '@prisma/client';
 import { AddressService } from '../address/address.service';
@@ -13,6 +13,7 @@ import { WalletService } from '../finance/wallet.service';
 import { ConsignmentService } from '../consignment/consignment.service';
 import { resolveProductLinePricing } from '../product/wholesale-pricing';
 import { randomPublicId } from '../common/secure-id';
+import { createGuestAccessToken, guestAccessTokenMatches } from '../common/guest-token';
 import { clampLimit, clampPage } from '../common/pagination';
 
 type TxClient = Prisma.TransactionClient;
@@ -58,13 +59,13 @@ export class OrderService {
         private consignmentService: ConsignmentService,
     ) { }
 
-    private async reserveStockForCartItems(tx: TxClient, cartItems: CartLine[], userId: number) {
+    private async reserveStockForCartItems(tx: TxClient, cartItems: CartLine[], userId: number | null) {
         for (const item of cartItems) {
             const product = item.product;
             if (!product.is_active) {
                 throw new BadRequestException(`${product.name} is no longer available`);
             }
-            if (product.is_consignment && product.consignor_user_id === userId) {
+            if (userId != null && product.is_consignment && product.consignor_user_id === userId) {
                 throw new BadRequestException('You cannot purchase your own consignment listing');
             }
             if (product.is_consignment && item.quantity > 1) {
@@ -135,16 +136,23 @@ export class OrderService {
         }
     }
 
-    private async getCheckoutPricing(userId: number, shippingAddressId: number) {
-        const cartItems = await this.cartService.getCart(userId);
+    private omitGuestSecret<T extends { guest_access_token_hash?: string | null }>(order: T) {
+        const { guest_access_token_hash: _hash, ...safe } = order;
+        return safe;
+    }
+
+    private async getCheckoutPricing(userId: number | null, dto: QuoteCheckoutDto) {
+        const cartItems = await this.cartService.resolveCheckoutLines(userId, userId ? undefined : dto.items);
         if (cartItems.length === 0) {
             throw new BadRequestException('Cart is empty');
         }
 
-        const addresses = await this.addressService.findAll(userId);
-        const validAddress = addresses.find((a) => a.id === shippingAddressId);
-        if (!validAddress) {
-            throw new BadRequestException('Invalid shipping address');
+        if (userId && dto.shipping_address_id) {
+            const addresses = await this.addressService.findAll(userId);
+            const validAddress = addresses.find((a) => a.id === dto.shipping_address_id);
+            if (!validAddress) {
+                throw new BadRequestException('Invalid shipping address');
+            }
         }
 
         const subtotal = cartItems.reduce((sum, item) => {
@@ -169,6 +177,7 @@ export class OrderService {
         const discount = 0;
         const total = subtotal + shippingFee + tax - discount;
         return {
+            cartItems,
             subtotal: Number(subtotal.toFixed(2)),
             shipping_fee: Number(shippingFee.toFixed(2)),
             tax: Number(tax.toFixed(2)),
@@ -178,13 +187,29 @@ export class OrderService {
         };
     }
 
-    async quoteCheckout(userId: number, shippingAddressId: number) {
-        return this.getCheckoutPricing(userId, shippingAddressId);
+    async quoteCheckout(userId: number | null, dto: QuoteCheckoutDto) {
+        const { cartItems: _cartItems, ...pricing } = await this.getCheckoutPricing(userId, dto);
+        return pricing;
     }
 
-    async create(userId: number, dto: CreateOrderDto) {
-        const pricing = await this.getCheckoutPricing(userId, dto.shipping_address_id);
-        const cartItems = await this.cartService.getCart(userId);
+    async create(userId: number | null, dto: CreateOrderDto) {
+        const isGuest = userId == null;
+        if (isGuest) {
+            if (dto.payment_method === 'wallet') {
+                throw new BadRequestException('Sign in to pay with wallet');
+            }
+            if (!dto.guest_email?.trim() || !dto.shipping_address) {
+                throw new BadRequestException('Guest checkout requires an email and shipping address');
+            }
+        } else if (!dto.shipping_address_id) {
+            throw new BadRequestException('Please select a shipping address');
+        }
+
+        const pricing = await this.getCheckoutPricing(userId, {
+            shipping_address_id: dto.shipping_address_id,
+            items: dto.items,
+        });
+        const cartItems = pricing.cartItems;
         const orderNumber = randomPublicId('ORD');
         const authoritativeTotal = pricing.total;
         const clientTotal = Number(dto.total);
@@ -192,9 +217,28 @@ export class OrderService {
             throw new BadRequestException('Checkout total mismatch. Please refresh your cart and try again.');
         }
         const isPaystack = dto.payment_method === 'card' || dto.payment_method === 'mobile_money';
+        const guestToken = isGuest ? createGuestAccessToken() : null;
+        const guestEmail = isGuest ? dto.guest_email!.trim().toLowerCase() : null;
 
         return this.prisma.$transaction(async (prisma) => {
             await this.reserveStockForCartItems(prisma, cartItems, userId);
+
+            let shippingAddressId = dto.shipping_address_id;
+            if (isGuest && dto.shipping_address) {
+                const address = await prisma.address.create({
+                    data: {
+                        user_id: null,
+                        address_type: 'home',
+                        full_name: dto.shipping_address.full_name,
+                        phone: dto.shipping_address.phone,
+                        street: dto.shipping_address.street,
+                        city: dto.shipping_address.city,
+                        region: dto.shipping_address.region,
+                        landmark: dto.shipping_address.landmark,
+                    },
+                });
+                shippingAddressId = address.id;
+            }
 
             const order = await prisma.order.create({
                 data: {
@@ -207,8 +251,10 @@ export class OrderService {
                     total: authoritativeTotal,
                     status: dto.payment_method === 'wallet' ? 'processing' : 'pending',
                     payment_method: dto.payment_method as PaymentMethod,
-                    shipping_address_id: dto.shipping_address_id,
+                    shipping_address_id: shippingAddressId!,
                     payment_status: dto.payment_method === 'wallet' ? 'success' : 'pending',
+                    guest_email: guestEmail,
+                    guest_access_token_hash: guestToken?.hash,
                 },
             });
             await prisma.orderTracking.create({
@@ -220,6 +266,9 @@ export class OrderService {
             });
 
             if (dto.payment_method === 'wallet') {
+                if (userId == null) {
+                    throw new BadRequestException('Sign in to pay with wallet');
+                }
                 await this.walletService.debit(
                     userId,
                     authoritativeTotal,
@@ -262,7 +311,7 @@ export class OrderService {
                 data: orderItemsData,
             });
 
-            if (!isPaystack) {
+            if (!isPaystack && userId) {
                 await prisma.cartItem.deleteMany({
                     where: { user_id: userId },
                 });
@@ -270,14 +319,14 @@ export class OrderService {
 
             const finalOrder = await prisma.order.findUnique({
                 where: { id: order.id },
-                include: { items: true },
+                include: { items: true, shipping_address: true },
             });
 
             if (!isPaystack && finalOrder) {
-                this.queueOrderConfirmationEmail(userId, finalOrder.order_number, String(finalOrder.total));
-                this.smsService.sendToUser(userId, `Your order ${finalOrder.order_number} has been placed. Total: GHS ${finalOrder.total}. Thank you for shopping with ThinQShop!`).catch(() => {});
+                this.notifyOrderPlaced(finalOrder, `Your order ${finalOrder.order_number} has been placed. Total: GHS ${finalOrder.total}. Thank you for shopping with ThinQShop!`);
             }
 
+            const safeOrder = finalOrder ? this.omitGuestSecret(finalOrder) : finalOrder;
             if (isPaystack) {
                 const transactionRef = `PAY-ORD-${order.id}-${Date.now()}`;
                 await prisma.payment.create({
@@ -292,13 +341,17 @@ export class OrderService {
                     },
                 });
                 return {
-                    ...finalOrder,
+                    ...safeOrder,
                     paystack_reference: transactionRef,
                     amount_pesewas: Math.round(Number(order.total) * 100),
+                    ...(guestToken ? { guest_token: guestToken.token } : {}),
                 };
             }
 
-            return finalOrder;
+            return {
+                ...safeOrder,
+                ...(guestToken ? { guest_token: guestToken.token } : {}),
+            };
         }).then(async (result) => {
             if (dto.payment_method === 'wallet' && result?.id) {
                 await this.consignmentService.handleOrderPaid(result.id);
@@ -307,16 +360,37 @@ export class OrderService {
         });
     }
 
-    async confirmOrderPayment(orderId: number, userId: number, paystackReference: string) {
+    private assertOrderAccess(order: { user_id: number | null; guest_access_token_hash: string | null }, userId: number | null, guestToken?: string) {
+        if (order.user_id != null) {
+            if (order.user_id !== userId) throw new BadRequestException('Unauthorized');
+            return;
+        }
+        if (!guestAccessTokenMatches(guestToken, order.guest_access_token_hash)) {
+            throw new BadRequestException('Unauthorized');
+        }
+    }
+
+    async findGuestOrder(id: number, token: string) {
+        const order = await this.prisma.order.findFirst({
+            where: { id, user_id: null },
+            include: { items: { include: { product: true, variant: true } }, tracking: { orderBy: { created_at: 'asc' } } },
+        });
+        if (!order || !guestAccessTokenMatches(token, order.guest_access_token_hash)) {
+            throw new NotFoundException('Order not found');
+        }
+        return this.omitGuestSecret(order);
+    }
+
+    async confirmOrderPayment(orderId: number, userId: number | null, paystackReference: string, guestToken?: string) {
         const order = await this.prisma.order.findUnique({
             where: { id: orderId },
             include: { items: true },
         });
         if (!order) throw new NotFoundException('Order not found');
-        if (order.user_id !== userId) throw new BadRequestException('Unauthorized');
+        this.assertOrderAccess(order, userId, guestToken);
         if (order.payment_status === 'success') {
             await this.consignmentService.handleOrderPaid(orderId);
-            return order;
+            return this.omitGuestSecret(order);
         }
 
         const result = await this.paymentService.verifyWithPaystack(paystackReference);
@@ -346,19 +420,23 @@ export class OrderService {
                     notes: 'Payment confirmed via Paystack',
                 },
             });
-            await tx.cartItem.deleteMany({ where: { user_id: userId } });
+            if (order.user_id != null) {
+                await tx.cartItem.deleteMany({ where: { user_id: order.user_id } });
+            }
             return tx.order.findUnique({
                 where: { id: orderId },
-                include: { items: true },
+                include: { items: true, shipping_address: true },
             });
         });
 
         if (updated) {
-            this.queueOrderConfirmationEmail(userId, updated.order_number, String(updated.total));
-            this.smsService.sendToUser(userId, `Payment confirmed. Your order ${updated.order_number} (GHS ${updated.total}) is being processed. Thank you!`).catch(() => {});
+            this.notifyOrderPlaced(
+                updated,
+                `Payment confirmed. Your order ${updated.order_number} (GHS ${updated.total}) is being processed. Thank you!`,
+            );
             await this.consignmentService.handleOrderPaid(orderId);
         }
-        return updated;
+        return updated ? this.omitGuestSecret(updated) : updated;
     }
 
     /** Called from Paystack webhook when an ecommerce payment succeeds. */
@@ -367,7 +445,7 @@ export class OrderService {
         service_id: number;
         status: string;
         transaction_ref: string;
-        user_id: number;
+        user_id: number | null;
     }) {
         if (payment.service_type !== 'ecommerce' || payment.status !== 'success') return null;
 
@@ -392,22 +470,23 @@ export class OrderService {
                     notes: 'Payment confirmed via Paystack webhook',
                 },
             });
-            await tx.cartItem.deleteMany({ where: { user_id: payment.user_id } });
+            if (order.user_id != null) {
+                await tx.cartItem.deleteMany({ where: { user_id: order.user_id } });
+            }
             return tx.order.findUnique({
                 where: { id: orderId },
-                include: { items: true },
+                include: { items: true, shipping_address: true },
             });
         });
 
         if (updated) {
-            this.queueOrderConfirmationEmail(payment.user_id, updated.order_number, String(updated.total));
-            this.smsService.sendToUser(
-                payment.user_id,
+            this.notifyOrderPlaced(
+                updated,
                 `Payment confirmed. Your order ${updated.order_number} (GHS ${updated.total}) is being processed. Thank you!`,
-            ).catch(() => {});
+            );
             await this.consignmentService.handleOrderPaid(orderId);
         }
-        return updated;
+        return updated ? this.omitGuestSecret(updated) : updated;
     }
 
     private frontendBaseUrl(): string {
@@ -429,6 +508,43 @@ export class OrderService {
                 order_number: orderNumber,
                 refund_amount: refundAmount.toFixed(2),
                 wallet_url: `${this.frontendBaseUrl()}/dashboard/wallet`,
+            });
+        } catch {
+            // ignore email queue errors
+        }
+    }
+
+    private notifyOrderPlaced(
+        order: {
+            user_id: number | null;
+            guest_email: string | null;
+            order_number: string;
+            total: unknown;
+            shipping_address?: { phone?: string | null; full_name?: string | null } | null;
+        },
+        smsMessage: string,
+    ) {
+        const name = order.shipping_address?.full_name?.trim() || 'Customer';
+        if (order.user_id != null) {
+            this.queueOrderConfirmationEmail(order.user_id, order.order_number, String(order.total));
+            this.smsService.sendToUser(order.user_id, smsMessage).catch(() => {});
+            return;
+        }
+        if (order.guest_email) {
+            this.queueOrderConfirmationToEmail(order.guest_email, name, order.order_number, String(order.total));
+        }
+        const phone = order.shipping_address?.phone;
+        if (phone) {
+            this.smsService.send(phone, smsMessage).catch(() => {});
+        }
+    }
+
+    private async queueOrderConfirmationToEmail(email: string, userName: string, orderNumber: string, total: string) {
+        try {
+            await this.emailTemplateService.queueFromTemplate('order_placed', email, {
+                order_number: orderNumber,
+                total,
+                user_name: userName || 'Customer',
             });
         } catch {
             // ignore email queue errors
@@ -483,7 +599,7 @@ export class OrderService {
         });
         if (!order) throw new NotFoundException('Order not found');
         const consignment_escrow = await this.consignmentService.getEscrowSummaryForOrder(id);
-        return { ...order, consignment_escrow };
+        return { ...this.omitGuestSecret(order), consignment_escrow };
     }
 
     /** Public lookup by order_number for track page. Returns minimal safe data (no user email, no full address). */
@@ -528,7 +644,10 @@ export class OrderService {
             }),
             this.prisma.order.count({ where }),
         ]);
-        return { data: orders, meta: { total, page: safePage, limit: safeLimit, totalPages: Math.ceil(total / safeLimit) } };
+        return {
+            data: orders.map((row) => this.omitGuestSecret(row)),
+            meta: { total, page: safePage, limit: safeLimit, totalPages: Math.ceil(total / safeLimit) },
+        };
     }
 
     async updateOrderStatus(
@@ -574,7 +693,16 @@ export class OrderService {
             },
         });
         const statusMsg = status.replace(/_/g, ' ');
-        this.smsService.sendToUser(order.user_id, `Your order ${order.order_number} status: ${statusMsg}. Track at ThinQShop.`).catch(() => {});
+        const sms = `Your order ${order.order_number} status: ${statusMsg}. Track at ThinQShop.`;
+        if (order.user_id != null) {
+            this.smsService.sendToUser(order.user_id, sms).catch(() => {});
+        } else {
+            const address = await this.prisma.address.findUnique({
+                where: { id: order.shipping_address_id },
+                select: { phone: true },
+            });
+            if (address?.phone) this.smsService.send(address.phone, sms).catch(() => {});
+        }
         if (status === 'delivered') {
             await this.consignmentService.handleOrderDelivered(order.id, {
                 releaseNote: options?.consignmentReleaseNote,
@@ -697,6 +825,11 @@ export class OrderService {
             trackingStatus = 'return_rejected';
             trackingNotes = notes?.trim() || 'Return request rejected by admin';
         } else if (action === 'refund') {
+            if (order.user_id == null) {
+                throw new BadRequestException(
+                    'Guest orders cannot be refunded to wallet. Process a Paystack reversal or contact the customer.',
+                );
+            }
             trackingStatus = 'refunded';
             trackingNotes = notes?.trim() || 'Refund credited to customer ThinQ Wallet (not Paystack reversal)';
             orderData.payment_status = 'refunded';
@@ -765,7 +898,7 @@ export class OrderService {
             return { order: resolved, refundConsignmentResult, walletRefundCredited };
         });
 
-        if (action === 'refund' && updated.walletRefundCredited) {
+        if (action === 'refund' && updated.walletRefundCredited && order.user_id != null) {
             await this.queueOrderRefundWalletEmail(
                 order.user_id,
                 order.order_number,
@@ -784,17 +917,19 @@ export class OrderService {
             );
         }
 
-        await this.notificationService.createNotification({
-            userId: order.user_id,
-            type: 'return_request',
-            title: `Return ${action === 'refund' ? 'refunded to wallet' : action === 'approve' ? 'approved' : 'rejected'}`,
-            message: action === 'refund'
-                ? `Your return for ${order.order_number} was approved. ₵${Number(order.total).toFixed(2)} has been credited to your ThinQ Wallet (not back to card/MoMo).`
-                : action === 'approve'
-                    ? `Your return for ${order.order_number} has been approved.`
-                    : `Your return for ${order.order_number} was not approved.`,
-            link: action === 'refund' ? '/dashboard/wallet' : `/dashboard/orders/${order.id}`,
-        });
+        if (order.user_id != null) {
+            await this.notificationService.createNotification({
+                userId: order.user_id,
+                type: 'return_request',
+                title: `Return ${action === 'refund' ? 'refunded to wallet' : action === 'approve' ? 'approved' : 'rejected'}`,
+                message: action === 'refund'
+                    ? `Your return for ${order.order_number} was approved. ₵${Number(order.total).toFixed(2)} has been credited to your ThinQ Wallet (not back to card/MoMo).`
+                    : action === 'approve'
+                        ? `Your return for ${order.order_number} has been approved.`
+                        : `Your return for ${order.order_number} was not approved.`,
+                link: action === 'refund' ? '/dashboard/wallet' : `/dashboard/orders/${order.id}`,
+            });
+        }
 
         return updated.order;
     }
