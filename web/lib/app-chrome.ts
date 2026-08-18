@@ -9,6 +9,8 @@
  * hidebars:// is iOS-wrapper only — on Android it hides the clock.
  */
 
+import { isWebViewGoldClient } from './webviewGoldClient';
+
 export const APP_CHROME_BG = '#ffffff';
 export const APP_CHROME_RGB = '255,255,255';
 export const APP_CHROME_STATUS_TEXT = 'black';
@@ -56,8 +58,13 @@ export function resolveSafeAreaTopPx(opts: {
     return 0;
 }
 
+export function shouldPingWebViewGoldSchemes(): boolean {
+    return isWebViewGoldClient() || isAndroidWebView();
+}
+
 export function pingWebViewGoldScheme(url: string): void {
     if (typeof document === 'undefined') return;
+    if (!shouldPingWebViewGoldSchemes()) return;
     try {
         const iframe = document.createElement('iframe');
         iframe.setAttribute('src', url);
@@ -80,7 +87,7 @@ export function pingWebViewGoldScheme(url: string): void {
     }
 }
 
-/** iframe + Image. Color pings are safe in browsers (unknown schemes are ignored). */
+/** iframe + Image. Only call from a WebViewGold / Android WebView wrapper. */
 export function pingWebViewGoldStatusBar(opts?: { hidebars?: boolean }): void {
     pingWebViewGoldScheme(STATUSBAR_COLOR);
     pingWebViewGoldScheme(STATUSBAR_TEXT);
@@ -162,7 +169,9 @@ export function initAppChrome(opts: { isWebViewGold: boolean }): () => void {
     measureAndApplySafeArea();
 
     const hidebars = opts.isWebViewGold && isIosClient();
-    pingWebViewGoldStatusBar({ hidebars });
+    if (shouldPingWebViewGoldSchemes()) {
+        pingWebViewGoldStatusBar({ hidebars });
+    }
     if (hidebars) {
         navigateIosStatusBarSchemes();
     }

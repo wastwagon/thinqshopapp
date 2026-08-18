@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import AppChrome from "@/components/AppChrome";
 import AppProviders from "@/components/AppProviders";
+import { APP_CHROME_RGB, APP_CHROME_STATUS_TEXT } from "@/lib/app-chrome";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
@@ -16,8 +17,8 @@ const webViewGoldPtrOffIframe = process.env.NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_IFRA
  * iframes (do not wait for hydration). No native store rebuild required —
  * existing WebViewGold already intercepts statusbarcolor://.
  *
- * statusbarcolor / statusbartextcolor: always (Safari/Chrome ignore unknown
- * schemes; Android WebViewGold paints the native bar white).
+ * statusbarcolor / statusbartextcolor: WebViewGold and Android WebView only
+ * (Safari/Chrome cannot use those schemes; pinging them only spams CSP).
  * hidebars://: iOS wrapper only (on Android it hides the clock).
  * Do NOT navigate the top frame to custom schemes on Android.
  */
@@ -73,18 +74,17 @@ const webViewGoldBootScript = `
   function chromePings(){
     if (chromeSent) return;
     chromeSent=true;
-    ping('statusbarcolor://255,255,255');
-    ping('statusbartextcolor://black');
+    ping('statusbarcolor://${APP_CHROME_RGB}');
+    ping('statusbartextcolor://${APP_CHROME_STATUS_TEXT}');
     if (isIOS() && isWG()) ping('hidebars://on');
   }
-  chromePings();
   if (isWG() || isAndroidWV()) {
     mark();
+    chromePings();
     iframePtrOnce();
   }
   document.addEventListener('DOMContentLoaded',function(){
-    chromePings();
-    if (isWG() || isAndroidWV()) { mark(); iframePtrOnce(); }
+    if (isWG() || isAndroidWV()) { mark(); chromePings(); iframePtrOnce(); }
   });
 })();`;
 

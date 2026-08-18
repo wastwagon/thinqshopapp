@@ -1,5 +1,6 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { CONTENT_SECURITY_POLICY } from './lib/csp.mjs';
 
 function loadJwtSecretFromEnvFiles() {
     if (process.env.JWT_SECRET) return;
@@ -31,10 +32,7 @@ const nextConfig = {
                     { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
                     { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=()' },
                     { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
-                    {
-                        key: 'Content-Security-Policy',
-                        value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.paystack.co https://checkout.paystack.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.paystack.co https://checkout.paystack.com https://www.google-analytics.com https://www.googletagmanager.com; frame-src https://checkout.paystack.com https://js.paystack.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
-                    },
+                    { key: 'Content-Security-Policy', value: CONTENT_SECURITY_POLICY },
                 ],
             },
             {
