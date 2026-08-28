@@ -16,6 +16,12 @@ if (!mainPath) {
 
 if (!fs.existsSync(linkPath)) {
   const relative = path.relative(distDir, mainPath).split(path.sep).join('/');
-  fs.symlinkSync(relative, linkPath);
-  console.log(`link-main: dist/main.js -> ${relative}`);
+  try {
+    fs.symlinkSync(relative, linkPath);
+    console.log(`link-main: dist/main.js -> ${relative}`);
+  } catch (err) {
+    // Windows often blocks symlinks without Developer Mode / admin.
+    fs.copyFileSync(mainPath, linkPath);
+    console.log(`link-main: copied dist/main.js from ${relative} (${err.code || 'symlink failed'})`);
+  }
 }

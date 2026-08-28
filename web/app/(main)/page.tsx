@@ -19,7 +19,6 @@ import {
     Home as HomeIconLucide,
     type LucideIcon,
 } from 'lucide-react';
-import products from '@/lib/data/scraped_products.json';
 import api from '@/lib/axios';
 import ProductCard from '@/components/ui/ProductCard';
 import ShopLayout from '@/components/layout/ShopLayout';
@@ -28,7 +27,6 @@ import TrustStrip from '@/components/home/TrustStrip';
 import HomeServicesSection from '@/components/home/HomeServicesSection';
 import SellForMeCta from '@/components/home/SellForMeCta';
 import TestimonialsBlock from '@/components/home/TestimonialsBlock';
-import { ShopLoadingState } from '@/components/shop/ShopSuccessShell';
 import { STATIC_CATEGORIES as CATEGORY_CATALOG } from '@/lib/product-utils';
 import { getRootCategories, type CategoryNode } from '@/lib/category-utils';
 
@@ -121,7 +119,6 @@ type TrustBadge = { id: number; icon: string; label: string; optional_link?: str
 type Testimonial = { id: number; quote: string; author_name: string; author_role?: string | null };
 
 export default function Home() {
-    const [mounted, setMounted] = useState(false);
     const [productsList, setProductsList] = useState<Product[]>([]);
     const [categories, setCategories] = useState<CategoryNode[]>([]);
     const [source, setSource] = useState<'api' | 'static'>('static');
@@ -131,20 +128,15 @@ export default function Home() {
     const [sectionOrder, setSectionOrder] = useState<string[]>(DEFAULT_HOME_SECTIONS);
 
     useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    useEffect(() => {
-        if (!mounted) return;
         const load = async () => {
             try {
                 const [productsRes, categoriesRes, heroRes, trustRes, testimonialRes, sectionsRes] = await Promise.all([
-                    api.get('/products', { params: { limit: 100 } }),
-                    api.get('/products/categories'),
-                    api.get('/content/hero-slides').catch(() => ({ data: [] })),
-                    api.get('/content/trust-badges').catch(() => ({ data: [] })),
-                    api.get('/content/testimonials').catch(() => ({ data: [] })),
-                    api.get('/content/homepage-sections').catch(() => ({ data: [] })),
+                    api.get('/products', { params: { limit: 100 }, timeout: 12000 }),
+                    api.get('/products/categories', { timeout: 12000 }),
+                    api.get('/content/hero-slides', { timeout: 12000 }).catch(() => ({ data: [] })),
+                    api.get('/content/trust-badges', { timeout: 12000 }).catch(() => ({ data: [] })),
+                    api.get('/content/testimonials', { timeout: 12000 }).catch(() => ({ data: [] })),
+                    api.get('/content/homepage-sections', { timeout: 12000 }).catch(() => ({ data: [] })),
                 ]);
                 const apiProducts = productsRes.data?.data ?? productsRes.data ?? [];
                 const apiCategories = categoriesRes.data ?? [];
@@ -176,7 +168,8 @@ export default function Home() {
             } catch (_) {
                 // Fall through to static
             }
-            const staticProducts = (products as Product[]).map((p, i) => normalizeProduct({ ...p, id: p.id ?? i + 1 }, i));
+            const staticMod = await import('@/lib/data/scraped_products.json');
+            const staticProducts = (staticMod.default as Product[]).map((p, i) => normalizeProduct({ ...p, id: p.id ?? i + 1 }, i));
             setProductsList(staticProducts);
             setCategories(
                 CATEGORY_CATALOG.map((c, i) => ({
@@ -190,7 +183,7 @@ export default function Home() {
             setHeroSlides([]);
         };
         load();
-    }, [mounted]);
+    }, []);
 
     const productsWithIds = productsList;
 
@@ -242,15 +235,6 @@ export default function Home() {
         }
         return m;
     }, [allProducts, categories]);
-
-
-    if (!mounted) {
-        return (
-            <ShopLayout>
-                <ShopLoadingState message="Loading…" />
-            </ShopLayout>
-        );
-    }
 
     const hasProducts = productsWithIds.length > 0;
     const showFeaturedSections = fallbackFlash.length >= 4 && fallbackFeatured.length >= 4;

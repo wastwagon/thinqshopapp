@@ -24,7 +24,7 @@ export default function AuthBrand() {
 export function AuthCard({ children }: { children: React.ReactNode }) {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
             className="w-full max-w-md overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.12)]"
