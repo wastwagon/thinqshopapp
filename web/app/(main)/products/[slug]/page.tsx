@@ -370,7 +370,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                     <PageHeader breadcrumbs={breadcrumbs} accent="amber" />
                 </div>
 
-                <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 lg:items-start">
+                <div className="lg:grid lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,30rem)_minmax(0,1fr)] lg:gap-x-10 xl:gap-x-12 lg:items-start">
                     {/* Image + compact under-image purchase (mobile) */}
                     <div>
                         <div className="sm:px-0">
@@ -379,14 +379,14 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 onClick={() => canExpandGallery && setLightboxOpen(true)}
                                 disabled={!canExpandGallery}
                                 aria-label={`View larger image: ${product.name}`}
-                                className="group/image w-full aspect-[4/5] max-h-[52vh] sm:aspect-square sm:max-h-[420px] lg:max-h-none relative overflow-hidden bg-gray-100 border-y border-gray-100 sm:border sm:rounded-lg cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-default"
+                                className="group/image relative w-full sm:max-w-md sm:mx-auto lg:max-w-none lg:mx-0 aspect-square overflow-hidden bg-gray-100 border-y border-gray-100 sm:border sm:rounded-lg cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-default"
                             >
                                 <Image
                                     src={images[selectedImage] || '/placeholder.svg'}
                                     alt={product.name}
                                     fill
                                     className="object-cover object-center transition-transform duration-500 group-hover/image:scale-[1.02] pointer-events-none"
-                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 448px, 480px"
                                     unoptimized={imgUnoptimized(images[selectedImage] || '')}
                                     priority
                                 />
