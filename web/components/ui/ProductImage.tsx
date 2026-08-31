@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ImageIcon } from 'lucide-react';
 import { getMediaUrl } from '@/lib/media';
 
@@ -52,6 +52,10 @@ export default function ProductImage({ src, alt, width = 400, height = 400, clas
     const [error, setError] = useState(false);
     const resolvedSrc = resolveImageUrl(src);
     const unoptimized = shouldUnoptimize(resolvedSrc);
+
+    useEffect(() => {
+        setError(false);
+    }, [resolvedSrc]);
 
     if (error || !resolvedSrc) {
         return (

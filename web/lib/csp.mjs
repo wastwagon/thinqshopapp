@@ -8,7 +8,7 @@ export const CONTENT_SECURITY_POLICY = [
     [
         "script-src 'self' 'unsafe-inline'",
         isDev ? "'unsafe-eval' 'wasm-unsafe-eval'" : null,
-        'https://js.paystack.co https://checkout.paystack.com https://www.googletagmanager.com',
+        'https://js.paystack.co https://checkout.paystack.com https://www.googletagmanager.com https://static.cloudflareinsights.com',
     ]
         .filter(Boolean)
         .join(' '),
@@ -18,7 +18,7 @@ export const CONTENT_SECURITY_POLICY = [
     [
         "connect-src 'self'",
         isDev ? 'http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:*' : null,
-        'https://api.paystack.co https://checkout.paystack.com https://www.google-analytics.com https://www.googletagmanager.com',
+        'https://api.paystack.co https://checkout.paystack.com https://www.google-analytics.com https://www.googletagmanager.com https://cloudflareinsights.com https://static.cloudflareinsights.com',
     ]
         .filter(Boolean)
         .join(' '),

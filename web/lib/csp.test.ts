@@ -17,6 +17,11 @@ describe('CONTENT_SECURITY_POLICY', () => {
         }
     });
 
+    it('allows Cloudflare Web Analytics beacon', () => {
+        expect(CONTENT_SECURITY_POLICY).toContain('https://static.cloudflareinsights.com');
+        expect(CONTENT_SECURITY_POLICY).toContain('https://cloudflareinsights.com');
+    });
+
     it('allows Paystack checkout plus empty/about:blank frames', () => {
         expect(CONTENT_SECURITY_POLICY).toContain(
             "frame-src 'self' about: blob: https://checkout.paystack.com https://js.paystack.co",
