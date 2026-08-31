@@ -1,21 +1,17 @@
 'use client';
 
 import { useLayoutEffect, useRef } from 'react';
-import { initAppChrome, isAndroidWebView } from '@/lib/app-chrome';
-import { isWebViewGoldClient, markWebViewGoldDocument } from '@/lib/webviewGoldClient';
+import { initAppChrome } from '@/lib/app-chrome';
 
 /**
- * Measures safe-area-inset-top, paints html/body/theme-color to the AppBar
- * white, and pings WebViewGold status-bar schemes. Runs on every surface
- * (shop, dashboard, auth) from the root layout.
+ * Measures safe-area-inset-top and paints html/body/theme-color to the AppBar
+ * white. Runs on every surface (shop, dashboard, auth) from the root layout.
  */
 export default function AppChrome() {
     const cleanup = useRef<(() => void) | null>(null);
 
     useLayoutEffect(() => {
-        const isWebViewGold = isWebViewGoldClient();
-        if (isWebViewGold || isAndroidWebView()) markWebViewGoldDocument();
-        cleanup.current = initAppChrome({ isWebViewGold });
+        cleanup.current = initAppChrome();
         return () => {
             cleanup.current?.();
             cleanup.current = null;

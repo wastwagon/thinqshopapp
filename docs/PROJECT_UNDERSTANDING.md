@@ -6,7 +6,7 @@ Canonical architecture reference for contributors and AI agents. For setup comma
 
 **ThinQShop** (`thinqshop-monorepo`) is a full-stack platform for **e-commerce plus financial/logistics services**, aimed at Ghana (GHS, Paystack, local SMS). The README describes it as a "premium e-commerce and money transfer platform."
 
-This is **not** React Native, Expo, or Flutter. The "app" is a **Next.js web app** (mobile-first), optionally wrapped in **WebViewGold** for store distribution (`web/lib/webviewGoldClient.ts`, `web/components/WebViewGoldBridge.tsx`).
+This is **not** React Native, Expo, or Flutter. The product is a **Next.js web app** (mobile-first) served in the browser. `webviewgold-ios/` and `webviewgold-android/` are local native-wrapper references only — they are not part of the web runtime, Docker web/backend images, or storefront behavior.
 
 ---
 
@@ -15,7 +15,7 @@ This is **not** React Native, Expo, or Flutter. The "app" is a **Next.js web app
 ```mermaid
 flowchart TB
   subgraph clients [Clients]
-    Browser[Browser / WebViewGold]
+    Browser[Browser]
   end
   subgraph webLayer [web - Next.js :7001]
     Pages[App Router pages]
@@ -46,6 +46,7 @@ flowchart TB
 | `packages/shared-types/` | Shared TypeScript types across workspaces |
 | `docs/` | Deploy, Paystack, logistics, SEO, enhancement plans |
 | `scripts/` | `dev:start`, DB migrate/seed, deploy smoke checks |
+| `webviewgold-ios/`, `webviewgold-android/` | Native wrapper source kept for reference; excluded from web/backend Docker builds |
 | Root `package.json` | npm workspaces; `dev:backend`, `dev:web`, Docker builds |
 
 **Dev ports:** API **7000**, web **7001**.

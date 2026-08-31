@@ -147,7 +147,6 @@
     #main-content {
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: none;
-      /* contain avoids scroll chaining; WebViewGold override below uses auto — fixes stuck upward scroll on some Android WebViews */
       overscroll-behavior-y: contain;
       touch-action: pan-y;
       scroll-behavior: auto;
@@ -156,24 +155,6 @@
       scrollbar-color: hsl(var(--border)) rgba(0, 0, 0, 0.05);
     }
 
-    /*
-     * WebView Gold / Android WebView: strict overscroll:none + nested overflow scroll
-     * can prevent upward drags from reaching #main-content. Relax vertical overscroll
-     * and stabilize height with dvh so the flex scroll region matches the visible viewport.
-     */
-    html.webview-gold,
-    html.webview-gold body {
-      overscroll-behavior-x: none;
-      overscroll-behavior-y: auto;
-    }
-    html.webview-gold #main-content {
-      overscroll-behavior-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    html.webview-gold .app-shell {
-      min-height: 100dvh;
-      height: 100dvh;
-    }
     #main-content::-webkit-scrollbar {
       width: 6px;
     }
@@ -388,7 +369,7 @@
   scrollbar-width: none;
 }
 
-/* WebViewGold / iOS notch: opaque fill behind the native clock (not frost). */
+/* iOS notch: opaque fill behind the native clock (not frost). */
 #status-bar-cover {
   position: fixed;
   top: 0;

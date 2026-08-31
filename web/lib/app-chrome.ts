@@ -1,36 +1,16 @@
 /**
- * Mobile top chrome / status-bar fill (WebViewGold + Safari viewport-fit=cover).
- *
- * Web-only: existing store wrappers already intercept statusbarcolor:// so we
- * do not need an App Store / Play resubmit. Android's default bar is
- * colorPrimaryDark (#0F7FFC); we override it to AppBar white (255,255,255).
- *
- * Never use location.href custom schemes on Android (breaks relaunch).
- * hidebars:// is iOS-wrapper only — on Android it hides the clock.
+ * Mobile top chrome (Safari / Chrome theme-color + viewport-fit=cover).
+ * Does not ping WebViewGold custom URL schemes — those wrappers are reference-only
+ * and are not part of the web app runtime.
  */
 
-import { isAndroidWebViewUserAgent } from './webviewGoldClient';
-
 export const APP_CHROME_BG = '#ffffff';
-export const APP_CHROME_RGB = '255,255,255';
-export const APP_CHROME_STATUS_TEXT = 'black';
-
-const HIDEBARS_ON = 'hidebars://on';
-const STATUSBAR_COLOR = `statusbarcolor://${APP_CHROME_RGB}`;
-const STATUSBAR_TEXT = `statusbartextcolor://${APP_CHROME_STATUS_TEXT}`;
-
-let iosLocationPingDone = false;
 
 export function isIosClient(): boolean {
     if (typeof navigator === 'undefined') return false;
     const ua = navigator.userAgent || '';
     if (/iPad|iPhone|iPod/i.test(ua)) return true;
     return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-}
-
-export function isAndroidWebView(): boolean {
-    if (typeof navigator === 'undefined') return false;
-    return isAndroidWebViewUserAgent(navigator.userAgent || '');
 }
 
 export function iosFallbackStatusBarHeight(screenHeight: number): number {
@@ -55,74 +35,6 @@ export function resolveSafeAreaTopPx(opts: {
         return iosFallbackStatusBarHeight(opts.screenHeight);
     }
     return 0;
-}
-
-/** Chrome/Safari have no handler for statusbarcolor:// — never ping those browsers. */
-export function shouldPingWebViewGoldSchemesFromUa(
-    ua: string,
-    opts?: { nativeFlag?: boolean },
-): boolean {
-    if (opts?.nativeFlag) return true;
-    if (/WebViewGold/i.test(ua)) return true;
-    return isAndroidWebViewUserAgent(ua);
-}
-
-export function shouldPingWebViewGoldSchemes(): boolean {
-    if (typeof window === 'undefined') return false;
-    const w = window as unknown as { __WEBVIEWGOLD__?: boolean };
-    return shouldPingWebViewGoldSchemesFromUa(navigator.userAgent || '', {
-        nativeFlag: w.__WEBVIEWGOLD__ === true,
-    });
-}
-
-export function pingWebViewGoldScheme(url: string): void {
-    if (typeof document === 'undefined') return;
-    if (!shouldPingWebViewGoldSchemes()) return;
-    try {
-        const iframe = document.createElement('iframe');
-        iframe.setAttribute('src', url);
-        iframe.setAttribute('aria-hidden', 'true');
-        iframe.setAttribute('title', '');
-        iframe.style.cssText =
-            'position:absolute;width:0;height:0;border:0;visibility:hidden;pointer-events:none';
-        (document.body || document.documentElement).appendChild(iframe);
-        window.setTimeout(() => {
-            iframe.remove();
-        }, 400);
-    } catch {
-        /* ignore */
-    }
-}
-
-/** Hidden iframe only. Never Image() — browsers log ERR_UNKNOWN_URL_SCHEME. */
-export function pingWebViewGoldStatusBar(opts?: { hidebars?: boolean }): void {
-    pingWebViewGoldScheme(STATUSBAR_COLOR);
-    pingWebViewGoldScheme(STATUSBAR_TEXT);
-    if (opts?.hidebars && isIosClient()) {
-        pingWebViewGoldScheme(HIDEBARS_ON);
-    }
-}
-
-/**
- * iOS only: top-frame hidebars then statusbarcolor. iframe pings are not
- * always enough in WKWebView. Never call this on Android.
- */
-export function navigateIosStatusBarSchemes(): void {
-    if (iosLocationPingDone || typeof window === 'undefined') return;
-    if (!isIosClient()) return;
-    iosLocationPingDone = true;
-    try {
-        window.location.href = HIDEBARS_ON;
-        window.setTimeout(() => {
-            try {
-                window.location.href = STATUSBAR_COLOR;
-            } catch {
-                /* ignore */
-            }
-        }, 350);
-    } catch {
-        iosLocationPingDone = false;
-    }
 }
 
 export function measureSafeAreaInsetTopPx(): number {
@@ -171,17 +83,9 @@ export function measureAndApplySafeArea(): number {
     return px;
 }
 
-export function initAppChrome(opts: { isWebViewGold: boolean }): () => void {
+export function initAppChrome(): () => void {
     syncChromeBackground();
     measureAndApplySafeArea();
-
-    const hidebars = opts.isWebViewGold && isIosClient();
-    if (shouldPingWebViewGoldSchemes()) {
-        pingWebViewGoldStatusBar({ hidebars });
-    }
-    if (hidebars) {
-        navigateIosStatusBarSchemes();
-    }
     window.setTimeout(() => {
         measureAndApplySafeArea();
     }, 400);

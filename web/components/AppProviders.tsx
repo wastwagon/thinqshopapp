@@ -9,7 +9,6 @@ import CartDrawer from '@/components/ui/CartDrawer';
 import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
 import OfflineBanner from '@/components/ui/OfflineBanner';
 import CookieConsent from '@/components/ui/CookieConsent';
-import WebViewGoldBridge from '@/components/WebViewGoldBridge';
 
 export default function AppProviders({ children }: { children: React.ReactNode }) {
     return (
@@ -17,7 +16,6 @@ export default function AppProviders({ children }: { children: React.ReactNode }
             <CurrencyProvider>
                 <WishlistProvider>
                     <CartProvider>
-                        <WebViewGoldBridge />
                         <OfflineBanner />
                         <AnalyticsProvider />
                         <Toaster

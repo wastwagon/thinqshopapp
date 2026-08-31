@@ -22,8 +22,8 @@ export const CONTENT_SECURITY_POLICY = [
     ]
         .filter(Boolean)
         .join(' '),
-    // 'self' about: — Paystack inline iframe (empty / about:blank); custom schemes — WebViewGold
-    "frame-src 'self' about: blob: https://checkout.paystack.com https://js.paystack.co statusbarcolor: statusbartextcolor: hidebars: disablepulltorefresh:",
+    // 'self' about: — Paystack inline iframe (empty / about:blank)
+    "frame-src 'self' about: blob: https://checkout.paystack.com https://js.paystack.co",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
