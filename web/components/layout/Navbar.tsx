@@ -116,7 +116,7 @@ export default function Navbar() {
                     aria-label="ThinQShop home"
                 >
                     <div className="relative h-10 w-[168px] sm:h-11 sm:w-[185px] md:h-12 md:w-[202px] flex items-center justify-center">
-                        <Image src="/thinqshop-logo.webp" alt="ThinQShopping" fill className="object-contain object-left" priority sizes="202px" />
+                        <Image src="/thinqshop-logo.webp" alt="ThinQShopping" fill className="object-contain object-left" sizes="202px" />
                     </div>
                 </Link>
 

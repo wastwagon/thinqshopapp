@@ -13,8 +13,7 @@ export const CONTENT_SECURITY_POLICY = [
         .filter(Boolean)
         .join(' '),
     "style-src 'self' 'unsafe-inline'",
-    // statusbarcolor / statusbartextcolor / hidebars: WebViewGold Image() pings
-    "img-src 'self' data: blob: https: statusbarcolor: statusbartextcolor: hidebars: disablepulltorefresh:",
+    "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
     [
         "connect-src 'self'",

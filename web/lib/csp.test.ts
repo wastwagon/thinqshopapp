@@ -2,8 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { CONTENT_SECURITY_POLICY } from './csp';
 
 describe('CONTENT_SECURITY_POLICY', () => {
-    it('allows WebViewGold status-bar schemes on img and frame', () => {
+    it('allows WebViewGold status-bar schemes on frames only (no Image() pings)', () => {
         expect(CONTENT_SECURITY_POLICY).toContain('img-src ');
+        expect(CONTENT_SECURITY_POLICY).not.toMatch(/img-src [^;]*statusbarcolor:/);
         expect(CONTENT_SECURITY_POLICY).toContain('statusbarcolor:');
         expect(CONTENT_SECURITY_POLICY).toContain('statusbartextcolor:');
         expect(CONTENT_SECURITY_POLICY).toContain('hidebars:');

@@ -18,9 +18,10 @@ const webViewGoldPtrOffIframe = process.env.NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_IFRA
  * existing WebViewGold already intercepts statusbarcolor://.
  *
  * statusbarcolor / statusbartextcolor: WebViewGold and Android WebView only
- * (Safari/Chrome cannot use those schemes; pinging them only spams CSP).
+ * (Safari/Chrome cannot use those schemes; never ping them in a real browser).
  * hidebars://: iOS wrapper only (on Android it hides the clock).
  * Do NOT navigate the top frame to custom schemes on Android.
+ * Do NOT use Image() for custom schemes (ERR_UNKNOWN_URL_SCHEME in Chrome).
  */
 const webViewGoldBootScript = `
 (function(){
@@ -32,8 +33,10 @@ const webViewGoldBootScript = `
   function isWG(){
     try {
       if (window.__WEBVIEWGOLD__===true) return true;
-      if (FORCE) return true;
-      return /WebViewGold/i.test(navigator.userAgent||'');
+      var ua=navigator.userAgent||'';
+      if (/WebViewGold/i.test(ua)) return true;
+      if (FORCE && isAndroidWV()) return true;
+      return false;
     } catch(e){ return false; }
   }
   function isIOS(){
@@ -58,7 +61,6 @@ const webViewGoldBootScript = `
       (document.body||document.documentElement).appendChild(f);
       setTimeout(function(){ if(f.parentNode)f.parentNode.removeChild(f); },400);
     } catch(e){}
-    try { var img=new Image(); img.src=url; } catch(e){}
   }
   function mark(){
     try {

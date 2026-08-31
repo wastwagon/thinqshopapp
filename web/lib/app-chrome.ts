@@ -9,7 +9,7 @@
  * hidebars:// is iOS-wrapper only — on Android it hides the clock.
  */
 
-import { isWebViewGoldClient } from './webviewGoldClient';
+import { isAndroidWebViewUserAgent } from './webviewGoldClient';
 
 export const APP_CHROME_BG = '#ffffff';
 export const APP_CHROME_RGB = '255,255,255';
@@ -30,8 +30,7 @@ export function isIosClient(): boolean {
 
 export function isAndroidWebView(): boolean {
     if (typeof navigator === 'undefined') return false;
-    const ua = navigator.userAgent || '';
-    return /Android/i.test(ua) && /; wv\)/i.test(ua);
+    return isAndroidWebViewUserAgent(navigator.userAgent || '');
 }
 
 export function iosFallbackStatusBarHeight(screenHeight: number): number {
@@ -58,8 +57,22 @@ export function resolveSafeAreaTopPx(opts: {
     return 0;
 }
 
+/** Chrome/Safari have no handler for statusbarcolor:// — never ping those browsers. */
+export function shouldPingWebViewGoldSchemesFromUa(
+    ua: string,
+    opts?: { nativeFlag?: boolean },
+): boolean {
+    if (opts?.nativeFlag) return true;
+    if (/WebViewGold/i.test(ua)) return true;
+    return isAndroidWebViewUserAgent(ua);
+}
+
 export function shouldPingWebViewGoldSchemes(): boolean {
-    return isWebViewGoldClient() || isAndroidWebView();
+    if (typeof window === 'undefined') return false;
+    const w = window as unknown as { __WEBVIEWGOLD__?: boolean };
+    return shouldPingWebViewGoldSchemesFromUa(navigator.userAgent || '', {
+        nativeFlag: w.__WEBVIEWGOLD__ === true,
+    });
 }
 
 export function pingWebViewGoldScheme(url: string): void {
@@ -79,15 +92,9 @@ export function pingWebViewGoldScheme(url: string): void {
     } catch {
         /* ignore */
     }
-    try {
-        const img = new Image();
-        img.src = url;
-    } catch {
-        /* ignore */
-    }
 }
 
-/** iframe + Image. Only call from a WebViewGold / Android WebView wrapper. */
+/** Hidden iframe only. Never Image() — browsers log ERR_UNKNOWN_URL_SCHEME. */
 export function pingWebViewGoldStatusBar(opts?: { hidebars?: boolean }): void {
     pingWebViewGoldScheme(STATUSBAR_COLOR);
     pingWebViewGoldScheme(STATUSBAR_TEXT);

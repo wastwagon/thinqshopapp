@@ -9,8 +9,9 @@
  * Optional `NEXT_PUBLIC_WEBVIEWGOLD_PTR_OFF_IFRAME=1` fires the scheme once via a
  * hidden iframe (never `<a click>` / `location.href`).
  *
- * `NEXT_PUBLIC_WEBVIEWGOLD_FORCE_BRIDGE=1` — treat all clients as WebViewGold when
- * the app strips “WebViewGold” from the user agent.
+ * `NEXT_PUBLIC_WEBVIEWGOLD_FORCE_BRIDGE=1` — treat Android in-app WebView as
+ * WebViewGold when the wrapper strips “WebViewGold” from the user agent.
+ * Never apply FORCE to Chrome/Safari/Firefox (they have no custom-scheme handler).
  */
 
 const DISABLE_PTR_SCHEME = 'disablepulltorefresh://';
@@ -35,12 +36,20 @@ function fireIframeSchemeOnce(url: string): void {
     }
 }
 
+export function isAndroidWebViewUserAgent(ua: string): boolean {
+    return /Android/i.test(ua) && /; wv\)/i.test(ua);
+}
+
 export function isWebViewGoldClient(): boolean {
     if (typeof window === 'undefined') return false;
     const w = window as unknown as { __WEBVIEWGOLD__?: boolean };
     if (w.__WEBVIEWGOLD__ === true) return true;
-    if (process.env.NEXT_PUBLIC_WEBVIEWGOLD_FORCE_BRIDGE === '1') return true;
-    return /WebViewGold/i.test(navigator.userAgent);
+    const ua = navigator.userAgent || '';
+    if (/WebViewGold/i.test(ua)) return true;
+    if (process.env.NEXT_PUBLIC_WEBVIEWGOLD_FORCE_BRIDGE === '1' && isAndroidWebViewUserAgent(ua)) {
+        return true;
+    }
+    return false;
 }
 
 export function markWebViewGoldDocument(): void {

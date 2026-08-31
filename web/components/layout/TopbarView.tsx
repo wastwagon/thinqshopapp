@@ -62,7 +62,6 @@ function DashboardHomeLogo() {
                     fill
                     className="object-contain"
                     sizes="148px"
-                    priority
                 />
             </div>
         </Link>
