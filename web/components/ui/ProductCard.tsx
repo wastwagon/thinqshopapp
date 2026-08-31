@@ -161,9 +161,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         : 'border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white hover:border-blue-600';
     const actionBtnBase =
         'bg-white shadow-sm border rounded-full flex items-center justify-center transition-all';
-    const actionBtnCompact = `${actionBtnBase} min-w-[44px] min-h-[44px] w-10 h-10`;
+    const actionBtnCompact = `${actionBtnBase} min-w-[36px] min-h-[36px] w-8 h-8`;
     const actionBtnDesktop = `${actionBtnBase} min-w-[44px] min-h-[44px] w-10 h-10`;
-    const iconCompact = 'h-3.5 w-3.5';
+    const iconCompact = 'h-3 w-3';
     const iconDesktop = 'h-4 w-4';
 
     const quickActions = (compact: boolean) => (
@@ -203,7 +203,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     return (
         <>
             <div className="group flat-card-interactive overflow-hidden relative flex flex-col h-full">
-                <div className="flex md:hidden items-center justify-end gap-1 px-2 pt-2 pb-1 shrink-0">
+                <div className="flex md:hidden items-center justify-end gap-1 px-1.5 pt-1.5 pb-0.5 shrink-0">
                     {quickActions(true)}
                 </div>
 
@@ -212,14 +212,13 @@ export default function ProductCard({ product }: ProductCardProps) {
                     onClick={openLightbox}
                     disabled={galleryImages.length === 0}
                     aria-label={`Expand image: ${product.name}`}
-                    className="group/image aspect-square relative overflow-hidden bg-gray-50/80 flex items-center justify-center w-full text-left cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-default"
+                    className="group/image aspect-square relative overflow-hidden bg-white md:bg-gray-50/80 flex items-center justify-center w-full text-left cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-default"
                 >
                     <ProductImage
                         src={productImage}
                         alt={product.name}
-                        width={400}
-                        height={400}
-                        className="object-contain p-5 group-hover/image:scale-105 transition-transform duration-500 pointer-events-none"
+                        fill
+                        className="object-contain p-1.5 sm:p-3 md:p-5 group-hover/image:scale-105 transition-transform duration-500 pointer-events-none"
                     />
 
                     {product.compare_price && (
@@ -251,7 +250,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </button>
 
             {/* Content */}
-            <div className="p-4 flex flex-col flex-1">
+            <div className="p-2.5 sm:p-3 md:p-4 flex flex-col flex-1">
                     <div className="flex items-center justify-between gap-2 mb-1.5">
                     <span className="text-xs font-medium text-blue-600 truncate">
                         {typeof product.category === 'string' ? product.category : product.category?.name || 'Vetted Asset'}
@@ -276,7 +275,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </p>
                 )}
 
-                <div className="flex items-center justify-between mt-auto pt-3">
+                <div className="flex items-center justify-between mt-auto pt-2 md:pt-3">
                     <div className="flex flex-col">
                         {product.compare_price && (
                             <span className="text-xs text-gray-400 line-through">
@@ -295,7 +294,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </div>
                     <Link
                         href={productHref}
-                        className="w-9 h-9 min-w-[36px] min-h-[36px] p-1.5 bg-gray-50 border border-gray-200/80 text-gray-700 rounded-lg flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors group/btn"
+                        className="w-8 h-8 md:w-9 md:h-9 min-w-[32px] min-h-[32px] md:min-w-[36px] md:min-h-[36px] p-1.5 bg-gray-50 border border-gray-200/80 text-gray-700 rounded-lg flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors group/btn"
                         aria-label="View product"
                     >
                         <ArrowRight className="h-4 w-4 shrink-0 group-hover/btn:scale-110 transition-transform" aria-hidden />

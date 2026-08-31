@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -31,7 +31,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
     const searchParams = useSearchParams();
     const from = searchParams.get('from') || '/dashboard';
@@ -160,5 +160,19 @@ export default function LoginPage() {
                 </Button>
             </form>
         </AuthScreen>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense
+            fallback={
+                <AuthScreen title="Sign in" subtitle="Sign in to your account to continue shopping.">
+                    <div className="h-48 rounded-xl bg-gray-50 animate-pulse" aria-hidden />
+                </AuthScreen>
+            }
+        >
+            <LoginForm />
+        </Suspense>
     );
 }
