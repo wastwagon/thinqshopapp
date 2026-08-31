@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '@/lib/axios';
+import { isAdminRole } from '@/lib/access-cookie';
 import { useRouter } from 'next/navigation';
 
 interface User {
@@ -84,9 +85,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setUser(data);
                 } catch (error: unknown) {
                     const status = (error as { response?: { status?: number } })?.response?.status;
-                    if (status === 401 || status === 403) {
-                        await clearAccessSession();
-                        setUser(null);
+                    // Keep the JWT session on 403 / transient profile errors. Only 401
+                    // after the session cookie itself is dead should sign the user out.
+                    if (status === 401) {
+                        const sessionOk = await fetch('/api/session', { credentials: 'same-origin' })
+                            .then((res) => res.ok)
+                            .catch(() => false);
+                        if (!sessionOk) {
+                            await clearAccessSession();
+                            setUser(null);
+                        }
                     }
                 }
             } catch {
@@ -113,14 +121,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             /^\/(dashboard|admin|checkout|cart|wishlist|track)(\/|$)/.test(redirectPath)
                 ? redirectPath
                 : null;
-        const target =
-            userRole === 'admin' || userRole === 'superadmin'
-                ? safe && safe.startsWith('/admin')
-                    ? safe
-                    : '/admin'
-                : safe && !safe.startsWith('/admin')
-                  ? safe
-                  : '/dashboard';
+        const target = isAdminRole(userRole)
+            ? safe && safe.startsWith('/admin')
+                ? safe
+                : '/admin'
+            : safe && !safe.startsWith('/admin')
+              ? safe
+              : '/dashboard';
         window.location.href = target;
     };
 

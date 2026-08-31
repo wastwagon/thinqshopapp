@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ACCESS_COOKIE } from '@/lib/access-cookie';
 
 // Prefer BACKEND_URL for server-side proxy (Docker: http://backend:7000); NEXT_PUBLIC_API_URL is for client
 const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000';
@@ -54,7 +55,7 @@ async function proxy(request: NextRequest, pathSegments: string[]) {
         // Avoid upstream compression/header mismatches in proxy responses.
         headers['accept-encoding'] = 'identity';
 
-        const access = request.cookies.get('thinq_access')?.value;
+        const access = request.cookies.get(ACCESS_COOKIE)?.value;
         if (access) {
             headers['Authorization'] = `Bearer ${access}`;
         }

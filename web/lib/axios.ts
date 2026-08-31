@@ -18,6 +18,22 @@ async function clearAccessSession() {
     }
 }
 
+let sessionCheck: Promise<boolean> | null = null;
+
+/** True when /api/session still accepts the cookie. Notifications/cart 401s must not log the user out. */
+export async function isSessionStillValid(): Promise<boolean> {
+    if (typeof window === 'undefined') return false;
+    if (!sessionCheck) {
+        sessionCheck = fetch('/api/session', { credentials: 'same-origin' })
+            .then((res) => res.ok)
+            .catch(() => false)
+            .finally(() => {
+                sessionCheck = null;
+            });
+    }
+    return sessionCheck;
+}
+
 let last502Toast = 0;
 const BACKEND_502_COOLDOWN_MS = 15000;
 
@@ -36,7 +52,7 @@ api.interceptors.response.use(
         if (typeof window !== 'undefined' && error.response?.status === 401) {
             const url = String(error.config?.url || '');
             const isAuthRequest = url.includes('/auth/') || url.includes('/session');
-            if (!isAuthRequest) {
+            if (!isAuthRequest && !(await isSessionStillValid())) {
                 await clearAccessSession();
                 const path = window.location.pathname || '';
                 const onProtected =

@@ -63,6 +63,7 @@ services:
       BACKEND_URL: ${BACKEND_URL:-http://backend:7000}
       # Same secret as backend — middleware verifies the httpOnly session cookie
       JWT_SECRET: ${JWT_SECRET}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
       FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
       backend:

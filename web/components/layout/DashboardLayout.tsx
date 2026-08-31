@@ -5,6 +5,7 @@ import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import MobileBottomNav from './MobileBottomNav';
 import { useAuth } from '@/context/AuthContext';
+import { isAdminRole } from '@/lib/access-cookie';
 import { useRouter } from 'next/navigation';
 
 interface DashboardLayoutProps {
@@ -21,7 +22,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
     React.useEffect(() => {
         if (!loading && !user) {
             router.push('/login');
-        } else if (!loading && isAdmin && user?.role !== 'admin' && user?.role !== 'superadmin') {
+        } else if (!loading && isAdmin && !isAdminRole(user?.role)) {
             router.push('/dashboard');
         }
     }, [user, loading, isAdmin, router]);

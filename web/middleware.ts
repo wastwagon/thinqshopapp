@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { ACCESS_COOKIE, isAdminRole, verifyAccessToken } from '@/lib/access-cookie';
+import { ACCESS_COOKIE, isAdminRole, readAccessClaims } from '@/lib/access-cookie';
 import { CONTENT_SECURITY_POLICY } from '@/lib/csp';
 
 const LOGIN_PATH = '/login';
@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
     let response: NextResponse;
 
     if (isProtectedPath(request.nextUrl.pathname)) {
-        const claims = await verifyAccessToken(request.cookies.get(ACCESS_COOKIE)?.value);
+        const claims = await readAccessClaims(request.cookies.get(ACCESS_COOKIE)?.value);
         if (!claims) {
             const url = request.nextUrl.clone();
             url.pathname = LOGIN_PATH;

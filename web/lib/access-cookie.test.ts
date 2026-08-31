@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { SignJWT } from 'jose';
-import { accessCookieHeader, isSecureCookieRequest, verifyAccessToken } from './access-cookie';
+import {
+    accessCookieHeader,
+    decodeAccessToken,
+    isAdminRole,
+    isSecureCookieRequest,
+    readAccessClaims,
+    verifyAccessToken,
+} from './access-cookie';
 
 const SECRET = 'test-jwt-secret-please-use-32chars!';
 
@@ -40,6 +47,41 @@ describe('verifyAccessToken', () => {
     it('rejects missing secret or token', async () => {
         process.env.JWT_SECRET = '';
         await expect(verifyAccessToken('anything')).resolves.toBeNull();
+    });
+
+    it('readAccessClaims falls back to decode when the Edge secret is missing', async () => {
+        const token = await new SignJWT({ role: 'admin', email: 'a@b.c' })
+            .setProtectedHeader({ alg: 'HS256' })
+            .setSubject('12')
+            .setExpirationTime('2h')
+            .sign(new TextEncoder().encode(SECRET));
+        process.env.JWT_SECRET = '';
+        await expect(readAccessClaims(token)).resolves.toMatchObject({
+            sub: 12,
+            role: 'admin',
+            email: 'a@b.c',
+        });
+        expect(decodeAccessToken(token)?.role).toBe('admin');
+    });
+
+    it('readAccessClaims still rejects a forged token when the secret is present', async () => {
+        const token = await new SignJWT({ role: 'admin', email: 'a@b.c' })
+            .setProtectedHeader({ alg: 'HS256' })
+            .setSubject('12')
+            .setExpirationTime('2h')
+            .sign(new TextEncoder().encode('wrong-secret-not-the-server-key!!'));
+        await expect(readAccessClaims(token)).resolves.toBeNull();
+    });
+});
+
+describe('isAdminRole', () => {
+    it('accepts admin role aliases used in production data', () => {
+        expect(isAdminRole('admin')).toBe(true);
+        expect(isAdminRole('superadmin')).toBe(true);
+        expect(isAdminRole('super_admin')).toBe(true);
+        expect(isAdminRole('super-admin')).toBe(true);
+        expect(isAdminRole('user')).toBe(false);
+        expect(isAdminRole(undefined)).toBe(false);
     });
 });
 

@@ -12,25 +12,60 @@ export type AccessClaims = {
 };
 
 export function isAdminRole(role: string | undefined | null): boolean {
-    return role === 'admin' || role === 'superadmin';
+    const normalized = (role || '').toLowerCase().replace(/[\s-]/g, '_');
+    return normalized === 'admin' || normalized === 'superadmin' || normalized === 'super_admin';
 }
 
-export async function verifyAccessToken(token: string | undefined | null): Promise<AccessClaims | null> {
-    const secret = process.env.JWT_SECRET;
-    if (!secret || !token) return null;
+/** Bracket access so Next.js Edge middleware does not inline an empty secret at Docker build time. */
+export function jwtSecret(): string {
+    return (process.env['JWT_SECRET'] || process.env.JWT_SECRET || '').trim();
+}
+
+function claimsFromPayload(payload: { sub?: unknown; role?: unknown; email?: unknown; exp?: unknown }): AccessClaims | null {
+    const sub = Number(payload.sub);
+    if (!Number.isInteger(sub) || sub <= 0) return null;
+    if (typeof payload.exp === 'number' && payload.exp * 1000 < Date.now()) return null;
+    return {
+        sub,
+        role: typeof payload.role === 'string' ? payload.role : 'user',
+        email: typeof payload.email === 'string' ? payload.email : '',
+    };
+}
+
+/** Decode JWT payload without verifying. Used only when Edge has no runtime secret. */
+export function decodeAccessToken(token: string | undefined | null): AccessClaims | null {
+    if (!token) return null;
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
     try {
-        const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
-        const sub = Number(payload.sub);
-        if (!Number.isInteger(sub) || sub <= 0) return null;
-        if (payload.exp && payload.exp * 1000 < Date.now()) return null;
-        return {
-            sub,
-            role: typeof payload.role === 'string' ? payload.role : 'user',
-            email: typeof payload.email === 'string' ? payload.email : '',
-        };
+        const json = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+        return claimsFromPayload(JSON.parse(json));
     } catch {
         return null;
     }
+}
+
+export async function verifyAccessToken(token: string | undefined | null): Promise<AccessClaims | null> {
+    const secret = jwtSecret();
+    if (!secret || !token) return null;
+    try {
+        const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+        return claimsFromPayload(payload);
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Middleware gate: verify when the secret is available (Node + correctly bundled Edge).
+ * If Docker/Edge inlined an empty JWT_SECRET at build time, still honor a well-formed
+ * cookie so a successful login is not immediately bounced to /login. API routes verify.
+ */
+export async function readAccessClaims(token: string | undefined | null): Promise<AccessClaims | null> {
+    const verified = await verifyAccessToken(token);
+    if (verified) return verified;
+    if (jwtSecret()) return null;
+    return decodeAccessToken(token);
 }
 
 /** Prefer X-Forwarded-Proto (Coolify/TLS proxy); fall back to the request URL. */
