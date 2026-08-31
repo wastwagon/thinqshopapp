@@ -1,16 +1,37 @@
 /**
  * Mobile top chrome (Safari / Chrome theme-color + viewport-fit=cover).
- * Does not ping WebViewGold custom URL schemes — those wrappers are reference-only
- * and are not part of the web app runtime.
+ *
+ * WebViewGold (and similar native wrappers) pin the WKWebView / WebView below
+ * the status bar. Applying env(safe-area-inset-top) on top of that doubles the
+ * gap. Safari / PWA still need the inset because they draw edge-to-edge.
  */
 
 export const APP_CHROME_BG = '#ffffff';
 
-export function isIosClient(): boolean {
-    if (typeof navigator === 'undefined') return false;
-    const ua = navigator.userAgent || '';
+const IOS_THIRD_PARTY_BROWSER = /CriOS|FxiOS|EdgiOS|OPiOS|OPT\/|DuckDuckGo|YaBrowser/i;
+
+export function isIosClient(userAgent?: string, maxTouchPoints?: number, platform?: string): boolean {
+    const nav = typeof navigator !== 'undefined' ? navigator : undefined;
+    const ua = userAgent ?? nav?.userAgent ?? '';
     if (/iPad|iPhone|iPod/i.test(ua)) return true;
-    return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    const plat = platform ?? nav?.platform;
+    const touches = maxTouchPoints ?? nav?.maxTouchPoints ?? 0;
+    return plat === 'MacIntel' && touches > 1;
+}
+
+/**
+ * WKWebView (iOS) omits Safari's Version/…Safari/ tokens.
+ * Android WebView includes `; wv)`.
+ */
+export function isInAppWebView(userAgent: string): boolean {
+    const ua = userAgent || '';
+    if (/; wv\)/.test(ua)) return true;
+
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    if (!isIOS) return false;
+    if (IOS_THIRD_PARTY_BROWSER.test(ua)) return false;
+    if (/Version\/[\d.]+/i.test(ua) && /Safari\//i.test(ua)) return false;
+    return /AppleWebKit/i.test(ua);
 }
 
 export function iosFallbackStatusBarHeight(screenHeight: number): number {
@@ -21,7 +42,17 @@ export function iosFallbackStatusBarHeight(screenHeight: number): number {
 
 export function isEdgeToEdgeViewport(viewportHeight: number, screenHeight: number): boolean {
     if (screenHeight <= 0) return false;
-    return viewportHeight / screenHeight >= 0.92;
+    return viewportHeight / screenHeight >= 0.96;
+}
+
+/**
+ * Native wrappers pin the webview below the status bar, so the layout viewport
+ * is already shorter than the screen by ~20–59px (status bar / notch) while
+ * still extending under the home indicator.
+ */
+export function isNativeTopAlreadyReserved(viewportHeight: number, screenHeight: number): boolean {
+    if (screenHeight <= 0 || viewportHeight <= 0) return false;
+    return screenHeight - viewportHeight >= 20;
 }
 
 export function resolveSafeAreaTopPx(opts: {
@@ -29,7 +60,11 @@ export function resolveSafeAreaTopPx(opts: {
     isIOS: boolean;
     viewportHeight: number;
     screenHeight: number;
+    inAppWebView?: boolean;
 }): number {
+    if (opts.inAppWebView && isNativeTopAlreadyReserved(opts.viewportHeight, opts.screenHeight)) {
+        return 0;
+    }
     if (opts.measuredPx > 0) return Math.round(opts.measuredPx);
     if (opts.isIOS && isEdgeToEdgeViewport(opts.viewportHeight, opts.screenHeight)) {
         return iosFallbackStatusBarHeight(opts.screenHeight);
@@ -48,11 +83,13 @@ export function measureSafeAreaInsetTopPx(): number {
     probe.remove();
     const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
     const screenHeight = window.screen?.height ?? 0;
+    const ua = navigator.userAgent || '';
     return resolveSafeAreaTopPx({
         measuredPx: measured,
-        isIOS: isIosClient(),
+        isIOS: isIosClient(ua),
         viewportHeight,
         screenHeight,
+        inAppWebView: isInAppWebView(ua),
     });
 }
 
@@ -101,3 +138,18 @@ export function initAppChrome(): () => void {
         window.removeEventListener('resize', onResize);
     };
 }
+
+/**
+ * Runs in <head> before first paint so WebViewGold does not flash a doubled
+ * status-bar gap. Keep detection in sync with isInAppWebView / resolveSafeAreaTopPx.
+ */
+export const APP_CHROME_BOOT_SCRIPT =
+    '(function(){try{' +
+    'var ua=navigator.userAgent||"";' +
+    'var inApp=/; wv\\)/.test(ua)||(/iPhone|iPad|iPod/i.test(ua)&&/AppleWebKit/i.test(ua)' +
+    '&&!/CriOS|FxiOS|EdgiOS|OPiOS|OPT\\//i.test(ua)&&!(/Version\\/[\\d.]+/i.test(ua)&&/Safari\\//i.test(ua)));' +
+    'if(!inApp)return;' +
+    'var vh=(window.visualViewport&&window.visualViewport.height)||window.innerHeight||0;' +
+    'var sh=(window.screen&&window.screen.height)||0;' +
+    'if(sh>0&&vh>0&&(sh-vh)>=20){document.documentElement.style.setProperty("--app-sat","0px")}' +
+    '}catch(e){}})();';

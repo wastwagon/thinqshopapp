@@ -4,8 +4,8 @@ import { useLayoutEffect, useRef } from 'react';
 import { initAppChrome } from '@/lib/app-chrome';
 
 /**
- * Measures safe-area-inset-top and paints html/body/theme-color to the AppBar
- * white. Runs on every surface (shop, dashboard, auth) from the root layout.
+ * Measures the CSS top safe-area inset (skipped when a native wrapper already
+ * reserved it) and paints html/body/theme-color to the AppBar white.
  */
 export default function AppChrome() {
     const cleanup = useRef<(() => void) | null>(null);

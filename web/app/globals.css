@@ -49,7 +49,8 @@
     --touch-min: 44px;
     --touch-min-desktop: 40px;
 
-    /* Status-bar / notch fill — matches opaque Navbar/Topbar (not brand navy) */
+    /* Status-bar / notch fill — matches opaque Navbar/Topbar (not brand navy).
+       --app-sat is zeroed in WebViewGold (native already reserved the status bar). */
     --app-chrome-bg: #ffffff;
     --app-sat: env(safe-area-inset-top, 0px);
   }
@@ -277,7 +278,8 @@
   }
 
   /* iOS / notched devices: use with viewport-fit=cover so env() is defined.
-     --app-sat is a measured px fallback when WKWebView reports 0. */
+     --app-sat is 0 in WebViewGold (native already inset) and a measured px
+     fallback in Safari when WKWebView/Safari reports 0. */
   .safe-area-inset-top {
     padding-top: var(--app-sat, env(safe-area-inset-top, 0px));
   }

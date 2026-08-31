@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import AppChrome from "@/components/AppChrome";
 import AppProviders from "@/components/AppProviders";
+import { APP_CHROME_BOOT_SCRIPT } from "@/lib/app-chrome";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
@@ -76,6 +77,8 @@ export default function RootLayout({
                             'background:var(--app-chrome-bg)}',
                     }}
                 />
+                {/* WebViewGold already pins below the status bar — zero --app-sat before first paint. */}
+                <script dangerouslySetInnerHTML={{ __html: APP_CHROME_BOOT_SCRIPT }} />
             </head>
             <body className={`${outfit.className} font-brand antialiased`}>
                 <div id="status-bar-cover" aria-hidden="true" />
