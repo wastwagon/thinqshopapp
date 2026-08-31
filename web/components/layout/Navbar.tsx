@@ -108,7 +108,7 @@ export default function Navbar() {
             className="fixed top-0 w-full z-50 app-chrome-header bg-white border-b border-gray-200 flex flex-col"
             aria-label="Main navigation"
         >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 w-full flex items-center gap-4 sm:gap-8 lg:gap-4">
+            <div className="page-shell h-14 sm:h-16 w-full flex items-center gap-4 sm:gap-8 lg:gap-4">
                 {/* Logo - left, sized to bar height */}
                 <Link
                     href="/"

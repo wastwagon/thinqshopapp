@@ -379,13 +379,13 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                 onClick={() => canExpandGallery && setLightboxOpen(true)}
                                 disabled={!canExpandGallery}
                                 aria-label={`View larger image: ${product.name}`}
-                                className="group/image w-full aspect-[4/5] max-h-[52vh] sm:aspect-square sm:max-h-[420px] lg:max-h-none relative overflow-hidden bg-gray-50 border-y border-gray-100 sm:border sm:rounded-lg cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-default"
+                                className="group/image w-full aspect-[4/5] max-h-[52vh] sm:aspect-square sm:max-h-[420px] lg:max-h-none relative overflow-hidden bg-gray-100 border-y border-gray-100 sm:border sm:rounded-lg cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-default"
                             >
                                 <Image
                                     src={images[selectedImage] || '/placeholder.svg'}
                                     alt={product.name}
                                     fill
-                                    className="object-contain p-1 sm:p-2 transition-transform duration-500 group-hover/image:scale-[1.02] pointer-events-none"
+                                    className="object-cover object-center transition-transform duration-500 group-hover/image:scale-[1.02] pointer-events-none"
                                     sizes="(max-width: 1024px) 100vw, 50vw"
                                     unoptimized={imgUnoptimized(images[selectedImage] || '')}
                                     priority
@@ -719,7 +719,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                             <h2 className="text-lg sm:text-xl md:text-2xl font-bold sm:font-extrabold text-gray-900 tracking-tight">Related products</h2>
                             {catName && <span className="text-xs font-medium text-gray-500">{catName}</span>}
                         </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-4">
                             {relatedProducts.map((relatedProduct, idx) => (
                                 <ProductCard key={relatedProduct.slug ?? relatedProduct.id ?? idx} product={relatedProduct as any} />
                             ))}

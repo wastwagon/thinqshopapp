@@ -210,6 +210,11 @@
     box-shadow: none;
   }
 
+  /* Full-bleed page gutters — no boxed max-width on desktop */
+  .page-shell {
+    @apply w-full min-w-0 px-4 sm:px-6 lg:px-8;
+  }
+
   .flat-card-interactive {
     @apply bg-white rounded-xl border border-gray-200/90 transition-colors hover:border-gray-300/90 active:bg-gray-50;
     box-shadow: none;

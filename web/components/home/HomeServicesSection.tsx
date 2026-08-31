@@ -17,7 +17,7 @@ export default function HomeServicesSection() {
 
     return (
         <section className="py-8 sm:py-10 bg-white border-y border-gray-100/80" aria-labelledby="home-services-heading">
-            <div className="max-w-lg mx-auto md:max-w-3xl px-4 sm:px-6">
+            <div className="mx-auto w-full max-w-lg md:max-w-4xl px-4 sm:px-6">
                 <div className="mb-5">
                     <div className="w-10 h-1 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 mb-3" aria-hidden />
                     <h2 id="home-services-heading" className="text-xl font-bold text-gray-900 tracking-tight">

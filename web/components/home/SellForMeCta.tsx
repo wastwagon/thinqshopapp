@@ -18,7 +18,7 @@ export default function SellForMeCta() {
 
     return (
         <section className="py-8 sm:py-10" aria-labelledby="sell-for-me-cta-heading">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="page-shell">
                 <div className="flat-card border-l-4 border-l-amber-500 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-2">

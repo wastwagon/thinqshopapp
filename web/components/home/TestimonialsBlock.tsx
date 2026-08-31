@@ -21,7 +21,7 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
     if (!list.length) return null;
     return (
         <section className="py-8 sm:py-12 border-y border-gray-200/80 bg-white" aria-label="Testimonials">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="page-shell">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 tracking-tight">What our customers say</h2>
                 <p className="text-xs text-gray-500 mb-6">Real feedback from creators and professionals</p>
                 {/* Mobile: single column, touch-friendly cards. Desktop: grid */}

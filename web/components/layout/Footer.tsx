@@ -103,7 +103,7 @@ export default function Footer() {
                 <p className="text-xs font-medium text-gray-400">© 2026 ThinQShop Global. All rights reserved.</p>
             </div>
 
-            <div className="hidden md:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+            <div className="hidden md:block page-shell py-16 sm:py-20 lg:py-24">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-10 xl:gap-14 mb-14 sm:mb-16">
                     {/* Column 1 — Brand */}
                     <div className="sm:col-span-2 lg:col-span-1">

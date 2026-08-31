@@ -247,7 +247,7 @@ export default function Home() {
         sell_for_me: <SellForMeCta />,
         flash_sales: (
             <section className="py-8 sm:py-12 relative">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6">
+                <div className="page-shell">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                             <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-50 border border-amber-100">
@@ -263,7 +263,7 @@ export default function Home() {
                             <ChevronRight className="w-4 h-4" />
                         </Link>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-4">
                         {fallbackFlash.map((product, idx) => (
                             <div key={product.slug || idx}>
                                 <ProductCard product={product as any} />
@@ -275,7 +275,7 @@ export default function Home() {
         ),
         featured: (
             <section className="py-8 sm:py-12 border-y border-gray-200/80 bg-white/50">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6">
+                <div className="page-shell">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                             <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50 ring-1 ring-blue-100">
@@ -291,7 +291,7 @@ export default function Home() {
                             <ChevronRight className="w-4 h-4" />
                         </Link>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-4">
                         {fallbackFeatured.map((product, idx) => (
                             <div key={product.slug || idx}>
                                 <ProductCard product={product as any} />
@@ -303,7 +303,7 @@ export default function Home() {
         ),
         categories: (
             <section className="py-8 sm:py-12" aria-labelledby="shop-by-category-heading">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                <div className="page-shell">
                     <div className="mb-4 sm:mb-5">
                         <h2 id="shop-by-category-heading" className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 tracking-tight">
                             Shop by category
@@ -351,12 +351,12 @@ export default function Home() {
         testimonials: <TestimonialsBlock testimonials={testimonials} />,
         all_products: (
             <section className="py-8 sm:py-12 border-t border-gray-200/80">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6">
+                <div className="page-shell">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">All products</h2>
                         <span className="text-xs text-gray-500 font-medium">{allProducts.length} items</span>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-4">
                         {allProducts.map((product, idx) => (
                             <div key={product.slug || idx}>
                                 <ProductCard product={product as any} />

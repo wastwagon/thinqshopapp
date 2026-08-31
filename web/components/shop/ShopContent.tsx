@@ -6,13 +6,9 @@ type ShopContentProps = {
     className?: string;
 };
 
-export default function ShopContent({ children, wide, className = '' }: ShopContentProps) {
+export default function ShopContent({ children, className = '' }: ShopContentProps) {
     return (
-        <div
-            className={`w-full min-w-0 mx-auto px-4 sm:px-6 ${
-                wide ? 'max-w-7xl' : 'max-w-lg md:max-w-3xl'
-            } ${className}`}
-        >
+        <div className={`page-shell ${className}`}>
             {children}
         </div>
     );

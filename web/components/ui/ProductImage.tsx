@@ -74,7 +74,7 @@ export default function ProductImage({ src, alt, width = 400, height = 400, clas
             className={className}
             unoptimized={unoptimized}
             onError={() => setError(true)}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1536px) 20vw, 16vw"
         />
     );
 }

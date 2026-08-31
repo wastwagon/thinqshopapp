@@ -71,7 +71,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
                     tabIndex={-1}
                     role="main"
                 >
-                    <div className={`max-w-7xl mx-auto min-w-0 w-full ${premiumShell ? '' : 'space-y-4 md:space-y-6'}`}>
+                    <div className={`min-w-0 w-full ${premiumShell ? '' : 'space-y-4 md:space-y-6'}`}>
                         {children}
                     </div>
                 </main>

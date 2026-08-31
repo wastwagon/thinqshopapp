@@ -212,13 +212,13 @@ export default function ProductCard({ product }: ProductCardProps) {
                     onClick={openLightbox}
                     disabled={galleryImages.length === 0}
                     aria-label={`Expand image: ${product.name}`}
-                    className="group/image aspect-square relative overflow-hidden bg-white md:bg-gray-50/80 flex items-center justify-center w-full text-left cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-default"
+                    className="group/image aspect-square relative overflow-hidden bg-gray-100 flex w-full text-left cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-default"
                 >
                     <ProductImage
                         src={productImage}
                         alt={product.name}
                         fill
-                        className="object-contain p-1.5 sm:p-3 md:p-5 group-hover/image:scale-105 transition-transform duration-500 pointer-events-none"
+                        className="object-cover object-center group-hover/image:scale-105 transition-transform duration-500 pointer-events-none"
                     />
 
                     {product.compare_price && (
