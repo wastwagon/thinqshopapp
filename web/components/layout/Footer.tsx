@@ -74,36 +74,7 @@ export default function Footer() {
 
     return (
         <footer className="border-t border-gray-200/80 bg-app">
-            <div className="md:hidden px-4 pt-8 pb-6">
-                <Link href="/" className="inline-flex items-center mb-5">
-                    <div className="relative h-9 w-[151px] flex-shrink-0">
-                        <Image src="/thinqshop-logo.webp" alt="ThinQShopping" fill className="object-contain object-left" sizes="151px" />
-                    </div>
-                </Link>
-                <ul className="space-y-3 mb-6">
-                    <li>
-                        <a href={`tel:${supportPhone.replace(/\s/g, '')}`} className="flex items-center gap-2 text-sm font-medium text-gray-800">
-                            <Phone className="h-4 w-4 text-gray-500 shrink-0" aria-hidden />
-                            {supportPhone}
-                        </a>
-                    </li>
-                    <li>
-                        <a href={`mailto:${supportEmail}`} className="flex items-center gap-2 text-sm font-medium text-gray-800 break-all">
-                            <Mail className="h-4 w-4 text-gray-500 shrink-0" aria-hidden />
-                            {supportEmail}
-                        </a>
-                    </li>
-                </ul>
-                <nav aria-label="Legal" className="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-gray-600 mb-6">
-                    <Link href="/terms" className="min-h-[44px] inline-flex items-center">Terms</Link>
-                    <Link href="/privacy" className="min-h-[44px] inline-flex items-center">Privacy</Link>
-                    <Link href="/contact" className="min-h-[44px] inline-flex items-center">Contact</Link>
-                    <Link href="/about" className="min-h-[44px] inline-flex items-center">About</Link>
-                </nav>
-                <p className="text-xs font-medium text-gray-400">© 2026 ThinQShop Global. All rights reserved.</p>
-            </div>
-
-            <div className="hidden md:block page-shell py-16 sm:py-20 lg:py-24">
+            <div className="page-shell py-10 sm:py-16 lg:py-24">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-10 xl:gap-14 mb-14 sm:mb-16">
                     {/* Column 1 — Brand */}
                     <div className="sm:col-span-2 lg:col-span-1">
