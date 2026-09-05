@@ -111,7 +111,7 @@ export function reconstructAxesFromVariants(
             return {
                 slug,
                 name: cat?.name ?? slug.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-                values: [...(valuesBySlug.get(slug) ?? [])],
+                values: Array.from(valuesBySlug.get(slug) ?? []),
             };
         });
     }
@@ -124,12 +124,12 @@ export function reconstructAxesFromVariants(
         if (!byType.has(t)) byType.set(t, new Set());
         byType.get(t)!.add(val);
     }
-    return [...byType.entries()].map(([slug, values]) => {
+    return Array.from(byType.entries()).map(([slug, values]) => {
         const cat = catalog?.find((c) => c.slug === slug);
         return {
             slug,
-            name: cat?.name ?? slug.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-            values: [...values],
+            name: cat?.name ?? slug.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+            values: Array.from(values),
         };
     });
 }

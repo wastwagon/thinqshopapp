@@ -29,7 +29,7 @@ function candidateEnvFiles(): string[] {
         // Next may compile this without import.meta.url
     }
 
-    for (const root of roots) {
+    for (const root of Array.from(roots)) {
         add(join(root, '.env'));
         add(join(root, '.env.local'));
         add(join(root, '../.env'));
