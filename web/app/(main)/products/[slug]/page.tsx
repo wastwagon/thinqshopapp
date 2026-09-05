@@ -18,6 +18,7 @@ import localProducts from '@/lib/data/scraped_products.json';
 import { toSlug, parsePrice, normalizeProduct } from '@/lib/product-utils';
 import { purchaseQtyForAddToCart, resolveProductLinePricing } from '@/lib/wholesale-pricing';
 import { sanitizeProductHtml } from '@/lib/sanitize-html';
+import { findVariantBySelections, type VariantOptionAxis } from '@/lib/variant-options';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
@@ -63,6 +64,7 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const [reviews, setReviews] = useState<{ data: ReviewRow[]; meta: { total: number; totalPages: number } }>({ data: [], meta: { total: 0, totalPages: 0 } });
     const [policies, setPolicies] = useState<PolicyRow[]>([]);
     const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
+    const [optionSelections, setOptionSelections] = useState<Record<string, string>>({});
     const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
 
     useEffect(() => {
@@ -73,7 +75,34 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                     setProduct(data);
                     setQuantity(purchaseQtyForAddToCart(data));
                     const v = Array.isArray(data.variants) ? data.variants : [];
-                    setSelectedVariantId(v.length && v[0]?.id != null ? Number(v[0].id) : null);
+                    const axes = Array.isArray(data.variant_options)
+                        ? (data.variant_options as VariantOptionAxis[])
+                        : [];
+                    if (axes.length > 0 && v.length > 0) {
+                        const first = v.find((row: { option_values?: Record<string, string> }) => row.option_values)
+                            ?? v[0];
+                        const ov =
+                            first?.option_values && typeof first.option_values === 'object'
+                                ? (first.option_values as Record<string, string>)
+                                : {};
+                        const initial: Record<string, string> = {};
+                        for (const axis of axes) {
+                            initial[axis.slug] =
+                                ov[axis.slug] ?? axis.values[0] ?? '';
+                        }
+                        setOptionSelections(initial);
+                        const match = findVariantBySelections(v, initial);
+                        setSelectedVariantId(
+                            match?.id != null
+                                ? Number(match.id)
+                                : v[0]?.id != null
+                                  ? Number(v[0].id)
+                                  : null,
+                        );
+                    } else {
+                        setOptionSelections({});
+                        setSelectedVariantId(v.length && v[0]?.id != null ? Number(v[0].id) : null);
+                    }
                     setLoading(false);
                     return;
                 }
@@ -84,8 +113,10 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                 setProduct({ ...found, id, slug, images: found.gallery_images ?? found.images ?? [] });
                 setQuantity(purchaseQtyForAddToCart(found));
                 setSelectedVariantId(null);
+                setOptionSelections({});
             } else {
                 setSelectedVariantId(null);
+                setOptionSelections({});
             }
             setLoading(false);
         };
@@ -189,6 +220,10 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
     const galleryImages = images.filter((img) => img && img !== '/placeholder.svg');
     const canExpandGallery = galleryImages.length > 0;
     const variants = Array.isArray(product.variants) ? product.variants : [];
+    const variantAxes: VariantOptionAxis[] = Array.isArray(product.variant_options)
+        ? (product.variant_options as VariantOptionAxis[])
+        : [];
+    const isCombinatorial = variantAxes.length > 0 && variants.some((v: { option_values?: unknown }) => v.option_values);
     const selectedVariant =
         variants.find((v: { id: number }) => Number(v.id) === selectedVariantId) ?? (variants[0] as { id?: number } | undefined) ?? null;
     const imgUnoptimized = (src: string) => shouldUnoptimizeProductImage(src);
@@ -535,35 +570,83 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                         {variants.length > 0 && (
                             <div className="mb-6 rounded-2xl border border-gray-100 bg-gray-50/80 p-4">
                                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Options</p>
-                                <p className="text-xs text-gray-500 mb-2">Price updates when you select an option.</p>
-                                <div className="flex flex-col gap-2">
-                                    {variants.map((v: { id: number; variant_type: string; variant_value: string; price_adjust?: number; stock_quantity?: number }) => {
-                                        const vid = Number(v.id);
-                                        const vList = basePrice + Number(v.price_adjust ?? 0);
-                                        const vUnit = resolveProductLinePricing(product, {
-                                            listPrice: vList,
-                                            quantity,
-                                        }).unitPrice;
-                                        const sel = selectedVariantId === vid;
-                                        const oos = product.is_consignment
-                                            ? Number(product.stock_quantity ?? 0) <= 0
-                                            : Number(v.stock_quantity ?? 0) <= 0;
-                                        return (
-                                            <button
-                                                key={vid}
-                                                type="button"
-                                                disabled={oos}
-                                                onClick={() => setSelectedVariantId(vid)}
-                                                className={`flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-all ${sel ? 'border-blue-500 bg-white ring-1 ring-blue-100' : 'border-gray-200 bg-white hover:border-gray-300'} ${oos ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            >
-                                                <span className="font-semibold text-gray-900 capitalize">
-                                                    {String(v.variant_type).replace(/_/g, ' ')}: <span className="text-gray-600">{v.variant_value}</span>
+                                {isCombinatorial ? (
+                                    <div className="flex flex-col gap-4">
+                                        {variantAxes.map((axis) => (
+                                            <div key={axis.slug}>
+                                                <p className="text-xs font-semibold text-gray-600 mb-2">{axis.name}</p>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {axis.values.map((val) => {
+                                                        const sel = optionSelections[axis.slug] === val;
+                                                        const trial = { ...optionSelections, [axis.slug]: val };
+                                                        const match = findVariantBySelections(variants, trial);
+                                                        const oos = match
+                                                            ? product.is_consignment
+                                                                ? Number(product.stock_quantity ?? 0) <= 0
+                                                                : Number((match as { stock_quantity?: number }).stock_quantity ?? 0) <= 0
+                                                            : true;
+                                                        return (
+                                                            <button
+                                                                key={val}
+                                                                type="button"
+                                                                disabled={oos && !sel}
+                                                                onClick={() => {
+                                                                    const next = { ...optionSelections, [axis.slug]: val };
+                                                                    setOptionSelections(next);
+                                                                    const found = findVariantBySelections(variants, next);
+                                                                    if (found?.id != null) setSelectedVariantId(Number(found.id));
+                                                                }}
+                                                                className={`rounded-xl border px-3 py-2 text-sm font-semibold transition-all ${sel ? 'border-blue-500 bg-white ring-1 ring-blue-100 text-gray-900' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'} ${oos && !sel ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                                            >
+                                                                {val}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {selectedVariant && (
+                                            <p className="text-xs text-gray-500">
+                                                Selected:{' '}
+                                                <span className="font-semibold text-gray-800">
+                                                    {(selectedVariant as { variant_value?: string }).variant_value}
                                                 </span>
-                                                <span className="font-bold text-gray-900 tabular-nums"><PriceDisplay amountGhs={vUnit} /></span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
+                                            </p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <p className="text-xs text-gray-500 mb-2">Price updates when you select an option.</p>
+                                        <div className="flex flex-col gap-2">
+                                            {variants.map((v: { id: number; variant_type: string; variant_value: string; price_adjust?: number; stock_quantity?: number }) => {
+                                                const vid = Number(v.id);
+                                                const vList = basePrice + Number(v.price_adjust ?? 0);
+                                                const vUnit = resolveProductLinePricing(product, {
+                                                    listPrice: vList,
+                                                    quantity,
+                                                }).unitPrice;
+                                                const sel = selectedVariantId === vid;
+                                                const oos = product.is_consignment
+                                                    ? Number(product.stock_quantity ?? 0) <= 0
+                                                    : Number(v.stock_quantity ?? 0) <= 0;
+                                                return (
+                                                    <button
+                                                        key={vid}
+                                                        type="button"
+                                                        disabled={oos}
+                                                        onClick={() => setSelectedVariantId(vid)}
+                                                        className={`flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-all ${sel ? 'border-blue-500 bg-white ring-1 ring-blue-100' : 'border-gray-200 bg-white hover:border-gray-300'} ${oos ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                    >
+                                                        <span className="font-semibold text-gray-900 capitalize">
+                                                            {String(v.variant_type).replace(/_/g, ' ')}: <span className="text-gray-600">{v.variant_value}</span>
+                                                        </span>
+                                                        <span className="font-bold text-gray-900 tabular-nums"><PriceDisplay amountGhs={vUnit} /></span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         )}
 

@@ -15,6 +15,10 @@ export class ProductVariantDto {
     variant_value: string;
 
     @IsOptional()
+    @IsObject()
+    option_values?: Record<string, string>;
+
+    @IsOptional()
     @IsString()
     sku?: string;
 
@@ -29,6 +33,18 @@ export class ProductVariantDto {
     @IsOptional()
     @IsString()
     image?: string;
+}
+
+export class VariantOptionAxisDto {
+    @IsString()
+    slug: string;
+
+    @IsString()
+    name: string;
+
+    @IsArray()
+    @IsString({ each: true })
+    values: string[];
 }
 
 export class CreateProductDto {
@@ -86,6 +102,12 @@ export class CreateProductDto {
     @IsOptional()
     @IsBoolean()
     enforce_min_quantity?: boolean;
+
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => VariantOptionAxisDto)
+    variant_options?: VariantOptionAxisDto[];
 
     @IsOptional()
     @IsArray()

@@ -73,7 +73,17 @@ export class ProductService {
         await this.assertLeafCategory(createProductDto.category_id);
         this.assertWholesaleConfig(createProductDto);
         const slug = createProductDto.slug || this.slugify(createProductDto.name);
-        const { variants, ...rest } = createProductDto as CreateProductDto & { variants?: Array<{ variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number; image?: string }> };
+        const { variants, ...rest } = createProductDto as CreateProductDto & {
+            variants?: Array<{
+                variant_type: string;
+                variant_value: string;
+                option_values?: Record<string, string>;
+                sku?: string;
+                price_adjust?: number;
+                stock_quantity?: number;
+                image?: string;
+            }>;
+        };
         const data = { ...rest, slug } as any;
         const product = await this.prisma.product.create({
             data,
@@ -84,6 +94,7 @@ export class ProductService {
                     product_id: product.id,
                     variant_type: v.variant_type,
                     variant_value: v.variant_value,
+                    option_values: v.option_values ?? undefined,
                     sku: v.sku ?? null,
                     price_adjust: v.price_adjust ?? 0,
                     stock_quantity: v.stock_quantity ?? 0,
@@ -316,7 +327,17 @@ export class ProductService {
             await this.assertLeafCategory(updateProductDto.category_id);
         }
         this.assertWholesaleConfig(updateProductDto, existing);
-        const { variants, ...rest } = updateProductDto as UpdateProductDto & { variants?: Array<{ variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number; image?: string }> };
+        const { variants, ...rest } = updateProductDto as UpdateProductDto & {
+            variants?: Array<{
+                variant_type: string;
+                variant_value: string;
+                option_values?: Record<string, string>;
+                sku?: string;
+                price_adjust?: number;
+                stock_quantity?: number;
+                image?: string;
+            }>;
+        };
 
         if (existing.is_consignment) {
             const dto = updateProductDto as Record<string, unknown>;
@@ -347,6 +368,7 @@ export class ProductService {
                         product_id: id,
                         variant_type: v.variant_type,
                         variant_value: v.variant_value,
+                        option_values: v.option_values ?? undefined,
                         sku: v.sku ?? null,
                         price_adjust: v.price_adjust ?? 0,
                         stock_quantity: consignmentStock ?? v.stock_quantity ?? 0,

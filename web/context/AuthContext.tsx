@@ -43,7 +43,11 @@ async function persistAccessToken(token: string): Promise<boolean> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
     });
-    return res.ok;
+    if (!res.ok) {
+        localStorage.removeItem('token');
+        return false;
+    }
+    return true;
 }
 
 async function clearAccessSession() {

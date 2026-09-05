@@ -47,21 +47,14 @@ import {
 } from '@/lib/category-utils';
 import { getMediaUrl } from '@/lib/media';
 import MediaPickerModal from '@/components/admin/MediaPickerModal';
+import ProductVariantsEditor from '@/components/admin/ProductVariantsEditor';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
+import {
+    reconstructAxesFromVariants,
+    type VariantOptionAxis,
+} from '@/lib/variant-options';
 
 type VariationOptionRow = { id: number; name: string; slug: string; values: { id: number; value: string }[] };
-
-function resolveOptionSlug(variantType: string, options: VariationOptionRow[]): string {
-    if (!variantType?.trim()) return '';
-    const t = variantType.trim();
-    const exact = options.find((o) => o.slug === t);
-    if (exact) return exact.slug;
-    const lower = t.toLowerCase();
-    const bySlug = options.find((o) => o.slug.toLowerCase() === lower);
-    if (bySlug) return bySlug.slug;
-    const byName = options.find((o) => o.name.toLowerCase() === lower);
-    return byName?.slug ?? t;
-}
 
 export default function AdminProducts() {
     const { confirm, confirmDialog } = useConfirmDialog();
@@ -90,7 +83,15 @@ export default function AdminProducts() {
         short_description: '',
         description: '',
         specifications_json: '', // JSON text for specs (e.g. {"Screen": "14\"", "RAM": "8GB"})
-        variants: [] as { variant_type: string; variant_value: string; sku?: string; price_adjust?: number; stock_quantity?: number }[],
+        variant_options: [] as VariantOptionAxis[],
+        variants: [] as {
+            variant_type: string;
+            variant_value: string;
+            option_values?: Record<string, string>;
+            sku?: string;
+            price_adjust?: number;
+            stock_quantity?: number;
+        }[],
     });
     const [variationOptions, setVariationOptions] = useState<VariationOptionRow[]>([]);
     const [mediaPickerOpen, setMediaPickerOpen] = useState<'featured' | 'gallery' | null>(null);
@@ -103,19 +104,6 @@ export default function AdminProducts() {
     const applyVariationOptions = (opts: VariationOptionRow[]) => {
         variationOptionsRef.current = opts;
         setVariationOptions(opts);
-    };
-
-    const defaultVariantType = (options: VariationOptionRow[]) =>
-        options.find((o) => o.slug === 'size')?.slug ?? options[0]?.slug ?? '';
-
-    const newVariantRow = (options: VariationOptionRow[] = variationOptionsRef.current) => ({
-        variant_type: defaultVariantType(options),
-        variant_value: '',
-    });
-
-    const getValuesForOption = (variantType: string, options: VariationOptionRow[] = variationOptionsRef.current) => {
-        const slug = resolveOptionSlug(variantType, options);
-        return options.find((o) => o.slug === slug)?.values ?? [];
     };
 
     useEffect(() => {
@@ -174,17 +162,28 @@ export default function AdminProducts() {
                 : { mainId: '', conditionId: '' };
             const imgs = Array.isArray(product.images) ? product.images.filter(Boolean) : product.image ? [product.image] : [];
             const variants = (product.variants || []).map((v: any) => ({
-                variant_type: resolveOptionSlug(v.variant_type ?? '', options),
+                variant_type: v.variant_type ?? '',
                 variant_value: v.variant_value ?? '',
+                option_values:
+                    v.option_values && typeof v.option_values === 'object'
+                        ? (v.option_values as Record<string, string>)
+                        : undefined,
                 sku: v.sku ?? undefined,
                 price_adjust: v.price_adjust != null ? Number(v.price_adjust) : undefined,
                 stock_quantity: v.stock_quantity != null ? Number(v.stock_quantity) : undefined,
             }));
+            const storedAxes = Array.isArray(product.variant_options)
+                ? (product.variant_options as VariantOptionAxis[])
+                : [];
+            const variant_options =
+                storedAxes.length > 0
+                    ? storedAxes
+                    : reconstructAxesFromVariants(variants, options);
             setFormData({
                 name: product.name ?? '',
                 main_category_id: mainId,
                 condition_category_id: conditionId,
-                product_kind: variants.length > 0 ? 'variable' : 'simple',
+                product_kind: variants.length > 0 || variant_options.length > 0 ? 'variable' : 'simple',
                 price: String(Number(product.price ?? 0)),
                 compare_price: product.compare_price != null ? String(Number(product.compare_price)) : '',
                 stock_quantity: String(Number(product.stock_quantity ?? product.stock ?? 10)),
@@ -203,6 +202,7 @@ export default function AdminProducts() {
                         .map(([k, v]) => `${k}: ${v == null ? '' : String(v)}`)
                         .join('\n');
                 })(),
+                variant_options,
                 variants,
             });
         } else {
@@ -224,6 +224,7 @@ export default function AdminProducts() {
                 short_description: '',
                 description: '',
                 specifications_json: '',
+                variant_options: [],
                 variants: [],
             });
         }
@@ -306,9 +307,11 @@ export default function AdminProducts() {
             return;
         }
         if (isVariable) {
-            const ok = formData.variants.some((v) => v.variant_type && v.variant_value);
+            const ok =
+                formData.variant_options.some((a) => a.values.length > 0) &&
+                formData.variants.some((v) => v.variant_type && v.variant_value);
             if (!ok) {
-                toast.error('Variable products need at least one variant with option and value');
+                toast.error('Add at least one option with values to generate variants');
                 return;
             }
         }
@@ -365,16 +368,19 @@ export default function AdminProducts() {
             }
             payload.specifications = specsObj && typeof specsObj === 'object' ? specsObj : {};
             if (isVariable) {
+                payload.variant_options = formData.variant_options.filter((a) => a.slug && a.values.length > 0);
                 payload.variants = (formData.variants || [])
                     .filter((v) => v.variant_type && v.variant_value)
                     .map((v) => ({
                         variant_type: v.variant_type,
                         variant_value: v.variant_value,
+                        option_values: v.option_values || undefined,
                         sku: v.sku || undefined,
                         price_adjust: v.price_adjust ?? 0,
                         stock_quantity: v.stock_quantity ?? 0,
                     }));
             } else {
+                payload.variant_options = [];
                 payload.variants = [];
             }
             if (editingProduct) {
@@ -609,7 +615,14 @@ export default function AdminProducts() {
                         <div className="flex rounded-lg border border-gray-200/90 p-0.5 bg-gray-50 gap-0.5">
                             <button
                                 type="button"
-                                onClick={() => setFormData((f) => ({ ...f, product_kind: 'simple', variants: [] }))}
+                                onClick={() =>
+                                    setFormData((f) => ({
+                                        ...f,
+                                        product_kind: 'simple',
+                                        variants: [],
+                                        variant_options: [],
+                                    }))
+                                }
                                 className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'simple' ? 'bg-white text-gray-900 border border-gray-200/90' : 'text-gray-500 hover:text-gray-700'}`}
                             >
                                 Simple
@@ -617,13 +630,12 @@ export default function AdminProducts() {
                             <button
                                 type="button"
                                 onClick={async () => {
-                                    const opts = variationOptionsRef.current.length
-                                        ? variationOptionsRef.current
-                                        : await fetchVariationOptions();
+                                    await fetchVariationOptions();
                                     setFormData((f) => ({
                                         ...f,
                                         product_kind: 'variable',
-                                        variants: f.variants.length > 0 ? f.variants : [newVariantRow(opts)],
+                                        variant_options: f.variant_options.length > 0 ? f.variant_options : [],
+                                        variants: f.variants.length > 0 ? f.variants : [],
                                     }));
                                 }}
                                 className={`flex-1 h-9 rounded-md text-xs font-semibold transition-all ${formData.product_kind === 'variable' ? 'bg-white text-gray-900 border border-gray-200/90' : 'text-gray-500 hover:text-gray-700'}`}
@@ -704,94 +716,20 @@ export default function AdminProducts() {
                         <label className="block text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1.5">
                             <Layers className="h-3.5 w-3.5" /> Variants
                         </label>
-                        <p className="text-xs text-gray-400 mb-2">Add options from Variations (e.g. Size, Color). Select <strong>Option</strong> first (e.g. Size), then pick a <strong>Value</strong>. Price = base + amount below (use base 0 and enter full GHS price per row if you prefer).</p>
-                        {variationOptions.length === 0 && (
-                            <p className="text-xs text-amber-600 mb-2">
-                                No variation options loaded.{' '}
-                                <Link href="/admin/variations" className="underline font-medium">Set up Size/Color in Variations</Link>
-                                {' '}or run <code className="text-[11px] bg-gray-100 px-1 rounded">npm run db:seed-variations</code> locally.
-                            </p>
-                        )}
-                        <div className="space-y-2">
-                            {formData.variants.map((v, idx) => (
-                                <div key={idx} className="flex flex-wrap items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-100">
-                                    <select
-                                        value={v.variant_type}
-                                        onChange={(e) => setFormData((f) => ({
-                                            ...f,
-                                            variants: f.variants.map((x, i) => i === idx ? { ...x, variant_type: e.target.value, variant_value: '' } : x),
-                                        }))}
-                                        className="h-9 px-2 rounded-lg border border-gray-200 text-sm min-w-[100px]"
-                                    >
-                                        <option value="">Option</option>
-                                        {variationOptions.map((o) => (
-                                            <option key={o.id} value={o.slug}>{o.name}</option>
-                                        ))}
-                                    </select>
-                                    <select
-                                        value={v.variant_value}
-                                        disabled={!v.variant_type}
-                                        onChange={(e) => setFormData((f) => ({
-                                            ...f,
-                                            variants: f.variants.map((x, i) => i === idx ? { ...x, variant_value: e.target.value } : x),
-                                        }))}
-                                        className="h-9 px-2 rounded-lg border border-gray-200 text-sm min-w-[90px] disabled:bg-gray-100 disabled:text-gray-400"
-                                    >
-                                        <option value="">{v.variant_type ? 'Value' : 'Select option first'}</option>
-                                        {getValuesForOption(v.variant_type).map((val) => (
-                                            <option key={val.id} value={val.value}>{val.value}</option>
-                                        ))}
-                                    </select>
-                                    {v.variant_type && getValuesForOption(v.variant_type).length <= 1 && (
-                                        <Link href="/admin/variations" className="text-xs text-brand hover:underline whitespace-nowrap">
-                                            Add more values in Variations
-                                        </Link>
-                                    )}
-                                    <input
-                                        type="text"
-                                        placeholder="SKU"
-                                        value={v.sku ?? ''}
-                                        onChange={(e) => setFormData((f) => ({
-                                            ...f,
-                                            variants: f.variants.map((x, i) => i === idx ? { ...x, sku: e.target.value || undefined } : x),
-                                        }))}
-                                        className="h-9 px-2 rounded-lg border border-gray-200 text-sm w-20"
-                                    />
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="Price +"
-                                        value={v.price_adjust ?? ''}
-                                        onChange={(e) => setFormData((f) => ({
-                                            ...f,
-                                            variants: f.variants.map((x, i) => i === idx ? { ...x, price_adjust: e.target.value ? parseFloat(e.target.value) : undefined } : x),
-                                        }))}
-                                        className="h-9 px-2 rounded-lg border border-gray-200 text-sm w-20"
-                                    />
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        placeholder="Stock"
-                                        value={v.stock_quantity ?? ''}
-                                        onChange={(e) => setFormData((f) => ({
-                                            ...f,
-                                            variants: f.variants.map((x, i) => i === idx ? { ...x, stock_quantity: e.target.value ? parseInt(e.target.value, 10) : undefined } : x),
-                                        }))}
-                                        className="h-9 px-2 rounded-lg border border-gray-200 text-sm w-20"
-                                    />
-                                    <button type="button" onClick={() => setFormData((f) => ({ ...f, variants: f.variants.filter((_, i) => i !== idx) }))} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50" aria-label="Remove variant">
-                                        <Trash2 className="h-4 w-4" />
-                                    </button>
-                                </div>
-                            ))}
-                            <button
-                                type="button"
-                                onClick={() => setFormData((f) => ({ ...f, variants: [...f.variants, newVariantRow()] }))}
-                                className="min-h-[40px] px-3 rounded-lg border border-dashed border-gray-300 text-gray-500 text-sm font-medium flex items-center gap-1.5 hover:border-blue-300 hover:text-brand"
-                            >
-                                <Plus className="h-3.5 w-3.5" /> Add variant
-                            </button>
-                        </div>
+                        <p className="text-xs text-gray-400 mb-2">
+                            Add options (Color, Size, …) then set price, quantity, and SKU for each combination.
+                            Price = base + adjust (use base 0 and enter the full GHS price per row if you prefer).
+                        </p>
+                        <ProductVariantsEditor
+                            basePrice={parseFloat(String(formData.price || '0')) || 0}
+                            catalog={variationOptions}
+                            axes={formData.variant_options}
+                            variants={formData.variants}
+                            onAxesChange={(variant_options) =>
+                                setFormData((f) => ({ ...f, variant_options }))
+                            }
+                            onVariantsChange={(variants) => setFormData((f) => ({ ...f, variants }))}
+                        />
                     </div>
                     )}
                     {!editingProduct?.is_consignment && (
