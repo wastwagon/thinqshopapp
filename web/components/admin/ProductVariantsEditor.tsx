@@ -60,11 +60,20 @@ export default function ProductVariantsEditor({
     const [dragFrom, setDragFrom] = useState<number | null>(null);
     const [addingOption, setAddingOption] = useState(false);
     const [pickSlug, setPickSlug] = useState('');
+    const [pickQuery, setPickQuery] = useState('');
 
     const unusedCatalog = useMemo(
         () => catalog.filter((c) => !axes.some((a) => a.slug === c.slug)),
         [catalog, axes],
     );
+
+    const filteredUnusedCatalog = useMemo(() => {
+        const q = pickQuery.trim().toLowerCase();
+        if (!q) return unusedCatalog;
+        return unusedCatalog.filter(
+            (c) => c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q),
+        );
+    }, [unusedCatalog, pickQuery]);
 
     useEffect(() => {
         setSelected((prev) => {
@@ -120,7 +129,13 @@ export default function ProductVariantsEditor({
             return;
         }
         setPickSlug(unusedCatalog[0]?.slug ?? '');
+        setPickQuery('');
         setAddingOption(true);
+    };
+
+    const closeAddOption = () => {
+        setAddingOption(false);
+        setPickQuery('');
     };
 
     const confirmAddOption = () => {
@@ -140,6 +155,7 @@ export default function ProductVariantsEditor({
         onAxesChange(next);
         syncRowsFromAxes(next, variants, onVariantsChange);
         setAddingOption(false);
+        setPickQuery('');
         setEditingAxisIdx(newIdx);
         setEditName(axis.name);
         setEditSlug(axis.slug);
@@ -403,12 +419,12 @@ export default function ProductVariantsEditor({
 
             <Modal
                 open={addingOption}
-                onClose={() => setAddingOption(false)}
+                onClose={closeAddOption}
                 title="Add option"
                 size="sm"
                 footer={
                     <div className="flex justify-end gap-2 w-full">
-                        <Button type="button" variant="secondary" onClick={() => setAddingOption(false)}>
+                        <Button type="button" variant="secondary" onClick={closeAddOption}>
                             Cancel
                         </Button>
                         <Button
@@ -436,21 +452,47 @@ export default function ProductVariantsEditor({
                         </p>
                     ) : (
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1" htmlFor="add-option-pick">
+                            <label className="block text-xs font-semibold text-gray-500 mb-1" htmlFor="add-option-search">
                                 Option
                             </label>
-                            <select
-                                id="add-option-pick"
-                                value={pickSlug}
-                                onChange={(e) => setPickSlug(e.target.value)}
-                                className="w-full h-10 px-3 rounded-md border border-gray-200 text-sm text-gray-900 bg-white"
+                            <Input
+                                id="add-option-search"
+                                value={pickQuery}
+                                onChange={(e) => setPickQuery(e.target.value)}
+                                placeholder="Search options…"
+                                autoFocus
+                                autoComplete="off"
+                            />
+                            <ul
+                                className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-gray-200 divide-y divide-gray-100"
+                                role="listbox"
+                                aria-label="Available options"
                             >
-                                {unusedCatalog.map((c) => (
-                                    <option key={c.slug} value={c.slug}>
-                                        {c.name}
-                                    </option>
-                                ))}
-                            </select>
+                                {filteredUnusedCatalog.length === 0 ? (
+                                    <li className="px-3 py-2.5 text-sm text-gray-500">No options match.</li>
+                                ) : (
+                                    filteredUnusedCatalog.map((c) => {
+                                        const isActive = pickSlug === c.slug;
+                                        return (
+                                            <li key={c.slug}>
+                                                <button
+                                                    type="button"
+                                                    role="option"
+                                                    aria-selected={isActive}
+                                                    onClick={() => setPickSlug(c.slug)}
+                                                    className={`w-full text-left px-3 py-2.5 text-sm transition-colors ${
+                                                        isActive
+                                                            ? 'bg-brand/10 text-brand font-semibold'
+                                                            : 'text-gray-900 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    {c.name}
+                                                </button>
+                                            </li>
+                                        );
+                                    })
+                                )}
+                            </ul>
                         </div>
                     )}
                 </div>
