@@ -58,6 +58,8 @@ export default function ProductVariantsEditor({
     const [newValue, setNewValue] = useState('');
     const [editingRowIdx, setEditingRowIdx] = useState<number | null>(null);
     const [dragFrom, setDragFrom] = useState<number | null>(null);
+    const [addingOption, setAddingOption] = useState(false);
+    const [pickSlug, setPickSlug] = useState('');
 
     const unusedCatalog = useMemo(
         () => catalog.filter((c) => !axes.some((a) => a.slug === c.slug)),
@@ -94,32 +96,55 @@ export default function ProductVariantsEditor({
             toast.error('Add at least one value');
             return;
         }
-        const next = axes.map((a, i) =>
-            i === editingAxisIdx
-                ? { slug: editSlug.trim(), name: editName.trim(), values }
-                : a,
-        );
+        const updated: VariantOptionAxis = {
+            slug: editSlug.trim(),
+            name: editName.trim(),
+            values,
+        };
+        let next: VariantOptionAxis[];
+        if (editingAxisIdx < axes.length) {
+            next = axes.map((a, i) => (i === editingAxisIdx ? updated : a));
+        } else if (axes.some((a) => a.slug === updated.slug)) {
+            next = axes.map((a) => (a.slug === updated.slug ? updated : a));
+        } else {
+            next = [...axes, updated];
+        }
         onAxesChange(next);
         syncRowsFromAxes(next, variants, onVariantsChange);
         setEditingAxisIdx(null);
     };
 
-    const addAnotherOption = () => {
-        const nextOpt = unusedCatalog[0];
+    const openAddOption = () => {
+        if (unusedCatalog.length === 0) {
+            toast.error('No more catalog options. Add one under Variations first.');
+            return;
+        }
+        setPickSlug(unusedCatalog[0]?.slug ?? '');
+        setAddingOption(true);
+    };
+
+    const confirmAddOption = () => {
+        const nextOpt = unusedCatalog.find((c) => c.slug === pickSlug) ?? unusedCatalog[0];
         if (!nextOpt) {
             toast.error('No more catalog options. Add one under Variations first.');
             return;
         }
-        const next: VariantOptionAxis[] = [
-            ...axes,
-            {
-                slug: nextOpt.slug,
-                name: nextOpt.name,
-                values: nextOpt.values.map((v) => v.value).slice(0, 5),
-            },
-        ];
+        const values = nextOpt.values.map((v) => v.value).slice(0, 5);
+        const axis: VariantOptionAxis = {
+            slug: nextOpt.slug,
+            name: nextOpt.name,
+            values,
+        };
+        const next = [...axes, axis];
+        const newIdx = axes.length;
         onAxesChange(next);
         syncRowsFromAxes(next, variants, onVariantsChange);
+        setAddingOption(false);
+        setEditingAxisIdx(newIdx);
+        setEditName(axis.name);
+        setEditSlug(axis.slug);
+        setEditValues([...axis.values]);
+        setNewValue('');
     };
 
     const removeAxis = (idx: number) => {
@@ -235,8 +260,8 @@ export default function ProductVariantsEditor({
                 <div className="px-3 py-2.5 border-t border-gray-100">
                     <button
                         type="button"
-                        onClick={addAnotherOption}
-                        disabled={unusedCatalog.length === 0 && axes.length > 0}
+                        onClick={openAddOption}
+                        disabled={unusedCatalog.length === 0}
                         className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline disabled:text-gray-400 disabled:no-underline"
                     >
                         <Plus className="h-3.5 w-3.5" />
@@ -375,6 +400,61 @@ export default function ProductVariantsEditor({
                     </div>
                 </div>
             )}
+
+            <Modal
+                open={addingOption}
+                onClose={() => setAddingOption(false)}
+                title="Add option"
+                size="sm"
+                footer={
+                    <div className="flex justify-end gap-2 w-full">
+                        <Button type="button" variant="secondary" onClick={() => setAddingOption(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="primary"
+                            onClick={confirmAddOption}
+                            disabled={!pickSlug || unusedCatalog.length === 0}
+                        >
+                            Continue
+                        </Button>
+                    </div>
+                }
+            >
+                <div className="space-y-3">
+                    <p className="text-sm text-gray-600">
+                        Choose which option to add. You can edit its values next.
+                    </p>
+                    {unusedCatalog.length === 0 ? (
+                        <p className="text-sm text-gray-500">
+                            No unused options left.{' '}
+                            <Link href="/admin/variations" className="text-brand underline font-medium">
+                                Set up more in Variations
+                            </Link>
+                            .
+                        </p>
+                    ) : (
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-500 mb-1" htmlFor="add-option-pick">
+                                Option
+                            </label>
+                            <select
+                                id="add-option-pick"
+                                value={pickSlug}
+                                onChange={(e) => setPickSlug(e.target.value)}
+                                className="w-full h-10 px-3 rounded-md border border-gray-200 text-sm text-gray-900 bg-white"
+                            >
+                                {unusedCatalog.map((c) => (
+                                    <option key={c.slug} value={c.slug}>
+                                        {c.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                </div>
+            </Modal>
 
             <Modal
                 open={editingAxisIdx != null}
