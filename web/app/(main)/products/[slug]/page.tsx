@@ -61,10 +61,10 @@ function galleryIndexForMappedImage(product: any, mapped: string): number {
         }
     }
     if (!Array.isArray(raw)) raw = [];
-    const paths = raw.filter(Boolean).map((x: unknown) => String(x));
+    const paths: string[] = (raw as unknown[]).filter(Boolean).map((x) => String(x));
     const byRaw = indexOfGalleryImage(paths, mapped);
     if (byRaw >= 0) return byRaw;
-    const urls = paths.map((p) => getMediaUrl(p));
+    const urls = paths.map((p: string) => getMediaUrl(p));
     return indexOfGalleryImage(urls, getMediaUrl(mapped));
 }
 
