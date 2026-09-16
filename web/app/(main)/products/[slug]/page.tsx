@@ -18,7 +18,13 @@ import localProducts from '@/lib/data/scraped_products.json';
 import { toSlug, parsePrice, normalizeProduct } from '@/lib/product-utils';
 import { purchaseQtyForAddToCart, resolveProductLinePricing } from '@/lib/wholesale-pricing';
 import { sanitizeProductHtml } from '@/lib/sanitize-html';
-import { findVariantBySelections, type VariantOptionAxis } from '@/lib/variant-options';
+import {
+    findVariantBySelections,
+    imageForColorSelection,
+    indexOfGalleryImage,
+    isColorAxis,
+    type VariantOptionAxis,
+} from '@/lib/variant-options';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
@@ -42,6 +48,24 @@ function normalizeProductImages(product: any): string[] {
     if (!Array.isArray(raw)) raw = [];
     const urls = raw.filter(Boolean).map((x: unknown) => getMediaUrl(String(x)));
     return urls.length ? urls : ['/placeholder.svg'];
+}
+
+/** Index in normalizeProductImages() for a stored gallery path (raw or absolute). */
+function galleryIndexForMappedImage(product: any, mapped: string): number {
+    let raw = product?.images ?? product?.gallery_images;
+    if (typeof raw === 'string') {
+        try {
+            raw = JSON.parse(raw);
+        } catch {
+            raw = [];
+        }
+    }
+    if (!Array.isArray(raw)) raw = [];
+    const paths = raw.filter(Boolean).map((x: unknown) => String(x));
+    const byRaw = indexOfGalleryImage(paths, mapped);
+    if (byRaw >= 0) return byRaw;
+    const urls = paths.map((p) => getMediaUrl(p));
+    return indexOfGalleryImage(urls, getMediaUrl(mapped));
 }
 
 type ReviewRow = { id: number; rating: number; review_text: string | null; review_images?: string[]; display_name: string; created_at: string };
@@ -99,6 +123,11 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                   ? Number(v[0].id)
                                   : null,
                         );
+                        const colorImg = imageForColorSelection(axes, initial);
+                        if (colorImg) {
+                            const idx = galleryIndexForMappedImage(data, colorImg);
+                            if (idx >= 0) setSelectedImage(idx);
+                        }
                     } else {
                         setOptionSelections({});
                         setSelectedVariantId(v.length && v[0]?.id != null ? Number(v[0].id) : null);
@@ -595,6 +624,13 @@ export default function ProductDetailsPage({ params }: { params: { slug: string 
                                                                     setOptionSelections(next);
                                                                     const found = findVariantBySelections(variants, next);
                                                                     if (found?.id != null) setSelectedVariantId(Number(found.id));
+                                                                    if (isColorAxis(axis)) {
+                                                                        const mapped = axis.value_images?.[val]?.trim();
+                                                                        if (mapped) {
+                                                                            const idx = galleryIndexForMappedImage(product, mapped);
+                                                                            if (idx >= 0) setSelectedImage(idx);
+                                                                        }
+                                                                    }
                                                                 }}
                                                                 className={`rounded-xl border px-3 py-2 text-sm font-semibold transition-all ${sel ? 'border-blue-500 bg-white ring-1 ring-blue-100 text-gray-900' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'} ${oos && !sel ? 'opacity-40 cursor-not-allowed' : ''}`}
                                                             >

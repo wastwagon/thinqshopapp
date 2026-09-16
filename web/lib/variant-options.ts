@@ -4,6 +4,8 @@ export type VariantOptionAxis = {
     slug: string;
     name: string;
     values: string[];
+    /** Color axis: option value → product gallery image path/URL */
+    value_images?: Record<string, string>;
 };
 
 export type VariantRow = {
@@ -17,6 +19,40 @@ export type VariantRow = {
 };
 
 export const MAX_VARIANT_COMBINATIONS = 200;
+
+export function isColorAxis(axis: { slug?: string; name?: string }): boolean {
+    const s = (axis.slug || '').toLowerCase().trim();
+    const n = (axis.name || '').toLowerCase().trim();
+    return s === 'color' || s === 'colour' || n === 'color' || n === 'colour';
+}
+
+export function findColorAxis(axes: VariantOptionAxis[]): VariantOptionAxis | undefined {
+    return axes.find(isColorAxis);
+}
+
+/** Resolve gallery image for the Color selection only (Size does not drive photos). */
+export function imageForColorSelection(
+    axes: VariantOptionAxis[],
+    selections: Record<string, string>,
+): string | undefined {
+    const colorAxis = findColorAxis(axes);
+    if (!colorAxis) return undefined;
+    const val = selections[colorAxis.slug];
+    if (!val) return undefined;
+    const mapped = colorAxis.value_images?.[val];
+    return mapped?.trim() || undefined;
+}
+
+export function indexOfGalleryImage(images: string[], target: string): number {
+    const t = target.trim();
+    if (!t) return -1;
+    const exact = images.findIndex((img) => img === t);
+    if (exact >= 0) return exact;
+    return images.findIndex((img) => {
+        const s = String(img || '').trim();
+        return Boolean(s) && (s.endsWith(t) || t.endsWith(s));
+    });
+}
 
 export function optionValuesKey(values: Record<string, string>, slugs: string[]): string {
     return slugs.map((s) => `${s}=${values[s] ?? ''}`).join('|');
@@ -67,10 +103,16 @@ export function regenerateVariantRows(
         }
     }
     const typeLabel = displayTypeFromAxes(axes);
+    const colorAxis = findColorAxis(axes);
     const rows: VariantRow[] = limited.map((combo) => {
         const key = optionValuesKey(combo, slugs);
         const sortedKey = optionValuesKey(combo, [...slugs].sort());
         const prev = prevByKey.get(key) ?? prevByKey.get(sortedKey);
+        const colorVal = colorAxis ? combo[colorAxis.slug] : undefined;
+        const mappedImage =
+            colorVal && colorAxis?.value_images?.[colorVal]
+                ? colorAxis.value_images[colorVal]
+                : undefined;
         return {
             variant_type: typeLabel || 'option',
             variant_value: displayValueFromCombo(combo, axes),
@@ -78,7 +120,7 @@ export function regenerateVariantRows(
             sku: prev?.sku,
             price_adjust: prev?.price_adjust,
             stock_quantity: prev?.stock_quantity ?? 0,
-            image: prev?.image,
+            image: mappedImage || prev?.image,
         };
     });
     return { rows, truncated };

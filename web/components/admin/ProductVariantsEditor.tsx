@@ -12,7 +12,9 @@ import {
     type VariantRow,
     regenerateVariantRows,
     MAX_VARIANT_COMBINATIONS,
+    isColorAxis,
 } from '@/lib/variant-options';
+import { getMediaUrl } from '@/lib/media';
 
 export type CatalogOption = {
     id: number;
@@ -26,6 +28,8 @@ type ProductVariantsEditorProps = {
     catalog: CatalogOption[];
     axes: VariantOptionAxis[];
     variants: VariantRow[];
+    /** Featured + gallery paths from the product form (for Color → image linking). */
+    galleryImages?: string[];
     onAxesChange: (axes: VariantOptionAxis[]) => void;
     onVariantsChange: (variants: VariantRow[]) => void;
 };
@@ -47,6 +51,7 @@ export default function ProductVariantsEditor({
     catalog,
     axes,
     variants,
+    galleryImages = [],
     onAxesChange,
     onVariantsChange,
 }: ProductVariantsEditorProps) {
@@ -105,10 +110,16 @@ export default function ProductVariantsEditor({
             toast.error('Add at least one value');
             return;
         }
+        const prevImages = (editingAxisIdx < axes.length ? axes[editingAxisIdx]?.value_images : undefined) || {};
+        const value_images: Record<string, string> = {};
+        for (const v of values) {
+            if (prevImages[v]) value_images[v] = prevImages[v];
+        }
         const updated: VariantOptionAxis = {
             slug: editSlug.trim(),
             name: editName.trim(),
             values,
+            ...(Object.keys(value_images).length > 0 ? { value_images } : {}),
         };
         let next: VariantOptionAxis[];
         if (editingAxisIdx < axes.length) {
@@ -168,6 +179,25 @@ export default function ProductVariantsEditor({
         onAxesChange(next);
         syncRowsFromAxes(next, variants, onVariantsChange);
     };
+
+    const setColorValueImage = (axisIdx: number, value: string, image: string | null) => {
+        const next = axes.map((a, i) => {
+            if (i !== axisIdx) return a;
+            const value_images = { ...(a.value_images || {}) };
+            if (image) value_images[value] = image;
+            else delete value_images[value];
+            const keys = Object.keys(value_images);
+            return {
+                ...a,
+                value_images: keys.length > 0 ? value_images : undefined,
+            };
+        });
+        onAxesChange(next);
+        syncRowsFromAxes(next, variants, onVariantsChange);
+    };
+
+    const galleryThumbUrl = (path: string) =>
+        (path && path.startsWith('http') ? path : getMediaUrl(path)) || '/placeholder.svg';
 
     const moveAxis = (from: number, to: number) => {
         if (to < 0 || to >= axes.length || from === to) return;
@@ -261,6 +291,65 @@ export default function ProductVariantsEditor({
                                     </span>
                                 ))}
                             </div>
+                            {isColorAxis(axis) && (
+                                <div className="mt-3 space-y-2">
+                                    <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
+                                        Link gallery images to colors
+                                    </p>
+                                    {galleryImages.length === 0 ? (
+                                        <p className="text-xs text-gray-400">
+                                            Add a featured image or gallery photos above, then map each color here.
+                                        </p>
+                                    ) : (
+                                        axis.values.map((val) => {
+                                            const linked = axis.value_images?.[val];
+                                            return (
+                                                <div key={val} className="rounded-lg border border-gray-100 bg-gray-50/80 p-2">
+                                                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                                                        <span className="text-xs font-semibold text-gray-800">{val}</span>
+                                                        {linked && (
+                                                            <button
+                                                                type="button"
+                                                                className="text-[11px] text-gray-500 hover:text-red-600"
+                                                                onClick={() => setColorValueImage(idx, val, null)}
+                                                            >
+                                                                Clear
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {galleryImages.map((path) => {
+                                                            const active = linked === path;
+                                                            return (
+                                                                <button
+                                                                    key={path}
+                                                                    type="button"
+                                                                    title={`Use for ${val}`}
+                                                                    onClick={() =>
+                                                                        setColorValueImage(idx, val, active ? null : path)
+                                                                    }
+                                                                    className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-md border bg-white ${
+                                                                        active
+                                                                            ? 'border-brand ring-2 ring-brand/30'
+                                                                            : 'border-gray-200 hover:border-gray-300'
+                                                                    }`}
+                                                                >
+                                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                    <img
+                                                                        src={galleryThumbUrl(path)}
+                                                                        alt=""
+                                                                        className="h-full w-full object-cover"
+                                                                    />
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            )}
                         </div>
                         <Button
                             type="button"

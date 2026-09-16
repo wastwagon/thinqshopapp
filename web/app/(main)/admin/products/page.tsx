@@ -725,6 +725,7 @@ export default function AdminProducts() {
                             catalog={variationOptions}
                             axes={formData.variant_options}
                             variants={formData.variants}
+                            galleryImages={[formData.featuredImage, ...formData.gallery].filter(Boolean)}
                             onAxesChange={(variant_options) =>
                                 setFormData((f) => ({ ...f, variant_options }))
                             }

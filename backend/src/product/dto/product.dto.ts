@@ -45,6 +45,11 @@ export class VariantOptionAxisDto {
     @IsArray()
     @IsString({ each: true })
     values: string[];
+
+    /** Color axis: option value → gallery image path/URL */
+    @IsOptional()
+    @IsObject()
+    value_images?: Record<string, string>;
 }
 
 export class CreateProductDto {

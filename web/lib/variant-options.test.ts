@@ -5,6 +5,9 @@ import {
     reconstructAxesFromVariants,
     findVariantBySelections,
     optionValuesKey,
+    isColorAxis,
+    imageForColorSelection,
+    indexOfGalleryImage,
 } from './variant-options';
 
 describe('cartesianProduct', () => {
@@ -62,5 +65,38 @@ describe('findVariantBySelections', () => {
         ];
         expect(findVariantBySelections(variants, { color: 'Yellow', size: 'L' })?.id).toBe(2);
         expect(optionValuesKey({ color: 'Red', size: 'M' }, ['color', 'size'])).toBe('color=Red|size=M');
+    });
+});
+
+describe('color value images', () => {
+    it('detects color axis and resolves mapped image', () => {
+        expect(isColorAxis({ slug: 'color', name: 'Color' })).toBe(true);
+        expect(isColorAxis({ slug: 'size', name: 'Size' })).toBe(false);
+        const axes = [
+            {
+                slug: 'color',
+                name: 'Color',
+                values: ['Red', 'Yellow'],
+                value_images: { Yellow: '/uploads/yellow.webp' },
+            },
+            { slug: 'size', name: 'Size', values: ['M'] },
+        ];
+        expect(imageForColorSelection(axes, { color: 'Yellow', size: 'M' })).toBe('/uploads/yellow.webp');
+        expect(imageForColorSelection(axes, { color: 'Red', size: 'M' })).toBeUndefined();
+        expect(indexOfGalleryImage(['/a.webp', '/uploads/yellow.webp'], '/uploads/yellow.webp')).toBe(1);
+    });
+
+    it('syncs color images onto regenerated rows', () => {
+        const axes = [
+            {
+                slug: 'color',
+                name: 'Color',
+                values: ['Yellow'],
+                value_images: { Yellow: '/y.webp' },
+            },
+            { slug: 'size', name: 'Size', values: ['M', 'L'] },
+        ];
+        const { rows } = regenerateVariantRows(axes, []);
+        expect(rows.every((r) => r.image === '/y.webp')).toBe(true);
     });
 });
