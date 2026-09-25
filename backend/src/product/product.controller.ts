@@ -77,8 +77,17 @@ export class ProductController {
     @Get('admin/list')
     @UseGuards(AuthGuard, PermissionGuard)
     @RequirePermission(PERMISSION_MAP.PRODUCTS_READ)
-    async findAllAdmin(@Request() req: any, @Query() query: { page?: number; limit?: number; search?: string }) {
+    async findAllAdmin(
+        @Query() query: { page?: number; limit?: number; search?: string; category_id?: string; status?: string },
+    ) {
         return this.productService.findAllForAdmin(query);
+    }
+
+    @Get('admin/stats')
+    @UseGuards(AuthGuard, PermissionGuard)
+    @RequirePermission(PERMISSION_MAP.PRODUCTS_READ)
+    getAdminStats() {
+        return this.productService.getAdminCatalogStats();
     }
 
     @Post()

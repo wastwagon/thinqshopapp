@@ -8,10 +8,11 @@ import TopbarView, { type Notification } from './TopbarView';
 interface TopbarProps {
     onMenuPress?: () => void;
     variant?: 'default' | 'dashboard-home';
+    hideSearch?: boolean;
 }
 
 export default function Topbar(props: TopbarProps) {
-    const { onMenuPress, variant } = props;
+    const { onMenuPress, variant, hideSearch } = props;
     const { user, logout } = useAuth();
     const [notifications, setNotifications] = useState([] as Notification[]);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -89,6 +90,7 @@ export default function Topbar(props: TopbarProps) {
     return React.createElement(TopbarView, {
         onMenuPress,
         variant,
+        hideSearch,
         user,
         logout,
         notifications,

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import AdminStatGrid from '@/components/admin/AdminStatGrid';
@@ -32,6 +33,7 @@ import {
     FileText,
     CheckCircle,
     AlertTriangle,
+    CircleOff,
     Layers
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -40,6 +42,7 @@ import api from '@/lib/axios';
 import {
     getShopNavRoots,
     getSubcategoriesForRoot,
+    NAV_SUPERSEDED_BY,
     rootHasSubcategories,
     resolveAdminCategoryIds,
     resolveCategoryIdForAdmin,
@@ -50,6 +53,92 @@ import MediaPickerModal from '@/components/admin/MediaPickerModal';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 type VariationOptionRow = { id: number; name: string; slug: string; values: { id: number; value: string }[] };
+
+type PageSize = 50 | 100 | 500;
+type StatusFilter = '' | 'active' | 'inactive' | 'low_stock';
+
+type ListQuery = {
+    search: string;
+    categoryId: number;
+    page: number;
+    pageSize: PageSize;
+    status: StatusFilter;
+};
+
+type ListMeta = {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+};
+
+type CategoryStat = {
+    id: number;
+    name: string;
+    slug: string;
+    parent_id: number | null;
+    count: number;
+    total: number;
+};
+
+type CatalogStats = {
+    total: number;
+    active: number;
+    inactive: number;
+    lowStock: number;
+    categories: CategoryStat[];
+};
+
+const EMPTY_META: ListMeta = { total: 0, page: 1, limit: 50, totalPages: 0 };
+const EMPTY_STATS: CatalogStats = { total: 0, active: 0, inactive: 0, lowStock: 0, categories: [] };
+
+function parsePageSize(value: string | null): PageSize {
+    const n = Number(value);
+    if (n === 100 || n === 500) return n;
+    return 50;
+}
+
+function parseStatus(value: string | null): StatusFilter {
+    if (value === 'active' || value === 'inactive' || value === 'low_stock') return value;
+    return '';
+}
+
+function listQueryFromParams(params: URLSearchParams): ListQuery {
+    return {
+        search: (params.get('q') ?? '').trim(),
+        categoryId: Math.max(0, Number(params.get('category')) || 0),
+        page: Math.max(1, Number(params.get('page')) || 1),
+        pageSize: parsePageSize(params.get('limit')),
+        status: parseStatus(params.get('status')),
+    };
+}
+
+function buildProductsQuery(query: ListQuery): string {
+    const params = new URLSearchParams();
+    if (query.search) params.set('q', query.search);
+    if (query.categoryId) params.set('category', String(query.categoryId));
+    if (query.page > 1) params.set('page', String(query.page));
+    if (query.pageSize !== 50) params.set('limit', String(query.pageSize));
+    if (query.status) params.set('status', query.status);
+    const serialized = params.toString();
+    return serialized ? `?${serialized}` : '';
+}
+
+function queriesMatch(a: ListQuery, b: ListQuery) {
+    return buildProductsQuery(a) === buildProductsQuery(b);
+}
+
+function statusLabel(status: StatusFilter): string {
+    if (status === 'active') return 'active';
+    if (status === 'inactive') return 'inactive';
+    if (status === 'low_stock') return 'low stock';
+    return '';
+}
+
+function isAbortError(err: unknown) {
+    const error = err as { code?: string; name?: string };
+    return error?.code === 'ERR_CANCELED' || error?.name === 'CanceledError' || error?.name === 'AbortError';
+}
 
 function resolveOptionSlug(variantType: string, options: VariationOptionRow[]): string {
     if (!variantType?.trim()) return '';
@@ -65,10 +154,19 @@ function resolveOptionSlug(variantType: string, options: VariationOptionRow[]): 
 
 export default function AdminProducts() {
     const { confirm, confirmDialog } = useConfirmDialog();
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const [products, setProducts] = useState<any[]>([]);
     const [categories, setCategories] = useState<CategoryNode[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [refreshing, setRefreshing] = useState(false);
+    const [searchInput, setSearchInput] = useState(() => (searchParams.get('q') ?? '').trim());
+    const [listQuery, setListQuery] = useState<ListQuery>(() => listQueryFromParams(searchParams));
+    const [meta, setMeta] = useState<ListMeta>(EMPTY_META);
+    const [catalogStats, setCatalogStats] = useState<CatalogStats>(EMPTY_STATS);
+    const [reloadKey, setReloadKey] = useState(0);
+    const skipNextUrlWriteRef = useRef(false);
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -119,9 +217,91 @@ export default function AdminProducts() {
     };
 
     useEffect(() => {
-        fetchProducts();
         fetchCategories();
+        fetchCatalogStats();
     }, []);
+
+    useEffect(() => {
+        const fromUrl = listQueryFromParams(searchParams);
+        setListQuery((current) => {
+            if (queriesMatch(current, fromUrl)) return current;
+            skipNextUrlWriteRef.current = true;
+            return fromUrl;
+        });
+        setSearchInput((current) => (current === fromUrl.search ? current : fromUrl.search));
+    }, [searchParams]);
+
+    useEffect(() => {
+        if (skipNextUrlWriteRef.current) {
+            skipNextUrlWriteRef.current = false;
+            return;
+        }
+        const next = buildProductsQuery(listQuery);
+        const current = buildProductsQuery(listQueryFromParams(searchParams));
+        if (next !== current) {
+            router.replace(`${pathname}${next}`, { scroll: false });
+        }
+    }, [listQuery, pathname, router, searchParams]);
+
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            const next = searchInput.trim();
+            setListQuery((current) =>
+                current.search === next ? current : { ...current, search: next, page: 1 },
+            );
+        }, 300);
+        return () => window.clearTimeout(timer);
+    }, [searchInput]);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        let active = true;
+        const load = async () => {
+            setRefreshing(true);
+            try {
+                const params: Record<string, string | number> = {
+                    page: listQuery.page,
+                    limit: listQuery.pageSize,
+                };
+                if (listQuery.search) params.search = listQuery.search;
+                if (listQuery.categoryId) params.category_id = listQuery.categoryId;
+                if (listQuery.status) params.status = listQuery.status;
+                const { data } = await api.get('/products/admin/list', {
+                    params,
+                    signal: controller.signal,
+                });
+                if (!active) return;
+                const nextMeta = {
+                    total: Number(data?.meta?.total ?? 0),
+                    page: Number(data?.meta?.page ?? listQuery.page),
+                    limit: Number(data?.meta?.limit ?? listQuery.pageSize),
+                    totalPages: Number(data?.meta?.totalPages ?? 0),
+                };
+                if (nextMeta.page > 1 && (nextMeta.totalPages === 0 || nextMeta.page > nextMeta.totalPages)) {
+                    const safePage = Math.max(1, nextMeta.totalPages);
+                    setListQuery((current) =>
+                        current.page === safePage ? current : { ...current, page: safePage },
+                    );
+                    return;
+                }
+                setProducts(Array.isArray(data?.data) ? data.data : []);
+                setMeta(nextMeta);
+            } catch (err) {
+                if (!active || isAbortError(err)) return;
+                toast.error('Failed to fetch products');
+            } finally {
+                if (active) {
+                    setLoading(false);
+                    setRefreshing(false);
+                }
+            }
+        };
+        void load();
+        return () => {
+            active = false;
+            controller.abort();
+        };
+    }, [listQuery, reloadKey]);
 
     const fetchVariationOptions = async (): Promise<VariationOptionRow[]> => {
         try {
@@ -141,15 +321,24 @@ export default function AdminProducts() {
         }
     };
 
-    const fetchProducts = async () => {
+    const fetchCatalogStats = async () => {
         try {
-            const { data } = await api.get('/products/admin/list');
-            setProducts(Array.isArray(data) ? data : data?.data ?? []);
+            const { data } = await api.get('/products/admin/stats');
+            setCatalogStats({
+                total: Number(data?.total ?? 0),
+                active: Number(data?.active ?? 0),
+                inactive: Number(data?.inactive ?? Math.max(0, Number(data?.total ?? 0) - Number(data?.active ?? 0))),
+                lowStock: Number(data?.lowStock ?? 0),
+                categories: Array.isArray(data?.categories) ? data.categories : [],
+            });
         } catch {
-            toast.error('Failed to fetch products');
-        } finally {
-            setLoading(false);
+            setCatalogStats(EMPTY_STATS);
         }
+    };
+
+    const reloadCatalog = () => {
+        setReloadKey((key) => key + 1);
+        void fetchCatalogStats();
     };
 
     const fetchCategories = async () => {
@@ -385,7 +574,7 @@ export default function AdminProducts() {
                 toast.success("Product created");
             }
             setIsModalOpen(false);
-            fetchProducts();
+            reloadCatalog();
         } catch (err: any) {
             const msg = err?.response?.data?.message ?? err?.message ?? 'Failed to save product';
             const details = Array.isArray(err?.response?.data?.message) ? err.response.data.message.join(', ') : msg;
@@ -399,7 +588,12 @@ export default function AdminProducts() {
         try {
             await api.delete(`/products/${id}`);
             toast.success('Product deleted');
-            setProducts(products.filter((p) => p.id !== id));
+            if (products.length <= 1 && listQuery.page > 1) {
+                setListQuery((current) => ({ ...current, page: current.page - 1 }));
+                void fetchCatalogStats();
+            } else {
+                reloadCatalog();
+            }
         } catch {
             toast.error('Failed to delete product');
         }
@@ -415,20 +609,126 @@ export default function AdminProducts() {
 
     const productImageUrl = (path: string) => (path && path.startsWith('http') ? path : getMediaUrl(path)) || '/placeholder.svg';
 
-    const filteredProducts = products.filter(
-        (p) =>
-            p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            getCategoryName(p).toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const selectStatus = (status: StatusFilter) => {
+        setListQuery((current) => {
+            const nextStatus: StatusFilter = current.status === status ? '' : status;
+            return current.status === nextStatus && current.page === 1
+                ? current
+                : { ...current, status: nextStatus, page: 1 };
+        });
+    };
 
-    const activeCount = products.filter((p) => p.is_active !== false).length;
-    const lowStockCount = products.filter((p) => (Number(p.stock_quantity) ?? 0) <= (Number(p.low_stock_threshold) ?? 10)).length;
+    const clearFilters = () => {
+        setSearchInput('');
+        setListQuery((current) =>
+            !current.search && !current.categoryId && !current.status && current.page === 1
+                ? current
+                : { ...current, search: '', categoryId: 0, status: '', page: 1 },
+        );
+    };
+
+    const hasFilters = Boolean(listQuery.search || listQuery.categoryId || listQuery.status);
 
     const stats = [
-        { label: 'Total', value: products.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
-        { label: 'Active', value: activeCount, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
-        { label: 'Low stock', value: lowStockCount, icon: AlertTriangle, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
+        {
+            label: 'Total',
+            value: catalogStats.total,
+            icon: FileText,
+            color: 'text-blue-600',
+            bg: 'bg-blue-50',
+            border: 'border-blue-200',
+            selected: listQuery.status === '',
+            onClick: () =>
+                setListQuery((current) =>
+                    current.status === '' && current.page === 1
+                        ? current
+                        : { ...current, status: '', page: 1 },
+                ),
+            ariaLabel: 'Show all products',
+        },
+        {
+            label: 'Active',
+            value: catalogStats.active,
+            icon: CheckCircle,
+            color: 'text-green-600',
+            bg: 'bg-green-50',
+            border: 'border-green-100',
+            selected: listQuery.status === 'active',
+            onClick: () => selectStatus('active'),
+            ariaLabel: 'Filter active products',
+        },
+        {
+            label: 'Inactive',
+            value: catalogStats.inactive,
+            icon: CircleOff,
+            color: 'text-gray-600',
+            bg: 'bg-gray-50',
+            border: 'border-gray-200',
+            selected: listQuery.status === 'inactive',
+            onClick: () => selectStatus('inactive'),
+            ariaLabel: 'Filter inactive products',
+        },
+        {
+            label: 'Low stock',
+            value: catalogStats.lowStock,
+            icon: AlertTriangle,
+            color: 'text-orange-600',
+            bg: 'bg-orange-50',
+            border: 'border-orange-100',
+            selected: listQuery.status === 'low_stock',
+            onClick: () => selectStatus('low_stock'),
+            ariaLabel: 'Filter low stock products',
+        },
     ];
+
+    const selectedCategory = catalogStats.categories.find((category) => category.id === listQuery.categoryId) ?? null;
+    const activeRootId = selectedCategory?.parent_id ?? selectedCategory?.id ?? 0;
+    const activeRoot = catalogStats.categories.find((category) => category.id === activeRootId) ?? null;
+    const allRoots = catalogStats.categories.filter((category) => category.parent_id == null);
+    const rootCategories = allRoots.filter((category) => {
+        const supersededBy = NAV_SUPERSEDED_BY[category.slug];
+        if (!supersededBy) return true;
+        return !allRoots.some((row) => row.slug === supersededBy);
+    });
+    const visibleRoots = rootCategories.filter((category) => category.total > 0 || category.id === activeRootId);
+    const rootsToShow = visibleRoots.length > 0 ? visibleRoots : rootCategories;
+    const childCategories = activeRootId
+        ? catalogStats.categories.filter(
+              (category) =>
+                  category.parent_id === activeRootId &&
+                  (category.total > 0 || category.id === listQuery.categoryId),
+          )
+        : [];
+    const categoryCount = catalogStats.categories.filter((category) => category.count > 0).length;
+    const rangeStart = meta.total === 0 ? 0 : (meta.page - 1) * meta.limit + 1;
+    const rangeEnd = meta.total === 0 ? 0 : Math.min(meta.page * meta.limit, meta.total);
+    const statusText = statusLabel(listQuery.status);
+    const emptyMessage = listQuery.search
+        ? `No products match “${listQuery.search}”`
+        : listQuery.status === 'low_stock'
+          ? 'No low stock products'
+          : listQuery.status === 'active'
+            ? 'No active products'
+            : listQuery.status === 'inactive'
+              ? 'No inactive products'
+              : listQuery.categoryId
+                ? 'No products in this category'
+                : 'No products found';
+
+    const selectCategory = (categoryId: number) => {
+        setListQuery((current) =>
+            current.categoryId === categoryId && current.page === 1
+                ? current
+                : { ...current, categoryId, page: 1 },
+        );
+    };
+
+    const categoryChipClass = (selected: boolean) =>
+        `inline-flex items-center gap-1.5 h-8 px-3 rounded-full border text-xs font-semibold transition-colors ${
+            selected
+                ? 'bg-brand text-white border-brand'
+                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:text-gray-900'
+        }`;
 
     return (
         <DashboardLayout isAdmin={true}>
@@ -437,25 +737,114 @@ export default function AdminProducts() {
                 icon={Package}
                 title="Products"
                 subtitle="Manage your storefront catalog"
-                actions={
-                    <AdminToolbar
-                        searchValue={searchTerm}
-                        onSearchChange={setSearchTerm}
-                        searchPlaceholder="Search name or category…"
-                        searchAriaLabel="Search products"
-                    >
-                        <Button
-                            type="button"
-                            size="sm"
-                            leftIcon={<Plus className="h-3.5 w-3.5" />}
-                            onClick={() => handleOpenModal()}
-                        >
-                            Add product
-                        </Button>
-                    </AdminToolbar>
-                }
             />
-            <AdminStatGrid items={stats} columns={3} />
+            <AdminToolbar
+                className="w-full mb-4"
+                searchClassName="sm:flex-1 sm:w-auto sm:max-w-md [&_input]:sm:w-full"
+                searchValue={searchInput}
+                onSearchChange={setSearchInput}
+                searchPlaceholder="Search name, SKU, or category…"
+                searchAriaLabel="Search products"
+            >
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
+                    Show
+                    <Select
+                        aria-label="Products per page"
+                        value={listQuery.pageSize}
+                        onChange={(e) => {
+                            const pageSize = Number(e.target.value) as PageSize;
+                            setListQuery((current) =>
+                                current.pageSize === pageSize && current.page === 1
+                                    ? current
+                                    : { ...current, pageSize, page: 1 },
+                            );
+                        }}
+                        className="h-9 min-h-[36px] w-[4.75rem] px-2.5 py-0 text-xs"
+                    >
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                        <option value={500}>500</option>
+                    </Select>
+                </label>
+                <Button
+                    type="button"
+                    size="sm"
+                    leftIcon={<Plus className="h-3.5 w-3.5" />}
+                    onClick={() => handleOpenModal()}
+                >
+                    Add product
+                </Button>
+                {hasFilters && (
+                    <Button type="button" size="sm" variant="secondary" onClick={clearFilters}>
+                        Clear filters
+                    </Button>
+                )}
+            </AdminToolbar>
+            <AdminStatGrid items={stats} columns={4} />
+
+            <div className="mb-4">
+                <p className="text-xs font-semibold text-gray-500 mb-2">
+                    Browse by category
+                    <span className="font-medium text-gray-400">
+                        {' '}
+                        · {catalogStats.total.toLocaleString()} products across {categoryCount.toLocaleString()}{' '}
+                        {categoryCount === 1 ? 'category' : 'categories'}
+                    </span>
+                </p>
+                <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+                    <button
+                        type="button"
+                        className={categoryChipClass(listQuery.categoryId === 0)}
+                        aria-pressed={listQuery.categoryId === 0}
+                        onClick={() => selectCategory(0)}
+                    >
+                        All
+                        <span className={listQuery.categoryId === 0 ? 'text-white/80' : 'text-gray-400'}>
+                            {catalogStats.total.toLocaleString()}
+                        </span>
+                    </button>
+                    {rootsToShow.map((category) => (
+                        <button
+                            key={category.id}
+                            type="button"
+                            className={categoryChipClass(activeRootId === category.id)}
+                            aria-pressed={activeRootId === category.id}
+                            onClick={() => selectCategory(category.id)}
+                        >
+                            {category.name}
+                            <span className={activeRootId === category.id ? 'text-white/80' : 'text-gray-400'}>
+                                {category.total.toLocaleString()}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+                {childCategories.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2" role="group" aria-label="Filter by subcategory">
+                        <button
+                            type="button"
+                            className={categoryChipClass(listQuery.categoryId === activeRootId)}
+                            aria-pressed={listQuery.categoryId === activeRootId}
+                            onClick={() => selectCategory(activeRootId)}
+                        >
+                            All in {activeRoot?.name}
+                        </button>
+                        {childCategories.map((category) => (
+                            <button
+                                key={category.id}
+                                type="button"
+                                className={categoryChipClass(listQuery.categoryId === category.id)}
+                                aria-pressed={listQuery.categoryId === category.id}
+                                onClick={() => selectCategory(category.id)}
+                            >
+                                {category.name}
+                                <span className={listQuery.categoryId === category.id ? 'text-white/80' : 'text-gray-400'}>
+                                    {category.total.toLocaleString()}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
 
             <AdminTable>
                 <AdminTableHead>
@@ -465,17 +854,17 @@ export default function AdminProducts() {
                     <AdminTh>Status</AdminTh>
                     <AdminTh align="right">Actions</AdminTh>
                 </AdminTableHead>
-                <AdminTableBody>
+                <AdminTableBody className={refreshing && !loading ? 'opacity-60' : undefined}>
                     {loading ? (
-                        <AdminTableLoading colSpan={5} />
-                    ) : filteredProducts.length === 0 ? (
+                        <AdminTableLoading colSpan={5} label="Loading products…" />
+                    ) : products.length === 0 ? (
                         <AdminTableEmpty
                             colSpan={5}
                             icon={<Package className="h-10 w-10 mx-auto mb-2 text-gray-200" />}
-                            message="No products found"
+                            message={emptyMessage}
                         />
                     ) : (
-                        filteredProducts.map((p) => (
+                        products.map((p) => (
                             <AdminTr key={p.id} className="group">
                                 <AdminTd>
                                     <div className="flex items-center gap-2">
@@ -521,7 +910,26 @@ export default function AdminProducts() {
                                 </AdminTd>
                                 <AdminTd className="text-right">
                                     <div className="flex justify-end gap-1.5">
-                                        <button type="button" className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand transition-all" aria-label="View"><Eye className="h-4 w-4" /></button>
+                                        {p.slug ? (
+                                            <Link
+                                                href={`/products/${p.slug}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand transition-all"
+                                                aria-label="View product"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </Link>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                disabled
+                                                className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-300 cursor-not-allowed"
+                                                aria-label="View product unavailable"
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </button>
+                                        )}
                                         <button type="button" onClick={() => handleOpenModal(p)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand transition-all" aria-label="Edit"><Edit3 className="h-4 w-4" /></button>
                                         <button type="button" onClick={() => void handleDelete(p.id)} className="min-w-[44px] min-h-[44px] w-9 h-9 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-all" aria-label="Delete"><Trash2 className="h-4 w-4" /></button>
                                     </div>
@@ -531,6 +939,47 @@ export default function AdminProducts() {
                     )}
                 </AdminTableBody>
             </AdminTable>
+
+            {!loading && (
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between py-4">
+                    <p className="text-sm text-gray-500" aria-live="polite">
+                        {refreshing
+                            ? 'Searching…'
+                            : meta.total === 0
+                              ? 'Showing 0 products'
+                              : `Showing ${rangeStart.toLocaleString()}–${rangeEnd.toLocaleString()} of ${meta.total.toLocaleString()}${
+                                    statusText ? ` · ${statusText}` : ''
+                                }${selectedCategory ? ` in ${selectedCategory.name}` : ''}${
+                                    listQuery.search ? ` for “${listQuery.search}”` : ''
+                                }`}
+                    </p>
+                    {meta.totalPages > 1 && (
+                        <div className="flex items-center gap-2">
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                disabled={listQuery.page <= 1 || refreshing}
+                                onClick={() => setListQuery((current) => ({ ...current, page: current.page - 1 }))}
+                            >
+                                Previous
+                            </Button>
+                            <span className="px-2 text-sm text-gray-500">
+                                Page {meta.page} of {meta.totalPages}
+                            </span>
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                disabled={listQuery.page >= meta.totalPages || refreshing}
+                                onClick={() => setListQuery((current) => ({ ...current, page: current.page + 1 }))}
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Create/Edit Modal */}
             <Modal

@@ -58,7 +58,7 @@ export default function DashboardLayout({ children, isAdmin }: DashboardLayoutPr
             />
 
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-                <Topbar onMenuPress={toggleSidebar} variant={premiumShell ? 'dashboard-home' : 'default'} />
+                <Topbar onMenuPress={toggleSidebar} variant={premiumShell ? 'dashboard-home' : 'default'} hideSearch={!!isAdmin} />
 
                 {/* pb clears fixed MobileBottomNav + home-indicator; do not also use safe-area-inset-bottom (it overrides this padding). */}
                 <main

@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { CreateReviewDto } from './dto/review.dto';
-import { clampLimit, clampPage } from '../common/pagination';
+import { adminProductPageSize, clampLimit, clampPage } from '../common/pagination';
 
 /**
  * Extra flat slugs rolled into a New/Used tree root (no product reassignment).
@@ -107,17 +107,45 @@ export class ProductService {
             .replace(/^-|-$/g, '') || 'product-' + Date.now();
     }
 
-    async findAllForAdmin(query: { page?: number; limit?: number; search?: string }) {
+    async findAllForAdmin(query: {
+        page?: number;
+        limit?: number;
+        search?: string;
+        category_id?: number | string;
+        status?: string;
+    }) {
         const page = clampPage(query.page);
-        const limit = clampLimit(query.limit, 50, 100);
+        const limit = adminProductPageSize(query.limit);
         const skip = (page - 1) * limit;
-        const search = query.search;
+        const search = query.search?.trim();
         const where: any = {};
+
+        const categoryId = Number(query.category_id);
+        if (Number.isFinite(categoryId) && categoryId > 0) {
+            const ids = await this.resolveAdminCategoryFilterIds(categoryId);
+            where.category_id = ids.length === 0 ? -1 : ids.length === 1 ? ids[0] : { in: ids };
+        }
+
+        const status = (query.status ?? '').trim().toLowerCase();
+        if (status === 'active') {
+            where.is_active = true;
+        } else if (status === 'inactive') {
+            where.is_active = false;
+        } else if (status === 'low_stock') {
+            const lowStockIds = await this.prisma.$queryRaw<{ id: number }[]>`
+                SELECT id FROM products
+                WHERE stock_quantity <= low_stock_threshold
+            `;
+            where.id = lowStockIds.length === 0 ? -1 : { in: lowStockIds.map((row) => row.id) };
+        }
+
         if (search) {
             where.OR = [
                 { name: { contains: search, mode: 'insensitive' } },
+                { short_description: { contains: search, mode: 'insensitive' } },
                 { description: { contains: search, mode: 'insensitive' } },
                 { sku: { contains: search, mode: 'insensitive' } },
+                { category: { name: { contains: search, mode: 'insensitive' } } },
             ];
         }
         const [products, total] = await Promise.all([
@@ -130,7 +158,77 @@ export class ProductService {
             }),
             this.prisma.product.count({ where }),
         ]);
-        return { data: products, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+        return { data: products, meta: { total, page, limit, totalPages: Math.ceil(total / limit) || 0 } };
+    }
+
+    /** Catalog totals for the admin product list. Counts are the full catalog, not the current page. */
+    async getAdminCatalogStats() {
+        const [total, active, lowStockRows, grouped, categories] = await Promise.all([
+            this.prisma.product.count(),
+            this.prisma.product.count({ where: { is_active: true } }),
+            this.prisma.$queryRaw<{ count: number }[]>`
+                SELECT COUNT(*)::int AS count
+                FROM products
+                WHERE stock_quantity <= low_stock_threshold
+            `,
+            this.prisma.product.groupBy({
+                by: ['category_id'],
+                _count: { _all: true },
+            }),
+            this.prisma.category.findMany({
+                select: { id: true, name: true, slug: true, parent_id: true },
+                orderBy: [{ sort_order: 'asc' }, { name: 'asc' }],
+            }),
+        ]);
+
+        const direct = new Map(grouped.map((row) => [row.category_id, row._count._all]));
+        const bySlug = new Map(categories.map((category) => [category.slug, category.id]));
+        const childrenByParent = new Map<number, number[]>();
+        for (const category of categories) {
+            if (category.parent_id == null) continue;
+            const siblings = childrenByParent.get(category.parent_id) ?? [];
+            siblings.push(category.id);
+            childrenByParent.set(category.parent_id, siblings);
+        }
+
+        const productCountForIds = (ids: number[]) =>
+            [...new Set(ids)].reduce((sum, id) => sum + (direct.get(id) ?? 0), 0);
+
+        const expandFilterIds = (category: { id: number; parent_id: number | null; slug: string }): number[] => {
+            const mirrorRoot = LEGACY_MIRROR_TO_ROOT[category.slug];
+            if (mirrorRoot) {
+                const mirrored = categories.find((row) => row.slug === mirrorRoot);
+                if (mirrored) return expandFilterIds(mirrored);
+            }
+            const legacyIds = legacyAliasSlugsFor(category.slug)
+                .map((slug) => bySlug.get(slug))
+                .filter((id): id is number => id != null);
+            if (category.parent_id != null) {
+                return [category.id, ...legacyIds];
+            }
+            return [category.id, ...(childrenByParent.get(category.id) ?? []), ...legacyIds];
+        };
+
+        const rows = categories.map((category) => {
+            const own = direct.get(category.id) ?? 0;
+            const matched = productCountForIds(expandFilterIds(category));
+            return {
+                id: category.id,
+                name: category.name,
+                slug: category.slug,
+                parent_id: category.parent_id,
+                count: own,
+                total: matched,
+            };
+        });
+
+        return {
+            total,
+            active,
+            inactive: Math.max(0, total - active),
+            lowStock: Number(lowStockRows[0]?.count ?? 0),
+            categories: rows,
+        };
     }
 
     async findAll(query: { category?: string; search?: string; page?: number; limit?: number }) {
@@ -397,6 +495,37 @@ export class ProductService {
 
             return tx.product.delete({ where: { id } });
         });
+    }
+
+    /** Parent filter includes its subcategories so the admin category view matches the catalog tree. */
+    private async resolveAdminCategoryFilterIds(categoryId: number): Promise<number[]> {
+        const category = await this.prisma.category.findUnique({
+            where: { id: categoryId },
+            select: { id: true, parent_id: true, slug: true },
+        });
+        if (!category) return [];
+
+        const mirrorRoot = LEGACY_MIRROR_TO_ROOT[category.slug];
+        if (mirrorRoot) {
+            const mirrored = await this.prisma.category.findUnique({
+                where: { slug: mirrorRoot },
+                select: { id: true },
+            });
+            if (mirrored) {
+                return this.resolveAdminCategoryFilterIds(mirrored.id);
+            }
+        }
+
+        if (category.parent_id != null) {
+            const legacyIds = await this.resolveLegacyCategoryIds(category.slug);
+            return [...new Set([category.id, ...legacyIds])];
+        }
+        const children = await this.prisma.category.findMany({
+            where: { parent_id: category.id },
+            select: { id: true },
+        });
+        const legacyIds = await this.resolveLegacyCategoryIds(category.slug);
+        return [...new Set([category.id, ...children.map((child) => child.id), ...legacyIds])];
     }
 
     private async resolveLegacyCategoryIds(categorySlug: string): Promise<number[]> {

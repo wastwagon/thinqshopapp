@@ -34,6 +34,7 @@ export interface Notification {
 export interface TopbarViewProps {
     onMenuPress?: () => void;
     variant?: 'default' | 'dashboard-home';
+    hideSearch?: boolean;
     user: { first_name?: string; last_name?: string; email?: string; role?: string; profile_image?: string | null } | null;
     logout: () => void;
     notifications: Notification[];
@@ -72,6 +73,7 @@ export default function TopbarView(props: TopbarViewProps) {
     const {
         onMenuPress,
         variant = 'default',
+        hideSearch = false,
         user,
         logout,
     notifications,
@@ -106,18 +108,20 @@ export default function TopbarView(props: TopbarViewProps) {
                         <DashboardHomeLogo />
                     </div>
                 )}
-                <div className={`flex-1 max-w-xs hidden md:block ${isDashboardHome ? 'md:hidden' : ''}`}>
-                    <SearchWithSuggestions
-                        id="topbar-search-desktop"
-                        listboxId="topbar-search-desktop-suggestions"
-                        className="w-full"
-                        inputClassName="h-10 pl-9 pr-3 rounded-xl text-sm border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Search products..."
-                    />
-                </div>
+                {!isDashboardHome && !hideSearch && (
+                    <div className="flex-1 max-w-xs hidden md:block">
+                        <SearchWithSuggestions
+                            id="topbar-search-desktop"
+                            listboxId="topbar-search-desktop-suggestions"
+                            className="w-full"
+                            inputClassName="h-10 pl-9 pr-3 rounded-xl text-sm border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Search products..."
+                        />
+                    </div>
+                )}
 
-                <div className={`flex items-center gap-1.5 md:gap-3 shrink-0 ${isDashboardHome ? 'md:ml-auto' : 'ml-auto'}`}>
-                    {!isDashboardHome && (
+                <div className={`flex items-center gap-1.5 md:gap-3 shrink-0 ${isDashboardHome || hideSearch ? 'md:ml-auto' : 'ml-auto'}`}>
+                    {!isDashboardHome && !hideSearch && (
                         <button
                             type="button"
                             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
@@ -247,7 +251,7 @@ export default function TopbarView(props: TopbarViewProps) {
                 </div>
             </div>
 
-            {mobileSearchOpen && (
+            {mobileSearchOpen && !hideSearch && (
                 <div className="md:hidden px-3 pb-3 pt-0 border-t border-gray-200 bg-white relative z-40">
                     <SearchWithSuggestions
                         id="topbar-search-mobile"

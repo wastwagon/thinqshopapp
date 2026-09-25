@@ -10,6 +10,7 @@ type AdminToolbarProps = {
     onSearchChange?: (value: string) => void;
     searchPlaceholder?: string;
     searchAriaLabel?: string;
+    searchClassName?: string;
     children?: ReactNode;
     className?: string;
 };
@@ -20,13 +21,14 @@ export default function AdminToolbar({
     onSearchChange,
     searchPlaceholder = 'Search…',
     searchAriaLabel = 'Search',
+    searchClassName,
     children,
     className,
 }: AdminToolbarProps) {
     return (
         <div className={cn('flex flex-wrap items-center gap-2', className)}>
             {onSearchChange != null && (
-                <div className="relative flex-1 min-w-0 sm:flex-initial sm:w-48">
+                <div className={cn('relative flex-1 min-w-0 sm:flex-initial sm:w-48', searchClassName)}>
                     <Search
                         className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none"
                         aria-hidden
