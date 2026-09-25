@@ -1,16 +1,21 @@
 import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { CONTENT_SECURITY_POLICY } from './lib/csp.mjs';
 
+const webDir = dirname(fileURLToPath(import.meta.url));
+
 function loadJwtSecretFromEnvFiles() {
-    if (process.env.JWT_SECRET) return;
-    for (const file of [resolve(process.cwd(), '.env'), resolve(process.cwd(), '../.env')]) {
+    if ((process.env.JWT_SECRET || '').trim()) return;
+    for (const file of [resolve(webDir, '.env'), resolve(webDir, '.env.local'), resolve(webDir, '../.env')]) {
         if (!existsSync(file)) continue;
         const line = readFileSync(file, 'utf8')
-            .split('\n')
+            .split(/\r?\n/)
             .find((row) => row.startsWith('JWT_SECRET='));
         if (!line) continue;
-        process.env.JWT_SECRET = line.slice('JWT_SECRET='.length).replace(/^["']|["']$/g, '').trim();
+        const secret = line.slice('JWT_SECRET='.length).replace(/^["']|["']$/g, '').trim();
+        if (!secret) continue;
+        process.env.JWT_SECRET = secret;
         break;
     }
 }

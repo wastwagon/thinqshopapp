@@ -1,12 +1,9 @@
 'use client';
 
 import type { MouseEvent } from 'react';
-import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Heart, ShoppingCart, Star, Eye, ArrowRight } from 'lucide-react';
 import ProductImage from './ProductImage';
-import ProductImageLightbox, { ProductImageTapHint } from './ProductImageLightbox';
 import PriceDisplay from './PriceDisplay';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -45,29 +42,9 @@ interface ProductCardProps {
     product: Product;
 }
 
-function collectGalleryImages(product: Product, imagesList: string[], fallback: string): string[] {
-    const seen = new Set<string>();
-    const out: string[] = [];
-    const add = (raw?: string | null) => {
-        if (!raw) return;
-        const s = String(raw).trim();
-        if (!s || seen.has(s)) return;
-        seen.add(s);
-        out.push(s);
-    };
-    for (const src of imagesList) add(src);
-    for (const src of product.gallery_images ?? []) add(src);
-    add(product.image);
-    add(fallback);
-    return out;
-}
-
 export default function ProductCard({ product }: ProductCardProps) {
     const { addToCart } = useCart();
     const { isInWishlist, toggleWishlist } = useWishlist();
-    const router = useRouter();
-    const [lightboxOpen, setLightboxOpen] = useState(false);
-    const [buying, setBuying] = useState(false);
 
     const basePrice = typeof product.price === 'string'
         ? parseFloat(String(product.price).replace(/[^0-9.]/g, ''))
@@ -100,11 +77,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     const productId = typeof product.id === 'number' ? product.id : Number(product.id) || 0;
     const productHref = `/products/${productSlug}`;
 
-    const galleryImages = useMemo(
-        () => collectGalleryImages(product, imagesList, productImage),
-        [product, imagesList, productImage],
-    );
-
     const desc = product.short_description || product.description;
     const descPreview = desc ? (desc.length > 80 ? desc.slice(0, 80).trim() + '…' : desc) : null;
 
@@ -132,29 +104,6 @@ export default function ProductCard({ product }: ProductCardProps) {
         });
     };
 
-    const openLightbox = (e?: MouseEvent) => {
-        e?.preventDefault();
-        e?.stopPropagation();
-        if (galleryImages.length > 0) setLightboxOpen(true);
-    };
-
-    const handleExpressBuy = async () => {
-        if (!productId) return;
-        setBuying(true);
-        try {
-            const ok = await addToCart(productId, addQty, firstVariantId, {
-                openDrawer: false,
-                successMessage: 'Added — going to checkout',
-                product,
-            });
-            if (!ok) return;
-            setLightboxOpen(false);
-            router.push('/checkout');
-        } finally {
-            setBuying(false);
-        }
-    };
-
     const inWishlist = isInWishlist(Number(productId));
     const wishlistBtnClass = inWishlist
         ? 'border-red-200 text-red-500'
@@ -180,8 +129,8 @@ export default function ProductCard({ product }: ProductCardProps) {
             <Link
                 href={productHref}
                 className={`${compact ? actionBtnCompact : actionBtnDesktop} border-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white`}
-                title="Quick View"
-                aria-label="Quick view product"
+                title="View product"
+                aria-label="View product"
             >
                 <Eye className={compact ? iconCompact : iconDesktop} aria-hidden />
             </Link>
@@ -201,18 +150,16 @@ export default function ProductCard({ product }: ProductCardProps) {
     );
 
     return (
-        <>
-            <div className="group flat-card-interactive overflow-hidden relative flex flex-col h-full">
-                <div className="flex md:hidden items-center justify-end gap-1 px-1.5 pt-1.5 pb-0.5 shrink-0">
-                    {quickActions(true)}
-                </div>
+        <div className="group flat-card-interactive overflow-hidden relative flex flex-col h-full">
+            <div className="flex md:hidden items-center justify-end gap-1 px-1.5 pt-1.5 pb-0.5 shrink-0">
+                {quickActions(true)}
+            </div>
 
-                <button
-                    type="button"
-                    onClick={openLightbox}
-                    disabled={galleryImages.length === 0}
-                    aria-label={`Expand image: ${product.name}`}
-                    className="group/image aspect-square relative overflow-hidden bg-gray-100 flex w-full text-left cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset disabled:cursor-default"
+            <div className="group/image aspect-square relative overflow-hidden bg-gray-100">
+                <Link
+                    href={productHref}
+                    aria-label={`View ${product.name}`}
+                    className="absolute inset-0 flex focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
                 >
                     <ProductImage
                         src={productImage}
@@ -237,29 +184,24 @@ export default function ProductCard({ product }: ProductCardProps) {
                             Min {addQty}
                         </div>
                     )}
+                </Link>
 
-                    <ProductImageTapHint />
-
-                    <div
-                        className="hidden md:flex absolute top-3 right-3 flex-row gap-1.5 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 z-20"
-                        onClick={(e) => e.stopPropagation()}
-                        onKeyDown={(e) => e.stopPropagation()}
-                    >
-                        {quickActions(false)}
-                    </div>
-                </button>
+                <div className="hidden md:flex absolute top-3 right-3 flex-row gap-1.5 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 z-20">
+                    {quickActions(false)}
+                </div>
+            </div>
 
             {/* Content */}
             <div className="p-2.5 sm:p-3 md:p-4 flex flex-col flex-1">
-                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
                     <span className="text-xs font-medium text-blue-600 truncate">
                         {typeof product.category === 'string' ? product.category : product.category?.name || 'Vetted Asset'}
                     </span>
                     {product.rating != null && Number(product.rating) > 0 && (
-                    <div className="flex items-center gap-0.5 shrink-0">
-                        <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs text-gray-500">{Number(product.rating).toFixed(1)}</span>
-                    </div>
+                        <div className="flex items-center gap-0.5 shrink-0">
+                            <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
+                            <span className="text-xs text-gray-500">{Number(product.rating).toFixed(1)}</span>
+                        </div>
                     )}
                 </div>
 
@@ -301,26 +243,6 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </Link>
                 </div>
             </div>
-            </div>
-
-            <ProductImageLightbox
-                open={lightboxOpen}
-                onClose={() => setLightboxOpen(false)}
-                images={galleryImages}
-                title={product.name}
-                productHref={productHref}
-                onBuy={handleExpressBuy}
-                buying={buying}
-                buyLabel="Buy"
-                priceGhs={displayPrice}
-                categoryLabel={
-                    typeof product.category === 'string'
-                        ? product.category
-                        : product.category?.name || 'Vetted Asset'
-                }
-                rating={product.rating != null && Number(product.rating) > 0 ? Number(product.rating) : undefined}
-                description={descPreview}
-            />
-        </>
+        </div>
     );
 }

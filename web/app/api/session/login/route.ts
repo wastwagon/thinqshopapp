@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
     accessCookieHeader,
+    jwtSecret,
     verifyAccessToken,
 } from '@/lib/access-cookie';
+import { ensureJwtSecretLoaded } from '@/lib/load-jwt-secret';
 import { gateSessionMutation, noStore } from '@/lib/session-guard';
 
 const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000';
@@ -42,6 +44,11 @@ export async function POST(request: NextRequest) {
             { message: data?.message || 'Invalid credentials' },
             { status: upstream.status === 401 ? 401 : upstream.status || 401 },
         ));
+    }
+
+    ensureJwtSecretLoaded();
+    if (!jwtSecret()) {
+        return noStore(NextResponse.json({ message: 'Session signing is not configured' }, { status: 500 }));
     }
 
     const claims = await verifyAccessToken(token);
