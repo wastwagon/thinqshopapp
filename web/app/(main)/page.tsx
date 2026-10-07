@@ -348,7 +348,8 @@ export default function Home() {
                 </div>
             </section>
         ),
-        testimonials: <TestimonialsBlock testimonials={testimonials} />,
+        // Temporarily hidden — set to true to restore <TestimonialsBlock />
+        testimonials: false ? <TestimonialsBlock testimonials={testimonials} /> : null,
         all_products: (
             <section className="py-8 sm:py-12 border-t border-gray-200/80">
                 <div className="page-shell">
