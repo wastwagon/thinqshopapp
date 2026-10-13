@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * Homepage Sell-for-Me banner. Not mounted on `/` currently (kept for easy re-enable).
+ * Live flow: `/dashboard/sell-for-me` + admin consignments settings.
+ */
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Tag, ArrowRight, Wallet } from 'lucide-react';

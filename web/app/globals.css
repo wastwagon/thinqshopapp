@@ -414,6 +414,8 @@
   width: 100%;
   animation: hero-progress-fill 5000ms linear forwards;
   transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
   background: linear-gradient(90deg, hsl(var(--brand)) 0%, #fff 100%);
 }
 
@@ -428,12 +430,15 @@
   height: 6px;
   background: rgba(255, 255, 255, 0.5);
   opacity: 1;
-  transition: width 0.25s ease, background 0.2s ease;
+  border-radius: 3px;
+  transform: scaleX(1);
+  transform-origin: left center;
+  transition: transform 0.25s ease, background 0.2s ease;
+  will-change: transform;
 }
 
 .hero-swiper .hero-bullet-active {
-  width: 20px;
-  border-radius: 3px;
   background: linear-gradient(90deg, hsl(var(--brand)) 0%, #fff 100%);
+  transform: scaleX(3.3);
   box-shadow: 0 0 12px hsl(var(--brand) / 0.45);
 }

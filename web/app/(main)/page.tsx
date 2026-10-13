@@ -1,16 +1,19 @@
 'use client';
 
 import { Fragment, useState, useEffect, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Zap, ChevronRight, Flame } from 'lucide-react';
 import api from '@/lib/axios';
-import ProductCard from '@/components/ui/ProductCard';
 import ShopLayout from '@/components/layout/ShopLayout';
 import HomeHero from '@/components/home/HomeHero';
-import TrustStrip from '@/components/home/TrustStrip';
-import HomeServicesSection from '@/components/home/HomeServicesSection';
-import SellForMeCta from '@/components/home/SellForMeCta';
-import TestimonialsBlock from '@/components/home/TestimonialsBlock';
+
+const ProductCard = dynamic(() => import('@/components/ui/ProductCard'), {
+    loading: () => <div className="aspect-[4/5] rounded-xl bg-gray-100 animate-pulse" aria-hidden />,
+});
+const TrustStrip = dynamic(() => import('@/components/home/TrustStrip'));
+const HomeServicesSection = dynamic(() => import('@/components/home/HomeServicesSection'));
+const TestimonialsBlock = dynamic(() => import('@/components/home/TestimonialsBlock'));
 
 type Product = {
     category: string | { name: string; slug: string };
@@ -24,6 +27,10 @@ type Product = {
     slug?: string;
     [k: string]: unknown;
 };
+
+/** Enough for featured/flash + a capped “all products” grid without hydrating 100 cards. */
+const HOME_PRODUCT_FETCH_LIMIT = 36;
+const HOME_ALL_PRODUCTS_VISIBLE = 24;
 
 function normalizeProduct(p: any, index: number): Product {
     const categoryName = typeof p.category === 'object' ? p.category?.name : p.category;
@@ -69,15 +76,18 @@ export default function Home() {
     useEffect(() => {
         const load = async () => {
             try {
-                const [productsRes, heroRes, trustRes, testimonialRes, sectionsRes] = await Promise.all([
-                    api.get('/products', { params: { limit: 100 }, timeout: 12000 }),
-                    api.get('/content/hero-slides', { timeout: 12000 }).catch(() => ({ data: [] })),
+                // Hero first so LCP can settle before product/content payloads land.
+                const heroRes = await api.get('/content/hero-slides', { timeout: 12000 }).catch(() => ({ data: [] }));
+                const contentHeroSlides = Array.isArray(heroRes.data) ? heroRes.data : [];
+                if (contentHeroSlides.length) setHeroSlides(contentHeroSlides);
+
+                const [productsRes, trustRes, testimonialRes, sectionsRes] = await Promise.all([
+                    api.get('/products', { params: { limit: HOME_PRODUCT_FETCH_LIMIT }, timeout: 12000 }),
                     api.get('/content/trust-badges', { timeout: 12000 }).catch(() => ({ data: [] })),
                     api.get('/content/testimonials', { timeout: 12000 }).catch(() => ({ data: [] })),
                     api.get('/content/homepage-sections', { timeout: 12000 }).catch(() => ({ data: [] })),
                 ]);
                 const apiProducts = productsRes.data?.data ?? productsRes.data ?? [];
-                const contentHeroSlides = Array.isArray(heroRes.data) ? heroRes.data : [];
                 setTrustBadges(Array.isArray(trustRes.data) ? trustRes.data : []);
                 setTestimonials(Array.isArray(testimonialRes.data) ? testimonialRes.data : []);
                 const apiSections = Array.isArray(sectionsRes.data) ? sectionsRes.data : [];
@@ -105,7 +115,9 @@ export default function Home() {
                 // Fall through to static
             }
             const staticMod = await import('@/lib/data/scraped_products.json');
-            const staticProducts = (staticMod.default as Product[]).map((p, i) => normalizeProduct({ ...p, id: p.id ?? i + 1 }, i));
+            const staticProducts = (staticMod.default as Product[])
+                .slice(0, HOME_PRODUCT_FETCH_LIMIT)
+                .map((p, i) => normalizeProduct({ ...p, id: p.id ?? i + 1 }, i));
             setProductsList(staticProducts);
             setSource('static');
             setHeroSlides([]);
@@ -127,7 +139,7 @@ export default function Home() {
         return { fallbackFeatured, fallbackFlash };
     }, [productsWithIds, source]);
 
-    const allProducts = productsWithIds;
+    const allProducts = productsWithIds.slice(0, HOME_ALL_PRODUCTS_VISIBLE);
 
     const hasProducts = productsWithIds.length > 0;
     const showFeaturedSections = fallbackFlash.length >= 4 && fallbackFeatured.length >= 4;
@@ -137,7 +149,6 @@ export default function Home() {
         hero: <HomeHero slides={heroSlides} />,
         trust_strip: <TrustStrip badges={trustBadges} />,
         platform_services: <HomeServicesSection />,
-        sell_for_me: <SellForMeCta />,
         flash_sales: (
             <section className="py-8 sm:py-12 relative">
                 <div className="page-shell">
@@ -200,7 +211,10 @@ export default function Home() {
                 <div className="page-shell">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">All products</h2>
-                        <span className="text-xs text-gray-500 font-medium">{allProducts.length} items</span>
+                        <Link href="/shop" className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
+                            View shop
+                            <ChevronRight className="w-4 h-4" />
+                        </Link>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-4">
                         {allProducts.map((product, idx) => (
@@ -221,12 +235,7 @@ export default function Home() {
                     if (!sectionNodes[key]) return null;
                     if (productSectionKeys.has(key) && !hasProducts) return null;
                     if ((key === 'flash_sales' || key === 'featured') && !showFeaturedSections) return null;
-                    return (
-                        <Fragment key={key}>
-                            {sectionNodes[key]}
-                            {key === 'trust_strip' ? sectionNodes.sell_for_me : null}
-                        </Fragment>
-                    );
+                    return <Fragment key={key}>{sectionNodes[key]}</Fragment>;
                 })}
                 {!hasProducts && (
                     <div className="min-h-[40vh] flex items-center justify-center px-4">

@@ -209,7 +209,7 @@ export default function AdminSettings() {
                                             className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                             value={paymentDetails.momo_agent_number}
                                             onChange={(e) => setPaymentDetails({ ...paymentDetails, momo_agent_number: e.target.value })}
-                                            placeholder="0539761297"
+                                            placeholder="0596908816"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -229,7 +229,7 @@ export default function AdminSettings() {
                                             className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                             value={paymentDetails.momo_name_primary}
                                             onChange={(e) => setPaymentDetails({ ...paymentDetails, momo_name_primary: e.target.value })}
-                                            placeholder="Gohdit Print and Computers"
+                                            placeholder="Emmanuel Asiedu"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -239,7 +239,7 @@ export default function AdminSettings() {
                                             className="w-full h-11 bg-gray-50 border border-gray-100 rounded-lg px-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                             value={paymentDetails.momo_name_alternate}
                                             onChange={(e) => setPaymentDetails({ ...paymentDetails, momo_name_alternate: e.target.value })}
-                                            placeholder="Emmanuel ASIEDU"
+                                            placeholder="Gohdit Print and Computers"
                                         />
                                     </div>
                                 </div>

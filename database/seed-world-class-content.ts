@@ -80,13 +80,17 @@ Contact support if you need help starting a return.`;
     await prisma.homepageSection.deleteMany({ where: { section_key: 'categories' } });
     console.log('Seeded homepage_sections');
 
-    // --- Settings (storefront copy) ---
+    // --- Settings (storefront copy + transfer MoMo details) ---
     const settings = [
         { setting_key: 'free_shipping_threshold_ghs', setting_value: '500', description: 'Free delivery threshold (GHS)' },
         { setting_key: 'standard_shipping_fee_ghs', setting_value: '0', description: 'Standard ecommerce shipping fee (GHS)' },
         { setting_key: 'site_orders_delivered_text', setting_value: '10,000+ orders delivered', description: 'Social proof line' },
         { setting_key: 'support_phone', setting_value: '+86 183 2070 9024', description: 'Support phone' },
         { setting_key: 'support_email', setting_value: 'info@thinqshopping.app', description: 'Support email' },
+        { setting_key: 'transfer_momo_agent_number', setting_value: '0596908816', description: 'Transfer offline MoMo agent number' },
+        { setting_key: 'transfer_momo_name_primary', setting_value: 'Emmanuel Asiedu', description: 'Transfer offline MoMo primary name' },
+        { setting_key: 'transfer_momo_name_alternate', setting_value: 'Gohdit Print and Computers', description: 'Transfer offline MoMo alternate name' },
+        { setting_key: 'transfer_momo_network', setting_value: 'MTN', description: 'Transfer offline MoMo network' },
     ];
     for (const s of settings) {
         await prisma.setting.upsert({

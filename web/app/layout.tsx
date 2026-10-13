@@ -5,7 +5,12 @@ import AppChrome from "@/components/AppChrome";
 import AppProviders from "@/components/AppProviders";
 import { APP_CHROME_BOOT_SCRIPT } from "@/lib/app-chrome";
 
-const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
+const outfit = Outfit({
+    subsets: ["latin"],
+    variable: "--font-outfit",
+    display: "swap",
+    adjustFontFallback: true,
+});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://thinqshopping.app';
 

@@ -20,9 +20,9 @@ const PAYMENT_DETAIL_KEYS = [
 ] as const;
 
 const PAYMENT_DETAIL_DEFAULTS: TransferPaymentDetails = {
-    momo_agent_number: '0539761297',
-    momo_name_primary: 'Gohdit Print and Computers',
-    momo_name_alternate: 'Emmanuel ASIEDU',
+    momo_agent_number: '0596908816',
+    momo_name_primary: 'Emmanuel Asiedu',
+    momo_name_alternate: 'Gohdit Print and Computers',
     momo_network: 'MTN',
 };
 
