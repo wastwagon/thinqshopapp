@@ -68,7 +68,7 @@ Contact support if you need help starting a return.`;
     console.log('Seeded site_policies');
 
     // --- Homepage sections (upsert by section_key) ---
-    const sectionKeys = ['hero', 'trust_strip', 'flash_sales', 'featured', 'categories', 'testimonials', 'all_products'];
+    const sectionKeys = ['hero', 'trust_strip', 'flash_sales', 'featured', 'testimonials', 'all_products'];
     for (let i = 0; i < sectionKeys.length; i++) {
         await prisma.homepageSection.upsert({
             where: { section_key: sectionKeys[i] },
@@ -76,6 +76,8 @@ Contact support if you need help starting a return.`;
             create: { section_key: sectionKeys[i], sort_order: i, is_enabled: true, updated_at: now },
         });
     }
+    // Removed from homepage UI — drop stale CMS rows from older seeds
+    await prisma.homepageSection.deleteMany({ where: { section_key: 'categories' } });
     console.log('Seeded homepage_sections');
 
     // --- Settings (storefront copy) ---

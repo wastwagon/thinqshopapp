@@ -2,23 +2,7 @@
 
 import { Fragment, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import {
-    Zap,
-    ArrowRight,
-    ChevronRight,
-    Flame,
-    Camera,
-    Monitor,
-    Video,
-    Mic2,
-    Gamepad2,
-    Cpu,
-    Package,
-    Lightbulb,
-    Plane,
-    Home as HomeIconLucide,
-    type LucideIcon,
-} from 'lucide-react';
+import { Zap, ChevronRight, Flame } from 'lucide-react';
 import api from '@/lib/axios';
 import ProductCard from '@/components/ui/ProductCard';
 import ShopLayout from '@/components/layout/ShopLayout';
@@ -27,8 +11,6 @@ import TrustStrip from '@/components/home/TrustStrip';
 import HomeServicesSection from '@/components/home/HomeServicesSection';
 import SellForMeCta from '@/components/home/SellForMeCta';
 import TestimonialsBlock from '@/components/home/TestimonialsBlock';
-import { STATIC_CATEGORIES as CATEGORY_CATALOG } from '@/lib/product-utils';
-import { getRootCategories, type CategoryNode } from '@/lib/category-utils';
 
 type Product = {
     category: string | { name: string; slug: string };
@@ -62,57 +44,15 @@ function normalizeProduct(p: any, index: number): Product {
     };
 }
 
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-    Camera,
-    Monitor,
-    Video,
-    Mic2,
-    Gamepad2,
-    Cpu,
-    Package,
-    Lightbulb,
-    Plane,
-    Home: HomeIconLucide,
-};
-
-const CATEGORY_CARD_COUNT = 8;
-
 const DEFAULT_HOME_SECTIONS = [
     'hero',
     'trust_strip',
     'platform_services',
     'flash_sales',
     'featured',
-    'categories',
     'testimonials',
     'all_products',
 ];
-
-function buildEightCategories(apiList: { name: string; slug: string }[]): { name: string; slug: string }[] {
-    const seen = new Set<string>();
-    const out: { name: string; slug: string }[] = [];
-    for (const c of apiList) {
-        if (out.length >= CATEGORY_CARD_COUNT) break;
-        const slug = (c.slug || '').trim() || c.name.toLowerCase().replace(/\s+/g, '-');
-        if (seen.has(slug)) continue;
-        out.push({ name: c.name, slug });
-        seen.add(slug);
-    }
-    for (const def of CATEGORY_CATALOG) {
-        if (out.length >= CATEGORY_CARD_COUNT) break;
-        if (!seen.has(def.slug)) {
-            out.push({ name: def.name, slug: def.slug });
-            seen.add(def.slug);
-        }
-    }
-    return out.slice(0, CATEGORY_CARD_COUNT);
-}
-
-function categoryIconForSlug(slug: string): LucideIcon {
-    const def = CATEGORY_CATALOG.find((c) => c.slug === slug);
-    const key = def?.icon ?? 'Package';
-    return CATEGORY_ICONS[key] ?? Package;
-}
 
 type HeroSlide = { id: number; title: string; subtitle?: string | null; cta_text?: string | null; cta_url?: string | null; image_path?: string | null };
 type TrustBadge = { id: number; icon: string; label: string; optional_link?: string | null };
@@ -120,7 +60,6 @@ type Testimonial = { id: number; quote: string; author_name: string; author_role
 
 export default function Home() {
     const [productsList, setProductsList] = useState<Product[]>([]);
-    const [categories, setCategories] = useState<CategoryNode[]>([]);
     const [source, setSource] = useState<'api' | 'static'>('static');
     const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
     const [trustBadges, setTrustBadges] = useState<TrustBadge[]>([]);
@@ -130,16 +69,14 @@ export default function Home() {
     useEffect(() => {
         const load = async () => {
             try {
-                const [productsRes, categoriesRes, heroRes, trustRes, testimonialRes, sectionsRes] = await Promise.all([
+                const [productsRes, heroRes, trustRes, testimonialRes, sectionsRes] = await Promise.all([
                     api.get('/products', { params: { limit: 100 }, timeout: 12000 }),
-                    api.get('/products/categories', { timeout: 12000 }),
                     api.get('/content/hero-slides', { timeout: 12000 }).catch(() => ({ data: [] })),
                     api.get('/content/trust-badges', { timeout: 12000 }).catch(() => ({ data: [] })),
                     api.get('/content/testimonials', { timeout: 12000 }).catch(() => ({ data: [] })),
                     api.get('/content/homepage-sections', { timeout: 12000 }).catch(() => ({ data: [] })),
                 ]);
                 const apiProducts = productsRes.data?.data ?? productsRes.data ?? [];
-                const apiCategories = categoriesRes.data ?? [];
                 const contentHeroSlides = Array.isArray(heroRes.data) ? heroRes.data : [];
                 setTrustBadges(Array.isArray(trustRes.data) ? trustRes.data : []);
                 setTestimonials(Array.isArray(testimonialRes.data) ? testimonialRes.data : []);
@@ -160,7 +97,6 @@ export default function Home() {
                 if (apiProducts.length > 0 && Array.isArray(apiProducts)) {
                     const list = apiProducts.map((p: any, i: number) => normalizeProduct(p, i));
                     setProductsList(list);
-                    setCategories(apiCategories as CategoryNode[]);
                     setSource('api');
                     setHeroSlides(contentHeroSlides);
                     return;
@@ -171,14 +107,6 @@ export default function Home() {
             const staticMod = await import('@/lib/data/scraped_products.json');
             const staticProducts = (staticMod.default as Product[]).map((p, i) => normalizeProduct({ ...p, id: p.id ?? i + 1 }, i));
             setProductsList(staticProducts);
-            setCategories(
-                CATEGORY_CATALOG.map((c, i) => ({
-                    id: -(i + 1),
-                    name: c.name,
-                    slug: c.slug,
-                    parent_id: null,
-                })),
-            );
             setSource('static');
             setHeroSlides([]);
         };
@@ -201,44 +129,9 @@ export default function Home() {
 
     const allProducts = productsWithIds;
 
-    const categoryCards = useMemo(() => {
-        const roots = getRootCategories(categories);
-        const rootList = roots.length > 0 ? roots.map((r) => ({ name: r.name, slug: r.slug })) : categories;
-        return buildEightCategories(rootList);
-    }, [categories]);
-
-    /** Count products per main category (rollup of subcategories) */
-    const categoryProductCounts = useMemo(() => {
-        const m = new Map<string, number>();
-        const roots = getRootCategories(categories);
-        for (const root of roots) {
-            const childSlugs = new Set(
-                (root.children ?? categories.filter((c) => c.parent_id === root.id))
-                    .map((c) => c.slug)
-                    .filter(Boolean),
-            );
-            childSlugs.add(root.slug);
-            let count = 0;
-            for (const p of allProducts) {
-                const cat = typeof p.category === 'string' ? null : p.category;
-                const slug = cat?.slug ?? (typeof p.category === 'string' ? p.category.toLowerCase().replace(/\s+/g, '-') : '');
-                if (slug && childSlugs.has(slug)) count++;
-            }
-            m.set(root.name, count);
-        }
-        if (roots.length === 0) {
-            for (const p of allProducts) {
-                const name = typeof p.category === 'string' ? p.category : p.category?.name;
-                if (!name) continue;
-                m.set(name, (m.get(name) ?? 0) + 1);
-            }
-        }
-        return m;
-    }, [allProducts, categories]);
-
     const hasProducts = productsWithIds.length > 0;
     const showFeaturedSections = fallbackFlash.length >= 4 && fallbackFeatured.length >= 4;
-    const productSectionKeys = new Set(['flash_sales', 'featured', 'categories', 'testimonials', 'all_products']);
+    const productSectionKeys = new Set(['flash_sales', 'featured', 'testimonials', 'all_products']);
 
     const sectionNodes: Record<string, React.ReactNode> = {
         hero: <HomeHero slides={heroSlides} />,
@@ -297,53 +190,6 @@ export default function Home() {
                                 <ProductCard product={product as any} />
                             </div>
                         ))}
-                    </div>
-                </div>
-            </section>
-        ),
-        categories: (
-            <section className="py-8 sm:py-12" aria-labelledby="shop-by-category-heading">
-                <div className="page-shell">
-                    <div className="mb-4 sm:mb-5">
-                        <h2 id="shop-by-category-heading" className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 tracking-tight">
-                            Shop by category
-                        </h2>
-                        <p className="text-xs text-gray-500">Browse our curated collection</p>
-                    </div>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-8">
-                        {categoryCards.map((cat, idx) => {
-                            const count = categoryProductCounts.get(cat.name) ?? 0;
-                            const Icon = categoryIconForSlug(cat.slug);
-                            const accentBorder = idx % 2 === 0 ? 'border-l-blue-600' : 'border-l-amber-500';
-                            const iconBg = idx % 2 === 0 ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600';
-                            return (
-                                <Link
-                                    key={`${cat.slug}-${idx}`}
-                                    href={`/shop/${cat.slug}`}
-                                    aria-label={`${cat.name}: ${count} ${count === 1 ? 'product' : 'products'}`}
-                                    className={`group relative flex min-h-[5.25rem] flex-col rounded-xl border border-gray-200/90 bg-white border-l-4 ${accentBorder} p-3 sm:p-3.5 lg:p-4 transition-colors hover:border-gray-300/90 hover:bg-gray-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 lg:min-h-0`}
-                                >
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div className="min-w-0 pr-1">
-                                            <h3 className="font-semibold text-sm sm:text-[15px] text-gray-900 tracking-tight leading-tight line-clamp-2">{cat.name}</h3>
-                                            <p className="mt-1 text-xs font-medium tabular-nums text-gray-500">
-                                                {count} {count === 1 ? 'product' : 'products'}
-                                            </p>
-                                        </div>
-                                        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconBg}`} aria-hidden>
-                                            <Icon className="h-4 w-4" strokeWidth={2} />
-                                        </span>
-                                    </div>
-                                    <ChevronRight className="mt-auto pt-2 h-4 w-4 shrink-0 text-gray-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-blue-600" aria-hidden />
-                                </Link>
-                            );
-                        })}
-                    </div>
-                    <div className="flex justify-center">
-                        <Link href="/shop" className="inline-flex items-center gap-2 min-h-[44px] px-6 py-3 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
-                            Shop all products
-                            <ArrowRight className="w-4 h-4" />
-                        </Link>
                     </div>
                 </div>
             </section>

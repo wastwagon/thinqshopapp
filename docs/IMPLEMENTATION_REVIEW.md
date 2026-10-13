@@ -71,7 +71,7 @@
 
 ## 5. Optional Gaps (Non-Blocking)
 
-- **Homepage section order/visibility:** Plan said “Homepage component reads GET /content/homepage-sections and renders sections in order; sections with is_enabled: false are skipped.” Current homepage uses a fixed order (hero, trust, flash, featured, categories, testimonials, all products) and does not fetch or respect `homepage_sections`. Admin can toggle section `is_enabled` and reorder via API; frontend does not yet use that for layout. Optional follow-up: fetch `homepage-sections` and render sections in API order, skipping disabled.
+- **Homepage section order/visibility:** Homepage reads `GET /content/homepage-sections` and renders known keys in API order (hero, trust, flash, featured, testimonials, all products; plus in-app `platform_services`). The former `categories` (“Shop by category”) section has been removed from the homepage and seed.
 - **Reviews on PDP:** Review images (`review_images`) are not rendered in the PDP reviews block; only text and rating are. Optional: add a small gallery per review when `review_images` is present.
 - **POST review from storefront:** Customers can submit reviews via `POST /products/:id/reviews` (auth required). There is no “Write a review” form on the PDP yet; only display is implemented.
 

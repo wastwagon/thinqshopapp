@@ -47,7 +47,7 @@ export class ContentService {
 
     getHomepageSections() {
         return this.prisma.homepageSection.findMany({
-            where: { is_enabled: true },
+            where: { is_enabled: true, section_key: { not: 'categories' } },
             orderBy: { sort_order: 'asc' },
         });
     }
@@ -240,7 +240,10 @@ export class ContentService {
     // --- Admin: Homepage sections ---
 
     async getHomepageSectionsAdmin() {
-        return this.prisma.homepageSection.findMany({ orderBy: { sort_order: 'asc' } });
+        return this.prisma.homepageSection.findMany({
+            where: { section_key: { not: 'categories' } },
+            orderBy: { sort_order: 'asc' },
+        });
     }
 
     async updateHomepageSection(sectionKey: string, dto: UpdateHomepageSectionDto) {

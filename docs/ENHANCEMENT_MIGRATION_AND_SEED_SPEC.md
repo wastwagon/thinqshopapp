@@ -64,7 +64,7 @@ model SitePolicy {
 // Optional: explicit section ordering. Alternative is JSON in Setting.
 model HomepageSection {
   id         Int      @id @default(autoincrement())
-  section_key String  @unique @db.VarChar(50)   // hero, trust_strip, flash_sales, featured, categories, testimonials, all_products
+  section_key String  @unique @db.VarChar(50)   // hero, trust_strip, flash_sales, featured, testimonials, all_products
   sort_order Int      @default(0)
   is_enabled Boolean  @default(true)
   created_at DateTime @default(now())
@@ -95,7 +95,7 @@ model HomepageSection {
 | `site_orders_delivered_text` | Social proof line | `10,000+ orders delivered` |
 | `support_phone` | Contact | `+233 XX XXX XXXX` |
 | `support_email` | Contact | `support@thinqshop.com` |
-| `homepage_sections` | (Optional) JSON array of section keys in order if not using HomepageSection table | `["hero","trust_strip","flash_sales","featured","categories","testimonials","all_products"]` |
+| `homepage_sections` | (Optional) JSON array of section keys in order if not using HomepageSection table | `["hero","trust_strip","flash_sales","featured","testimonials","all_products"]` |
 
 ---
 
@@ -152,7 +152,7 @@ Example (original copy, Ghana/West Africa context):
 
 ---
 
-## 7. Seed data — homepage sections (7 rows)
+## 7. Seed data — homepage sections (6 rows)
 
 | section_key | sort_order | is_enabled |
 |-------------|------------|------------|
@@ -160,9 +160,8 @@ Example (original copy, Ghana/West Africa context):
 | trust_strip | 1 | true |
 | flash_sales | 2 | true |
 | featured | 3 | true |
-| categories | 4 | true |
-| testimonials | 5 | true |
-| all_products | 6 | true |
+| testimonials | 4 | true |
+| all_products | 5 | true |
 
 ---
 

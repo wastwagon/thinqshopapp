@@ -61,7 +61,11 @@ export default function AdminContent() {
             setTestimonials(t.data ?? []);
             setTrustBadges(tb.data ?? []);
             setPolicies(p.data ?? []);
-            setSections(s.data ?? []);
+            setSections(
+                (Array.isArray(s.data) ? s.data : []).filter(
+                    (row: HomepageSection) => row.section_key !== 'categories',
+                ),
+            );
         } catch {
             toast.error('Failed to load content');
         } finally {

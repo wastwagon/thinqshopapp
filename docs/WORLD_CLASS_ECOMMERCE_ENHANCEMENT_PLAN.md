@@ -26,7 +26,7 @@ Reference feel (structure and patterns, not literal copy): Apple (clean hero, tr
 | Social proof | None | Testimonials block (admin: quote, author name, role/company, avatar, order). Seed 3–5. |
 | Reviews on PDP | Schema exists; not shown on frontend; no admin | Show approved reviews with photos; aggregate rating; admin: list, approve/reject, optional reply. Seed reviews for key products. |
 | Delivery/returns on PDP | None | Admin-managed policy snippets (short + full); show short on PDP, link to full. Seed one policy each. |
-| Homepage section order | Fixed in code | Admin: enable/disable and order sections (hero, trust, flash, featured, categories, testimonials, all products). |
+| Homepage section order | Fixed in code | Admin: enable/disable and order sections (hero, trust, flash, featured, testimonials, all products). |
 | Global site copy | Hardcoded or missing | Free shipping threshold, “X orders delivered”, support line—stored in settings, editable in admin. |
 | Stock/urgency | Not shown | Show “In stock” / “Only X left” when data exists; optional low-stock badge. |
 | Categories on nav | Static list in code | Already have Category in DB; ensure nav uses API and admin can set order/image for homepage. |
@@ -54,7 +54,7 @@ Reference feel (structure and patterns, not literal copy): Apple (clean hero, tr
   - One row per type; admin edits both.
 
 - **HomepageSection** (optional; alternative: use Setting key-value)  
-  - Either a table `id`, `section_key` (e.g. `hero`, `trust`, `flash`, `featured`, `categories`, `testimonials`, `all_products`), `sort_order`, `is_enabled`, or store JSON in `Setting` like `homepage_sections`.  
+  - Either a table `id`, `section_key` (e.g. `hero`, `trust`, `flash`, `featured`, `testimonials`, `all_products`), `sort_order`, `is_enabled`, or store JSON in `Setting` like `homepage_sections`.  
   - Admin: toggle sections, drag-and-drop order.
 
 - **Setting** (existing)  
@@ -107,9 +107,9 @@ Reference feel (structure and patterns, not literal copy): Apple (clean hero, tr
   - Data: `GET /content/trust-badges`.  
   - Optional: “Free delivery over ₵X” from settings.
 
-- **Flash sales / Featured / Categories / All products:**  
+- **Flash sales / Featured / All products:**  
   - Keep current logic; ensure “Featured” uses `Product.is_featured` from API.  
-  - Categories: from `GET /products/categories`; link to `/shop/[category]`; optionally show category image from Category if present.
+  - Category browsing: `/shop` and `/shop/[category]` via `GET /products/categories` (not a homepage section).
 
 - **Testimonials:**  
   - New section: 3–5 cards (quote, author name, role, avatar).  
@@ -188,7 +188,7 @@ Reference feel (structure and patterns, not literal copy): Apple (clean hero, tr
   - **Hero slides:** List, add, edit, delete, reorder, toggle active. Fields: title, subtitle, CTA text, CTA URL, image (Media picker), sort order.  
   - **Trust badges:** List, add, edit, delete, reorder. Fields: icon (select), label, optional link, sort order.  
   - **Testimonials:** List, add, edit, delete, reorder. Fields: quote, author name, role, avatar (Media picker), sort order, active.  
-  - **Homepage sections:** List of sections (hero, trust, flash, featured, categories, testimonials, all products); toggle enabled, drag-and-drop order.  
+  - **Homepage sections:** List of sections (hero, trust, flash, featured, testimonials, all products); toggle enabled, drag-and-drop order.
   - **Policies:** Two forms: Delivery (short + full text), Returns (short + full text). Rich text or textarea.
 
 - **Site copy / Storefront settings**  
@@ -206,7 +206,7 @@ Reference feel (structure and patterns, not literal copy): Apple (clean hero, tr
   - Optional: “Show on hero” or “Hero product” for a single product-driven hero variant (can be Phase 2).
 
 - **Categories** (existing)  
-  - Ensure sort_order and image are editable; homepage “Shop by category” uses API and shows image if present.
+  - Ensure sort_order and image are editable; category browsing lives on `/shop` (homepage “Shop by category” section removed).
 
 - **Sidebar / nav**  
   - Add links: “Content” or “Homepage” (hero, trust, testimonials, sections), “Reviews”, “Site copy” (under Settings or its own).
